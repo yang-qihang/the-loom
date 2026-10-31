@@ -10,38 +10,15 @@
 - Java 25：Prism 的 Microsoft runtime 即可（26.1.2 需要 Java 25）。
 - 本仓库的真实引擎 + Paper 服务端；当前由仓库脚本启动。
 
-## 2. 启动真实世界
+## 2. 启动游戏
 
-```bash
-cd /home/yqh0919/Documents/deepseek-harness/default-workspace
-bash scripts/mc-up.sh
-```
-
-等 `mc: ready`。
-
-另开终端：
-
-```bash
-cd /home/yqh0919/Documents/deepseek-harness/default-workspace
-PORT=4320 LOOM_WORLD=paper npm run dev:engine:paper
-```
-
-等：
+双击/运行：
 
 ```text
-LOOM engine ready: http://127.0.0.1:4320 (port=4320, world=paper)
+apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft-x86_64.AppImage
 ```
 
-## 3. 启动桌面/Studio
-
-桌面包路径：
-
-```text
-apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage
-```
-
-打开向导，填真实引擎地址 `http://127.0.0.1:4320` → 保存 → 进入工坊。  
-顶部四个连接灯能直接看状态：**织机 / Paper / 织偶 / 客户端**。
+或 Fedora 安装 RPM。应用会自动启动包内 Paper 与真实引擎；顶部四个连接灯显示 **织机 / Paper / 织偶 / 客户端**。不需要终端，也不需要外部引擎。
 
 ## 4. 启动 Minecraft
 

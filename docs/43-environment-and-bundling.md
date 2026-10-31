@@ -11,39 +11,42 @@
 
 这些属于「用户自己的 Minecraft 环境」，不应由游戏安装包静默替换。
 
-## 2. 当前桌面包已经包含的
+## 2. 最新桌面包已经内置的
 
-- Studio UI（`apps/studio/dist`）
-- 桌面壳、伴玩、向导、自绘标题栏
-- 内置 **Mock 引擎**（不连 Minecraft）
-- 字体、图标、脚本、窗口/缩放/连接灯逻辑
+- Studio UI、桌面壳、伴玩、向导、自绘标题栏
+- **Node 22 运行时 + 所需共享库**
+- **Java 25 运行时**（从本机 Prism Microsoft runtime 打包）
+- **Paper 26.1.2 build 74**（含 libraries/cache/versions/world/plugins/配置）
+- 真实引擎 bundle（`runtime/real/engine.mjs`）
+- **mineflayer / minecraft-protocol / pathfinder** 与 `bot/manager.mjs`
+- Mock 演示引擎、字体、图标、窗口/缩放/连接灯逻辑
 
-## 3. 真实模式需要、但当前未随包携带的
+## 3. 用户只需要
 
-- Node 22 运行时（当前桌面壳调用系统 `node`）
-- Paper 26.1.2 build 74 server jar
-- LoomCraft 插件 jar
-- Paper 世界/配置（`it/.mc-server`）
-- Java 25（当前依赖系统/Prism Java）
-- mineflayer/minecraft-protocol/pathfinder 依赖（当前在仓库 `bot/node_modules`）
-- 真实引擎（仓库 `npm run dev:engine:paper`；桌面包 engine 仍是 stub）
+- Minecraft Java **26.1.2**（Prism/Flatpak 均可）
+- 能登录的 Minecraft 账号
+- 正常桌面/显卡驱动
 
-## 4. 目标安装包（还没完成）
+## 4. 当前实现方式
 
-理想目标：
+- App 启动时自动从 Tauri resources 启动内置 Java + Paper；
+- 等 Paper 的 25565 与插件 RPC 8765 就绪后，启动内置 Node + 真实引擎；
+- 真实引擎在 4317 提供 Studio 使用的 HTTP API；
+- 织偶用包内 mineflayer 连接 Paper；
+- 向导里仍可选「真实织机地址」连接外部引擎（高级用途），默认不需要。
 
-> 用户只安装正确版本的 Minecraft；游戏安装包内置 Node/Java/Paper/插件/世界/织偶运行时，双击后向导自动启动世界和真实引擎。
+## 5. 构建自包含运行时
 
-需要做的事：
+```bash
+bash scripts/build-real-runtime.sh
+cd apps/desktop
+npm run assets
+npx tauri build
+```
 
-1. 构建 Self-contained Node/engine（含 bot 依赖，或用 SEA 单文件）。
-2. 打包 Java runtime（或检测 Prism Java 并明确提示）。
-3. 把 Paper jar、插件 jar、世界、server.properties、eula 加入 Tauri resources。
-4. 改 Rust `start_paper` / `start_engine` 从 resources 启动，而不是 repo 脚本。
-5. 向导真实模式作为默认；Mock 仅作演示。
-6. 在 AppImage/DEB/RPM 实测：只装 Minecraft 的干净机器上从双击到进服。
+`build-real-runtime.sh` 需要构建机提供 Node 22、Java 25（默认读 Prism runtime，可用 `LOOM_JAVA_HOME` 覆盖）和可用的 Paper server；这些只在构建时使用，不进用户路线。
 
-在此之前，README/向导必须明确写：**桌面包默认 Mock；真实 Paper 需外部引擎**，不能宣传成「安装即玩真实世界」。
+> 注：AppImage 打包在本机曾遇到 linuxdeploy 图标/体积问题；RPM 可直接生成。可用 AppDir + `linuxdeploy-plugin-appimage.AppImage` 手动补图打包。
 
 ## 5. 当前真实模式启动路径
 

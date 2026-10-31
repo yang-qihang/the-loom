@@ -2,7 +2,7 @@
 
 > 一款用 Minecraft 教程序语言核心抽象的教学游戏：玩家写 TypeScript 子集驱动「织偶」，在 3 幕、10 关里依次遇到顺序、分支、循环、函数、记录/联合、闭包、高阶函数/管道、接口/组合、异步与并发。
 >
-> **当前状态**：L01–L10 已全部通过真实 Paper e2e；Studio 有完整中文引导、挑战层说明与 UOS 用户操作模拟。桌面安装包默认运行内置 Mock 世界；真实 Minecraft 模式需要连接仓库启动的真实引擎（详见下文与 `docs/42-player-guide.md`）。
+> **当前状态**：L01–L10 已全部通过真实 Paper e2e；Studio 有完整中文引导、挑战层说明与 UOS 用户操作模拟。**最新桌面包已内置 Node/Java/Paper/插件/世界/真实引擎与 mineflayer 织偶**：用户只需安装正确版本的 Minecraft，桌面应用会自己启动服务端与真实引擎。
 
 ## 一句话玩法
 
@@ -11,7 +11,7 @@
 ## 先看哪份文档
 
 - **[玩家玩法与启动](docs/42-player-guide.md)**：怎么装 Minecraft、怎么启动真实模式、怎么释放鼠标、怎么同时看代码和游戏。
-- **[环境与依赖边界](docs/43-environment-and-bundling.md)**：哪些是用户自己要装的，哪些现在随包、哪些还没随包。
+- **[环境与依赖边界](docs/43-environment-and-bundling.md)**：安装包内置了什么、用户只需要准备什么。
 - **[开发历程与踩坑](docs/40-development-history.md)**：L05–L10 真实路径、桌面窗口、自动化隔离等经验教训。
 - **[AI / 新开发者接手指南](docs/41-ai-contributor-guide.md)**：架构、红线、测试与添加关卡的方法。
 - **[交接与复现](docs/36-github-handoff.md)**：GitHub 交接、真实环境复现、已知问题。
@@ -20,44 +20,42 @@
 
 ## 需要什么环境
 
-### 玩家需要自己安装
+### 玩家只需要安装
 
 - **Minecraft Java 26.1.2**（推荐 Prism Launcher；Flatpak 可用）
 - 一个能登录的 Minecraft 账号
-- **Java 25**（Prism 的 Microsoft runtime 可用）
 - 正常工作的 Linux 桌面与显卡驱动
 
-### 仓库真实模式需要
+### 安装包已内置
 
-- Node 22、Paper 26.1.2 build 74、LoomCraft 插件、Paper 世界/配置
-- mineflayer/minecraft-protocol 依赖（仓库 `bot/node_modules`）
-- Java 25（当前从系统/Prism Java 使用）
+- Node 22 + Java 25 运行时
+- Paper 26.1.2 build 74、LoomCraft 插件、世界/配置
+- 真实引擎、mineflayer/minecraft-protocol 织偶依赖
+- Studio、桌面壳、字体、Mock 演示引擎
 
-> 当前桌面安装包默认只带 Mock 引擎，**不能双击直接连 Minecraft**。真实模式要按 `docs/42` 启动外部引擎；`docs/43` 明确列出了还没打进安装包的依赖与目标打包方案。
+用户不需要自己安装 Node/Java/Paper，也不需要另开终端启动引擎。
 
-## 快速开始（仓库真实模式）
+## 快速开始（玩家）
 
 ```bash
-# 1) 启动 Paper 世界
+./apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft-x86_64.AppImage
+# 或 Fedora: sudo rpm -i apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm
+```
+
+1. 打开桌面应用。它会自动启动包内 Paper 世界与真实引擎；顶部四个连接灯应显示：**织机 / Paper / 织偶 / 客户端**。
+2. 打开 Prism Launcher，进入已安装的 **Minecraft Java 26.1.2** 实例。
+3. 多人游戏 → 直连 `localhost:25565`。
+4. 在 Studio 里选关、写代码、运行；出现「轮到你」时回 Minecraft 完成玩家节拍。
+
+如果连接灯不是绿色，等待首次启动十几秒；仍不绿时看 `~/.loomcraft/logs/`。
+
+## 开发者：从源码跑真实模式
+
+```bash
 bash scripts/mc-up.sh
-
-# 2) 启动真实引擎（保持终端）
 PORT=4320 LOOM_WORLD=paper npm run dev:engine:paper
-
-# 3) 启动 Studio（浏览器开发模式）
 VITE_ENGINE_URL=http://127.0.0.1:4320 npm --prefix apps/studio run dev -- --host 127.0.0.1
-# 打开 http://127.0.0.1:5173
 ```
-
-或者启动桌面包：
-
-```bash
-./apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage
-```
-
-在向导里填「真实织机引擎地址」`http://127.0.0.1:4320`，保存；顶部四个连接灯显示 **织机 / Paper / 织偶 / 客户端**。
-
-然后在 Prism 启动 **Village Development** 实例，多人游戏直连 `localhost:25565`。
 
 ## 仓库结构
 

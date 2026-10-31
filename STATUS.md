@@ -73,3 +73,10 @@
 - 门禁：`npm test` 25 files / 235 tests；Studio e2e 6/6；纯中文 0 违规；`verify.sh` exit 0。
 - 桌面安装包 AppImage 125MB / rpm 23.17MB，隔离 `:98` 实测启动。
 - **明确边界**：桌面包仍 Mock-only；挑战层目前是可阅读说明而非可玩会话；真实人类键鼠盲测尚未执行（自动化代理为 UOS）。
+
+
+## 自包含安装包（2026-10-31 20:52）
+
+- `Loomcraft-x86_64.AppImage` 356MB / RPM 382MB，内置 Node 22、Java 25、Paper 26.1.2、插件/世界、真实引擎与 mineflayer 织偶。
+- 桌面应用启动时自动起 Paper + 引擎；用户只需安装 Minecraft 26.1.2 并连接 `localhost:25565`。
+- 真实运行时目录由 `bash scripts/build-real-runtime.sh` 生成，体积约 1GB，不入 GitHub；安装包随附。
