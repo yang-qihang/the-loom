@@ -10,6 +10,7 @@ const els = {
   modal: document.getElementById("settings-modal"),
   setPin: document.getElementById("set-pin"),
   setCompanion: document.getElementById("set-companion"),
+  setFocusFollow: document.getElementById("set-focus-follow"),
   setPrism: document.getElementById("set-prism"),
   setScale: document.getElementById("set-scale"),
   openLogs: document.getElementById("btn-open-logs"),
@@ -21,7 +22,7 @@ const els = {
   connClient: document.getElementById("conn-client"),
 };
 
-let settings = { alwaysOnTop: false, mode: "workbench", page: "wizard", uiScale: 0.8 };
+let settings = { alwaysOnTop: false, focusFollow: true, mode: "workbench", page: "wizard", uiScale: 0.8 };
 let currentSession = null;
 let currentLevel = null;
 // 迁移旧版开发地址：新自包含包内置引擎在 4317，旧的 4320 外部地址只会让 Studio 连错。
@@ -139,6 +140,7 @@ async function loadSettings() {
   }
   renderPin();
   renderMode();
+  if (els.setFocusFollow) els.setFocusFollow.checked = settings.focusFollow !== false;
   els.setPrism.value = settings.prismCommand ?? "flatpak run org.prismlauncher.PrismLauncher";
   els.setScale.value = String(settings.uiScale);
   applyUiScale();
@@ -214,6 +216,11 @@ els.setPin.addEventListener("change", async () => {
   const value = await invoke("set_pin", { value: els.setPin.checked });
   settings.alwaysOnTop = !!value;
   renderPin();
+});
+els.setFocusFollow?.addEventListener("change", async () => {
+  settings.focusFollow = !!els.setFocusFollow.checked;
+  try { await invoke("save_settings", { settings }); } catch { /* ignore */ }
+  toast(settings.focusFollow ? "鼠标离开织界会聚焦 Minecraft（游戏捕获鼠标属正常）" : "鼠标离开织界不再抢游戏焦点，光标保持可见");
 });
 els.setCompanion.addEventListener("change", async () => {
   const mode = els.setCompanion.checked ? "companion" : "workbench";

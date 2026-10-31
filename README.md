@@ -12,6 +12,7 @@
 
 - **[玩家玩法与启动](docs/42-player-guide.md)**：怎么装 Minecraft、怎么启动真实模式、怎么释放鼠标、怎么同时看代码和游戏。
 - **[环境与依赖边界](docs/43-environment-and-bundling.md)**：安装包内置了什么、用户只需要准备什么。
+- **[光标/悬浮方案调研](docs/45-cursor-and-focus-research.md)**：为什么全屏 Minecraft 下需要游戏内 mod，当前外部窗口折中怎么用。
 - **[开发历程与踩坑](docs/40-development-history.md)**：L05–L10 真实路径、桌面窗口、自动化隔离等经验教训。
 - **[AI / 新开发者接手指南](docs/41-ai-contributor-guide.md)**：架构、红线、测试与添加关卡的方法。
 - **[交接与复现](docs/36-github-handoff.md)**：GitHub 交接、真实环境复现、已知问题。

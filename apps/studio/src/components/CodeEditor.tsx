@@ -37,7 +37,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(function
       theme: "loom-night",
       fontSize,
       lineHeight: Math.round(fontSize * 1.625),
-      fontFamily: '"Departure Mono", "Zpix", "JetBrains Mono", "Fira Code", "Noto Sans Mono", ui-monospace, monospace',
+      fontFamily: '"Iosevka", "JetBrains Mono", "Fira Code", "Noto Sans Mono", ui-monospace, monospace',
       fontLigatures: false,
       minimap: { enabled: false },
       scrollBeyondLastLine: false,

@@ -30,6 +30,8 @@ const WORKBENCH_HEIGHT: u32 = 840;
 #[serde(rename_all = "camelCase")]
 struct Settings {
     always_on_top: bool,
+    #[serde(default = "default_focus_follow")]
+    focus_follow: bool,
     mode: String,
     page: String,
     prism_command: Option<String>,
@@ -42,6 +44,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             always_on_top: false,
+            focus_follow: true,
             mode: "workbench".into(),
             page: "wizard".into(),
             prism_command: None,
@@ -515,6 +518,8 @@ fn kill_children(state: &AppState) {
     }
 }
 
+fn default_focus_follow() -> bool { true }
+
 fn set_pin_internal(app: &tauri::AppHandle, value: bool) -> Result<bool, String> {
     let Some(window) = app.get_webview_window("main") else {
         return Err("主窗口不存在".into());
@@ -565,6 +570,7 @@ fn save_settings(app: tauri::AppHandle, settings: Settings) {
     let state = app.state::<AppState>();
     if let Ok(mut stored) = state.settings.lock() {
         stored.always_on_top = settings.always_on_top;
+        stored.focus_follow = settings.focus_follow;
         stored.mode = settings.mode;
         stored.page = settings.page;
         stored.prism_command = settings.prism_command;
@@ -613,6 +619,10 @@ fn focus_workbench(app: &tauri::AppHandle) {
         if window.is_focused().unwrap_or(false) {
             let _ = window.minimize();
             return;
+        }
+        // 游戏正在前台时，先让游戏松开鼠标（Escape 打开游戏菜单），再拉起织界。
+        if let Some(display) = x11_focus::DisplayHandle::open() {
+            display.send_escape();
         }
         let _ = window.unminimize();
         let _ = window.show();
@@ -921,6 +931,13 @@ mod x11_focus {
         fn XSetInputFocus(display: *mut Display, window: Window, revert_to: c_int, time: c_ulong) -> c_int;
         fn XRaiseWindow(display: *mut Display, window: Window) -> c_int;
         fn XFlush(display: *mut Display) -> c_int;
+        fn XStringToKeysym(name: *const c_char) -> c_ulong;
+        fn XKeysymToKeycode(display: *mut Display, keysym: c_ulong) -> u8;
+    }
+
+    #[link(name = "Xtst")]
+    extern "C" {
+        fn XTestFakeKeyEvent(display: *mut Display, keycode: c_uint, is_press: c_int, delay: c_ulong) -> c_int;
     }
 
     pub struct DisplayHandle(*mut Display);
@@ -989,6 +1006,19 @@ mod x11_focus {
             found
         }
 
+        pub fn send_escape(&self) {
+            let symbol = CString::new("Escape").unwrap();
+            let keysym = unsafe { XStringToKeysym(symbol.as_ptr()) };
+            if keysym == 0 { return; }
+            let keycode = unsafe { XKeysymToKeycode(self.0, keysym) };
+            if keycode == 0 { return; }
+            unsafe {
+                XTestFakeKeyEvent(self.0, keycode as c_uint, 1, 0);
+                XTestFakeKeyEvent(self.0, keycode as c_uint, 0, 0);
+                XFlush(self.0);
+            }
+        }
+
         pub fn focus_minecraft(&self) -> bool {
             let root = unsafe { XDefaultRootWindow(self.0) };
             let Some(window) = self.find_window(root, "minecraft", 4) else { return false; };
@@ -1018,11 +1048,19 @@ fn start_focus_follow(app: tauri::AppHandle) {
             if inside == was_inside { continue; }
             // 仅在指针真正跨过窗口边界时动作，避免反复抢焦点造成卡顿/焦点抖动。
             if last_action.elapsed() < Duration::from_millis(320) { continue; }
+            let follow_game = app
+                .state::<AppState>()
+                .settings
+                .lock()
+                .map(|settings| settings.focus_follow)
+                .unwrap_or(true);
             if inside {
                 let _ = window.unminimize();
                 let _ = window.show();
                 let _ = window.set_focus();
-            } else if window.is_focused().unwrap_or(false) {
+            } else if follow_game && window.is_focused().unwrap_or(false) {
+                // 默认行为：鼠标离开织界就交给 Minecraft。游戏会捕获并隐藏鼠标，
+                // 这是 Minecraft 正常操作；按 Ctrl+Shift+K 会先 Escape 释放鼠标再回到织界。
                 let _ = display.focus_minecraft();
             }
             was_inside = inside;
