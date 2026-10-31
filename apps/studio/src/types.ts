@@ -74,7 +74,7 @@ export interface StudioEngine {
   run(sessionId: string, source: string): Promise<void>;
   stop(sessionId: string): Promise<void>;
   reset(sessionId: string): Promise<void>;
-  playerBeat(sessionId: string): Promise<void>;
+  playerBeat(sessionId: string, simulate?: boolean): Promise<void>;
   inGame(sessionId: string, text: string, kind?: "title" | "actionbar"): Promise<void>;
   setAnnotations(sessionId: string, visible: boolean): Promise<void>;
   subscribe(sessionId: string, listener: (event: StudioEvent) => void): () => void;

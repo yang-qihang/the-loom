@@ -1047,8 +1047,13 @@ fn install_kwin_focus_script(state: &AppState) -> bool {
   const app = list.find(w => ((w.caption || '') + ' ' + (w.resourceClass || '')).toLowerCase().includes('织界') || ((w.resourceClass || '').toLowerCase().includes('loom')));
   const mc = list.find(w => ((w.caption || '') + ' ' + (w.resourceClass || '')).toLowerCase().includes('minecraft'));
   if (!app) return;
-  if (workspace.activeWindow === app) { if (mc) mc.activate(); }
-  else app.activate();
+  function activate(w) {
+    try { if (typeof workspace.activateWindow === 'function') { workspace.activateWindow(w); return; } } catch (e) {}
+    try { if (w && typeof w.activate === 'function') { w.activate(); return; } } catch (e) {}
+    try { workspace.activeWindow = w; } catch (e) {}
+  }
+  if (app.active) { if (mc) activate(mc); }
+  else activate(app);
 }
 registerShortcut('LoomToggleFocus', 'Loom: toggle focus', 'Alt+Z', toggleLoomFocus);
 "#;

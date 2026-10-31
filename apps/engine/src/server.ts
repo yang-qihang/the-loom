@@ -284,7 +284,7 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
     if (method === "POST" && path === "/api/player-beat") {
       const body = await readJson(req);
       const session = requireSession(requireString(body, "sessionId"));
-      const { state, result } = await session.playerBeat();
+      const { state, result } = await session.playerBeat(body.simulate === false);
       sendJson(res, 200, { ok: true, state, result });
       return;
     }

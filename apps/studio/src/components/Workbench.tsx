@@ -257,7 +257,8 @@ export function Workbench({
 
   const playerBeat = useCallback(async () => {
     if (!sessionId) return;
-    await engine.playerBeat(sessionId);
+    // 真实 Paper 只确认玩家在世界里亲手完成的结果，不在后台代放方块。
+    await engine.playerBeat(sessionId, engine.mode === "mock");
   }, [engine, sessionId]);
 
   const showHint = useCallback(() => {

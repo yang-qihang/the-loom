@@ -320,9 +320,15 @@ export const L01Content: LevelContent & { copy: ContentCopy; challenge: Challeng
       if (block === "minecraft:lantern") return y >= 12; // 路灯保留
       return !(x >= -13 && x <= 3 && z >= -3 && z <= 17);
     });
+    // 第 4 盏灯前的两级石阶：玩家站上去视线与灯柱顶端齐平，不用一直仰望。
+    const lampAccess: Array<{ pos: Pos; block: string }> = [
+      { pos: [1, 11, 17], block: "minecraft:stone_bricks" },
+      { pos: [1, 12, 16], block: "minecraft:stone_bricks" },
+    ];
     await port.setBlocks([
       ...lamps.map(pos => ({ pos, block: "minecraft:air" })),
       ...safeDecor,
+      ...lampAccess,
     ]);
     await port.spawnEntity({ type: "villager", id: "eira", name: "艾拉", pos: [0, 11, 6], role: "npc" });
     await port.spawnEntity({ type: "golem", id: "golem", name: "灰崽", pos: [0, 11, 0], role: "agent" });

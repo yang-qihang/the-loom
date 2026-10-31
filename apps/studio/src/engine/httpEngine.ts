@@ -187,8 +187,8 @@ export class HttpEngine implements StudioEngine {
     await this.request("/api/reset", { method: "POST", body: JSON.stringify({ sessionId }) });
   }
 
-  async playerBeat(sessionId: string): Promise<void> {
-    await this.request("/api/player-beat", { method: "POST", body: JSON.stringify({ sessionId }) });
+  async playerBeat(sessionId: string, simulate = true): Promise<void> {
+    await this.request("/api/player-beat", { method: "POST", body: JSON.stringify({ sessionId, simulate }) });
   }
 
   async inGame(sessionId: string, text: string, kind: "title" | "actionbar" = "title"): Promise<void> {

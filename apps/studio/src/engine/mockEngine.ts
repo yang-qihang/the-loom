@@ -143,7 +143,9 @@ export class MockEngine implements StudioEngine {
     // Mock 没有真实世界标注。
   }
 
-  async playerBeat(sessionId: string): Promise<void> {
+  async playerBeat(sessionId: string, simulate = true): Promise<void> {
+    // MockWorld 没有真人输入，始终模拟；真实路径由 HttpEngine 传入 simulate=false。
+    void simulate;
     const session = this.get(sessionId);
     if (session.phase !== "awaiting-player-beat") {
       this.emit(session, { type: "log", line: WORKBENCH.playerBeatEarly });

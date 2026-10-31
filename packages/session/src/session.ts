@@ -323,8 +323,8 @@ export class GameSession {
     }
   }
 
-  /** 玩家节拍：模拟玩家亲手完成最后一步，然后重新快照评分。 */
-  async playerBeat(): Promise<{ state: SessionState; result: ResultEvent | null }> {
+  /** 玩家节拍：默认模拟最后一步（Mock/无人测试）；confirmOnly=true 时只按真实世界状态评分。 */
+  async playerBeat(confirmOnly = false): Promise<{ state: SessionState; result: ResultEvent | null }> {
     this.#assertAlive();
     if (this.mode === "repl") {
       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
@@ -334,7 +334,7 @@ export class GameSession {
     }
     const ticket = this.#ticket;
     const runId = `beat-${++this.#runSeq}`;
-    if (this.level.playerBeat) {
+    if (!confirmOnly && this.level.playerBeat) {
       await this.level.playerBeat(this.port);
     }
     const result = await this.#verifyAndPublish({ runId, ticket }, "player-beat");
