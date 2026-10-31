@@ -729,6 +729,10 @@ export const L03Content: LevelContent & { challenge: LevelChallenge; copy: Conte
     await port.spawnEntity({ type: "villager", id: "eira", name: "艾拉", pos: pos(vars.eira), role: "npc" });
     await port.spawnEntity({ type: "iron_golem", id: "guard", name: "铁傀儡", pos: [3, G + 1, 3], role: "npc" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:bell", 8);
+  },
   async playerBeat(port) {
     // 天亮，你用织者之印敲钟：有些最后一步，只有活人的手能完成
     await port.playerPlace("bell", pos(BASE.bell));

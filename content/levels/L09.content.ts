@@ -785,6 +785,11 @@ export const L09Content: LevelContent & { challenge: ChallengeDef } = {
     await port.spawnEntity({ type: "witch", id: "granny", name: "苔婆", pos: [-10, G, -6], role: "npc" });
     await port.spawnEntity({ type: "zombie_villager", id: "sick", name: "生病的村民", pos: cage, role: "target" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:splash_potion", 8);
+    await port.playerGive("minecraft:bell", 4);
+  },
   async playerBeat(port) {
     // 织者之印：泼药水与敲钟这两下只有活人的手能做（位置从本局 vars 读，隐藏平移变体也成立）
     const vars = port.world.vars;

@@ -40,6 +40,14 @@ for lib in $(ldd "$NODE_BIN" | awk '/=> \//{print $3} /^\//{print $1}'); do cp -
 cp -a "$JAVA_HOME_SRC/." "$DEST/java/"
 # 6) Paper / 插件 / 世界（日志与运行时输入输出不打包）
 rsync -a --exclude logs --exclude 'console.*' --exclude '*.log' "$PAPER_SRC/" "$DEST/paper/"
-# 7) eula
+# 7) 插件必须和当前源码一起构建，不能复用旧 jar（否则 player.give/关卡钩子会悄悄过期）
+(cd "$ROOT/plugin" && ./gradlew clean build --no-daemon -q)
+mkdir -p "$DEST/paper/plugins/spark"
+cp "$ROOT/plugin/build/libs/loomcraft-plugin.jar" "$DEST/paper/plugins/loomcraft-plugin.jar"
+cp "$PAPER_SRC/server.properties" "$DEST/paper/server.properties" 2>/dev/null || true
+printf '{"_header":"spark configuration file - https://spark.lucko.me/docs/Configuration","backgroundProfiler":false}\n' > "$DEST/paper/plugins/spark/config.json"
+# 8) eula
 printf 'eula=true\n' > "$DEST/paper/eula.txt"
+grep -q 'playerGive' "$DEST/engine.mjs" || { echo "引擎 bundle 未包含 playerGive" >&2; exit 3; }
+(cd "$ROOT/plugin" && javap -classpath build/libs/loomcraft-plugin.jar -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem' || { echo "插件 jar 未包含快捷栏 setItem 逻辑" >&2; exit 3; })
 du -sh "$DEST"

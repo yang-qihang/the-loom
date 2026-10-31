@@ -649,6 +649,10 @@ export const L07Content: LevelContent & { challenge: LevelChallenge } = {
     await port.spawnEntity({ type: "allay", id: "allay-2", name: "悦灵", pos: [-6, 65, 14], role: "prop" });
     await port.spawnEntity({ type: "allay", id: "allay-3", name: "悦灵", pos: [18, 65, 10], role: "prop" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:oak_trapdoor", 8);
+  },
   async playerBeat(port) {
     // 织者之印：三只笼门由你亲手打开，悦灵随即按规矩出发。
     for (const cage of posList(port.world.vars.cages)) {

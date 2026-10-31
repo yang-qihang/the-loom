@@ -191,14 +191,18 @@ export function Workbench({
       } else if (event.type === "error") {
         setResult(null);
         setPhase("error");
-        const authored = copy?.errors.syntax ?? "这一行还没写完：先看括号、引号和逗号，改完再运行一次。";
         errorHoldRef.current = true;
-        void engine.inGame(sessionId, "第 " + String(event.line ?? 1) + " 行还没写完。看看括号和数字。", "actionbar");
-        setError({
-          message: authored ? resolveCopy(authored) : humanizeError(event.message, levelId),
-          line: typeof event.line === "number" ? event.line : 1,
-        });
-        if (typeof event.line === "number") editorRef.current?.revealLine(event.line);
+        const raw = String(event.message ?? "");
+        const syntaxLike = typeof event.line === "number" || /SyntaxError|Unexpected token|Unexpected end|Unexpected identifier|Unterminated/i.test(raw);
+        if (syntaxLike) {
+          const authored = copy?.errors.syntax ?? "这一行还没写完：先看括号、引号和逗号，改完再运行一次。";
+          void engine.inGame(sessionId, "第 " + String(event.line ?? 1) + " 行还没写完。看看括号和数字。", "actionbar");
+          setError({ message: resolveCopy(authored), line: typeof event.line === "number" ? event.line : 1 });
+          if (typeof event.line === "number") editorRef.current?.revealLine(event.line);
+        } else {
+          // 沙箱/运行时错误不是语法错误，不能伪装成「第 1 行没写完」。
+          setError({ message: humanizeError(raw, levelId) });
+        }
         setLogs([]);
       }
     });

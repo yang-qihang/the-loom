@@ -695,6 +695,10 @@ export const L08Content: LevelContent & { challenge: ChallengeDef } = {
     await port.spawnEntity({ type: "villager", id: "eira", name: "艾拉", pos: posOf(vars.eira), role: "npc" });
     await port.spawnEntity({ type: "villager", id: "worker", name: "织匠", pos: [7, 65, 3], role: "npc" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:lever", 8);
+  },
   async playerBeat(port) {
     // 织者之印：总拉杆的最后一下只有活人的手能推到底
     await port.playerPlace("lever", posOf(L08.world.vars.lever));

@@ -38,6 +38,11 @@ collect_pids() {
   for pat in "${patterns[@]}"; do
     pids+=$(pgrep -f "$pat" 2>/dev/null || true)$'\n'
   done
+  # 旧引擎命令可能是 ./node/bin/node engine.mjs（相对路径），按 cwd 识别，避免端口被僵尸 cwd 占用。
+  for pid in $(pgrep -f 'node engine\.mjs' 2>/dev/null || true); do
+    cwd=$(readlink "/proc/$pid/cwd" 2>/dev/null || true)
+    case "$cwd" in *"/runtime/real"|*"/appimage_extracted_"*) pids+="$pid"$'\n';; esac
+  done
   printf '%s\n' "$pids" | awk 'NF' | sort -un | while read -r pid; do
     [ "$pid" = "$$" ] && continue
     [ "$pid" = "${PPID:-0}" ] && continue

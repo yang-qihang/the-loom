@@ -402,6 +402,7 @@ export const L10Content: LevelContent & { challenge: ChallengeDef } = {
     }
   },
   async afterPrepare(port) {
+    await port.playerGive("minecraft:lodestone", 4);
     // 两只织偶各就各位（插件 finalize 会把所有 bot 传到同一 agentSpawn，这里再分开）
     await port.teleportAgent(L10_BRIDGE.leftAgent, [L10_BRIDGE.leftBank[0], L10_BRIDGE.deckY + 1, L10_BRIDGE.leftBank[2]]);
     await port.teleportAgent(L10_BRIDGE.rightAgent, [L10_BRIDGE.rightBank[0], L10_BRIDGE.deckY + 1, L10_BRIDGE.rightBank[2]]);

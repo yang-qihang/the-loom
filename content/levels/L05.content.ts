@@ -704,6 +704,10 @@ export const L05Content: LevelContent & { challenge: LevelChallenge } = {
     await port.spawnEntity({ type: "villager", id: "mason", name: "石匠阿灰", pos: [16, 64, 4], role: "npc" });
     await port.spawnEntity({ type: "villager", id: "apprentice", name: "学徒小穗", pos: [26, 64, -4], role: "npc" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:oak_sign", 8);
+  },
   async playerBeat(port) {
     // 织者之印：五块门牌由你亲手挂到门口（真实 MC 里还要在门牌上写户名）。
     for (const sign of posList(port.world.vars.signs)) {

@@ -1,6 +1,7 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { pathToFileURL } from "node:url";
 import type { AddressInfo } from "node:net";
 import { MockWorldPort } from "../../../packages/worldport/src/mock-port";
@@ -25,6 +26,13 @@ export interface StartedEngine {
 }
 
 const ENGINE_VERSION = "1.0.0-t1";
+
+// 运行时目录可能被重新打包删除（旧进程 cwd 失效）；沙箱/缓存需要合法 cwd。
+try {
+  process.cwd();
+} catch {
+  process.chdir(os.tmpdir());
+}
 
 /** 引擎机器状态 → Studio 的 SessionPhase（apps/studio/src/types.ts）。 */
 function studioPhase(state: string): string {

@@ -690,6 +690,10 @@ export const L06Content: LevelContent & { challenge: LevelChallenge } = {
     }
     await port.spawnEntity({ type: "donkey", id: "donkey", name: "驴", pos: [15, 65, 22], role: "prop" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:string", 8);
+  },
   async playerBeat(port) {
     // 织者之印：对完账，你把换来的织线插进护符盒。
     await port.playerPlace("loom_thread", pos(port.world.vars.shrine));

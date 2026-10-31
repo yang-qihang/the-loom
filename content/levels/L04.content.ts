@@ -732,6 +732,10 @@ export const L04Content: LevelContent & { challenge: LevelChallenge; copy: Conte
     await port.spawnEntity({ type: "golem", id: "golem", name: "灰崽", pos: [8, G, -10], role: "agent" });
     await port.spawnEntity({ type: "villager", id: "eira", name: "艾拉", pos: [8, G, 28], role: "npc" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:pumpkin", 8);
+  },
   async playerBeat(port) {
     // 雨停后你把南瓜头放上干草捆：稻草人立起来（织者之印）
     await port.playerPlace("pumpkin", pos(L04_BASE.world.vars.scarecrow));

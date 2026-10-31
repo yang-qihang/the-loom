@@ -412,6 +412,10 @@ export const L02Content: LevelContent & { challenge: LevelChallenge; copy: Conte
     await port.spawnEntity({ type: "villager", id: "eira", name: "艾拉", pos: pos(L02.world.vars.eira), role: "npc" });
     await port.spawnEntity({ type: "chicken", id: "hens", name: "母鸡", pos: [-11, 65, 13], role: "prop" });
   },
+  async afterPrepare(port) {
+    // 真实玩家需要先拿到亲手节拍道具；没人在线时插件会排队到进服。
+    await port.playerGive("minecraft:cake", 8);
+  },
   async playerBeat(port) {
     // 玩家节拍：喂鸡催下的第 6 枚蛋由 setup 预置；这里模拟玩家把最后一只蛋糕放上蛋糕塔。
     await port.playerPlace("cake", pos(L02.world.vars.cakeTower));
