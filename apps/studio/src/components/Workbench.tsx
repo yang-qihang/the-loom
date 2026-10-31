@@ -559,7 +559,17 @@ export function Workbench({
                 >
                   {copy?.playerBeatAction ?? "我已在游戏里完成"}
                 </button>
-                <details className="mc-help" data-testid="mc-help">
+                {copy?.playerBeatGuide?.length ? (
+                  <div className="player-beat-guide" data-testid="player-beat-guide">
+                    <h4>第 4 盏灯怎么点</h4>
+                    <ol>
+                      {copy.playerBeatGuide.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+                <details className="mc-help" data-testid="mc-help" open>
                   <summary>{chrome.workbench.mcHelpTitle}</summary>
                   <p>{chrome.workbench.mcHelpIntro}</p>
                   <ol>

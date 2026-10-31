@@ -290,7 +290,7 @@ await loadSettings();
 document.getElementById("boot-splash")?.classList.add("is-hidden");
 try { await invoke("show_main_window"); } catch { /* old shell */ }
 void refreshStatus();
-setInterval(refreshStatus, 4000);
+setInterval(refreshStatus, 8000);
 window.__loomShell = { show, toast };
 
 /* ---- T9：自绘标题栏窗口控制（Rust 命令）+ 原生行为收口 ---- */

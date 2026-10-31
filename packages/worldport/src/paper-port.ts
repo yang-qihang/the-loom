@@ -495,6 +495,10 @@ export class PaperWorldPort implements WorldPort {
     await this.rpc.call("player.teleport", { sessionId: this.sessionId, pos });
   }
 
+  async playerGive(item: string, count = 1): Promise<void> {
+    await this.rpc.call("player.give", { sessionId: this.sessionId, item, count });
+  }
+
   async playerPlace(block: string, pos: Vec3): Promise<void> {
     this.recorded.playerPlaces.push({ block: normBlock(block), pos });
     await this.rpc.call("player.place", {

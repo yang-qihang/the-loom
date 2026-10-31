@@ -77,6 +77,7 @@ export interface LevelCopy {
   codexExplain: string;
   playerBeatUI: string;
   playerBeatAction?: string;
+  playerBeatGuide?: string[];
   firstStep: string;
   opening: Opening;
   journalRecap?: string;

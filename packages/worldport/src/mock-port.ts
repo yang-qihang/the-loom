@@ -87,6 +87,8 @@ export class MockWorldPort implements WorldPort {
   async clearEntities(_ids?: string[]): Promise<void> {}
   async setTime(_ticks: number): Promise<void> {}
   async setWeather(_weather: "clear" | "rain" | "thunder"): Promise<void> {}
+  async playerGive(_item: string, _count = 1): Promise<void> {}
+
   async playerPlace(block: string, pos: Vec3): Promise<void> {
     this.mock.playerPlace(block, pos);
   }

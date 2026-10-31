@@ -24,6 +24,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -92,6 +93,8 @@ public final class SceneManager implements Listener {
     private int[] rawAgentSpawn = null;
     private int[] playerSpawn = null;
     private final List<String> kit = new ArrayList<>();
+    /** 内容层在玩家还没进服时发的道具，等玩家加入后补发。 */
+    private final Map<Material, Integer> pendingPlayerItems = new LinkedHashMap<>();
 
     private static final class NpcSpec {
         String id;
@@ -887,6 +890,24 @@ public final class SceneManager implements Listener {
         res.put("pos", Json.vecList(pos));
         res.put("block", requested);
         return res;
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!prepared) return;
+        Player p = event.getPlayer();
+        if (bots.contains(p.getName())) return;
+        if (playerSpawn != null) {
+            p.teleport(new Location(world(), playerSpawn[0] + 0.5, playerSpawn[1], playerSpawn[2] + 0.5));
+        }
+        for (Map.Entry<Material, Integer> entry : pendingPlayerItems.entrySet()) {
+            p.getInventory().addItem(new ItemStack(entry.getKey(), entry.getValue()));
+            p.sendMessage(Component.text("已把「" + entry.getKey().name().toLowerCase() + "」放进你的背包；按 E 打开物品栏，拖到快捷栏。"));
+        }
+        if (!pendingPlayerItems.isEmpty()) {
+            p.sendMessage(Component.text("第 4 盏灯在村道尽头：x=2, z=16。手持灯笼，准星对准灯柱顶端，按鼠标右键。"));
+            pendingPlayerItems.clear();
+        }
     }
 
     @EventHandler

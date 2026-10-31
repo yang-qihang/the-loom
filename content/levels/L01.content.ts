@@ -186,7 +186,7 @@ export const L01: LevelDef & { challenge: ChallengeDef } = {
     ...L01_BASE.task,
     mainTask: "让灰崽把 1 到 3 号灯点亮，再走到 4 号灯下；最后一盏由你亲手点亮，做完回到艾拉身边。",
     makeTask: "回程顺路把桥另一侧的第 5 盏小灯也点亮，这盏可以不做。",
-    playerBeat: "4 号灯由你右键点亮：把鼠标移到灯笼上按右键。",
+    playerBeat: "4 号灯由你亲手点亮：走到村道尽头 x=2, z=16，手持灯笼，准星对准灯柱顶端，按鼠标右键放置。",
   },
   narrative: {
     opening: ["小径上四盏灯又灭了。", "先让灰崽点亮 1 到 3 号灯，再走到 4 号灯下。", "最后一盏要由你亲手点：织偶替不了活人的手。"],
@@ -330,10 +330,14 @@ export const L01Content: LevelContent & { copy: ContentCopy; challenge: Challeng
       await port.spawnEntity({ type: "villager", id: `villager-${i}`, name: "村民", pos: [i % 2 === 0 ? -2 : 2, 11, z], role: "npc" });
     }
   },
+  async afterPrepare(port) {
+    // 玩家是生存模式：必须先给灯笼，否则「右键点亮」无从谈起。
+    await port.playerGive("minecraft:lantern", 8);
+  },
   async annotate(port) {
     const entries = lamps.map((p, index) => ({
       id: `lamp-${index + 1}`,
-      text: index === 3 ? "4 号灯 · 由你亲手点亮" : `${index + 1} 号灯`,
+      text: index === 3 ? "4 号灯 · 由你亲手点亮（走到 x=2, z=16，手持灯笼右键灯柱顶端）" : `${index + 1} 号灯`,
       pos: [p[0], p[1] + 1, p[2]] as [number, number, number],
     }));
     entries.push({ id: "eira", text: "艾拉 · 老织者", pos: [0, 13, 6] });

@@ -376,6 +376,14 @@ fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
             let _ = fs::remove_file(paper_dir.join(world).join("session.lock"));
         }
     }
+    // 新版本插件/性能配置要覆盖到已存在的可写世界，否则老用户永远用旧 plugin。
+    let _ = fs::create_dir_all(paper_dir.join("plugins"));
+    for rel in ["plugins/loomcraft-plugin.jar", "server.properties"] {
+        let from = source_paper.join(rel);
+        if from.exists() {
+            let _ = fs::copy(&from, paper_dir.join(rel));
+        }
+    }
     let java = real.join("java/bin/java");
     let jar = paper_dir.join("paper.jar");
     if !java.exists() || !jar.exists() {
@@ -385,9 +393,9 @@ fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
     let log_file = File::create(state.logs_dir.join("paper.log")).map_err(|error| error.to_string())?;
     let log_file_err = log_file.try_clone().map_err(|error| error.to_string())?;
     let child = Command::new(&java)
-        .args(["-Xms1G", "-Xmx2G", "-jar", "paper.jar", "--nogui"])
+        .args(["-Xms384M", "-Xmx1024M", "-XX:+UseG1GC", "-jar", "paper.jar", "--nogui"])
         .current_dir(&paper_dir)
-        .stdin(Stdio::null())
+        .stdin(Stdio::piped())
         .stdout(Stdio::from(log_file))
         .stderr(Stdio::from(log_file_err))
         .spawn()
@@ -868,6 +876,161 @@ fn cleanup(app: &tauri::AppHandle) {
     }
 }
 
+
+// ---------------- X11 焦点跟随鼠标 ----------------
+// Tauri 在 Wayland 下无法可靠地做全局指针/窗口焦点；桌面壳强制 XWayland，
+// 这里直接用 libX11 查询根指针并激活 Minecraft 的 XWayland 窗口。
+mod x11_focus {
+    use std::ffi::{CStr, CString, c_char, c_int, c_uint, c_ulong, c_void};
+
+    type Display = c_void;
+    type Window = c_ulong;
+
+    #[repr(C)]
+    struct XClassHint {
+        res_name: *mut c_char,
+        res_class: *mut c_char,
+    }
+
+    #[link(name = "X11")]
+    extern "C" {
+        fn XOpenDisplay(name: *const c_char) -> *mut Display;
+        fn XDefaultRootWindow(display: *mut Display) -> Window;
+        fn XQueryPointer(
+            display: *mut Display,
+            window: Window,
+            root_return: *mut Window,
+            child_return: *mut Window,
+            root_x: *mut c_int,
+            root_y: *mut c_int,
+            win_x: *mut c_int,
+            win_y: *mut c_int,
+            mask: *mut c_uint,
+        ) -> c_int;
+        fn XQueryTree(
+            display: *mut Display,
+            window: Window,
+            root_return: *mut Window,
+            parent_return: *mut Window,
+            children_return: *mut *mut Window,
+            count_return: *mut c_uint,
+        ) -> c_int;
+        fn XFetchName(display: *mut Display, window: Window, name_return: *mut *mut c_char) -> c_int;
+        fn XGetClassHint(display: *mut Display, window: Window, hint_return: *mut XClassHint) -> c_int;
+        fn XFree(data: *mut c_void) -> c_int;
+        fn XSetInputFocus(display: *mut Display, window: Window, revert_to: c_int, time: c_ulong) -> c_int;
+        fn XRaiseWindow(display: *mut Display, window: Window) -> c_int;
+        fn XFlush(display: *mut Display) -> c_int;
+    }
+
+    pub struct DisplayHandle(*mut Display);
+    // 只在焦点线程内使用；Xlib Display 不是线程安全的，因此整体传给一个线程。
+    unsafe impl Send for DisplayHandle {}
+
+    impl DisplayHandle {
+        pub fn open() -> Option<Self> {
+            let display = unsafe { XOpenDisplay(std::ptr::null()) };
+            if display.is_null() { None } else { Some(Self(display)) }
+        }
+
+        pub fn pointer(&self) -> Option<(i32, i32)> {
+            let root = unsafe { XDefaultRootWindow(self.0) };
+            let mut root_return: Window = 0;
+            let mut child_return: Window = 0;
+            let mut root_x: c_int = 0;
+            let mut root_y: c_int = 0;
+            let mut win_x: c_int = 0;
+            let mut win_y: c_int = 0;
+            let mut mask: c_uint = 0;
+            let ok = unsafe {
+                XQueryPointer(self.0, root, &mut root_return, &mut child_return, &mut root_x, &mut root_y, &mut win_x, &mut win_y, &mut mask)
+            };
+            if ok == 0 { None } else { Some((root_x, root_y)) }
+        }
+
+        fn window_label(&self, window: Window) -> String {
+            let mut label = String::new();
+            let mut name: *mut c_char = std::ptr::null_mut();
+            if unsafe { XFetchName(self.0, window, &mut name) } != 0 && !name.is_null() {
+                if let Ok(value) = unsafe { CStr::from_ptr(name) }.to_str() {
+                    label.push_str(value);
+                }
+                unsafe { XFree(name.cast()) };
+            }
+            let mut hint = XClassHint { res_name: std::ptr::null_mut(), res_class: std::ptr::null_mut() };
+            if unsafe { XGetClassHint(self.0, window, &mut hint) } != 0 {
+                if !hint.res_name.is_null() {
+                    if let Ok(value) = unsafe { CStr::from_ptr(hint.res_name) }.to_str() { label.push(' '); label.push_str(value); }
+                    unsafe { XFree(hint.res_name.cast()) };
+                }
+                if !hint.res_class.is_null() {
+                    if let Ok(value) = unsafe { CStr::from_ptr(hint.res_class) }.to_str() { label.push(' '); label.push_str(value); }
+                    unsafe { XFree(hint.res_class.cast()) };
+                }
+            }
+            label.to_lowercase()
+        }
+
+        fn find_window(&self, window: Window, needle: &str, depth: u32) -> Option<Window> {
+            if self.window_label(window).contains(needle) { return Some(window); }
+            if depth == 0 { return None; }
+            let mut root_return: Window = 0;
+            let mut parent_return: Window = 0;
+            let mut children: *mut Window = std::ptr::null_mut();
+            let mut count: c_uint = 0;
+            let ok = unsafe { XQueryTree(self.0, window, &mut root_return, &mut parent_return, &mut children, &mut count) };
+            if ok == 0 || children.is_null() { return None; }
+            let slice = unsafe { std::slice::from_raw_parts(children, count as usize) };
+            let mut found = None;
+            for child in slice {
+                if let Some(hit) = self.find_window(*child, needle, depth - 1) { found = Some(hit); break; }
+            }
+            unsafe { XFree(children.cast()) };
+            found
+        }
+
+        pub fn focus_minecraft(&self) -> bool {
+            let root = unsafe { XDefaultRootWindow(self.0) };
+            let Some(window) = self.find_window(root, "minecraft", 4) else { return false; };
+            unsafe {
+                XRaiseWindow(self.0, window);
+                XSetInputFocus(self.0, window, 2, 0);
+                XFlush(self.0);
+            }
+            true
+        }
+    }
+}
+
+fn start_focus_follow(app: tauri::AppHandle) {
+    std::thread::spawn(move || {
+        let Some(display) = x11_focus::DisplayHandle::open() else { return; };
+        let mut was_inside = false;
+        let mut last_action = Instant::now() - Duration::from_secs(2);
+        loop {
+            std::thread::sleep(Duration::from_millis(140));
+            let Some(window) = app.get_webview_window("main") else { continue; };
+            if !window.is_visible().unwrap_or(false) { continue; }
+            let (Ok(position), Ok(size)) = (window.outer_position(), window.inner_size()) else { continue; };
+            let Some((px, py)) = display.pointer() else { continue; };
+            let inside = px >= position.x && px < position.x + size.width as i32
+                && py >= position.y && py < position.y + size.height as i32;
+            if inside == was_inside { continue; }
+            // 仅在指针真正跨过窗口边界时动作，避免反复抢焦点造成卡顿/焦点抖动。
+            if last_action.elapsed() < Duration::from_millis(320) { continue; }
+            if inside {
+                let _ = window.unminimize();
+                let _ = window.show();
+                let _ = window.set_focus();
+            } else if window.is_focused().unwrap_or(false) {
+                let _ = display.focus_minecraft();
+            }
+            was_inside = inside;
+            last_action = Instant::now();
+        }
+    });
+}
+
 fn main() {
     // KDE/GNOME 的 Wayland 会话下，GTK 窗口的 always-on-top 与 X11 全局快捷键都不可靠。
     // 强制走 XWayland，让置顶/跨窗口快捷键与 Minecraft（通常也是 XWayland）一致工作。
@@ -951,6 +1114,7 @@ fn main() {
                     state.log("shortcut", &format!("注册 {PIN_SHORTCUT} 失败：{error}"));
                 }
             }
+            start_focus_follow(app.handle().clone());
             let startup_handle = app.handle().clone();
             std::thread::spawn(move || {
                 // 页面若因 JS 错误没调用 show_main_window，5 秒后兜底显示，避免永久不可见。
