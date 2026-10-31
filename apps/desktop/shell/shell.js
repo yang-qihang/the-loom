@@ -181,6 +181,16 @@ els.pin.addEventListener("click", async () => {
   }
 });
 
+document.getElementById("btn-snap")?.addEventListener("click", async () => {
+  try {
+    await invoke("snap_half");
+    settings.alwaysOnTop = true;
+    renderPin();
+    toast("半屏 + 置顶：点织界任意处回到代码，Minecraft 全屏留在后面");
+  } catch (error) {
+    toast(`半屏失败：${error}`);
+  }
+});
 els.mode.addEventListener("click", async () => {
   const next = settings.mode === "companion" ? "workbench" : "companion";
   try {

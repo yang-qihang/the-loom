@@ -601,11 +601,32 @@ fn set_pin(app: tauri::AppHandle, value: bool) -> Result<bool, String> {
 #[tauri::command]
 fn focus_workbench(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
+        // 同一个快捷键来回切：织界在前时收起，焦点交给 Minecraft；不在前时拉起织界。
+        if window.is_focused().unwrap_or(false) {
+            let _ = window.minimize();
+            return;
+        }
         let _ = window.unminimize();
         let _ = window.show();
         let _ = window.set_focus();
         let _ = window.emit("loom://focus-workbench", ());
     }
+}
+
+#[tauri::command]
+fn snap_half(app: tauri::AppHandle) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or_else(|| "找不到主窗口".to_string())?;
+    let monitor = window.current_monitor().map_err(|error| error.to_string())?.ok_or_else(|| "找不到当前显示器".to_string())?;
+    let size = monitor.size();
+    let position = monitor.position();
+    window.set_always_on_top(true).map_err(|error| error.to_string())?;
+    window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width / 2, size.height))).map_err(|error| error.to_string())?;
+    window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(position.x, position.y))).map_err(|error| error.to_string())?;
+    let state = app.state::<AppState>();
+    if let Ok(mut settings) = state.settings.lock() { settings.always_on_top = true; }
+    state.save();
+    state.log("window", "半屏布局：左半屏 + 置顶");
+    Ok(())
 }
 
 #[tauri::command]
@@ -976,7 +997,8 @@ fn main() {
             window_start_drag,
             set_webview_zoom,
             engine_ready,
-            show_main_window
+            show_main_window,
+            snap_half
         ])
         .build(tauri::generate_context!())
         .expect("构建织界桌面应用失败");

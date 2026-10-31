@@ -82,9 +82,20 @@ export function Workbench({
     } catch { return 16; }
   });
   const [companion, setCompanion] = useState(false);
+  const [narrow, setNarrow] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1100px)").matches);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(true);
+  const [worldOpen, setWorldOpen] = useState(() => !(typeof window !== "undefined" && window.matchMedia("(max-width: 1100px)").matches));
   const [settleOpen, setSettleOpen] = useState(false);
   const errorHoldRef = useRef(false);
   const desktop = useMemo(() => isDesktopShell(), []);
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 1100px)");
+    const update = () => setNarrow(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   const editorRef = useRef<CodeEditorHandle | null>(null);
   const codeRef = useRef("");
   const objectiveIndexRef = useRef<Map<string, number>>(new Map());
@@ -341,45 +352,42 @@ export function Workbench({
           </span>
         </div>
         <div className="wb-status">
-          {desktop ? (
-            <div className="shell-controls">
-              <button type="button" className="btn btn-quiet btn-shell" onClick={() => void togglePinned()} data-testid="btn-pin">
-                {pinned ? chrome.shell.unpin : chrome.shell.pin}
+          {narrow ? (
+            <div className="wb-more-wrap">
+              <button type="button" className="btn btn-quiet" onClick={() => setMoreOpen((open) => !open)} aria-expanded={moreOpen} data-testid="btn-more">
+                更多
               </button>
-              <button type="button" className="btn btn-quiet btn-shell" onClick={() => void toggleCompanion()} data-testid="btn-companion">
-                {companion ? chrome.shell.expand : chrome.shell.companion}
-              </button>
+              {moreOpen ? (
+                <div className="wb-more-menu" onClick={(event) => { if ((event.target as HTMLElement).closest("button")) setMoreOpen(false); }}>
+                  {desktop ? (
+                    <>
+                      <button type="button" className="btn btn-quiet" onClick={() => void togglePinned()}>{pinned ? chrome.shell.unpin : chrome.shell.pin}</button>
+                      <button type="button" className="btn btn-quiet" onClick={() => void toggleCompanion()}>{companion ? chrome.shell.expand : chrome.shell.companion}</button>
+                    </>
+                  ) : null}
+                  <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
+                  <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
+                  <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
+                  <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-          <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">
-            重置本关
-          </button>
-          <button
-            type="button"
-            className="btn btn-quiet"
-            onClick={() => {
-              const next = !annotationsOn;
-              setAnnotationsOn(next);
-              try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ }
-              if (sessionId) void engine.setAnnotations(sessionId, next);
-            }}
-            title="世界里的中文浮空字是路标，帮你认第几盏灯、谁是艾拉和灰崽；不想看可以随时关掉。"
-            data-testid="btn-annotations"
-          >
-            世界标注：{annotationsOn ? "开" : "关"}
-          </button>
-          <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">
-            {journalLabels.open}
-          </button>
-          <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">
-            {chrome.codex.open}
-          </button>
-          <span className={engine.mode === "mock" ? "mode-chip is-mock" : "mode-chip"}>
-            {engine.mode === "mock" ? chrome.mode.local : chrome.mode.real}
-          </span>
-          <span className="phase-chip" data-testid="phase-chip">
-            {phaseLabel(phase, result, waitingForPlayer)}
-          </span>
+          ) : (
+            <>
+              {desktop ? (
+                <>
+                  <button type="button" className="btn btn-quiet btn-shell" onClick={() => void togglePinned()} data-testid="btn-pin">{pinned ? chrome.shell.unpin : chrome.shell.pin}</button>
+                  <button type="button" className="btn btn-quiet btn-shell" onClick={() => void toggleCompanion()} data-testid="btn-companion">{companion ? chrome.shell.expand : chrome.shell.companion}</button>
+                </>
+              ) : null}
+              <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
+              <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} title="世界里的中文浮空字是路标，帮你认第几盏灯、谁是艾拉和灰崽；不想看可以随时关掉。" data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
+              <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
+              <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
+              <span className={engine.mode === "mock" ? "mode-chip is-mock" : "mode-chip"}>{engine.mode === "mock" ? chrome.mode.local : chrome.mode.real}</span>
+            </>
+          )}
+          <span className="phase-chip" data-testid="phase-chip">{phaseLabel(phase, result, waitingForPlayer)}</span>
         </div>
       </header>
 
@@ -394,12 +402,21 @@ export function Workbench({
       ) : (
         <main className="wb-body">
           <section className="editor-pane">
-            <div className="world-strip">
-              <img src={`./world/${levelId}.png`} alt={`真实 Minecraft 客户端里的${level?.title ?? ""}场景`} data-testid="world-strip-image" data-level={levelId} />
-              <div className="world-strip-text">
-                <b>世界在「我的世界」窗口里</b>
-                <span>这是真实游戏窗口里的当前场景；代码在左边，世界在另一个窗口，两边会一起动。</span>
-              </div>
+            <div className={worldOpen ? "world-strip" : "world-strip is-collapsed"}>
+              {worldOpen ? (
+                <>
+                  <img src={`./world/${levelId}.png`} alt={`真实 Minecraft 客户端里的${level?.title ?? ""}场景`} data-testid="world-strip-image" data-level={levelId} />
+                  <div className="world-strip-text">
+                    <b>世界在「我的世界」窗口里</b>
+                    <span>这是真实游戏窗口里的当前场景；代码在左边，世界在另一个窗口，两边会一起动。</span>
+                  </div>
+                </>
+              ) : (
+                <b className="world-strip-collapsed-title">世界画面说明已收起</b>
+              )}
+              <button type="button" className="btn btn-quiet world-strip-toggle" onClick={() => setWorldOpen((open) => !open)} aria-expanded={worldOpen}>
+                {worldOpen ? "收起" : "展开"}
+              </button>
             </div>
             <div className="pane-head">
               <span className="pane-title" data-ui-panel-title>
@@ -499,10 +516,15 @@ export function Workbench({
                 <span className="card-tag">
                   {displayGoals.filter((goal) => goal.done).length} / {displayGoals.length}
                 </span>
+                <button type="button" className="btn btn-quiet card-collapse" onClick={() => setGoalsOpen((open) => !open)} aria-expanded={goalsOpen}>
+                  {goalsOpen ? "收起" : "展开"}
+                </button>
               </header>
-              <div className="card-body">
-                <GoalList goals={displayGoals} />
-              </div>
+              {goalsOpen ? (
+                <div className="card-body">
+                  <GoalList goals={displayGoals} />
+                </div>
+              ) : null}
             </section>
             <SceneIllustration levelId={levelId} />
             {copy?.challenge ? (
