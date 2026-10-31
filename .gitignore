@@ -53,3 +53,14 @@ evidence/l*-real-snapshot-20*.json
 # 本地构建生成的自包含真实运行时（约 1GB，不入库；由 scripts/build-runtime 生成）
 apps/desktop/src-tauri/runtime/real/
 evidence/l*-studio-20*.json
+
+# 本地验收截图/报告，不入 GitHub 快照
+apps/studio/evidence/
+report/
+evidence/scene-shots/
+evidence/mc-shots/
+evidence/*.json
+!evidence/*-latest.json
+evidence/l*-real-*.json
+evidence/l*-studio-*.json
+evidence/l*-scenario-*.json
