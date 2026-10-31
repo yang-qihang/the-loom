@@ -105,6 +105,7 @@ struct AppState {
     logs_dir: PathBuf,
     resource_dir: Mutex<PathBuf>,
     repo_root: Option<PathBuf>,
+    kde_wayland: bool,
 }
 
 impl AppState {
@@ -1036,6 +1037,42 @@ mod x11_focus {
     }
 }
 
+fn install_kwin_focus_script(state: &AppState) -> bool {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
+    let dir = Path::new(&home).join(".local/share/kwin/scripts/loom-focus/contents/code");
+    if fs::create_dir_all(&dir).is_err() { return false; }
+    let metadata = r#"{"KPlugin":{"Id":"loom-focus","Name":"Loom Focus","Description":"Alt+Z toggle between Loom and Minecraft","Version":"1.0","License":"MIT"},"X-Plasma-API":"javascript","X-Plasma-MainScript":"code/main.js"}"#;
+    let script = r#"function toggleLoomFocus() {
+  const list = workspace.windowList();
+  const app = list.find(w => ((w.caption || '') + ' ' + (w.resourceClass || '')).toLowerCase().includes('织界') || ((w.resourceClass || '').toLowerCase().includes('loom')));
+  const mc = list.find(w => ((w.caption || '') + ' ' + (w.resourceClass || '')).toLowerCase().includes('minecraft'));
+  if (!app) return;
+  if (workspace.activeWindow === app) { if (mc) mc.activate(); }
+  else app.activate();
+}
+registerShortcut('LoomToggleFocus', 'Loom: toggle focus', 'Alt+Z', toggleLoomFocus);
+"#;
+    let _ = fs::write(dir.join("main.js"), script);
+    let _ = fs::write(Path::new(&home).join(".local/share/kwin/scripts/loom-focus/metadata.json"), metadata);
+    let path = dir.join("main.js");
+    let qdbus = ["qdbus-qt6", "qdbus"];
+    let mut ok = false;
+    for tool in qdbus {
+        let unload = Command::new(tool).args(["org.kde.KWin", "/Scripting", "org.kde.kwin.Scripting.unloadScript", "loom-focus"]).output();
+        let _ = unload;
+        let loaded = Command::new(tool).args(["org.kde.KWin", "/Scripting", "org.kde.kwin.Scripting.loadScript", path.to_str().unwrap_or(""), "loom-focus"]).output();
+        let Ok(loaded) = loaded else { continue; };
+        let id = String::from_utf8_lossy(&loaded.stdout).trim().to_string();
+        if id.is_empty() { continue; }
+        let obj = format!("/Scripting/Script{id}");
+        let _ = Command::new(tool).args(["org.kde.KWin", obj.as_str(), "org.kde.kwin.Script.run"]).output();
+        ok = true;
+        state.log("shortcut", &format!("KWin 焦点脚本已加载 id={id}"));
+        break;
+    }
+    ok
+}
+
 fn start_focus_follow(app: tauri::AppHandle) {
     std::thread::spawn(move || {
         let Some(display) = x11_focus::DisplayHandle::open() else { return; };
@@ -1074,6 +1111,8 @@ fn start_focus_follow(app: tauri::AppHandle) {
 }
 
 fn main() {
+    let kde_wayland = std::env::var("XDG_SESSION_TYPE").map(|v| v == "wayland").unwrap_or(false)
+        && std::env::var("KDE_FULL_SESSION").map(|v| v == "true").unwrap_or(false);
     // KDE/GNOME 的 Wayland 会话下，GTK 窗口的 always-on-top 与全局快捷键都不可靠；
     // 去掉 WAYLAND_DISPLAY / 把 session type 设为 x11，让 Tauri 的 global-shortcut 走 X11，
     // 而不是弹出 xdg-desktop-portal 的全局快捷键授权框（授权状态损坏后 Alt+Z 会完全失效）。
@@ -1092,6 +1131,7 @@ fn main() {
         logs_dir: loom_dir().join("logs"),
         resource_dir: Mutex::new(PathBuf::new()),
         repo_root: find_repo_root(),
+        kde_wayland,
     };
 
     let app = tauri::Builder::default()
@@ -1120,6 +1160,10 @@ fn main() {
                 state.log("lifecycle", &format!("织界启动，repo_root={:?}", state.repo_root));
             }
             apply_saved_window(&app.handle().clone());
+            let kde_script = {
+                let state = app.state::<AppState>();
+                state.kde_wayland && install_kwin_focus_script(&state)
+            };
             let window = app.get_webview_window("main").expect("main window");
             let app_handle = app.handle().clone();
             window.on_window_event(move |event| match event {
@@ -1132,18 +1176,23 @@ fn main() {
                 }
                 _ => {}
             });
-            match app
-                .global_shortcut()
-                .register(Shortcut::new(Some(Modifiers::ALT), Code::KeyZ))
-            {
-                Ok(()) => {
-                    let state = app.state::<AppState>();
-                    state.log("shortcut", &format!("注册全局快捷键 {FOCUS_SHORTCUT} 成功"));
+            if !kde_script {
+                match app
+                    .global_shortcut()
+                    .register(Shortcut::new(Some(Modifiers::ALT), Code::KeyZ))
+                {
+                    Ok(()) => {
+                        let state = app.state::<AppState>();
+                        state.log("shortcut", &format!("注册全局快捷键 {FOCUS_SHORTCUT} 成功（X11）"));
+                    }
+                    Err(error) => {
+                        let state = app.state::<AppState>();
+                        state.log("shortcut", &format!("注册 {FOCUS_SHORTCUT} 失败：{error}"));
+                    }
                 }
-                Err(error) => {
-                    let state = app.state::<AppState>();
-                    state.log("shortcut", &format!("注册 {FOCUS_SHORTCUT} 失败：{error}"));
-                }
+            } else {
+                let state = app.state::<AppState>();
+                state.log("shortcut", "KDE Wayland：Alt+Z 由 KWin 脚本接管（绕过 portal）");
             }
             match app
                 .global_shortcut()

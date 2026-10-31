@@ -852,16 +852,26 @@ public final class SceneManager implements Listener {
 
     public Map<String, Object> givePlayer(Map<String, Object> params) {
         checkSession(params);
-        Player p = player(Json.str(params.get("name"), null));
-        if (p == null) return err("no_such_player");
+        String requestedName = Json.str(params.get("name"), null);
         Material mat = Material.matchMaterial(norm(Json.str(params.get("item"), "minecraft:lantern")));
         if (mat == null) return err("bad_item");
         int count = Json.num(params.get("count"), 1);
-        p.getInventory().addItem(new ItemStack(mat, count));
+        int given = 0;
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (bots.contains(p.getName())) continue;
+            if (requestedName != null && !requestedName.equals(p.getName())) continue;
+            p.getInventory().addItem(new ItemStack(mat, count));
+            p.getInventory().setItem(0, new ItemStack(mat, count));
+            p.sendMessage(Component.text("已把「" + mat.name().toLowerCase() + "」放进快捷栏第 1 格。"));
+            given += 1;
+        }
+        if (given == 0) pendingPlayerItems.merge(mat, count, Integer::sum);
         Map<String, Object> res = Json.obj();
         res.put("ok", true);
         res.put("gave", mat.getKey().toString());
         res.put("count", count);
+        res.put("players", given);
+        if (given == 0) res.put("queued", true);
         return res;
     }
 
