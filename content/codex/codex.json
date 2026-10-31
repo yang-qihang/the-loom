@@ -1,0 +1,584 @@
+{
+  "generatedFrom": "docs/13-codex-cross-language.md",
+  "count": 17,
+  "pages": [
+    {
+      "id": "A0",
+      "title": "求值",
+      "subtitle": "织机之心",
+      "en": "Evaluation / Notional Machine",
+      "solve": "程序不是许愿，它只会逐句算出结果、按你写下的顺序执行。学完这一页，你要能预判下一句会发生什么。",
+      "mechanism": "表达式（能算出一个结果的一小段，比如 2 * 3）先算出一个值；语句（一句叫灰崽做事的指令）再按书写顺序一条条执行。",
+      "cost": "它不理解你的意图：写错一个字，错的就是结果。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "const y = 2 * 3;        // 先算出 6\ngolem.moveTo(6, y);     // 再把结果当参数用"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（解释器逐句执行）\ny = 2 * 3\nprint(y)"
+        },
+        {
+          "lang": "c",
+          "code": "// C（先编译成机器码，运行时不再看源码）\nint y = 2 * 3;\nprintf(\"%d\\n\", y);"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（纯表达式，惰性求值：y 可以一直不算）\ny = 2 * 3\nmain = print y"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（事件循环上依次执行任务）\nconst y = 2 * 3;\nconsole.log(y);"
+        }
+      ],
+      "inGame": "L1「第一缕光」——你改一个坐标，灰崽就多走一步。灰崽是一只织偶：织机织出来的无魂工匠，不会猜你的意思，只会照你写的字做事。",
+      "misconception": "「它应该懂我的意思」——织偶只做你写下的，不做你心里想的。",
+      "unlock": "L01"
+    },
+    {
+      "id": "A1",
+      "title": "顺序",
+      "subtitle": "顺序之符",
+      "en": "Sequencing",
+      "solve": "世界按时间往前走，动作之间也有先后依赖。顺序错了，结果就会错。",
+      "mechanism": "一条写完再写下一条。写出来的动作会按调用顺序排队，等程序结束，再由织机依次做完——织机是把语言织成世界的老机器。",
+      "cost": "写得越长越难改：想改中间的一步，得先找到它在哪里。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "golem.moveTo(-12, 10);                 // 1\ngolem.place(\"lantern\", -12, 14, 10);   // 2 必须在 1 之后\ngolem.moveTo(-12, -2);                 // 3"
+        },
+        {
+          "lang": "c",
+          "code": "// C（语句按分号顺序执行）\nint x = 1;\nx = x + 1;\nprintf(\"%d\\n\", x);"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（自上而下）\nprint(\"walk\")\nprint(\"place\")"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（do 把 IO 动作串成顺序）\nmain = do\n  putStrLn \"walk\"\n  putStrLn \"place\""
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（同步语句顺序执行）\nconsole.log(\"walk\");\nconsole.log(\"place\");"
+        }
+      ],
+      "inGame": "L1 里第四盏灯必须最后点亮；如果先点它，前面的灯不会自己亮，整条路也接不上。",
+      "misconception": "「都写上了就行」——没写清楚先后，顺序就由机器自己决定，而不是按你的意图。",
+      "unlock": "L01"
+    },
+    {
+      "id": "A2",
+      "title": "变量",
+      "subtitle": "记忆之符",
+      "en": "Variables / Binding / Mutable State",
+      "solve": "程序需要「记住」中间结果；否则每次都得从头算，或者只能把值固定住。",
+      "mechanism": "给一个值起个名字，就能反复用它。会变的那种用 `let`，绑定之后还能重新赋值；不会变的那种用 `const`，绑定一次就定住。",
+      "cost": "状态一多就乱：是哪个名字改了它？又为什么变？到 L10 双织者，这件事会变成真正要解决的麻烦。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "let eggs = 0;\neggs = eggs + 1;         // 旧值 -> 新值\nconst home = golem.pos;  // 绑定后不再改变"
+        },
+        {
+          "lang": "c",
+          "code": "// C（变量 + 赋值）\nint count = 0;\ncount = count + 1;"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（动态绑定，名字可指向新对象）\ncount = 0\ncount = count + 1"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（绑定不可变；\"赋值\"其实是新绑定/遮蔽）\ncount = 0 + 1"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（可变必须显式声明）\nlet mut count = 0;\ncount += 1;"
+        }
+      ],
+      "inGame": "L2「会数数的织偶」里，灰崽是一只织偶：织机织出来的无魂工匠，不会猜你的意思。它没有记性，收到 3 枚蛋就重新开始兜圈；你给它一个变量（给会变的值起的名字）追着数，它才记得手上有几枚。",
+      "misconception": "「x = x + 1 是数学等式」——它不是等式，是「把旧值加一，再存回这个名字里」。",
+      "unlock": "L02"
+    },
+    {
+      "id": "A3",
+      "title": "分支",
+      "subtitle": "抉择之符",
+      "en": "Booleans / Branching",
+      "solve": "世界有好几种情形（有没有威胁、村民受不受伤），同一套固定动作，总会在某些情形下出错。",
+      "mechanism": "先把条件算成真或假，再决定走哪一条路。",
+      "cost": "情形组合一多，分支就会爆炸式增长；到那时候，一条条写 `if` 会变得很辛苦。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "if (world.scenario.threat !== \"none\") {\n  golem.ringBell();\n} else {\n  golem.placeTorch(0, 0);\n}"
+        },
+        {
+          "lang": "c",
+          "code": "// C（if/else，函数体内）\nint zombies = 2;\nif (zombies > 0) { printf(\"ring the bell\\n\"); } else { printf(\"light the torch\\n\"); }"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（if/elif/else）\nzombies = 2\nif zombies > 0:\n    print(\"ring the bell\")\nelse:\n    print(\"light the torch\")"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（guard：分支的另一种写法）\ndecide z | z > 0 = \"ring the bell\"\n         | otherwise = \"light the torches\""
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（条件与 match 都行，函数体内）\nlet zombies = 2;\nif zombies > 0 { println!(\"ring the bell\"); } else { println!(\"light the torch\"); }"
+        }
+      ],
+      "inGame": "L3「岔路与钟声」——同一份程序要连跑三夜；条件漏掉一种，第三夜就守不住。",
+      "misconception": "「`if` 只会看一种情况」——条件之间要互不重叠，又要把可能的情形说全，不然总有夜晚会漏网。",
+      "unlock": "L03"
+    },
+    {
+      "id": "A4",
+      "title": "循环",
+      "subtitle": "循环之符",
+      "en": "Loops / Iteration",
+      "solve": "重复的动作不该靠复制粘贴；规模多大还不知道的时候，也要能接着做下去。",
+      "mechanism": "让同一段动作按条件反复做，再用一个终止条件收尾。",
+      "cost": "边界和终止条件最容易错：差一格、越界，或者干脆死循环。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "const field = world.field();\nfor (let r = 0; r < field.rows; r++) {\n  golem.plant(field.origin.x + r, field.origin.z);\n}"
+        },
+        {
+          "lang": "c",
+          "code": "// C（三段式 for，函数体内）\nfor (int i = 0; i < 5; i++) { printf(\"plant %d\\n\", i); }"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（for-in 迭代）\nfor i in range(5):\n    print(f\"plant {i}\")"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（没有循环：递归 / fold）\nsumTo n = go 0 1\n  where go acc i | i > n = acc\n                 | otherwise = go (acc + i) (i + 1)"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（for + 迭代器，函数体内）\nfor i in 0..5 { println!(\"plant {i}\"); }"
+        }
+      ],
+      "inGame": "L4「麦田的咒语」——艾拉去年写了 25 行 `place`，一直写到天亮；循环几秒钟就能种完整片田，但还得跳过水渠那一行。",
+      "misconception": "「循环 = 一直做」——没有终止条件的 `while` 会一直做下去，直到出事。",
+      "unlock": "L04"
+    },
+    {
+      "id": "A5",
+      "title": "函数",
+      "subtitle": "函数之符",
+      "en": "Functions / Decomposition",
+      "solve": "同一种行为出现在好几个地方，改一处就不该改 N 处；顺便，它也该有个名字。",
+      "mechanism": "把动作和「会变的参数」分开（参数：每次调用都不一样的那些值），写成函数；最后用返回值把结果带回来。",
+      "cost": "参数和作用域是新的负担：名字起不好、范围没想清，抽象反而更乱。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "function buildHut(x: number, z: number): Vec2 {\n  golem.fill(\"oak_planks\", { x, z }, { x: x + 3, z: z + 3 });\n  return { x, z };   // 返回门的位置\n}"
+        },
+        {
+          "lang": "c",
+          "code": "// C（函数 + 参数 + 返回值）\nint add(int a, int b) { return a + b; }"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（def）\ndef add(a, b):\n    return a + b"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（柯里化：Int -> (Int -> Int)）\nadd :: Int -> Int -> Int\nadd a b = a + b"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（箭头函数）\nconst add = (a, b) => a + b;"
+        }
+      ],
+      "inGame": "L5「一百座房子」——先把同一栋房子复制粘贴三遍，再把做法抽成 `buildHut`(x, z)；换一块地，不参数化就会造错位置。",
+      "misconception": "「函数 = 写短一点」——不参数化只是把代码搬了个家，不是抽象。",
+      "unlock": "L05"
+    },
+    {
+      "id": "A6",
+      "title": "模块",
+      "subtitle": "织典之符",
+      "en": "Modules / Boundaries",
+      "solve": "东西一多就必须分边界，否则一个文件会大到记不住、也改不动。《织典》是古织者留下的图鉴，学会一枚符文（一句只做一件事的短句），它就亮起一页；这一页讲的就是「织典之符」。",
+      "mechanism": "把函数放进单独的文件里导出，再用 `import` 说明「我用到了谁」；游戏里的 `import` 由织机替你接好——织机是把语言织成世界的老机器。",
+      "cost": "依赖关系变得显式，也多了一层「这东西到底在哪」的查找成本。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "// blueprints.ts\nexport function buildHut(x: number, z: number): Vec2 { /* ... */ }\n// main.ts（学生只写调用，import 由织机代劳）\nconst door = buildHut(10, 20);"
+        },
+        {
+          "lang": "c",
+          "code": "// C（头文件声明 + 实现文件定义）\n/* blueprints.h */ int build_hut(int x, int z);\n/* blueprints.c */ int build_hut(int x, int z) { return x + z; }"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（模块 = 文件，import 引入）\nfrom blueprints import build_hut"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（mod 划分边界，use 引入名字）\nmod blueprints { pub fn build_hut(x: i32, z: i32) -> (i32, i32) { (x, z) } }"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（ES Module：export / import）\nimport { buildHut } from \"./blueprints.mjs\";"
+        }
+      ],
+      "inGame": "L5 把 `buildHut` 抽到 `blueprints.ts`；到 L7 再把策略函数抽出来。同一份逻辑，织偶能用，悦灵也能用——织偶是织机织出来的无魂工匠，不会猜你的意思；悦灵是信风谷里一群只会听命令的小家伙。",
+      "misconception": "「`import` 是运行时复制一份代码」——它建立的是引用和依赖声明，不是复制。",
+      "unlock": "L05"
+    },
+    {
+      "id": "A7",
+      "title": "记录",
+      "subtitle": "结构之符·上",
+      "en": "Product Types / Records",
+      "solve": "相关的信息要绑在一起，否则参数会越来越多，顺序一错就乱套（把「铁镐」当成「铁斧」）。",
+      "mechanism": "用字段名把一组值写成一条记录；类型负责说明「少了哪个字段」。",
+      "cost": "要多写类型；动手建模之前，得先想清楚数据到底长什么样。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "type Item = { kind: ItemId; name: string };\nconst ledger: Item[] = [{ kind: \"iron_pickaxe\", name: \"铁镐\" }];"
+        },
+        {
+          "lang": "c",
+          "code": "// C（struct：字段按名字访问）\nstruct Item { const char *kind; const char *name; };"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（dataclass：给字段起名）\nfrom dataclasses import dataclass\n@dataclass\nclass Item:\n    kind: str\n    name: str"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（record：具名字段）\ndata Item = Item { kind :: String, name :: String }"
+        },
+        {
+          "lang": "ts",
+          "code": "// TypeScript（interface：结构化的记录，字段名即文档）\ninterface Item { kind: ItemId; name: string }"
+        }
+      ],
+      "inGame": "L6「商队的账本」——全字符串账本把铁镐分给了矿工；用记录 + 字段名后，三个桶各归其位。",
+      "misconception": "「记录 = 数组」——数组靠位置，记录靠名字；位置放错了数组不会提醒你，字段名会。",
+      "unlock": "L06"
+    },
+    {
+      "id": "A8",
+      "title": "变体",
+      "subtitle": "结构之符·下",
+      "en": "Sum Types / Discriminated Unions",
+      "solve": "「几种互斥的情况」要能被一一列举；漏掉一种，程序就会在某个场景里出错。",
+      "mechanism": "用一个 `kind` 字段标出是哪一种形态，再用 `switch` 把每种都写出来；漏掉的那一种，交给 `assertNever` 在编译时报错。",
+      "cost": "要多写类型。另外，TypeScript 的联合类型不是真正的 ADT（代数数据类型：由几个构造子拼成的一种新类型）；它没有构造子，模式匹配只能用 `switch` 模拟。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "type Tool = { kind: \"axe\"; name: string } | { kind: \"pickaxe\"; name: string };\nfunction useTool(t: Tool): string {\n  switch (t.kind) {\n    case \"axe\": return t.name + \" chops\";\n    case \"pickaxe\": return t.name + \" mines\";\n    default: return assertNever(t);   // 漏一种 kind 这里就编译报错\n  }\n}"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（真 ADT：构造子 + 模式匹配）\ndata Tool = Axe String | Pickaxe String\nuse (Axe n)     = n ++ \" chops\"\nuse (Pickaxe n) = n ++ \" mines\""
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（enum + match：编译器强制穷举）\nenum Tool { Axe(String), Pickaxe(String) }\nfn use_tool(t: Tool) -> String { match t { Tool::Axe(n) => n, Tool::Pickaxe(n) => n } }"
+        },
+        {
+          "lang": "java",
+          "code": "// Java（sealed interface + record + 穷举 switch，Java 21+）\nsealed interface Tool permits Axe, Pickaxe {}\nrecord Axe(String name) implements Tool {}\nrecord Pickaxe(String name) implements Tool {}"
+        },
+        {
+          "lang": "ts",
+          "code": "// TypeScript（联合值的构造：kind 是\"标签\"，不是语言构造子）\ntype Tool = { kind: \"axe\"; name: string } | { kind: \"pickaxe\"; name: string };\nconst t: Tool = { kind: \"axe\", name: \"iron axe\" };"
+        }
+      ],
+      "inGame": "L6 商队的账本里新增了一种工具 `kind`——旧的 `switch` 会在《织典》里标红；你必须把新情况处理掉，账本才算清。织典是古织者留下的图鉴：学会一枚符文（一句只做一件事的短句），它就亮起一页。",
+      "misconception": "「TypeScript 的联合类型 = 真 ADT」——真 ADT 的构造子是语言自带的原语，模式匹配也由编译器检查（Haskell、Rust、Swift 的 `enum`、Kotlin 的 `sealed class` 都属于这一类）。",
+      "unlock": "L06"
+    },
+    {
+      "id": "A9",
+      "title": "闭包",
+      "subtitle": "流动之符·上",
+      "en": "Closures / Functions as Values",
+      "solve": "行为本身也可以是数据：能交给别人、存起来，过一会儿再执行。",
+      "mechanism": "函数可以返回函数；里面的函数会记住自己是在哪里被定义的（这叫闭包）。",
+      "cost": "抽象层数变多之后，一个值会被记住多久、被谁改过，常常追不下来。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "const home = golem.pos;\nconst isOre = (item: ItemStack) => item.kind.endsWith(\"_ore\");\nconst goHome = () => golem.moveTo(home.x, home.z);  // 捕获 home"
+        },
+        {
+          "lang": "c",
+          "code": "// C（函数指针：能传函数，但不能捕获局部变量）\nint add(int a, int b) { return a + b; }\nint (*op)(int, int) = add;\nprintf(\"%d\\n\", op(2, 3));"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（闭包：函数 + 词法环境）\nconst makeAdder = (n) => (x) => x + n;"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（闭包：n 被内部函数捕获）\ndef make_adder(n):\n    def add(x):\n        return x + n\n    return add"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（闭包可捕获；函数指针不能）\nlet n = 2;\nlet add_n = |x: i32| x + n;\nfn add_one(x: i32) -> i32 { x + 1 }"
+        }
+      ],
+      "inGame": "L7「信风与织线」——给悦灵一条策略函数，它自己就会飞去做事；策略里还记住了回家的坐标。悦灵是信风谷里一群只会听命令的小家伙。",
+      "misconception": "「C 的函数指针就是闭包」——函数指针不能捕获局部变量；闭包 = 函数 + 它记住的环境。",
+      "unlock": "L07"
+    },
+    {
+      "id": "A10",
+      "title": "高阶",
+      "subtitle": "流动之符·下",
+      "en": "Higher-order Functions / Iterators / Pipes",
+      "solve": "控制流（谁先谁后）和真正要做的事缠在一起，会拧成一团；组合比一层层嵌套更清楚。",
+      "mechanism": "把函数当参数传进去，再用 `filter`、`map`、`reduce`、`pipe` 把数据一段一段串起来。",
+      "cost": "抽象层数增加，调试就不那么直观：出错时得判断是哪一段管道漏了。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "pipe(\n  world.items(chestPos),\n  filter((it: ItemStack) => it.kind.endsWith(\"_ore\")),\n  map((it: ItemStack) => it.kind),\n  (names: string[]) => golem.say(`共 ${names.length} 种矿石`),\n);"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（组合 (.) + map/filter）\nresult = map (*2) . filter even $ [1, 2, 3, 4]"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（推导式：过滤 + 映射）\nresult = [x * 2 for x in range(1, 5) if x % 2 == 0]"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（reduce 把列表收成一个值）\nconst total = [1, 2, 3].reduce((acc, x) => acc + x, 0);"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（迭代器链，惰性求值）\nlet out: Vec<i32> = (1..5).filter(|x| x % 2 == 0).map(|x| x * 2).collect();"
+        }
+      ],
+      "inGame": "L7 把一层层 `for`、`if` 堆起来的分拣，重写成一条管道：换一条规则只需要改一个函数，悦灵还是那群悦灵（悦灵：信风谷里一群只会听命令的小家伙）。",
+      "misconception": "「管道 = 更短的循环」——关键区别是控制流被抽走了，要做的事变成一段段可以替换的小函数。",
+      "unlock": "L07"
+    },
+    {
+      "id": "A11",
+      "title": "接口",
+      "subtitle": "契约之符",
+      "en": "Interfaces / Traits / Composition over Inheritance",
+      "solve": "用继承建模「是什么」，会把系统焊死；用契约建模「能做什么」，才能替换和组合。",
+      "mechanism": "先定义一份能力契约（契约：要求会哪些本事的一份清单）；任何满足它的对象都能传进来，新增实现时不用改调用方。",
+      "cost": "需要先把契约想清楚；过度抽象会把简单系统拆得更难读。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "interface Machine { start(): Promise<void>; stop(): Promise<void>; status(): string }\nconst furnace: Machine = {\n  start: async () => {}, stop: async () => {}, status: () => \"idle\",\n};\nfunction runAll(machines: Machine[]): Promise<void[]> {\n  return Promise.all(machines.map((m) => m.start()));\n}"
+        },
+        {
+          "lang": "cpp",
+          "code": "// C++（继承反例：菱形）\nstruct A { virtual void tick() {} };\nstruct B : A {}; struct C : A {};\nstruct D : B, C {};   // D 有两个 A 子对象，d.tick() 有歧义"
+        },
+        {
+          "lang": "java",
+          "code": "// Java（接口：能力契约；Furnace 与 Bell 无需同一父类）\ninterface Machine { default String status() { return \"idle\"; } }\nclass Furnace implements Machine {}\nclass Bell implements Machine {}"
+        },
+        {
+          "lang": "go",
+          "code": "// Go（隐式实现：方法集吻合即满足接口，无需 implements 声明）【待核】\ntype Machine interface { Start() error }\ntype Furnace struct{}\nfunc (Furnace) Start() error { return nil }"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（trait：显式 impl；可静态单态化，也可 dyn 动态分发）\ntrait Machine { fn start(&self) -> String; }\nstruct Furnace;\nimpl Machine for Furnace { fn start(&self) -> String { \"on\".into() } }"
+        }
+      ],
+      "inGame": "L8「同一种心跳」——艾拉（村口那位最后的织者）的旧代码用继承写成 `Machine` → `Furnace` → `FurnaceWithBell`，加一台「熔炉 + 警钟」时继承树就打结了。你改成接口之后，最后会塞进来一台你没见过的机器，代码一行都不用改。",
+      "misconception": "「interface = typeclass = trait」——TS 和 Go 的 interface 是结构或能力检查，不用显式声明就能满足；Java 的 interface 要显式 `implements`；Rust 的 trait 要用 `impl` 声明，偏向静态分发；Haskell 的 typeclass 是「按类型的全局实例」。名字很像，语义不同。",
+      "unlock": "L08"
+    },
+    {
+      "id": "A12",
+      "title": "异步",
+      "subtitle": "时间之符",
+      "en": "Async / Futures / Errors",
+      "solve": "等待会把事情卡住；先把「将来会有的结果」拿在手里，等的这段时间就能去做别的事。",
+      "mechanism": "异步函数会返回一个 `Future` 或 Promise（将来才有结果的凭证）；`await` 取结果，`Promise.all` 同时等好几个；错误是「被拒绝的 `Future`」，不代表程序只能崩。",
+      "cost": "执行顺序不再直观；竞争条件和漏掉的 `catch`，是新的出错来源。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "async function dawn(): Promise<void> {\n  const brew1 = world.startBrewing(\"strength\");\n  const brew2 = world.startBrewing(\"night_vision\");\n  const [a, b] = await Promise.all([brew1, brew2]);   // 两个等待同时进行\n}"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（Promise.all：并发等待，仍是单线程）\nconst brew = (p) => new Promise((res) => setTimeout(() => res(p), 100));\nconst r = await Promise.all([brew(\"strength\"), brew(\"night\")]);"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（asyncio.gather）\nresult = await asyncio.gather(brew(\"strength\"), brew(\"night\"))"
+        },
+        {
+          "lang": "java",
+          "code": "// Java（CompletableFuture.allOf）\nstatic CompletableFuture<String> brew(String p) { return CompletableFuture.supplyAsync(() -> p + \" done\"); }\nCompletableFuture.allOf(brew(\"strength\"), brew(\"night\")).join();"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（async fn 返回 Future；Result 把错误当返回值）\nasync fn brew(p: &str) -> String { format!(\"{p} done\") }\nfn parse(s: &str) -> Result<i32, std::num::ParseIntError> { s.parse() }"
+        }
+      ],
+      "inGame": "L9「入夜之前」——一步一步 `await` 会错过入夜；`Promise.all` 让两个酿造台同时开工，材料缺了就在 `try/catch` 里走备用方案。",
+      "misconception": "「`async` = 并行 = 更快」——单线程里它只是「等待时不阻塞」（这叫并发）；真正的多核并行要靠 worker、线程或调度器。",
+      "unlock": "L09"
+    },
+    {
+      "id": "A13",
+      "title": "并发",
+      "subtitle": "双织之符",
+      "en": "Concurrency / Message Passing",
+      "solve": "多个执行者一起用同一个世界时，协调比算力更难：它们会抢东西，也会互相等死。",
+      "mechanism": "每个执行者各自跑，用消息或邮箱通信，而不是共享内存；哪几个点该对齐，靠事先约定好的协议（协议：事先说好的规矩）。",
+      "cost": "死锁、竞争和协调成本都会出现；调试时得读清楚「谁在等谁」。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "async function weave(): Promise<void> {\n  const left = agent(\"左织\");\n  const right = agent(\"右织\");\n  await left.send(\"锚块已放\");\n  const ack = await right.receive(5);   // 最多等 5 秒\n}"
+        },
+        {
+          "lang": "go",
+          "code": "// Go（goroutine + channel：通信代替共享内存；需 import \"fmt\"）【待核】\nfunc main() {\n    ch := make(chan string)\n    go func() { ch <- \"left done\" }()\n    fmt.Println(<-ch)\n}"
+        },
+        {
+          "lang": "erlang",
+          "code": "%% Erlang（actor：spawn + receive + ! 发消息）【待核】\nPid = spawn(fun() -> receive {msg, X} -> io:format(\"~p~n\", [X]) end end),\nPid ! {msg, \"left done\"}."
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（事件循环：并发但不并行；Worker 才加线程）\nsetTimeout(() => console.log(\"B\"), 0);        // 宏任务\nPromise.resolve().then(() => console.log(\"C\")); // 微任务，先于 setTimeout\nconsole.log(\"A\");                             // 输出 A C B"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（线程 + mpsc 通道）\nuse std::sync::mpsc;\nuse std::thread;\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || tx.send(\"left done\").unwrap());\nprintln!(\"{}\", rx.recv().unwrap());"
+        }
+      ],
+      "inGame": "L10「双织者」——先让你看到两只没有协议的织偶头顶「…」互相干等（这就是死锁）；加上消息协议之后，桥才能从两岸同时织起。织偶是织机织出来的无魂工匠，只会照字面做事。",
+      "misconception": "「并发 = 并行」——并发是「同时处理多个任务」（交错和等待），并行是「同一时刻真的在跑」；单线程的 JavaScript 能并发不能并行，Go 和 Erlang 靠调度器两样都能做到。",
+      "unlock": "L10"
+    },
+    {
+      "id": "A14",
+      "title": "元语言",
+      "subtitle": "元织之符",
+      "en": "Metalinguistic Abstraction / Data as Program",
+      "solve": "语言本身也能被当成数据来构造；理解这一点，就理解了「语言的边界是人定的」。",
+      "mechanism": "把指令写成数据（数组或对象），再写一个解释器去执行它——解释器就是一段「读程序、照着做」的程序。",
+      "cost": "抽象层级最高，离具体事情也最远；调试时要同时看数据和执行它的程序。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "type Instruction = { op: \"move\"; x: number; z: number } | { op: \"place\"; block: BlockId };\nfunction run(program: Instruction[]): void {\n  for (const ins of program) {\n    if (ins.op === \"move\") golem.moveTo(ins.x, ins.z);\n    else golem.place(ins.block, 0, 64, 0);\n  }\n}"
+        },
+        {
+          "lang": "scheme",
+          "code": "; Scheme/R5RS（同像性：代码就是列表，可被 quote/eval）【待核】\n(eval '(+ 1 2))"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（程序是数据类型，解释器是普通函数）\ndata Expr = Lit Int | Add Expr Expr\neval (Lit n) = n\neval (Add a b) = eval a + eval b"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（eval / ast：把字符串变程序）\nvalue = eval(\"1 + 2\")"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（eval / new Function）\neval(\"1 + 2\");\nnew Function(\"return 1 + 2\")();"
+        }
+      ],
+      "inGame": "Epilogue「元织机」——你把艾拉（村口那位最后的织者）留下的「远古指令表」当成数据跑起来，织偶（织机织出来的无魂工匠）按表完成最后一笔。这是《计算机程序的构造和解释》里那个经典解释器的迷你版。",
+      "misconception": "「有 `eval` 就叫元语言」——`eval` 只是入口；同像性的关键是程序本身就用语言的数据结构表示（Lisp 的列表），因此程序能被读、写、生成。",
+      "unlock": "EP"
+    },
+    {
+      "id": "X1",
+      "title": "递归",
+      "subtitle": "递归之符",
+      "en": "Recursion，Lab-R",
+      "solve": "有些结构天生自相似（塔、树、嵌套的表达式）；循环不是唯一的重复方式。",
+      "mechanism": "函数调用它自己，先写清最小的情况（`base case`，递归到底的那一步），再让每次调用把问题缩小一点。",
+      "cost": "每次调用都要占一层栈；最小情况没想清，就会一直往下坠。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "function tower(n: number): void {\n  if (n === 0) return;      // base case\n  tower(n - 1);\n  golem.place(\"stone\", n, 64, 0);\n}"
+        },
+        {
+          "lang": "haskell",
+          "code": "-- Haskell（模式匹配就是 base case 的写法）\nfact 0 = 1\nfact n = n * fact (n - 1)"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（函数调用自身）\ndef fact(n): return 1 if n == 0 else n * fact(n - 1)"
+        },
+        {
+          "lang": "c",
+          "code": "// C（递归 + 终止条件）\nint fact(int n) { return n == 0 ? 1 : n * fact(n - 1); }"
+        },
+        {
+          "lang": "js",
+          "code": "// JavaScript（递归）\nconst fact = (n) => (n === 0 ? 1 : n * fact(n - 1));"
+        }
+      ],
+      "inGame": "Lab-R「递归图腾」——10 行代码造出一座分形塔，塔尖由你亲手停住（那一步就是 `base case`）。",
+      "misconception": "「递归 = 循环的另一种写法」——它更擅长表达自相似的嵌套结构（表达式、树、目录），这些用循环写会别扭得多。",
+      "unlock": "LAB-R"
+    },
+    {
+      "id": "X2",
+      "title": "验证",
+      "subtitle": "证明之符",
+      "en": "Assertion / Verification，Lab-T",
+      "solve": "「我觉得对」不算对；要让机器帮你检查不变量（不变量：任何时候都该成立的一条规矩）。",
+      "mechanism": "在程序里写断言：条件不满足就当场失败，并把期望和实际一起打出来。",
+      "cost": "断言本身也要写对、也要维护；写错的断言会反过来骗你。",
+      "crossLanguage": [
+        {
+          "lang": "ts",
+          "code": "assert(\n  world.containers().every((c) => c.count(\"iron_axe\") === 1),\n  \"每个桶只能有一把铁斧\",\n);"
+        },
+        {
+          "lang": "c",
+          "code": "// C（assert.h：不满足则 abort；-DNDEBUG 可整体关闭）\nint lamps_lit = 4;\nassert(lamps_lit == 4);"
+        },
+        {
+          "lang": "python",
+          "code": "# Python（assert：语法级，-O 可关闭）\nassert lamps_lit == 4"
+        },
+        {
+          "lang": "rust",
+          "code": "// Rust（assert_eq!：失败打印两边值；release 下默认仍保留）\nassert_eq!(lamps_lit, 4);"
+        },
+        {
+          "lang": "java",
+          "code": "// Java（assert 默认关闭，需 -ea 才生效）\nint lampsLit = 4;\nassert lampsLit == 4;"
+        }
+      ],
+      "inGame": "Lab-T「证明你的符文」——符文是一句只做一件事的短句；给已经建好的装置写 4 条不变量断言，全部通过，信标才会亮。",
+      "misconception": "「断言 = 日志」——日志记录发生过什么，断言在「不该发生」时当场让程序失败；另外，Java 和 Python 的 `assert` 默认可能被关掉，这一点要记住。",
+      "unlock": "LAB-T"
+    }
+  ]
+}

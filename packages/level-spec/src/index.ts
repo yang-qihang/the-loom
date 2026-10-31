@@ -1,0 +1,252 @@
+import { LevelMetaSchema, type LevelMeta, type WorldEvent } from "../../protocol/src/index";
+
+export interface GraderApi {
+  var(name: string): unknown;
+  block(pos: number[]): { id: string };
+  events(type: string): WorldEvent[];
+  agent(id: string): { pos: [number, number, number] };
+  npc(name: string): { pos: [number, number, number] };
+  withinRadius(a: { pos: number[] }, b: { pos: number[] }, radius: number): boolean;
+}
+
+export interface Check {
+  id: string;
+  text: string;
+  check: (g: GraderApi) => boolean;
+}
+
+export interface Trial {
+  id: string;
+  name: string;
+  setup: Record<string, unknown>;
+  assertions: Check[];
+}
+
+export interface ChallengeDef {
+  id: string;
+  title: string;
+  goal: string;
+  reference?: string;
+  check: (g: GraderApi) => boolean;
+}
+
+export interface NarrativeDef {
+  worldState: string;
+  opening: [string, string, string];
+  whyYou: string;
+}
+
+export interface LevelDef {
+  id: string;
+  meta: LevelMeta;
+  world: {
+    vars: Record<string, unknown>;
+    entities: Array<{ type: string; role: string; id?: string; name?: string }>;
+  };
+  code: { starterCode: string; referenceSolution: string; expectedLoc: number };
+  task: {
+    mainTask: string;
+    makeTask: string;
+    playerBeat: string;
+    successCriteria: Check[];
+    hiddenTests: Trial[];
+  };
+  /** 可跳过的挑战层：不计星，但必须有独立判定（docs/20 §3c）。 */
+  challenge?: ChallengeDef;
+  /** 引导（docs/25）：世界状态 / 三句开场 / 为什么是你。 */
+  narrative?: NarrativeDef;
+  /** 玩家可见的阶段名（docs/20 §3c；≥2，L01 例外）。 */
+  phases?: string[];
+}
+
+/** 有效行数：去掉空行与纯注释行。 */
+export function effectiveLines(code: string): number {
+  return code
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.length > 0 && !line.startsWith("//") && !line.startsWith("/*") && !line.startsWith("*")).length;
+}
+
+function minimumLinesFor(act: number, id: string): number {
+  if (id === "L01") return 8;
+  if (act === 1) return 25;
+  if (act === 2) return 50;
+  return 60;
+}
+
+export function defineLevel(def: LevelDef): LevelDef {
+  return def;
+}
+
+export function validateLevel(level: LevelDef): string[] {
+  const issues: string[] = [];
+  const parsed = LevelMetaSchema.safeParse(level.meta);
+  if (!parsed.success) issues.push(`meta: ${parsed.error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join("; ")}`);
+  if (level.id !== level.meta.id) issues.push("id 与 meta.id 不一致");
+  if (level.task.successCriteria.length === 0) issues.push("没有 successCriteria");
+  if (level.task.hiddenTests.length === 0) issues.push("没有 hiddenTests");
+  if (level.code.starterCode.trim() === level.code.referenceSolution.trim()) issues.push("starter 与 reference 相同（starter 已是答案）");
+  if (level.meta.apiIntroduced.length > 5) issues.push("教学符号超过 5 个");
+
+  const minLines = minimumLinesFor(level.meta.act, level.id);
+  const refLines = effectiveLines(level.code.referenceSolution);
+  if (refLines < minLines) issues.push(`参考解有效行数 ${refLines} < 该幕下限 ${minLines}（docs/20 §3c）`);
+  const starterLines = effectiveLines(level.code.starterCode);
+  if (refLines - starterLines < Math.ceil(minLines / 2)) {
+    issues.push(`starter 与 reference 有效行差 ${refLines - starterLines} < 下限的一半（${Math.ceil(minLines / 2)}）`);
+  }
+  const minHidden = level.id === "L01" ? 1 : 2;
+  if (level.task.hiddenTests.length < minHidden) issues.push(`隐藏测试 ${level.task.hiddenTests.length} < ${minHidden}`);
+  if (level.id !== "L01" && !level.challenge) issues.push("缺少挑战层 challenge（可跳过、不计星，但必须有）");
+  if (level.narrative) {
+    if (level.narrative.opening.length !== 3) issues.push("narrative.opening 必须恰好 3 句（世界状态/任务/为什么是你）");
+    if (level.narrative.opening.some(line => line.trim().length === 0)) issues.push("narrative.opening 有空句");
+    if (!level.narrative.worldState.trim() || !level.narrative.whyYou.trim()) issues.push("narrative.worldState/whyYou 不能为空");
+  }
+  if (level.id !== "L01" && (!level.phases || level.phases.length < 2)) issues.push("phases 至少 2 个（docs/20 §3c）");
+  return issues;
+}
+
+const samePos = (a: number[] | undefined, b: number[]): boolean =>
+  !!a && a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+
+const lampsOf = (g: GraderApi): number[][] => g.var("lamps") as number[][];
+
+/** L01 — 第一缕光（第一版可运行实现；场景细节在 MockWorld/插件里补齐）。 */
+export const L01: LevelDef = defineLevel({
+  id: "L01",
+  meta: {
+    id: "L01",
+    title: { zh: "第一缕光", en: "First Light" },
+    act: 1,
+    order: 1,
+    priority: "P0",
+    prerequisites: [],
+    estimatedMinutes: 10,
+    difficulty: 1,
+    abstractions: ["A0", "A1"],
+    objectives: [
+      { id: "o-sequence", learnerView: "我写的每一条指令会严格按顺序执行", evidence: { kind: "machine", ref: "four-lamps-lit" } },
+      { id: "o-call", learnerView: "函数调用就是「对织偶说一句咒语」，括号里的数字是位置", evidence: { kind: "machine", ref: "golem-home" } },
+      { id: "o-notional", learnerView: "程序不是许愿，它只会照字面执行", evidence: { kind: "predict", ref: "predict-1" } },
+    ],
+    misconceptions: ["program-will-infer-intent", "order-does-not-matter"],
+    apiIntroduced: ["golem.moveTo", "golem.place", "golem.say", "golem.pos"],
+    apiAllowlist: ["golem.moveTo", "golem.place", "golem.say", "golem.pos"],
+    syntaxIntroduced: ["函数调用", "数字/字符串字面量", "注释"],
+    reward: { rune: "A1", advancement: "loomcraft/act1/first_light", codexPage: "A1" },
+    languageLevel: "act1",
+  },
+  world: {
+    vars: {
+      lamps: [[-12, 14, 10], [-12, 14, -2], [2, 14, -2], [2, 14, 16]],
+      optionalLamp: [[2, 14, 24]],
+    },
+    entities: [
+      { type: "golem", role: "agent", id: "golem", name: "灰崽" },
+      { type: "villager", role: "npc", id: "eira", name: "艾拉" },
+    ],
+  },
+  code: {
+    expectedLoc: 12,
+    starterCode: `// 灯柱坐标（右侧面板会同步显示）
+// 1 号: (-12, 10)   2 号: (-12, -2)   3 号: (2, -2)   4 号: (2, 16)
+
+// 第一盏：走过去，点亮它
+golem.moveTo(-12, 10)
+golem.place("lantern", -12, 14, 10)
+
+// 第二盏：抄上面的写法
+// TODO: golem.moveTo(?, ?)
+// TODO: golem.place("lantern", ?, ?, ?)
+
+// 第三盏、第四盏、回艾拉身边：你来写
+`,
+    referenceSolution: `golem.moveTo(-12, 10)
+golem.place("lantern", -12, 14, 10)
+golem.moveTo(-12, -2)
+golem.place("lantern", -12, 14, -2)
+golem.moveTo(2, -2)
+golem.place("lantern", 2, 14, -2)
+golem.moveTo(2, 16)
+golem.moveTo(0, 6)
+`,
+  },
+  task: {
+    mainTask: "点亮 1–3 号路灯；走到 4 号灯下，你亲手点亮；回到艾拉身边。",
+    makeTask: "回程顺路点亮桥另一侧的第 5 盏灯（可选）。",
+    playerBeat: "4 号灯由你右键点亮。",
+    successCriteria: [
+      {
+        id: "four-lamps-lit",
+        text: "4 盏路灯全部点亮",
+        check: g => lampsOf(g).every(p => g.block(p).id === "minecraft:lantern"),
+      },
+      {
+        id: "golem-home",
+        text: "灰崽回到艾拉身边",
+        check: g => g.withinRadius(g.agent("golem"), g.npc("eira"), 4),
+      },
+      {
+        id: "player-lit-fourth",
+        text: "第 4 盏灯由你亲手点亮",
+        check: g => g.events("block.place").some(e => e.actorType === "player" && samePos(e.pos, lampsOf(g)[3])),
+      },
+      {
+        id: "no-shortcut",
+        text: "1→2→3 号灯顺序正确",
+        check: g => {
+          const lamps = lampsOf(g);
+          const order = g
+            .events("block.place")
+            .filter(e => e.actorType === "agent")
+            .filter(e => lamps.slice(0, 3).some(p => samePos(e.pos, p)))
+            .map(e => lamps.findIndex(p => samePos(e.pos, p)));
+          return order.length >= 3 && order.every((v, i) => i === 0 || v > order[i - 1]) && order[0] === 0;
+        },
+      },
+    ],
+    hiddenTests: [
+      {
+        id: "h-physical-walk",
+        name: "织偶真的走到每盏灯下才放置",
+        setup: {},
+        assertions: [
+          {
+            id: "h1",
+            text: "每次放置前，织偶都到达过灯柱 2 格内",
+            check: g => {
+              const lamps = lampsOf(g);
+              const events = g.events("block.place").filter(e => e.actorType === "agent");
+              for (const e of events) {
+                const lamp = lamps.find(p => samePos(e.pos, p));
+                if (!lamp) continue;
+                const moved = g.events("agent.move").some(
+                  m => (m.seq ?? 0) < (e.seq ?? 0) && !!m.pos && Math.hypot(m.pos[0] - lamp[0], m.pos[2] - lamp[2]) <= 2,
+                );
+                if (!moved) return false;
+              }
+              return true;
+            },
+          },
+        ],
+      },
+      {
+        id: "h-no-extra",
+        name: "只落在灯位上、不乱放",
+        setup: {},
+        assertions: [
+          {
+            id: "h2",
+            text: "织偶的放置只发生在 4 个灯位或可选第 5 盏上",
+            check: g => {
+              const allowed = [...lampsOf(g), ...((g.var("optionalLamp") as number[][]) ?? [])];
+              const placements = g.events("block.place").filter(e => e.actorType === "agent");
+              return placements.every(e => allowed.some(p => samePos(e.pos, p)));
+            },
+          },
+        ],
+      },
+    ],
+  },
+});

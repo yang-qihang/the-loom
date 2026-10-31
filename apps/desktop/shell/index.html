@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>织界</title>
+    <link rel="stylesheet" href="./shell.css" />
+    <meta name="color-scheme" content="dark" />
+  </head>
+  <body>
+    <header class="loom-bar" id="loom-bar" data-tauri-drag-region>
+      <div class="brand" data-tauri-drag-region>
+        <span class="rune" aria-hidden="true">✦</span>
+        <span class="brand-name">织界</span>
+        <span class="brand-en">THE LOOM</span>
+      </div>
+      <div class="bar-status" id="bar-status" data-tauri-drag-region>
+        <span class="conn" id="conn-engine" data-state="off"><span class="dot"></span><span class="conn-label">织机</span></span>
+        <span class="conn" id="conn-paper" data-state="off"><span class="dot"></span><span class="conn-label">Paper</span></span>
+        <span class="conn" id="conn-bot" data-state="off"><span class="dot"></span><span class="conn-label">织偶</span></span>
+        <span class="conn" id="conn-client" data-state="off"><span class="dot"></span><span class="conn-label">客户端</span></span>
+      </div>
+      <div class="bar-spacer" data-tauri-drag-region></div>
+      <div class="bar-actions">
+        <button id="btn-pin" class="btn" type="button" title="切换窗口置顶（按控制键、上档键和 L）">置顶</button>
+        <button id="btn-mode" class="btn" type="button" title="切换伴玩/工作台">伴玩</button>
+        <button id="btn-settings" class="btn" type="button">设置</button>
+        <span class="win-sep" aria-hidden="true"></span>
+        <button id="btn-win-min" class="win-btn" type="button" title="最小化" aria-label="最小化窗口">—</button>
+        <button id="btn-win-max" class="win-btn" type="button" title="最大化 / 还原" aria-label="最大化或还原窗口">□</button>
+        <button id="btn-win-close" class="win-btn is-close" type="button" title="关闭" aria-label="关闭窗口">✕</button>
+      </div>
+    </header>
+    <main class="loom-main">
+      <iframe id="content" title="织界内容" src="./wizard.html" allow="clipboard-read; clipboard-write"></iframe>
+    </main>
+    <div class="toast" id="toast" hidden></div>
+    <div class="modal" id="settings-modal" hidden>
+      <div class="modal-card">
+        <h2>设置</h2>
+        <label class="row"><input type="checkbox" id="set-pin" /> 置顶窗口（《我的世界》最大化时也保持可见）</label>
+        <label class="row"><input type="checkbox" id="set-companion" /> 伴玩模式（420×620 小窗，只留目标与运行）</label>
+        <label class="row column">启动器启动命令
+          <input type="text" id="set-prism" placeholder="填写启动器命令" spellcheck="false" />
+        </label>
+        <label class="row column">界面缩放
+          <select id="set-scale">
+            <option value="0.7">70% · 最小</option>
+            <option value="0.75">75%</option>
+            <option value="0.8">80% · 推荐</option>
+            <option value="0.85">85%</option>
+            <option value="0.9">90%</option>
+            <option value="1">100%</option>
+            <option value="1.1">110%</option>
+          </select>
+        </label>
+        <p class="hint">快捷键：按控制键、上档键和 L 切换置顶；按控制键、上档键和 K 从《我的世界》切回工坊（游戏保持运行）。设置会自动保存。</p>
+        <div class="modal-actions">
+          <button id="btn-open-logs" class="btn" type="button">打开日志目录</button>
+          <button id="btn-close-settings" class="btn primary" type="button">完成</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./shell.js"></script>
+  </body>
+</html>

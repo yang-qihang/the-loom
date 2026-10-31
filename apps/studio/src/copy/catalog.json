@@ -1,0 +1,241 @@
+{
+  "map": {
+    "brand": "织界 · 工坊",
+    "title": "关卡墙",
+    "lede": "在我的世界里写程序：挑一关，进去。第一幕从灰岩村的黄昏开始。",
+    "loading": "正在取地图……",
+    "errorTitle": "地图没取回来。",
+    "retry": "继续",
+    "footActions": "选一张关卡卡进入；工作台底部常驻「运行 / 停止 / 重置」。",
+    "footKeys": "进入后按回车运行。",
+    "statusPlayable": "可玩",
+    "statusUnmade": "未解锁",
+    "minutes": "分钟",
+    "runeFallback": "未刻",
+    "lockHint": "未解锁 · 先过第 {关} 关",
+    "heroTitle": "灰岩村的黄昏",
+    "heroLine": "世界在另一个窗口里等你；写下一句，灰崽就去做。"
+  },
+  "levels": [
+    {
+      "id": "L05",
+      "act": 2,
+      "order": 5,
+      "minutes": 13,
+      "status": "尚未织成",
+      "title": "一百座房子",
+      "runeName": "函数之符"
+    },
+    {
+      "id": "L06",
+      "act": 2,
+      "order": 6,
+      "minutes": 17,
+      "status": "尚未织成",
+      "title": "商队的账本",
+      "runeName": "结构之符"
+    },
+    {
+      "id": "L07",
+      "act": 2,
+      "order": 7,
+      "minutes": 17,
+      "status": "尚未织成",
+      "title": "信风与织线",
+      "runeName": "流动之符"
+    },
+    {
+      "id": "L08",
+      "act": 2,
+      "order": 8,
+      "minutes": 17,
+      "status": "尚未织成",
+      "title": "同一种心跳",
+      "runeName": "契约之符"
+    },
+    {
+      "id": "L09",
+      "act": 3,
+      "order": 9,
+      "minutes": 18,
+      "status": "尚未织成",
+      "title": "入夜之前",
+      "runeName": "时间之符"
+    },
+    {
+      "id": "L10",
+      "act": 3,
+      "order": 10,
+      "minutes": 22,
+      "status": "尚未织成",
+      "title": "双织者",
+      "runeName": "双织之符"
+    }
+  ],
+  "onboarding": {
+    "skip": "跳过",
+    "next": "继续",
+    "replayOpening": "再看一遍",
+    "closeReplay": "关闭",
+    "openingLabels": {
+      "world": "眼下的村子",
+      "task": "你要做的事",
+      "why": "为什么是你"
+    }
+  },
+  "workbench": {
+    "logTitle": "世界日志",
+    "logEmpty": "运行后，这里会逐条记下灰崽做了什么。",
+    "resultPlaceholder": "还没有运行；点底部「运行」开始。",
+    "resultRunning": "灰崽正在按你的字走。等它停稳，再看这里。",
+    "codeLabel": "编辑器",
+    "phaseAwaiting": "等你在世界里完成最后一步",
+    "phaseError": "没跑通",
+    "errorLinePrefix": "第 {行} 行：",
+    "errorGeneric": "这一行没跑通。改顺这一行，再点「运行」。",
+    "loadFailed": "这一关没打开。按「返回」回到地图再试。",
+    "nightHeader": "接下来三夜的剧本",
+    "nightCard": "第 {序号} 夜",
+    "nightNotStarted": "未开始",
+    "nightNote": "写好的程序会自己连跑三夜。",
+    "goalDone": "已完成",
+    "goalTodo": "未完成",
+    "logMove": "灰崽走到（{横}, {纵}）。",
+    "logPlaceAgentLamp": "灰崽点亮了 {序号} 号灯。",
+    "logPlaceAgent": "灰崽在（{横}, {纵}）放了{方块}。",
+    "logPlacePlayer": "你亲手点亮了 {序号} 号灯。",
+    "logSay": "灰崽说：「{话语}」",
+    "blockLantern": "灯笼",
+    "runStarted": "灰崽开始照做。",
+    "runStopped": "已停止。点「运行」可以再来一次。",
+    "runFinished": "程序跑完了，看看目标还差哪一条。",
+    "resetDone": "已重置，回到起点。",
+    "playerBeatEarly": "先点「运行」，等前面的灯亮起来，再完成最后一步。",
+    "engineLogReset": "场景已重置。",
+    "engineLogStopped": "已停止当前运行。",
+    "errorOffline": "接不上织机。确认本地织机已启动，再按「继续」。",
+    "errorStatus": "织机回了一个错（{状态}）。按「继续」再试。",
+    "eventDisconnected": "和织机的连线断了，正在重连。",
+    "eventMalformed": "收到一条看不懂的织机消息。",
+    "localOnly": "本地演示只支持顺序指令；循环与判断要接真实织机。",
+    "nightTonight": "（今晚）",
+    "errorSyntax": "这一行还没写完。按下面的写法补齐括号和数字，再按一次「运行」。",
+    "mcHelpTitle": "第一次玩 我的世界？",
+    "mcHelpIntro": "这一步要你亲自进世界操作，不写代码也可以。按下面的顺序来：",
+    "mcHelpSteps": [
+      "先切到 我的世界 窗口（把鼠标移到游戏窗口上点一下）。",
+      "用 W、A、S、D 四个键走路，移动鼠标转动视角。",
+      "走到 4 号灯下，让屏幕中间的准星对准灯笼。",
+      "按鼠标右键点亮它。亮了以后再切回这里，按「我已在游戏里点亮」。"
+    ],
+    "mcHelpReset": "如果走错、弄乱了方块或卡住了，不用怕：按「重置本关」会把这一关恢复原样，你写的代码不会丢。",
+    "mcHelpDismiss": "知道了"
+  },
+  "mode": {
+    "real": "织机在线",
+    "local": "本地演示"
+  },
+  "shell": {
+    "pin": "置顶",
+    "unpin": "取消置顶",
+    "companion": "伴玩",
+    "expand": "展开"
+  },
+  "aria": {
+    "result": "本关结算",
+    "log": "世界日志",
+    "editor": "代码编辑器",
+    "stars": "共 {数} 星",
+    "terms": "名词表"
+  },
+  "coach": {
+    "label": "教练",
+    "hintNote": "卡住就点「提示」，不扣星。"
+  },
+  "runeBench": {
+    "title": "试符台",
+    "subtitle": "一次试一句；灰崽会照着你写的做。",
+    "open": "试符台",
+    "inputLabel": "写一句符文",
+    "inputHint": "回车试一句；一次只执行一句，不记变量。",
+    "try": "试一句",
+    "clear": "清空对话",
+    "reset": "把现场恢复原样",
+    "you": "你写的",
+    "golem": "灰崽",
+    "empty": "还没有试过；点下面的示例，再按「试一句」。",
+    "examplesTitle": "可以照抄的写法",
+    "resetDone": "现场已恢复原样。",
+    "errorGeneric": "这一句还没跑通。检查括号、引号是否成对，再试一次。",
+    "errorParen": "括号或引号还没配对。把这一行补完整，再试一次。",
+    "errorNumber": "这一行还没写完整：检查括号、引号、数字是否都对，再照着示例补全。",
+    "journalGo": "去试一句",
+    "back": "返回"
+  },
+  "codex": {
+    "title": "织典",
+    "subtitle": "织者的符文册子：每学会一枚符文，就亮起一页。",
+    "open": "打开织典",
+    "back": "返回",
+    "catalogTitle": "织典目录",
+    "pagePrefix": "第",
+    "unlocked": "已解锁",
+    "locked": "未解锁",
+    "lockedHint": "继续织下去，这一页会亮起来。",
+    "solve": "问题",
+    "mechanism": "机制",
+    "cost": "代价",
+    "crossLanguage": "跨语言对照",
+    "inGame": "在我们游戏里",
+    "misconception": "常见误解",
+    "misconceptionBadge": "注意",
+    "from": "这一页来自",
+    "journalGo": "打开织典"
+  },
+  "global": {
+    "states": {
+      "ready": "未运行"
+    }
+  },
+  "system": {
+    "about": "关于",
+    "settings": "设置",
+    "quit": "退出游戏",
+    "back": "返回",
+    "levelSelect": "关卡选择",
+    "aboutTitle": "织界",
+    "aboutEn": "织线成界",
+    "aboutTagline": "像素 · 织线 · 世界",
+    "aboutLead": "在 我的世界 里写程序：你写一句，灰崽做一句。",
+    "aboutBody": [
+      "灰岩村的老织机断了线。你是新来的织者，要把散落的织核一枚一枚装回去。",
+      "每一关都是一小段程序：顺序、判断、循环、函数、记录、异步、并发。代码不是练习题，它会真的驱动世界里的织偶干活。",
+      "这里没有抽象的术语考试。你看到的每一盏灯、每一块田、每一座桥，都是你写下的字在 我的世界 里长出来的样子。"
+    ],
+    "aboutLearnTitle": "你会学到",
+    "aboutLearn": [
+      "把一句话拆成一条一条可执行的命令",
+      "用循环和函数让重复的事自己发生",
+      "用记录和接口描述复杂的东西",
+      "让两件事同时发生，并避免互相等待"
+    ],
+    "aboutControlsTitle": "怎么玩",
+    "aboutControls": "左边写代码，按回车运行；灰崽在另一个 我的世界 窗口里照做。需要你亲自进世界时，画面会告诉你按什么。",
+    "version": "版本 0.1.0 · 教学原型",
+    "settingsTitle": "设置",
+    "settingsLead": "这些设置只影响你的界面，不会改变关卡评分。",
+    "fontSize": "代码字号",
+    "fontSizeHint": "只改编辑器里的代码大小，不影响游戏世界。",
+    "annotations": "世界标注",
+    "annotationsHint": "在 我的世界 里显示中文路标，帮你认灯、认人；不想看可以关掉。",
+    "reduceMotion": "减少界面动效",
+    "reduceMotionHint": "关闭界面的滑动、脉冲和过渡；对容易眩晕的玩家更友好。",
+    "on": "开",
+    "off": "关",
+    "quitTitle": "退出织界",
+    "quitLead": "进度会自动保存。确认关闭织界吗？",
+    "quitStay": "继续游戏",
+    "quitLeave": "退出游戏",
+    "quitBrowser": "桌面版可以直接退出；网页版请关闭标签页。"
+  }
+}

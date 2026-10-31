@@ -1,0 +1,16 @@
+{
+  "name": "@loom/desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "织界 Tauri 2 桌面壳（T3 spike）",
+  "scripts": {
+    "assets": "node scripts/build-assets.mjs",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "self-test": "node scripts/self-test.mjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4"
+  }
+}

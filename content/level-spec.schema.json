@@ -1,0 +1,213 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://loomcraft.local/schema/level-spec.schema.json",
+  "title": "Loomcraft Level Spec (design-time YAML block; mirrors defineLevel() fields)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "narrative", "world", "task", "code", "pedagogy", "feedback", "boundaries", "acceptance"],
+  "definitions": {
+    "i18n": {
+      "type": "object", "additionalProperties": false,
+      "required": ["zh"], "properties": { "zh": {"type": "string", "minLength": 1}, "en": {"type": "string"} }
+    },
+    "abstractionId": { "type": "string", "pattern": "^(A([0-9]|1[0-4])|X[12])$" },
+    "pos": {
+      "type": "array", "minItems": 2, "maxItems": 3,
+      "items": { "type": "number" }
+    },
+    "objective": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "learnerView", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^o-[a-z0-9-]+$"},
+        "learnerView": {"type": "string", "maxLength": 120},
+        "evidence": {"type": "string", "minLength": 4}
+      }
+    },
+    "primitive": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": { "type": "string", "minLength": 1, "description": "primitive 白名单见 docs/06 §5.4；设计期允许扩展，实现期由 level-kit validator 严格校验" }
+      },
+      "additionalProperties": true
+    },
+    "phase": {
+      "type": "object", "additionalProperties": false,
+      "required": ["phase", "steps"],
+      "properties": {
+        "phase": {"type": "string"},
+        "steps": {"type": "array", "items": {"$ref": "#/definitions/primitive"}}
+      }
+    },
+    "check": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["id","text","check"],
+          "properties": { "id": {"type": "string"}, "text": {"type": "string", "maxLength": 80}, "check": {"type": "string", "minLength": 8} } },
+        { "type": "object", "additionalProperties": false, "required": ["id","text","expect"],
+          "properties": { "id": {"type": "string"}, "text": {"type": "string", "maxLength": 80}, "expect": {"type": "object"} } }
+      ]
+    },
+    "trial": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "setup", "assertions"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string", "maxLength": 30},
+        "setup": {"type": "object"},
+        "assertions": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}}
+      }
+    },
+    "hint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["level", "trigger", "text", "codeAnchor"],
+      "properties": {
+        "level": {"type": "integer", "minimum": 1, "maximum": 3},
+        "trigger": {"type": "object", "properties": {"afterFailures": {"type": "integer"}, "afterSeconds": {"type": "integer"}, "onErrorCode": {"type": "integer"}}},
+        "text": {"type": "string", "maxLength": 45},
+        "codeAnchor": {"type": "string"}
+      }
+    },
+    "beat": {
+      "type": "object", "additionalProperties": false,
+      "required": ["beat", "durationSec", "playerAction", "coachLine", "uiChange", "expectedOutput"],
+      "properties": {
+        "beat": {"type": "string"},
+        "durationSec": {"type": "integer", "minimum": 15, "maximum": 300},
+        "playerAction": {"type": "string"},
+        "coachLine": {"type": "string", "maxLength": 45},
+        "uiChange": {"type": "string"},
+        "expectedOutput": {"type": "string"}
+      }
+    }
+  },
+  "properties": {
+    "meta": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id","title","act","order","priority","prerequisites","estimatedMinutes","difficulty","abstractions","objectives","misconceptions","apiIntroduced","apiAllowlist","syntaxIntroduced","reward"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(L[0-9]{2}|LAB-[A-Z])$"},
+        "title": {"$ref": "#/definitions/i18n"},
+        "act": {"type": "integer", "minimum": 1, "maximum": 3},
+        "order": {"type": "integer", "minimum": 1},
+        "priority": {"enum": ["P0","P1","P2","P3"]},
+        "prerequisites": {"type": "array", "items": {"type": "string"}},
+        "estimatedMinutes": {"type": "integer", "minimum": 5, "maximum": 35},
+        "difficulty": {"type": "integer", "minimum": 1, "maximum": 5},
+        "abstractions": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"$ref": "#/definitions/abstractionId"}},
+        "objectives": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/objective"}},
+        "misconceptions": {"type": "array", "items": {"type": "string"}},
+        "apiIntroduced": {"type": "array", "items": {"type": "string"}},
+        "apiAllowlist": {"type": "array", "items": {"type": "string"}},
+        "syntaxIntroduced": {"type": "array", "items": {"type": "string"}},
+        "reward": {
+          "type": "object", "additionalProperties": false,
+          "required": ["rune", "advancement", "codexPage"],
+          "properties": {
+            "rune": {"$ref": "#/definitions/abstractionId"},
+            "advancement": {"type": "string", "pattern": "^loomcraft/[a-z0-9_/]+$"},
+            "codexPage": {"$ref": "#/definitions/abstractionId"}
+          }
+        },
+        "languageLevel": {"type": "string", "description": "tsconfig/语法等级标签，如 act1"}
+      }
+    },
+    "narrative": {
+      "type": "object", "additionalProperties": false,
+      "required": ["setup", "stakes", "painBeat", "resolution", "coachTone"],
+      "properties": {
+        "setup": {"type": "string", "maxLength": 400},
+        "stakes": {"type": "string", "maxLength": 200},
+        "painBeat": {"type": "string", "maxLength": 400},
+        "resolution": {"type": "string", "maxLength": 300},
+        "coachTone": {"type": "string", "maxLength": 200}
+      }
+    },
+    "world": {
+      "type": "object", "additionalProperties": false,
+      "required": ["anchor", "dimension", "time", "weather", "region", "entities", "staging", "reset", "seed"],
+      "properties": {
+        "anchor": {"type": "object", "required": ["kind", "id"], "properties": {"kind": {"enum": ["village","ravine","cave","stronghold","custom","workshop","camp","meadow"]}, "id": {"type": "string"}}},
+        "dimension": {"enum": ["overworld","nether","end","void"]},
+        "time": {"type": "integer", "minimum": 0, "maximum": 24000},
+        "weather": {"enum": ["clear","rain","thunder"]},
+        "region": {"type": "object", "required": ["center", "radius"], "properties": {"center": {"$ref": "#/definitions/pos"}, "radius": {"type": "integer", "minimum": 8, "maximum": 256}}},
+        "entities": {"type": "array", "items": {"type": "object", "required": ["type","role"], "properties": {"type": {"type": "string"}, "role": {"enum": ["npc","prop","hazard","target","mount","agent"]}, "name": {"type": "string"}, "count": {"type": "integer", "minimum": 1}}}},
+        "regions": {"type": "object", "description": "命名区域（评分 g.region 用），值为 {from:[x,y,z], to:[x,y,z]}", "additionalProperties": {"type": "object", "required": ["from","to"], "properties": {"from": {"type": "array", "items": {"type": "number"}}, "to": {"type": "array", "items": {"type": "number"}}}, "additionalProperties": false}},
+        "vars": {"type": "object", "description": "关卡标量/数组变量（评分 g.var 用），值可为 number/string/boolean/array", "additionalProperties": true},
+        "staging": {"type": "array", "items": {"$ref": "#/definitions/phase"}},
+        "reset": {"type": "object", "required": ["strategy"], "properties": {"strategy": {"enum": ["rebuild_region","reload_world","restore_snapshot"]}}},
+        "seed": {"type": "object", "required": ["mode"], "properties": {"mode": {"enum": ["session","fixed"]}, "value": {"type": "integer"}}},
+        "protectedBlocks": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "task": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mainTask","makeTask","playerBeat","timeLimitSec","successCriteria"],
+      "properties": {
+        "mainTask": {"type": "string", "maxLength": 600},
+        "makeTask": {"type": "string", "maxLength": 400},
+        "playerBeat": {"type": "string", "maxLength": 200},
+        "timeLimitSec": {"type": "integer", "minimum": 30, "maximum": 900},
+        "successCriteria": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}},
+        "trials": {"type": "array", "items": {"$ref": "#/definitions/trial"}},
+        "hiddenTests": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/trial"}},
+        "randomization": {"type": "object", "properties": {"mode": {"enum": ["session","fixed"]}, "variants": {"type": "array"}, "hiddenOnly": {"type": "boolean"}}}
+      }
+    },
+    "code": {
+      "type": "object", "additionalProperties": false,
+      "required": ["starterCode","referenceSolution","expectedLoc"],
+      "properties": {
+        "starterCode": {"type": "string", "minLength": 20},
+        "referenceSolution": {"type": "string", "minLength": 20},
+        "expectedLoc": {"type": "integer", "minimum": 3, "maximum": 120},
+        "languageLevel": {"type": "string"}
+      }
+    },
+    "pedagogy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["predict","investigate","beats","hints","errorMap"],
+      "properties": {
+        "predict": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["question","options","answer"], "properties": {"question": {"type": "string", "maxLength": 120}, "options": {"type": "array", "minItems": 2, "items": {"type": "string"}}, "answer": {"type": "integer"}}}},
+        "investigate": {"type": "object", "required": ["brokenCode","expectedError","explanation"], "properties": {"brokenCode": {"type": "string"}, "expectedError": {"type": "string"}, "explanation": {"type": "string", "maxLength": 300}}},
+        "beats": {"type": "array", "minItems": 5, "items": {"$ref": "#/definitions/beat"}},
+        "hints": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/definitions/hint"}},
+        "errorMap": {"type": "array", "items": {"type": "object", "required": ["tsCode","text"], "properties": {"tsCode": {"type": "integer"}, "text": {"type": "string", "maxLength": 80}}}}
+      }
+    },
+    "feedback": {
+      "type": "object", "additionalProperties": false,
+      "required": ["success","partial","failure","wowMoment"],
+      "properties": {
+        "success": {"type": "array", "items": {"type": "string"}},
+        "partial": {"type": "array", "items": {"type": "string"}},
+        "failure": {"type": "array", "items": {"type": "string"}},
+        "wowMoment": {"type": "string", "minLength": 10},
+        "ambience": {"type": "string"}
+      }
+    },
+    "boundaries": {
+      "type": "object", "additionalProperties": false,
+      "required": ["timeout","infiniteLoop","disconnected","resetPolicy","cheatPolicy","isolation"],
+      "properties": {
+        "timeout": {"type": "string"},
+        "infiniteLoop": {"type": "string"},
+        "disconnected": {"type": "string"},
+        "resetPolicy": {"type": "string"},
+        "cheatPolicy": {"type": "string"},
+        "isolation": {"type": "string"}
+      }
+    },
+    "acceptance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evidence","blindSolver","screenshots"],
+      "properties": {
+        "evidence": {"type": "array", "minItems": 3, "items": {"type": "string"}},
+        "blindSolver": {"type": "object", "required": ["criteria"], "properties": {"criteria": {"type": "string"}}},
+        "screenshots": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"type": "string"}}
+      }
+    },
+    "openQuestions": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,1617 @@
+{
+ "task": "task-30 / T2-MC real L08 e2e",
+ "level": "L08",
+ "startedAt": "2026-10-31T11:29:41.777Z",
+ "environment": {
+  "node": "v22.23.1",
+  "host": "127.0.0.1",
+  "mcPort": 25565,
+  "rpcPort": 8765,
+  "botName": "Golem1860",
+  "plugin": {
+   "ok": true,
+   "plugin": "loomcraft-mc",
+   "version": "0.1.0",
+   "mc": "26.1.2",
+   "tick": 5905,
+   "phase": "ready",
+   "prepared": true,
+   "levelId": "L07",
+   "sessionId": "d1c8e819-a4cb-485c-8aaf-bd06ba342563",
+   "epoch": 14,
+   "groundY": 65,
+   "bots": [
+    "Golem1735"
+   ],
+   "npcs": [
+    "eira",
+    "allays",
+    "allay-2",
+    "allay-3"
+   ],
+   "regionFrom": [
+    -42,
+    55,
+    -40
+   ],
+   "regionTo": [
+    42,
+    85,
+    44
+   ],
+   "agentSpawn": [
+    0,
+    65,
+    24
+   ],
+   "playerSpawn": [
+    0,
+    65,
+    2
+   ],
+   "center": [
+    0,
+    65,
+    2
+   ],
+   "tracked": 2182,
+   "events": 0,
+   "lastResetHash": "sha256:5d0095e120e186efa44ae4009e4e2362bb36bd66608a44f8a22676b5a0900fd2",
+   "lastResetMs": 13
+  }
+ },
+ "checks": {
+  "plugin.health": {
+   "ok": true,
+   "detail": {
+    "plugin": "loomcraft-mc",
+    "mc": "26.1.2",
+    "version": "0.1.0"
+   }
+  },
+  "L08.scene-ready": {
+   "ok": true,
+   "detail": {
+    "prepareMs": 1654,
+    "scene": {
+     "groundY": 65,
+     "arena": {
+      "from": [
+       -24,
+       60,
+       -22
+      ],
+      "to": [
+       24,
+       82,
+       12
+      ]
+     },
+     "trackedCount": 986,
+     "kit": [
+      "minecraft:redstone_block"
+     ],
+     "agent": {
+      "pos": [
+       0,
+       65,
+       0
+      ]
+     },
+     "npcs": [
+      "eira",
+      "worker"
+     ]
+    }
+   }
+  },
+  "L08.stale-session-rejected": {
+   "ok": true,
+   "detail": {
+    "sessionId": "34217af1-982e-4ea9-ae91-d581166a591d",
+    "epoch": 15
+   }
+  },
+  "L08.epoch-incremented": {
+   "ok": true,
+   "detail": {
+    "first": {
+     "sessionId": "34217af1-982e-4ea9-ae91-d581166a591d",
+     "epoch": 15
+    },
+    "second": {
+     "sessionId": "e85a0aee-647a-43ba-b338-7f68859e29b3",
+     "epoch": 16
+    }
+   }
+  },
+  "L08.passed": {
+   "ok": true,
+   "detail": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "all-started",
+      "passed": true
+     },
+     {
+      "id": "status-reported",
+      "passed": true
+     },
+     {
+      "id": "stop-reversed",
+      "passed": true
+     },
+     {
+      "id": "lever-pulled",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "every-machine-touched",
+      "passed": true
+     },
+     {
+      "id": "reversed-tail",
+      "passed": true
+     },
+     {
+      "id": "hot-stopped-early",
+      "passed": true
+     },
+     {
+      "id": "only-switch-positions",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  },
+  "L08.stars-3": {
+   "ok": true,
+   "detail": 3
+  },
+  "L08.failures-empty": {
+   "ok": true,
+   "detail": []
+  },
+  "L08.actions": {
+   "ok": true,
+   "detail": {
+    "referenceRunMs": 6956
+   }
+  },
+  "L08.report-equals-mock": {
+   "ok": true,
+   "detail": {
+    "real": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "all-started",
+       "passed": true
+      },
+      {
+       "id": "status-reported",
+       "passed": true
+      },
+      {
+       "id": "stop-reversed",
+       "passed": true
+      },
+      {
+       "id": "lever-pulled",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "every-machine-touched",
+       "passed": true
+      },
+      {
+       "id": "reversed-tail",
+       "passed": true
+      },
+      {
+       "id": "hot-stopped-early",
+       "passed": true
+      },
+      {
+       "id": "only-switch-positions",
+       "passed": true
+      }
+     ],
+     "failures": []
+    },
+    "mock": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "all-started",
+       "passed": true
+      },
+      {
+       "id": "status-reported",
+       "passed": true
+      },
+      {
+       "id": "stop-reversed",
+       "passed": true
+      },
+      {
+       "id": "lever-pulled",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "every-machine-touched",
+       "passed": true
+      },
+      {
+       "id": "reversed-tail",
+       "passed": true
+      },
+      {
+       "id": "hot-stopped-early",
+       "passed": true
+      },
+      {
+       "id": "only-switch-positions",
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   }
+  },
+  "L08.digest-equals-mock": {
+   "ok": true,
+   "detail": {
+    "agentPlaces": 10,
+    "says": 11,
+    "blocks": 985
+   }
+  },
+  "L08.reset-under-2s": {
+   "ok": true,
+   "detail": {
+    "a": 4,
+    "b": 5
+   }
+  },
+  "L08.reset-hash-stable": {
+   "ok": true,
+   "detail": {
+    "a": "sha256:1605a449effad1b5a5cf9cdafe8f20d9b98e5bd60d539b9308ea30818223bfd1",
+    "b": "sha256:1605a449effad1b5a5cf9cdafe8f20d9b98e5bd60d539b9308ea30818223bfd1"
+   }
+  },
+  "L08.reset-clears-events": {
+   "ok": true,
+   "detail": {
+    "events": 0
+   }
+  }
+ },
+ "reports": {
+  "reference": {
+   "real": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "all-started",
+      "passed": true
+     },
+     {
+      "id": "status-reported",
+      "passed": true
+     },
+     {
+      "id": "stop-reversed",
+      "passed": true
+     },
+     {
+      "id": "lever-pulled",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "every-machine-touched",
+      "passed": true
+     },
+     {
+      "id": "reversed-tail",
+      "passed": true
+     },
+     {
+      "id": "hot-stopped-early",
+      "passed": true
+     },
+     {
+      "id": "only-switch-positions",
+      "passed": true
+     }
+    ],
+    "failures": []
+   },
+   "mock": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "all-started",
+      "passed": true
+     },
+     {
+      "id": "status-reported",
+      "passed": true
+     },
+     {
+      "id": "stop-reversed",
+      "passed": true
+     },
+     {
+      "id": "lever-pulled",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "every-machine-touched",
+      "passed": true
+     },
+     {
+      "id": "reversed-tail",
+      "passed": true
+     },
+     {
+      "id": "hot-stopped-early",
+      "passed": true
+     },
+     {
+      "id": "only-switch-positions",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  }
+ },
+ "sessions": {
+  "first": {
+   "sessionId": "34217af1-982e-4ea9-ae91-d581166a591d",
+   "epoch": 15
+  },
+  "second": {
+   "sessionId": "e85a0aee-647a-43ba-b338-7f68859e29b3",
+   "epoch": 16
+  }
+ },
+ "reset": {
+  "resetA": {
+   "ok": true,
+   "ms": 4,
+   "hash": "sha256:1605a449effad1b5a5cf9cdafe8f20d9b98e5bd60d539b9308ea30818223bfd1",
+   "tick": 6108,
+   "sessionId": "e85a0aee-647a-43ba-b338-7f68859e29b3",
+   "epoch": 16
+  },
+  "resetB": {
+   "ok": true,
+   "ms": 5,
+   "hash": "sha256:1605a449effad1b5a5cf9cdafe8f20d9b98e5bd60d539b9308ea30818223bfd1",
+   "tick": 6111,
+   "sessionId": "e85a0aee-647a-43ba-b338-7f68859e29b3",
+   "epoch": 16
+  }
+ },
+ "actions": [
+  {
+   "action": "moveTo(-2,-6)",
+   "ms": 1109
+  },
+  {
+   "action": "virtualPlace(minecraft:redstone_block@-6,65,-6)",
+   "ms": 100
+  },
+  {
+   "action": "say(启动 熔炉组：正常)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(2,-6)",
+   "ms": 639
+  },
+  {
+   "action": "virtualPlace(minecraft:redstone_block@6,65,-6)",
+   "ms": 50
+  },
+  {
+   "action": "say(启动 红石门：正常)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(2,-6)",
+   "ms": 89
+  },
+  {
+   "action": "virtualPlace(minecraft:redstone_block@2,65,-10)",
+   "ms": 51
+  },
+  {
+   "action": "say(启动 警钟：正常)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(-2,-6)",
+   "ms": 488
+  },
+  {
+   "action": "virtualPlace(minecraft:redstone_block@-6,65,-6)",
+   "ms": 50
+  },
+  {
+   "action": "say(启动 熔炉组：正常)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(2,-6)",
+   "ms": 89
+  },
+  {
+   "action": "virtualPlace(minecraft:redstone_block@2,65,-10)",
+   "ms": 50
+  },
+  {
+   "action": "say(启动 警钟：正常)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(2,-6)",
+   "ms": 90
+  },
+  {
+   "action": "virtualPlace(minecraft:air@2,65,-10)",
+   "ms": 100
+  },
+  {
+   "action": "say(停机 警钟)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(-2,-6)",
+   "ms": 89
+  },
+  {
+   "action": "virtualPlace(minecraft:air@-6,65,-6)",
+   "ms": 50
+  },
+  {
+   "action": "say(停机 熔炉组)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(2,-6)",
+   "ms": 90
+  },
+  {
+   "action": "virtualPlace(minecraft:air@2,65,-10)",
+   "ms": 50
+  },
+  {
+   "action": "say(停机 警钟)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(2,-6)",
+   "ms": 89
+  },
+  {
+   "action": "virtualPlace(minecraft:air@6,65,-6)",
+   "ms": 50
+  },
+  {
+   "action": "say(停机 红石门)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(-2,-6)",
+   "ms": 89
+  },
+  {
+   "action": "virtualPlace(minecraft:air@-6,65,-6)",
+   "ms": 50
+  },
+  {
+   "action": "say(停机 熔炉组)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(0,10)",
+   "ms": 2739
+  },
+  {
+   "action": "say(全部待机，请织者把拉杆推到底)",
+   "ms": 0
+  },
+  {
+   "action": "reset",
+   "ms": 127
+  },
+  {
+   "action": "reset",
+   "ms": 52
+  },
+  {
+   "action": "reset",
+   "ms": 54
+  }
+ ],
+ "errors": [],
+ "prepareMs": 1654,
+ "scene": {
+  "groundY": 65,
+  "arena": {
+   "from": [
+    -24,
+    60,
+    -22
+   ],
+   "to": [
+    24,
+    82,
+    12
+   ]
+  },
+  "trackedCount": 986,
+  "kit": [
+   "minecraft:redstone_block"
+  ],
+  "agent": {
+   "pos": [
+    0,
+    65,
+    0
+   ]
+  },
+  "npcs": [
+   "eira",
+   "worker"
+  ]
+ },
+ "referenceRunMs": 6956,
+ "snapshot": {
+  "blocks": {
+   "-12,64,-13": "minecraft:stone_bricks",
+   "-12,64,-12": "minecraft:stone_bricks",
+   "-12,64,-11": "minecraft:stone_bricks",
+   "-12,64,-10": "minecraft:stone_bricks",
+   "-12,64,-9": "minecraft:stone_bricks",
+   "-12,64,-8": "minecraft:stone_bricks",
+   "-12,64,-7": "minecraft:stone_bricks",
+   "-12,64,-6": "minecraft:mossy_stone_bricks",
+   "-12,64,-5": "minecraft:mossy_stone_bricks",
+   "-12,64,-4": "minecraft:mossy_stone_bricks",
+   "-12,64,-3": "minecraft:mossy_stone_bricks",
+   "-12,64,-2": "minecraft:mossy_stone_bricks",
+   "-12,64,-1": "minecraft:mossy_stone_bricks",
+   "-12,64,0": "minecraft:mossy_stone_bricks",
+   "-12,64,1": "minecraft:mossy_stone_bricks",
+   "-12,64,2": "minecraft:mossy_stone_bricks",
+   "-12,64,3": "minecraft:stone_bricks",
+   "-12,64,4": "minecraft:stone_bricks",
+   "-12,64,5": "minecraft:stone_bricks",
+   "-12,64,6": "minecraft:stone_bricks",
+   "-12,64,7": "minecraft:stone_bricks",
+   "-12,64,8": "minecraft:stone_bricks",
+   "-12,64,9": "minecraft:stone_bricks",
+   "-12,64,10": "minecraft:stone_bricks",
+   "-11,64,-13": "minecraft:stone_bricks",
+   "-11,64,-12": "minecraft:stone_bricks",
+   "-11,64,-11": "minecraft:stone_bricks",
+   "-11,64,-10": "minecraft:stone_bricks",
+   "-11,64,-9": "minecraft:stone_bricks",
+   "-11,64,-8": "minecraft:stone_bricks",
+   "-11,64,-7": "minecraft:stone_bricks",
+   "-11,64,-6": "minecraft:mossy_stone_bricks",
+   "-11,64,-5": "minecraft:mossy_stone_bricks",
+   "-11,64,-4": "minecraft:mossy_stone_bricks",
+   "-11,64,-3": "minecraft:mossy_stone_bricks",
+   "-11,64,-2": "minecraft:mossy_stone_bricks",
+   "-11,64,-1": "minecraft:mossy_stone_bricks",
+   "-11,64,0": "minecraft:mossy_stone_bricks",
+   "-11,64,1": "minecraft:mossy_stone_bricks",
+   "-11,64,2": "minecraft:mossy_stone_bricks",
+   "-11,64,3": "minecraft:stone_bricks",
+   "-11,64,4": "minecraft:stone_bricks",
+   "-11,64,5": "minecraft:stone_bricks",
+   "-11,64,6": "minecraft:spruce_planks",
+   "-11,64,7": "minecraft:spruce_planks",
+   "-11,64,8": "minecraft:spruce_planks",
+   "-11,64,9": "minecraft:spruce_planks",
+   "-11,64,10": "minecraft:spruce_planks",
+   "-10,64,-13": "minecraft:stone_bricks",
+   "-10,64,-12": "minecraft:stone_bricks",
+   "-10,64,-11": "minecraft:cobblestone",
+   "-10,64,-10": "minecraft:cobblestone",
+   "-10,64,-9": "minecraft:cobblestone",
+   "-10,64,-8": "minecraft:cobblestone",
+   "-10,64,-7": "minecraft:cobblestone",
+   "-10,64,-6": "minecraft:cobblestone",
+   "-10,64,-5": "minecraft:cobblestone",
+   "-10,64,-4": "minecraft:cobblestone",
+   "-10,64,-3": "minecraft:stone_bricks",
+   "-10,64,-2": "minecraft:stone_bricks",
+   "-10,64,-1": "minecraft:stone_bricks",
+   "-10,64,0": "minecraft:stone_bricks",
+   "-10,64,1": "minecraft:stone_bricks",
+   "-10,64,2": "minecraft:stone_bricks",
+   "-10,64,3": "minecraft:stone_bricks",
+   "-10,64,4": "minecraft:stone_bricks",
+   "-10,64,5": "minecraft:stone_bricks",
+   "-10,64,6": "minecraft:spruce_planks",
+   "-10,64,7": "minecraft:spruce_planks",
+   "-10,64,8": "minecraft:spruce_planks",
+   "-10,64,9": "minecraft:spruce_planks",
+   "-10,64,10": "minecraft:spruce_planks",
+   "-9,64,-13": "minecraft:stone_bricks",
+   "-9,64,-12": "minecraft:stone_bricks",
+   "-9,64,-11": "minecraft:cobblestone",
+   "-9,64,-10": "minecraft:cobblestone",
+   "-9,64,-9": "minecraft:cobblestone",
+   "-9,64,-8": "minecraft:cobblestone",
+   "-9,64,-7": "minecraft:cobblestone",
+   "-9,64,-6": "minecraft:cobblestone",
+   "-9,64,-5": "minecraft:cobblestone",
+   "-9,64,-4": "minecraft:cobblestone",
+   "-9,64,-3": "minecraft:stone_bricks",
+   "-9,64,-2": "minecraft:stone_bricks",
+   "-9,64,-1": "minecraft:stone_bricks",
+   "-9,64,0": "minecraft:stone_bricks",
+   "-9,64,1": "minecraft:stone_bricks",
+   "-9,64,2": "minecraft:stone_bricks",
+   "-9,64,3": "minecraft:stone_bricks",
+   "-9,64,4": "minecraft:stone_bricks",
+   "-9,64,5": "minecraft:stone_bricks",
+   "-9,64,6": "minecraft:spruce_planks",
+   "-9,64,7": "minecraft:spruce_planks",
+   "-9,64,8": "minecraft:spruce_planks",
+   "-9,64,9": "minecraft:spruce_planks",
+   "-9,64,10": "minecraft:spruce_planks",
+   "-8,64,-13": "minecraft:stone_bricks",
+   "-8,64,-12": "minecraft:stone_bricks",
+   "-8,64,-11": "minecraft:cobblestone",
+   "-8,64,-10": "minecraft:cobblestone",
+   "-8,64,-9": "minecraft:cobblestone",
+   "-8,64,-8": "minecraft:cobblestone",
+   "-8,64,-7": "minecraft:cobblestone",
+   "-8,64,-6": "minecraft:cobblestone",
+   "-8,64,-5": "minecraft:cobblestone",
+   "-8,64,-4": "minecraft:cobblestone",
+   "-8,64,-3": "minecraft:stone_bricks",
+   "-8,64,-2": "minecraft:stone_bricks",
+   "-8,64,-1": "minecraft:stone_bricks",
+   "-8,64,0": "minecraft:stone_bricks",
+   "-8,64,1": "minecraft:stone_bricks",
+   "-8,64,2": "minecraft:stone_bricks",
+   "-8,64,3": "minecraft:stone_bricks",
+   "-8,64,4": "minecraft:stone_bricks",
+   "-8,64,5": "minecraft:stone_bricks",
+   "-8,64,6": "minecraft:spruce_planks",
+   "-8,64,7": "minecraft:spruce_planks",
+   "-8,64,8": "minecraft:spruce_planks",
+   "-8,64,9": "minecraft:spruce_planks",
+   "-8,64,10": "minecraft:spruce_planks",
+   "-7,64,-13": "minecraft:stone_bricks",
+   "-7,64,-12": "minecraft:stone_bricks",
+   "-7,64,-11": "minecraft:cobblestone",
+   "-7,64,-10": "minecraft:cobblestone",
+   "-7,64,-9": "minecraft:cobblestone",
+   "-7,64,-8": "minecraft:cobblestone",
+   "-7,64,-7": "minecraft:cobblestone",
+   "-7,64,-6": "minecraft:cobblestone",
+   "-7,64,-5": "minecraft:cobblestone",
+   "-7,64,-4": "minecraft:cobblestone",
+   "-7,64,-3": "minecraft:stone_bricks",
+   "-7,64,-2": "minecraft:stone_bricks",
+   "-7,64,-1": "minecraft:stone_bricks",
+   "-7,64,0": "minecraft:stone_bricks",
+   "-7,64,1": "minecraft:stone_bricks",
+   "-7,64,2": "minecraft:stone_bricks",
+   "-7,64,3": "minecraft:stone_bricks",
+   "-7,64,4": "minecraft:stone_bricks",
+   "-7,64,5": "minecraft:stone_bricks",
+   "-7,64,6": "minecraft:spruce_planks",
+   "-7,64,7": "minecraft:spruce_planks",
+   "-7,64,8": "minecraft:spruce_planks",
+   "-7,64,9": "minecraft:spruce_planks",
+   "-7,64,10": "minecraft:spruce_planks",
+   "-6,64,-13": "minecraft:stone_bricks",
+   "-6,64,-12": "minecraft:stone_bricks",
+   "-6,64,-11": "minecraft:cobblestone",
+   "-6,64,-10": "minecraft:cobblestone",
+   "-6,64,-9": "minecraft:cobblestone",
+   "-6,64,-8": "minecraft:cobblestone",
+   "-6,64,-7": "minecraft:cobblestone",
+   "-6,64,-6": "minecraft:chiseled_stone_bricks",
+   "-6,64,-5": "minecraft:cobblestone",
+   "-6,64,-4": "minecraft:cobblestone",
+   "-6,64,-3": "minecraft:stone_bricks",
+   "-6,64,-2": "minecraft:stone_bricks",
+   "-6,64,-1": "minecraft:stone_bricks",
+   "-6,64,0": "minecraft:stone_bricks",
+   "-6,64,1": "minecraft:stone_bricks",
+   "-6,64,2": "minecraft:stone_bricks",
+   "-6,64,3": "minecraft:stone_bricks",
+   "-6,64,4": "minecraft:stone_bricks",
+   "-6,64,5": "minecraft:stone_bricks",
+   "-6,64,6": "minecraft:spruce_planks",
+   "-6,64,7": "minecraft:spruce_planks",
+   "-6,64,8": "minecraft:spruce_planks",
+   "-6,64,9": "minecraft:spruce_planks",
+   "-6,64,10": "minecraft:spruce_planks",
+   "-5,64,-13": "minecraft:stone_bricks",
+   "-5,64,-12": "minecraft:stone_bricks",
+   "-5,64,-11": "minecraft:cobblestone",
+   "-5,64,-10": "minecraft:cobblestone",
+   "-5,64,-9": "minecraft:cobblestone",
+   "-5,64,-8": "minecraft:cobblestone",
+   "-5,64,-7": "minecraft:cobblestone",
+   "-5,64,-6": "minecraft:cobblestone",
+   "-5,64,-5": "minecraft:cobblestone",
+   "-5,64,-4": "minecraft:cobblestone",
+   "-5,64,-3": "minecraft:stone_bricks",
+   "-5,64,-2": "minecraft:stone_bricks",
+   "-5,64,-1": "minecraft:stone_bricks",
+   "-5,64,0": "minecraft:stone_bricks",
+   "-5,64,1": "minecraft:stone_bricks",
+   "-5,64,2": "minecraft:stone_bricks",
+   "-5,64,3": "minecraft:stone_bricks",
+   "-5,64,4": "minecraft:stone_bricks",
+   "-5,64,5": "minecraft:stone_bricks",
+   "-5,64,6": "minecraft:spruce_planks",
+   "-5,64,7": "minecraft:spruce_planks",
+   "-5,64,8": "minecraft:spruce_planks",
+   "-5,64,9": "minecraft:spruce_planks",
+   "-5,64,10": "minecraft:spruce_planks",
+   "-4,64,-13": "minecraft:stone_bricks",
+   "-4,64,-12": "minecraft:stone_bricks",
+   "-4,64,-11": "minecraft:cobblestone",
+   "-4,64,-10": "minecraft:cobblestone",
+   "-4,64,-9": "minecraft:cobblestone",
+   "-4,64,-8": "minecraft:cobblestone",
+   "-4,64,-7": "minecraft:cobblestone",
+   "-4,64,-6": "minecraft:cobblestone",
+   "-4,64,-5": "minecraft:cobblestone",
+   "-4,64,-4": "minecraft:cobblestone",
+   "-4,64,-3": "minecraft:stone_bricks",
+   "-4,64,-2": "minecraft:stone_bricks",
+   "-4,64,-1": "minecraft:stone_bricks",
+   "-4,64,0": "minecraft:stone_bricks",
+   "-4,64,1": "minecraft:stone_bricks",
+   "-4,64,2": "minecraft:stone_bricks",
+   "-4,64,3": "minecraft:stone_bricks",
+   "-4,64,4": "minecraft:stone_bricks",
+   "-4,64,5": "minecraft:stone_bricks",
+   "-4,64,6": "minecraft:spruce_planks",
+   "-4,64,7": "minecraft:spruce_planks",
+   "-4,64,8": "minecraft:spruce_planks",
+   "-4,64,9": "minecraft:spruce_planks",
+   "-4,64,10": "minecraft:spruce_planks",
+   "-3,64,-13": "minecraft:stone_bricks",
+   "-3,64,-12": "minecraft:stone_bricks",
+   "-3,64,-11": "minecraft:stone_bricks",
+   "-3,64,-10": "minecraft:stone_bricks",
+   "-3,64,-9": "minecraft:stone_bricks",
+   "-3,64,-8": "minecraft:stone_bricks",
+   "-3,64,-7": "minecraft:stone_bricks",
+   "-3,64,-6": "minecraft:stone_bricks",
+   "-3,64,-5": "minecraft:stone_bricks",
+   "-3,64,-4": "minecraft:stone_bricks",
+   "-3,64,-3": "minecraft:stone_bricks",
+   "-3,64,-2": "minecraft:stone_bricks",
+   "-3,64,-1": "minecraft:stone_bricks",
+   "-3,64,0": "minecraft:stone_bricks",
+   "-3,64,1": "minecraft:stone_bricks",
+   "-3,64,2": "minecraft:stone_bricks",
+   "-3,64,3": "minecraft:stone_bricks",
+   "-3,64,4": "minecraft:stone_bricks",
+   "-3,64,5": "minecraft:stone_bricks",
+   "-3,64,6": "minecraft:spruce_planks",
+   "-3,64,7": "minecraft:spruce_planks",
+   "-3,64,8": "minecraft:spruce_planks",
+   "-3,64,9": "minecraft:spruce_planks",
+   "-3,64,10": "minecraft:spruce_planks",
+   "-2,64,-13": "minecraft:stone_bricks",
+   "-2,64,-12": "minecraft:gravel",
+   "-2,64,-11": "minecraft:gravel",
+   "-2,64,-10": "minecraft:gravel",
+   "-2,64,-9": "minecraft:gravel",
+   "-2,64,-8": "minecraft:gravel",
+   "-2,64,-7": "minecraft:gravel",
+   "-2,64,-6": "minecraft:gravel",
+   "-2,64,-5": "minecraft:gravel",
+   "-2,64,-4": "minecraft:gravel",
+   "-2,64,-3": "minecraft:gravel",
+   "-2,64,-2": "minecraft:gravel",
+   "-2,64,-1": "minecraft:gravel",
+   "-2,64,0": "minecraft:gravel",
+   "-2,64,1": "minecraft:gravel",
+   "-2,64,2": "minecraft:gravel",
+   "-2,64,3": "minecraft:gravel",
+   "-2,64,4": "minecraft:gravel",
+   "-2,64,5": "minecraft:gravel",
+   "-2,64,6": "minecraft:spruce_planks",
+   "-2,64,7": "minecraft:spruce_planks",
+   "-2,64,8": "minecraft:spruce_planks",
+   "-2,64,9": "minecraft:spruce_planks",
+   "-2,64,10": "minecraft:spruce_planks",
+   "-1,64,-13": "minecraft:stone_bricks",
+   "-1,64,-12": "minecraft:polished_andesite",
+   "-1,64,-11": "minecraft:polished_andesite",
+   "-1,64,-10": "minecraft:polished_andesite",
+   "-1,64,-9": "minecraft:polished_andesite",
+   "-1,64,-8": "minecraft:polished_andesite",
+   "-1,64,-7": "minecraft:polished_andesite",
+   "-1,64,-6": "minecraft:polished_andesite",
+   "-1,64,-5": "minecraft:polished_andesite",
+   "-1,64,-4": "minecraft:polished_andesite",
+   "-1,64,-3": "minecraft:polished_andesite",
+   "-1,64,-2": "minecraft:polished_andesite",
+   "-1,64,-1": "minecraft:polished_andesite",
+   "-1,64,0": "minecraft:polished_andesite",
+   "-1,64,1": "minecraft:polished_andesite",
+   "-1,64,2": "minecraft:polished_andesite",
+   "-1,64,3": "minecraft:polished_andesite",
+   "-1,64,4": "minecraft:polished_andesite",
+   "-1,64,5": "minecraft:polished_andesite",
+   "-1,64,6": "minecraft:spruce_planks",
+   "-1,64,7": "minecraft:spruce_planks",
+   "-1,64,8": "minecraft:waxed_cut_copper",
+   "-1,64,9": "minecraft:spruce_planks",
+   "-1,64,10": "minecraft:spruce_planks",
+   "0,64,-13": "minecraft:stone_bricks",
+   "0,64,-12": "minecraft:polished_andesite",
+   "0,64,-11": "minecraft:polished_andesite",
+   "0,64,-10": "minecraft:polished_andesite",
+   "0,64,-9": "minecraft:polished_andesite",
+   "0,64,-8": "minecraft:polished_andesite",
+   "0,64,-7": "minecraft:polished_andesite",
+   "0,64,-6": "minecraft:polished_andesite",
+   "0,64,-5": "minecraft:polished_andesite",
+   "0,64,-4": "minecraft:polished_andesite",
+   "0,64,-3": "minecraft:polished_andesite",
+   "0,64,-2": "minecraft:polished_andesite",
+   "0,64,-1": "minecraft:polished_andesite",
+   "0,64,0": "minecraft:polished_andesite",
+   "0,64,1": "minecraft:polished_andesite",
+   "0,64,2": "minecraft:polished_andesite",
+   "0,64,3": "minecraft:polished_andesite",
+   "0,64,4": "minecraft:polished_andesite",
+   "0,64,5": "minecraft:polished_andesite",
+   "0,64,6": "minecraft:spruce_planks",
+   "0,64,7": "minecraft:mossy_stone_bricks",
+   "0,64,8": "minecraft:chiseled_stone_bricks",
+   "0,64,9": "minecraft:gold_block",
+   "0,64,10": "minecraft:spruce_planks",
+   "1,64,-13": "minecraft:stone_bricks",
+   "1,64,-12": "minecraft:polished_andesite",
+   "1,64,-11": "minecraft:polished_andesite",
+   "1,64,-10": "minecraft:polished_andesite",
+   "1,64,-9": "minecraft:polished_andesite",
+   "1,64,-8": "minecraft:polished_andesite",
+   "1,64,-7": "minecraft:polished_andesite",
+   "1,64,-6": "minecraft:polished_andesite",
+   "1,64,-5": "minecraft:polished_andesite",
+   "1,64,-4": "minecraft:polished_andesite",
+   "1,64,-3": "minecraft:polished_andesite",
+   "1,64,-2": "minecraft:polished_andesite",
+   "1,64,-1": "minecraft:polished_andesite",
+   "1,64,0": "minecraft:polished_andesite",
+   "1,64,1": "minecraft:polished_andesite",
+   "1,64,2": "minecraft:polished_andesite",
+   "1,64,3": "minecraft:polished_andesite",
+   "1,64,4": "minecraft:polished_andesite",
+   "1,64,5": "minecraft:polished_andesite",
+   "1,64,6": "minecraft:spruce_planks",
+   "1,64,7": "minecraft:spruce_planks",
+   "1,64,8": "minecraft:waxed_cut_copper",
+   "1,64,9": "minecraft:spruce_planks",
+   "1,64,10": "minecraft:spruce_planks",
+   "2,64,-13": "minecraft:stone_bricks",
+   "2,64,-12": "minecraft:gravel",
+   "2,64,-11": "minecraft:gravel",
+   "2,64,-10": "minecraft:gravel",
+   "2,64,-9": "minecraft:gravel",
+   "2,64,-8": "minecraft:gravel",
+   "2,64,-7": "minecraft:gravel",
+   "2,64,-6": "minecraft:gravel",
+   "2,64,-5": "minecraft:gravel",
+   "2,64,-4": "minecraft:gravel",
+   "2,64,-3": "minecraft:gravel",
+   "2,64,-2": "minecraft:gravel",
+   "2,64,-1": "minecraft:gravel",
+   "2,64,0": "minecraft:gravel",
+   "2,64,1": "minecraft:gravel",
+   "2,64,2": "minecraft:gravel",
+   "2,64,3": "minecraft:gravel",
+   "2,64,4": "minecraft:gravel",
+   "2,64,5": "minecraft:gravel",
+   "2,64,6": "minecraft:spruce_planks",
+   "2,64,7": "minecraft:spruce_planks",
+   "2,64,8": "minecraft:spruce_planks",
+   "2,64,9": "minecraft:spruce_planks",
+   "2,64,10": "minecraft:spruce_planks",
+   "3,64,-13": "minecraft:stone_bricks",
+   "3,64,-12": "minecraft:stone_bricks",
+   "3,64,-11": "minecraft:polished_deepslate",
+   "3,64,-10": "minecraft:polished_deepslate",
+   "3,64,-9": "minecraft:polished_deepslate",
+   "3,64,-8": "minecraft:polished_deepslate",
+   "3,64,-7": "minecraft:polished_deepslate",
+   "3,64,-6": "minecraft:polished_deepslate",
+   "3,64,-5": "minecraft:polished_deepslate",
+   "3,64,-4": "minecraft:polished_deepslate",
+   "3,64,-3": "minecraft:stone_bricks",
+   "3,64,-2": "minecraft:stone_bricks",
+   "3,64,-1": "minecraft:stone_bricks",
+   "3,64,0": "minecraft:stone_bricks",
+   "3,64,1": "minecraft:stone_bricks",
+   "3,64,2": "minecraft:stone_bricks",
+   "3,64,3": "minecraft:stone_bricks",
+   "3,64,4": "minecraft:stone_bricks",
+   "3,64,5": "minecraft:stone_bricks",
+   "3,64,6": "minecraft:spruce_planks",
+   "3,64,7": "minecraft:spruce_planks",
+   "3,64,8": "minecraft:spruce_planks",
+   "3,64,9": "minecraft:spruce_planks",
+   "3,64,10": "minecraft:spruce_planks",
+   "4,64,-13": "minecraft:stone_bricks",
+   "4,64,-12": "minecraft:stone_bricks",
+   "4,64,-11": "minecraft:polished_deepslate",
+   "4,64,-10": "minecraft:polished_deepslate",
+   "4,64,-9": "minecraft:polished_deepslate",
+   "4,64,-8": "minecraft:polished_deepslate",
+   "4,64,-7": "minecraft:polished_deepslate",
+   "4,64,-6": "minecraft:polished_deepslate",
+   "4,64,-5": "minecraft:polished_deepslate",
+   "4,64,-4": "minecraft:polished_deepslate",
+   "4,64,-3": "minecraft:stone_bricks",
+   "4,64,-2": "minecraft:stone_bricks",
+   "4,64,-1": "minecraft:stone_bricks",
+   "4,64,0": "minecraft:stone_bricks",
+   "4,64,1": "minecraft:stone_bricks",
+   "4,64,2": "minecraft:stone_bricks",
+   "4,64,3": "minecraft:stone_bricks",
+   "4,64,4": "minecraft:stone_bricks",
+   "4,64,5": "minecraft:stone_bricks",
+   "4,64,6": "minecraft:spruce_planks",
+   "4,64,7": "minecraft:spruce_planks",
+   "4,64,8": "minecraft:spruce_planks",
+   "4,64,9": "minecraft:spruce_planks",
+   "4,64,10": "minecraft:spruce_planks",
+   "5,64,-13": "minecraft:stone_bricks",
+   "5,64,-12": "minecraft:stone_bricks",
+   "5,64,-11": "minecraft:polished_deepslate",
+   "5,64,-10": "minecraft:polished_deepslate",
+   "5,64,-9": "minecraft:polished_deepslate",
+   "5,64,-8": "minecraft:polished_deepslate",
+   "5,64,-7": "minecraft:polished_deepslate",
+   "5,64,-6": "minecraft:polished_deepslate",
+   "5,64,-5": "minecraft:polished_deepslate",
+   "5,64,-4": "minecraft:polished_deepslate",
+   "5,64,-3": "minecraft:stone_bricks",
+   "5,64,-2": "minecraft:stone_bricks",
+   "5,64,-1": "minecraft:stone_bricks",
+   "5,64,0": "minecraft:stone_bricks",
+   "5,64,1": "minecraft:stone_bricks",
+   "5,64,2": "minecraft:stone_bricks",
+   "5,64,3": "minecraft:stone_bricks",
+   "5,64,4": "minecraft:stone_bricks",
+   "5,64,5": "minecraft:stone_bricks",
+   "5,64,6": "minecraft:spruce_planks",
+   "5,64,7": "minecraft:spruce_planks",
+   "5,64,8": "minecraft:spruce_planks",
+   "5,64,9": "minecraft:spruce_planks",
+   "5,64,10": "minecraft:spruce_planks",
+   "6,64,-13": "minecraft:stone_bricks",
+   "6,64,-12": "minecraft:stone_bricks",
+   "6,64,-11": "minecraft:polished_deepslate",
+   "6,64,-10": "minecraft:polished_deepslate",
+   "6,64,-9": "minecraft:polished_deepslate",
+   "6,64,-8": "minecraft:polished_deepslate",
+   "6,64,-7": "minecraft:polished_deepslate",
+   "6,64,-6": "minecraft:chiseled_stone_bricks",
+   "6,64,-5": "minecraft:polished_deepslate",
+   "6,64,-4": "minecraft:polished_deepslate",
+   "6,64,-3": "minecraft:stone_bricks",
+   "6,64,-2": "minecraft:stone_bricks",
+   "6,64,-1": "minecraft:stone_bricks",
+   "6,64,0": "minecraft:stone_bricks",
+   "6,64,1": "minecraft:stone_bricks",
+   "6,64,2": "minecraft:stone_bricks",
+   "6,64,3": "minecraft:stone_bricks",
+   "6,64,4": "minecraft:stone_bricks",
+   "6,64,5": "minecraft:stone_bricks",
+   "6,64,6": "minecraft:spruce_planks",
+   "6,64,7": "minecraft:spruce_planks",
+   "6,64,8": "minecraft:spruce_planks",
+   "6,64,9": "minecraft:spruce_planks",
+   "6,64,10": "minecraft:spruce_planks",
+   "7,64,-13": "minecraft:stone_bricks",
+   "7,64,-12": "minecraft:stone_bricks",
+   "7,64,-11": "minecraft:polished_deepslate",
+   "7,64,-10": "minecraft:polished_deepslate",
+   "7,64,-9": "minecraft:dark_oak_planks",
+   "7,64,-8": "minecraft:dark_oak_planks",
+   "7,64,-7": "minecraft:dark_oak_planks",
+   "7,64,-6": "minecraft:dark_oak_planks",
+   "7,64,-5": "minecraft:dark_oak_planks",
+   "7,64,-4": "minecraft:dark_oak_planks",
+   "7,64,-3": "minecraft:dark_oak_planks",
+   "7,64,-2": "minecraft:stone_bricks",
+   "7,64,-1": "minecraft:stone_bricks",
+   "7,64,0": "minecraft:stone_bricks",
+   "7,64,1": "minecraft:stone_bricks",
+   "7,64,2": "minecraft:stone_bricks",
+   "7,64,3": "minecraft:stone_bricks",
+   "7,64,4": "minecraft:stone_bricks",
+   "7,64,5": "minecraft:stone_bricks",
+   "7,64,6": "minecraft:spruce_planks",
+   "7,64,7": "minecraft:spruce_planks",
+   "7,64,8": "minecraft:spruce_planks",
+   "7,64,9": "minecraft:spruce_planks",
+   "7,64,10": "minecraft:spruce_planks",
+   "8,64,-13": "minecraft:stone_bricks",
+   "8,64,-12": "minecraft:stone_bricks",
+   "8,64,-11": "minecraft:polished_deepslate",
+   "8,64,-10": "minecraft:polished_deepslate",
+   "8,64,-9": "minecraft:dark_oak_planks",
+   "8,64,-8": "minecraft:dark_oak_planks",
+   "8,64,-7": "minecraft:dark_oak_planks",
+   "8,64,-6": "minecraft:dark_oak_planks",
+   "8,64,-5": "minecraft:dark_oak_planks",
+   "8,64,-4": "minecraft:dark_oak_planks",
+   "8,64,-3": "minecraft:dark_oak_planks",
+   "8,64,-2": "minecraft:stone_bricks",
+   "8,64,-1": "minecraft:stone_bricks",
+   "8,64,0": "minecraft:stone_bricks",
+   "8,64,1": "minecraft:stone_bricks",
+   "8,64,2": "minecraft:stone_bricks",
+   "8,64,3": "minecraft:stone_bricks",
+   "8,64,4": "minecraft:stone_bricks",
+   "8,64,5": "minecraft:stone_bricks",
+   "8,64,6": "minecraft:spruce_planks",
+   "8,64,7": "minecraft:spruce_planks",
+   "8,64,8": "minecraft:spruce_planks",
+   "8,64,9": "minecraft:spruce_planks",
+   "8,64,10": "minecraft:spruce_planks",
+   "9,64,-13": "minecraft:stone_bricks",
+   "9,64,-12": "minecraft:stone_bricks",
+   "9,64,-11": "minecraft:polished_deepslate",
+   "9,64,-10": "minecraft:polished_deepslate",
+   "9,64,-9": "minecraft:dark_oak_planks",
+   "9,64,-8": "minecraft:dark_oak_planks",
+   "9,64,-7": "minecraft:dark_oak_planks",
+   "9,64,-6": "minecraft:dark_oak_planks",
+   "9,64,-5": "minecraft:dark_oak_planks",
+   "9,64,-4": "minecraft:dark_oak_planks",
+   "9,64,-3": "minecraft:dark_oak_planks",
+   "9,64,-2": "minecraft:stone_bricks",
+   "9,64,-1": "minecraft:stone_bricks",
+   "9,64,0": "minecraft:stone_bricks",
+   "9,64,1": "minecraft:stone_bricks",
+   "9,64,2": "minecraft:stone_bricks",
+   "9,64,3": "minecraft:stone_bricks",
+   "9,64,4": "minecraft:stone_bricks",
+   "9,64,5": "minecraft:stone_bricks",
+   "9,64,6": "minecraft:spruce_planks",
+   "9,64,7": "minecraft:spruce_planks",
+   "9,64,8": "minecraft:spruce_planks",
+   "9,64,9": "minecraft:spruce_planks",
+   "9,64,10": "minecraft:spruce_planks",
+   "10,64,-13": "minecraft:stone_bricks",
+   "10,64,-12": "minecraft:stone_bricks",
+   "10,64,-11": "minecraft:stone_bricks",
+   "10,64,-10": "minecraft:stone_bricks",
+   "10,64,-9": "minecraft:dark_oak_planks",
+   "10,64,-8": "minecraft:dark_oak_planks",
+   "10,64,-7": "minecraft:dark_oak_planks",
+   "10,64,-6": "minecraft:dark_oak_planks",
+   "10,64,-5": "minecraft:dark_oak_planks",
+   "10,64,-4": "minecraft:dark_oak_planks",
+   "10,64,-3": "minecraft:dark_oak_planks",
+   "10,64,-2": "minecraft:stone_bricks",
+   "10,64,-1": "minecraft:stone_bricks",
+   "10,64,0": "minecraft:stone_bricks",
+   "10,64,1": "minecraft:stone_bricks",
+   "10,64,2": "minecraft:stone_bricks",
+   "10,64,3": "minecraft:stone_bricks",
+   "10,64,4": "minecraft:stone_bricks",
+   "10,64,5": "minecraft:stone_bricks",
+   "10,64,6": "minecraft:spruce_planks",
+   "10,64,7": "minecraft:spruce_planks",
+   "10,64,8": "minecraft:spruce_planks",
+   "10,64,9": "minecraft:spruce_planks",
+   "10,64,10": "minecraft:spruce_planks",
+   "11,64,-13": "minecraft:stone_bricks",
+   "11,64,-12": "minecraft:stone_bricks",
+   "11,64,-11": "minecraft:stone_bricks",
+   "11,64,-10": "minecraft:stone_bricks",
+   "11,64,-9": "minecraft:dark_oak_planks",
+   "11,64,-8": "minecraft:dark_oak_planks",
+   "11,64,-7": "minecraft:dark_oak_planks",
+   "11,64,-6": "minecraft:mossy_stone_bricks",
+   "11,64,-5": "minecraft:mossy_stone_bricks",
+   "11,64,-4": "minecraft:mossy_stone_bricks",
+   "11,64,-3": "minecraft:mossy_stone_bricks",
+   "11,64,-2": "minecraft:mossy_stone_bricks",
+   "11,64,-1": "minecraft:mossy_stone_bricks",
+   "11,64,0": "minecraft:mossy_stone_bricks",
+   "11,64,1": "minecraft:mossy_stone_bricks",
+   "11,64,2": "minecraft:mossy_stone_bricks",
+   "11,64,3": "minecraft:stone_bricks",
+   "11,64,4": "minecraft:stone_bricks",
+   "11,64,5": "minecraft:stone_bricks",
+   "11,64,6": "minecraft:spruce_planks",
+   "11,64,7": "minecraft:spruce_planks",
+   "11,64,8": "minecraft:spruce_planks",
+   "11,64,9": "minecraft:spruce_planks",
+   "11,64,10": "minecraft:spruce_planks",
+   "12,64,-13": "minecraft:stone_bricks",
+   "12,64,-12": "minecraft:stone_bricks",
+   "12,64,-11": "minecraft:stone_bricks",
+   "12,64,-10": "minecraft:stone_bricks",
+   "12,64,-9": "minecraft:stone_bricks",
+   "12,64,-8": "minecraft:stone_bricks",
+   "12,64,-7": "minecraft:stone_bricks",
+   "12,64,-6": "minecraft:mossy_stone_bricks",
+   "12,64,-5": "minecraft:mossy_stone_bricks",
+   "12,64,-4": "minecraft:mossy_stone_bricks",
+   "12,64,-3": "minecraft:mossy_stone_bricks",
+   "12,64,-2": "minecraft:mossy_stone_bricks",
+   "12,64,-1": "minecraft:mossy_stone_bricks",
+   "12,64,0": "minecraft:mossy_stone_bricks",
+   "12,64,1": "minecraft:mossy_stone_bricks",
+   "12,64,2": "minecraft:mossy_stone_bricks",
+   "12,64,3": "minecraft:stone_bricks",
+   "12,64,4": "minecraft:stone_bricks",
+   "12,64,5": "minecraft:stone_bricks",
+   "12,64,6": "minecraft:stone_bricks",
+   "12,64,7": "minecraft:stone_bricks",
+   "12,64,8": "minecraft:stone_bricks",
+   "12,64,9": "minecraft:stone_bricks",
+   "12,64,10": "minecraft:stone_bricks",
+   "-12,65,-13": "minecraft:stone_bricks",
+   "-11,65,-13": "minecraft:stone_bricks",
+   "-11,66,-13": "minecraft:waxed_copper_block",
+   "-10,65,-13": "minecraft:coal_block",
+   "-10,66,-13": "minecraft:waxed_cut_copper",
+   "-9,65,-13": "minecraft:bricks",
+   "-8,65,-13": "minecraft:bricks",
+   "-8,66,-13": "minecraft:bricks",
+   "-7,65,-13": "minecraft:stone_bricks",
+   "-7,66,-13": "minecraft:spruce_planks",
+   "-6,65,-13": "minecraft:stone_bricks",
+   "-5,65,-13": "minecraft:deepslate_bricks",
+   "-5,66,-13": "minecraft:waxed_copper_block",
+   "-4,65,-13": "minecraft:spruce_log",
+   "-4,66,-13": "minecraft:spruce_log",
+   "-3,65,-13": "minecraft:stone_bricks",
+   "-2,65,-13": "minecraft:redstone_lamp",
+   "-2,66,-13": "minecraft:waxed_copper_block",
+   "-1,65,-13": "minecraft:stone_bricks",
+   "-1,66,-13": "minecraft:waxed_cut_copper",
+   "0,65,-13": "minecraft:spruce_log",
+   "1,65,-13": "minecraft:stone_bricks",
+   "1,66,-13": "minecraft:waxed_copper_block",
+   "2,65,-13": "minecraft:stone_bricks",
+   "2,66,-13": "minecraft:waxed_cut_copper",
+   "3,65,-13": "minecraft:stone_bricks",
+   "4,65,-13": "minecraft:spruce_log",
+   "4,66,-13": "minecraft:spruce_log",
+   "5,65,-13": "minecraft:deepslate_bricks",
+   "5,66,-13": "minecraft:waxed_cut_copper",
+   "6,65,-13": "minecraft:redstone_lamp",
+   "7,65,-13": "minecraft:stone_bricks",
+   "7,66,-13": "minecraft:waxed_copper_block",
+   "8,65,-13": "minecraft:spruce_log",
+   "8,66,-13": "minecraft:spruce_log",
+   "9,65,-13": "minecraft:stone_bricks",
+   "10,65,-13": "minecraft:deepslate_bricks",
+   "10,66,-13": "minecraft:waxed_copper_block",
+   "11,65,-13": "minecraft:stone_bricks",
+   "11,66,-13": "minecraft:waxed_cut_copper",
+   "12,65,-13": "minecraft:stone_bricks",
+   "-10,65,-14": "minecraft:redstone_block",
+   "-2,65,-14": "minecraft:redstone_block",
+   "6,65,-14": "minecraft:redstone_block",
+   "-6,66,-13": "minecraft:hopper",
+   "-3,66,-13": "minecraft:exposed_copper",
+   "0,66,-13": "minecraft:spruce_log",
+   "3,66,-13": "minecraft:exposed_copper",
+   "6,66,-13": "minecraft:hopper",
+   "9,66,-13": "minecraft:exposed_copper",
+   "-12,66,-13": "minecraft:glass_pane",
+   "-12,67,-13": "minecraft:spruce_log",
+   "-12,68,-13": "minecraft:spruce_log",
+   "-12,69,-13": "minecraft:spruce_log",
+   "-12,70,-13": "minecraft:waxed_cut_copper",
+   "-8,67,-13": "minecraft:cracked_stone_bricks",
+   "-8,68,-13": "minecraft:bricks",
+   "-8,69,-13": "minecraft:cracked_stone_bricks",
+   "-8,70,-13": "minecraft:bricks",
+   "-4,67,-13": "minecraft:spruce_log",
+   "-4,68,-13": "minecraft:spruce_log",
+   "-4,69,-13": "minecraft:spruce_log",
+   "-4,70,-13": "minecraft:waxed_cut_copper",
+   "0,67,-13": "minecraft:spruce_log",
+   "0,68,-13": "minecraft:spruce_log",
+   "0,69,-13": "minecraft:spruce_log",
+   "0,70,-13": "minecraft:waxed_cut_copper",
+   "4,67,-13": "minecraft:spruce_log",
+   "4,68,-13": "minecraft:spruce_log",
+   "4,69,-13": "minecraft:spruce_log",
+   "4,70,-13": "minecraft:waxed_cut_copper",
+   "8,67,-13": "minecraft:spruce_log",
+   "8,68,-13": "minecraft:spruce_log",
+   "8,69,-13": "minecraft:spruce_log",
+   "8,70,-13": "minecraft:waxed_cut_copper",
+   "12,66,-13": "minecraft:glass_pane",
+   "12,67,-13": "minecraft:spruce_log",
+   "12,68,-13": "minecraft:spruce_log",
+   "12,69,-13": "minecraft:spruce_log",
+   "12,70,-13": "minecraft:waxed_cut_copper",
+   "-12,65,-12": "minecraft:spruce_log",
+   "-12,66,-12": "minecraft:spruce_log",
+   "-12,65,-11": "minecraft:stone_bricks",
+   "-12,66,-11": "minecraft:glass_pane",
+   "-12,65,-10": "minecraft:stone_bricks",
+   "-12,66,-10": "minecraft:glass_pane",
+   "-12,65,-9": "minecraft:stone_bricks",
+   "-12,66,-9": "minecraft:glass_pane",
+   "-12,65,-8": "minecraft:spruce_log",
+   "-12,66,-8": "minecraft:spruce_log",
+   "-12,65,-7": "minecraft:stone_bricks",
+   "-12,66,-7": "minecraft:glass_pane",
+   "-12,65,-6": "minecraft:stone_bricks",
+   "-12,66,-6": "minecraft:glass_pane",
+   "-12,65,-5": "minecraft:stone_bricks",
+   "-12,66,-5": "minecraft:glass_pane",
+   "-12,65,-4": "minecraft:spruce_log",
+   "-12,66,-4": "minecraft:spruce_log",
+   "-12,65,-3": "minecraft:stone_bricks",
+   "-12,66,-3": "minecraft:glass_pane",
+   "-12,65,-2": "minecraft:stone_bricks",
+   "-12,66,-2": "minecraft:glass_pane",
+   "-12,65,-1": "minecraft:stone_bricks",
+   "-12,66,-1": "minecraft:glass_pane",
+   "-12,65,0": "minecraft:spruce_log",
+   "-12,66,0": "minecraft:spruce_log",
+   "-12,65,1": "minecraft:stone_bricks",
+   "-12,66,1": "minecraft:glass_pane",
+   "-12,65,2": "minecraft:stone_bricks",
+   "-12,66,2": "minecraft:glass_pane",
+   "-12,65,3": "minecraft:stone_bricks",
+   "-12,66,3": "minecraft:glass_pane",
+   "-12,65,4": "minecraft:spruce_log",
+   "-12,66,4": "minecraft:spruce_log",
+   "-12,65,5": "minecraft:stone_bricks",
+   "-12,66,5": "minecraft:glass_pane",
+   "-12,65,6": "minecraft:stone_bricks",
+   "-12,66,6": "minecraft:glass_pane",
+   "-12,65,7": "minecraft:stone_bricks",
+   "-12,66,7": "minecraft:glass_pane",
+   "-12,65,8": "minecraft:spruce_log",
+   "-12,66,8": "minecraft:spruce_log",
+   "-12,65,9": "minecraft:stone_bricks",
+   "-12,66,9": "minecraft:glass_pane",
+   "-12,65,10": "minecraft:stone_bricks",
+   "-12,66,10": "minecraft:glass_pane",
+   "-12,67,-12": "minecraft:spruce_log",
+   "-12,68,-12": "minecraft:spruce_log",
+   "-12,69,-12": "minecraft:spruce_log",
+   "-12,70,-12": "minecraft:waxed_cut_copper",
+   "-12,71,-12": "minecraft:lantern",
+   "-12,67,-8": "minecraft:spruce_log",
+   "-12,68,-8": "minecraft:spruce_log",
+   "-12,69,-8": "minecraft:spruce_log",
+   "-12,70,-8": "minecraft:waxed_cut_copper",
+   "-12,71,-8": "minecraft:lantern",
+   "-12,67,-4": "minecraft:spruce_log",
+   "-12,68,-4": "minecraft:spruce_log",
+   "-12,69,-4": "minecraft:spruce_log",
+   "-12,70,-4": "minecraft:waxed_cut_copper",
+   "-12,71,-4": "minecraft:lantern",
+   "-12,67,0": "minecraft:spruce_log",
+   "-12,68,0": "minecraft:spruce_log",
+   "-12,69,0": "minecraft:spruce_log",
+   "-12,70,0": "minecraft:waxed_cut_copper",
+   "-12,71,0": "minecraft:lantern",
+   "-12,67,4": "minecraft:spruce_log",
+   "-12,68,4": "minecraft:spruce_log",
+   "-12,69,4": "minecraft:spruce_log",
+   "-12,70,4": "minecraft:waxed_cut_copper",
+   "-12,71,4": "minecraft:lantern",
+   "-12,67,8": "minecraft:spruce_log",
+   "-12,68,8": "minecraft:spruce_log",
+   "-12,69,8": "minecraft:spruce_log",
+   "-12,70,8": "minecraft:waxed_cut_copper",
+   "-12,71,8": "minecraft:lantern",
+   "12,65,-12": "minecraft:spruce_log",
+   "12,66,-12": "minecraft:spruce_log",
+   "12,65,-11": "minecraft:stone_bricks",
+   "12,66,-11": "minecraft:glass_pane",
+   "12,65,-10": "minecraft:stone_bricks",
+   "12,66,-10": "minecraft:glass_pane",
+   "12,65,-9": "minecraft:stone_bricks",
+   "12,66,-9": "minecraft:glass_pane",
+   "12,65,-8": "minecraft:spruce_log",
+   "12,66,-8": "minecraft:spruce_log",
+   "12,65,-7": "minecraft:stone_bricks",
+   "12,66,-7": "minecraft:glass_pane",
+   "12,65,-6": "minecraft:stone_bricks",
+   "12,66,-6": "minecraft:glass_pane",
+   "12,65,-5": "minecraft:stone_bricks",
+   "12,66,-5": "minecraft:glass_pane",
+   "12,65,-4": "minecraft:spruce_log",
+   "12,66,-4": "minecraft:spruce_log",
+   "12,65,-3": "minecraft:stone_bricks",
+   "12,66,-3": "minecraft:glass_pane",
+   "12,65,-2": "minecraft:stone_bricks",
+   "12,66,-2": "minecraft:glass_pane",
+   "12,65,-1": "minecraft:stone_bricks",
+   "12,66,-1": "minecraft:glass_pane",
+   "12,65,0": "minecraft:spruce_log",
+   "12,66,0": "minecraft:spruce_log",
+   "12,65,1": "minecraft:stone_bricks",
+   "12,66,1": "minecraft:glass_pane",
+   "12,65,2": "minecraft:stone_bricks",
+   "12,66,2": "minecraft:glass_pane",
+   "12,65,3": "minecraft:stone_bricks",
+   "12,66,3": "minecraft:glass_pane",
+   "12,65,4": "minecraft:spruce_log",
+   "12,66,4": "minecraft:spruce_log",
+   "12,65,5": "minecraft:stone_bricks",
+   "12,66,5": "minecraft:glass_pane",
+   "12,65,6": "minecraft:stone_bricks",
+   "12,66,6": "minecraft:glass_pane",
+   "12,65,7": "minecraft:stone_bricks",
+   "12,66,7": "minecraft:glass_pane",
+   "12,65,8": "minecraft:spruce_log",
+   "12,66,8": "minecraft:spruce_log",
+   "12,65,9": "minecraft:stone_bricks",
+   "12,66,9": "minecraft:glass_pane",
+   "12,65,10": "minecraft:stone_bricks",
+   "12,66,10": "minecraft:glass_pane",
+   "12,67,-12": "minecraft:spruce_log",
+   "12,68,-12": "minecraft:spruce_log",
+   "12,69,-12": "minecraft:spruce_log",
+   "12,70,-12": "minecraft:waxed_cut_copper",
+   "12,71,-12": "minecraft:lantern",
+   "12,67,-8": "minecraft:spruce_log",
+   "12,68,-8": "minecraft:spruce_log",
+   "12,69,-8": "minecraft:spruce_log",
+   "12,70,-8": "minecraft:waxed_cut_copper",
+   "12,71,-8": "minecraft:lantern",
+   "12,67,-4": "minecraft:spruce_log",
+   "12,68,-4": "minecraft:spruce_log",
+   "12,69,-4": "minecraft:spruce_log",
+   "12,70,-4": "minecraft:waxed_cut_copper",
+   "12,71,-4": "minecraft:lantern",
+   "12,67,0": "minecraft:spruce_log",
+   "12,68,0": "minecraft:spruce_log",
+   "12,69,0": "minecraft:spruce_log",
+   "12,70,0": "minecraft:waxed_cut_copper",
+   "12,71,0": "minecraft:lantern",
+   "12,67,4": "minecraft:spruce_log",
+   "12,68,4": "minecraft:spruce_log",
+   "12,69,4": "minecraft:spruce_log",
+   "12,70,4": "minecraft:waxed_cut_copper",
+   "12,71,4": "minecraft:lantern",
+   "12,67,8": "minecraft:spruce_log",
+   "12,68,8": "minecraft:spruce_log",
+   "12,69,8": "minecraft:spruce_log",
+   "12,70,8": "minecraft:waxed_cut_copper",
+   "12,71,8": "minecraft:lantern",
+   "-5,65,10": "minecraft:spruce_log",
+   "-5,66,10": "minecraft:red_wool",
+   "-5,67,10": "minecraft:spruce_log",
+   "-5,68,10": "minecraft:spruce_log",
+   "-5,69,10": "minecraft:spruce_log",
+   "-5,70,10": "minecraft:waxed_cut_copper",
+   "5,65,10": "minecraft:spruce_log",
+   "5,66,10": "minecraft:yellow_wool",
+   "5,67,10": "minecraft:spruce_log",
+   "5,68,10": "minecraft:spruce_log",
+   "5,69,10": "minecraft:spruce_log",
+   "5,70,10": "minecraft:waxed_cut_copper",
+   "-9,66,-13": "minecraft:bricks",
+   "-9,67,-13": "minecraft:cracked_stone_bricks",
+   "-9,68,-13": "minecraft:bricks",
+   "-9,69,-13": "minecraft:cracked_stone_bricks",
+   "-9,70,-13": "minecraft:bricks",
+   "-9,71,-13": "minecraft:waxed_cut_copper",
+   "-9,72,-13": "minecraft:bricks",
+   "-9,73,-13": "minecraft:bricks",
+   "-9,74,-13": "minecraft:campfire",
+   "-9,65,-12": "minecraft:bricks",
+   "-9,66,-12": "minecraft:bricks",
+   "-9,67,-12": "minecraft:cracked_stone_bricks",
+   "-9,68,-12": "minecraft:bricks",
+   "-9,69,-12": "minecraft:cracked_stone_bricks",
+   "-9,70,-12": "minecraft:bricks",
+   "-9,71,-12": "minecraft:waxed_cut_copper",
+   "-9,72,-12": "minecraft:bricks",
+   "-9,73,-12": "minecraft:bricks",
+   "-9,74,-12": "minecraft:campfire",
+   "-8,71,-13": "minecraft:waxed_cut_copper",
+   "-8,72,-13": "minecraft:bricks",
+   "-8,73,-13": "minecraft:bricks",
+   "-8,74,-13": "minecraft:campfire",
+   "-8,65,-12": "minecraft:bricks",
+   "-8,66,-12": "minecraft:bricks",
+   "-8,67,-12": "minecraft:cracked_stone_bricks",
+   "-8,68,-12": "minecraft:bricks",
+   "-8,69,-12": "minecraft:cracked_stone_bricks",
+   "-8,70,-12": "minecraft:bricks",
+   "-8,71,-12": "minecraft:waxed_cut_copper",
+   "-8,72,-12": "minecraft:bricks",
+   "-8,73,-12": "minecraft:bricks",
+   "-8,74,-12": "minecraft:campfire",
+   "-10,65,-12": "minecraft:barrel",
+   "-7,65,-12": "minecraft:coal_block",
+   "-7,65,-6": "minecraft:blast_furnace",
+   "-7,66,-6": "minecraft:blast_furnace",
+   "-7,67,-6": "minecraft:blast_furnace",
+   "-5,65,-6": "minecraft:copper_bulb",
+   "-5,66,-6": "minecraft:redstone_lamp",
+   "-8,65,-5": "minecraft:crafting_table",
+   "-4,65,-5": "minecraft:chest",
+   "-8,65,-8": "minecraft:furnace",
+   "-4,65,-8": "minecraft:barrel",
+   "-9,65,-9": "minecraft:campfire",
+   "-7,68,-6": "minecraft:lantern",
+   "5,65,-6": "minecraft:spruce_log",
+   "5,66,-6": "minecraft:waxed_cut_copper",
+   "5,68,-6": "minecraft:redstone_lamp",
+   "7,65,-6": "minecraft:spruce_log",
+   "7,66,-6": "minecraft:waxed_cut_copper",
+   "7,68,-6": "minecraft:redstone_lamp",
+   "5,67,-6": "minecraft:dark_oak_planks",
+   "7,67,-6": "minecraft:dark_oak_planks",
+   "7,65,-5": "minecraft:sticky_piston",
+   "5,65,-7": "minecraft:piston",
+   "4,65,-4": "minecraft:crafting_table",
+   "8,65,-4": "minecraft:chest",
+   "4,65,-8": "minecraft:furnace",
+   "8,65,-9": "minecraft:barrel",
+   "1,65,-10": "minecraft:waxed_cut_copper",
+   "1,66,-10": "minecraft:waxed_cut_copper",
+   "1,67,-10": "minecraft:waxed_cut_copper",
+   "1,68,-10": "minecraft:waxed_cut_copper",
+   "3,65,-10": "minecraft:waxed_cut_copper",
+   "3,66,-10": "minecraft:waxed_copper_block",
+   "3,67,-10": "minecraft:bell",
+   "3,68,-10": "minecraft:waxed_cut_copper",
+   "0,65,-9": "minecraft:crafting_table",
+   "4,65,-9": "minecraft:chest",
+   "0,65,-12": "minecraft:furnace",
+   "10,65,-9": "minecraft:spruce_planks",
+   "10,66,-9": "minecraft:spruce_planks",
+   "10,67,-9": "minecraft:spruce_planks",
+   "10,68,-9": "minecraft:dark_oak_planks",
+   "10,65,-8": "minecraft:spruce_planks",
+   "10,66,-8": "minecraft:iron_bars",
+   "10,67,-8": "minecraft:spruce_planks",
+   "10,68,-8": "minecraft:dark_oak_planks",
+   "10,65,-7": "minecraft:spruce_planks",
+   "10,66,-7": "minecraft:spruce_planks",
+   "10,67,-7": "minecraft:iron_bars",
+   "10,68,-7": "minecraft:dark_oak_planks",
+   "10,65,-6": "minecraft:spruce_planks",
+   "10,66,-6": "minecraft:iron_bars",
+   "10,67,-6": "minecraft:spruce_planks",
+   "10,68,-6": "minecraft:dark_oak_planks",
+   "10,65,-5": "minecraft:spruce_planks",
+   "10,66,-5": "minecraft:spruce_planks",
+   "10,67,-5": "minecraft:iron_bars",
+   "10,68,-5": "minecraft:dark_oak_planks",
+   "10,65,-4": "minecraft:spruce_planks",
+   "10,66,-4": "minecraft:spruce_planks",
+   "10,67,-4": "minecraft:spruce_planks",
+   "10,68,-4": "minecraft:dark_oak_planks",
+   "9,65,-8": "minecraft:stonecutter",
+   "9,65,-7": "minecraft:anvil",
+   "9,65,-6": "minecraft:grindstone",
+   "9,65,-5": "minecraft:smithing_table",
+   "9,65,-4": "minecraft:chest",
+   "10,69,-6": "minecraft:lantern",
+   "10,69,-8": "minecraft:shroomlight",
+   "-4,65,4": "minecraft:stone_bricks",
+   "-4,66,4": "minecraft:stone_bricks",
+   "-4,67,4": "minecraft:lantern",
+   "4,65,4": "minecraft:stone_bricks",
+   "4,66,4": "minecraft:stone_bricks",
+   "4,67,4": "minecraft:lantern",
+   "-9,65,8": "minecraft:campfire",
+   "9,65,7": "minecraft:campfire",
+   "6,65,8": "minecraft:dark_oak_planks",
+   "6,66,8": "minecraft:dark_oak_sign",
+   "6,67,8": "minecraft:dark_oak_planks",
+   "7,65,8": "minecraft:dark_oak_planks",
+   "7,66,8": "minecraft:dark_oak_sign",
+   "7,67,8": "minecraft:dark_oak_planks",
+   "8,65,8": "minecraft:dark_oak_planks",
+   "8,66,8": "minecraft:dark_oak_sign",
+   "8,67,8": "minecraft:dark_oak_planks",
+   "9,65,8": "minecraft:dark_oak_planks",
+   "9,66,8": "minecraft:dark_oak_sign",
+   "9,67,8": "minecraft:dark_oak_planks",
+   "-2,65,3": "minecraft:oak_fence",
+   "-2,65,4": "minecraft:oak_fence",
+   "-2,65,6": "minecraft:oak_fence",
+   "-2,65,7": "minecraft:oak_fence",
+   "2,65,3": "minecraft:oak_fence",
+   "2,65,4": "minecraft:oak_fence",
+   "2,65,6": "minecraft:oak_fence",
+   "2,65,7": "minecraft:oak_fence",
+   "-11,65,4": "minecraft:azalea",
+   "11,65,4": "minecraft:flowering_azalea",
+   "-11,65,6": "minecraft:barrel",
+   "-11,65,7": "minecraft:chest",
+   "11,65,6": "minecraft:cartography_table",
+   "11,65,7": "minecraft:barrel",
+   "-4,65,-12": "minecraft:barrel",
+   "-6,65,-6": "minecraft:air",
+   "6,65,-6": "minecraft:air",
+   "2,65,-10": "minecraft:air",
+   "0,65,8": "minecraft:lever",
+   "-4,65,6": "minecraft:air"
+  },
+  "agents": {
+   "golem": {
+    "pos": [
+     0,
+     65,
+     8
+    ]
+   }
+  },
+  "npcs": {
+   "eira": {
+    "pos": [
+     -4,
+     65,
+     6
+    ]
+   },
+   "worker": {
+    "pos": [
+     7,
+     65,
+     3
+    ]
+   }
+  },
+  "sayCount": 11,
+  "agentPlaceCount": 10,
+  "playerPlaceCount": 1,
+  "eventTypes": [
+   "agent.move:agent",
+   "block.place:agent",
+   "say:agent",
+   "block.place:player"
+  ]
+ },
+ "finishedAt": "2026-10-31T11:29:52.229Z",
+ "ok": true
+}

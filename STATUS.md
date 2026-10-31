@@ -1,0 +1,75 @@
+# STATUS — 项目状态（Lead 维护，每个集成点更新）
+
+> 最后更新：2026-10-31 12:25（Asia/Shanghai）｜阶段：**设计交付完成（v1.3：审计 + 两轮独立评审 + 修订 + 关键 spike），等待 CP0 拍板后进入 T1**
+
+## 一句话
+
+**交付状态（2026-10-31 14:30）**
+
+- **可玩**：L01–L09（Mock + Studio；真实 MC 已验收 L01–L04）。L10 为终局设计/预演（多织偶运行时未接）。
+- **真实 MC**：Engine `LOOM_WORLD=paper` 跑通 L01–L04（34/34 check，3 星）；真实评分与 Mock 逐项一致。
+- **桌面**：Tauri 2 AppImage 120MB / rpm 18MB，无浏览器、置顶/伴玩；App 内 engine 默认 Mock-only（真实 Paper 用 `npm run dev:engine:paper`，未收进安装包）。
+- **质量**：185 项自动化测试全绿；verify l0–l3+lg exit 0；门禁 8 pass / 1 warn / G-FRESH-READER Round 4 仍 tracked fail（需继续收敛）；Studio 真实 Playwright 5/5（含文字溢出自动断言、等待玩家、错误态、试符台、织典）。
+- **真实 MC 视觉**：客户端已在 Xvfb 真实启动进服；L01 完成村门/风车/池塘/集市/村舍/苔藓小径/灯笼等美术 pass，L02 完成谷仓/鸡舍/水槽/树/干草等美术 pass；真实 L1/L2 e2e PASS；截图 evidence/scene-shots/L01.png、L02.png；场景质量门 `qa/scene-quality.mjs`；流程 docs/34、docs/35。
+- **场景美术（region-aware）**：新增 `scripts/scene-shot.mjs` + 插件 `session.status` 的 region/spawn/center 与 `player.teleport yaw/pitch`，截图不再拍旧竞技场。**L01–L09 全部通过真实截图质量门**（L04 修复 y65 逻辑田不可见 + 天气；L08 修复插件补灰柱/相机在场景外，真机主视角能看到烟囱/熔炉/红石门/工具架；自然材质约 85%，红石灯/羊毛为小面积点缀）；L07 实拍仍空/灰，继续返工；L06 机位需调整；L09/L10 未做。L05 第三次返工：clearRegion 中心从空草地改到工地，playerSpawn=(13,64,-2)，真实机位可见脚手架/工棚/半成品房/木料场；自然材质为主、点缀色 3.88%。已向并行 agent 强调：不得为了凑丰富滥用高饱和彩色，点缀色小面积使用。
+- **桌面最新包（v36）**：AppImage 124.20MiB / rpm 23.15MiB，含自绘像素标题栏（无系统窗框）、拖动/双击最大化/最小化/关闭、原生行为收口、编辑器 A-/A+、系统页、伴玩直角+像素化；实测在隔离 `:98 + Openbox`，`:0` 零自动化；Mock-only 已写明。
+- **游戏内提示**：`POST /api/in-game` 支持 `title`（短句大字）与 `actionbar`（长句小字）；真实客户端截图 20/21 已验证不裁切；Studio 开始/等待/报错/通关/重置都已接入。
+- **真实玩家路径验收（未完成）**：L01–L04 真实 Paper e2e 通过；L01–L10 已全部真实 Paper e2e PASS（各 3 星，L10 双织偶含 Studio 会话注入）；Studio L05–L10 中文引导已补齐；每关天空/天气配置已拆分并按 Act 集成。桌面安装包最新重打（Mock-only 未变）；UOS 4/4、纯中文 0 违规；挑战层 UI、真人键鼠验收仍待补。禁止把 Mock 全绿说成「所有关卡跑通」。
+- **世界内中文标注**：插件 `annotations.set/clear/visible` 已实现并打日志（L01 一次生成 6 个、直接测试 2 个 ArmorStand 名牌）；Studio 有「世界标注：开/关」与说明。**受控测试里 2.2x TextDisplay 可见但过大；1.2x 在 L01 实际机位仍不易看到，标注字号/机位未定稿，未宣称可用。**
+- **零 MC 基础引导**：只在「轮到你」阶段出现可折叠「第一次玩 Minecraft？」分步说明（切窗口/WASD/准星/右键），并提供「我弄乱了世界，重置本关」一键恢复；Playwright 已断言。
+- **随时重置**：工作台顶栏「重置本关」+ 结算页重置常驻。
+- **UI 修复**：目标三条不再被裁、等待态有「我已在游戏里点亮」入口、错误态不再显示「准备就绪/灰崽开始照做」、结算主按钮为「下一关」、坐标/失败/试符台/序章排版/红色波浪线等已修；所有卡片加文字溢出 Playwright 断言。
+- **Fresh Reader**：Round 3 仍 FAIL（主要剩「没有真实游戏画面/世界方位图不随关卡变、织典术语密度、部分文案指代」）；未清零前不宣布通过。
+- **内容**：9 关 Mock 内容、L01–L04 真实场景、17 页织典、试符台 REPL、序章/手记、纯中文 UI、Fresh Reader 修复循环。
+- **未完成/限制**：L10 多 agent 运行时；桌面安装包接真实 MC；无真人客户端视觉验收；Fresh Reader Round 3 结果待定。
+：真实 Paper 26.1.2 上 L01 无头 e2e **PASSED/3 星**，真实评分与 MockWorld 逐项一致，reset ≤2s hash 稳定；`npm test` **70 测试全绿**，`verify.sh` l0–l3 全绿；Engine HTTP/SSE 3 星；Studio 构建通过；安全加固 4 项完成。进入 **T2：Studio live + L02–L04 真实 MC 场景 + 美术/文案**。
+
+设计交付包 v1 完成；M0（MC 技术栈）已实证通过（双通道 7/7）；10 关规格与 4 个 Labs 正在收尾；等待用户确认 8 个前提问题后开始 4 天实施。
+
+## 门禁
+
+| 门 | 状态 | 证据 |
+|---|---|---|
+| M0 环境锁定 | ✅ 通过 | `spikes/mc-bot-paper/`（Paper 26.1.2 + mineflayer 4.39.0，7/7；见 docs/02） |
+| 设计交付 v1.3 | ✅ 完成 | docs/00–15 + 13 份 level spec + 3 个实证 spike（见下方「今日完成」） |
+| L10 铺桥 spike | ✅ 通过 | 路线 A 10/10、0 掉落（docs/02c） |
+| Spec 修订波 | ✅ 完成 | L01–L10/EP/Labs 按 docs/14/14b 修复并自查 0 error；待 fresh critic 复评一次（≈1h）后冻结 |
+| CP0 用户拍板 | ⏳ 等待 | 待确认问题见 docs/11 §13 |
+
+## 今日完成
+
+- 5 路研究：行业对标（01）、MC 技术栈与实证（02）、语言/macro/sandbox（research）、学习设计（research，收尾中）、AI 工程保证（research）。
+- 设计文档：BRIEF、03 语言判断、04 学习设计、05 课程骨架、06 关卡 spec 体系、07 架构、08 AI 工作流 + 附录模板、09 4 天执行计划、10 demo/报告/评估、11 决策与开放问题、12 SDK API registry、13 Codex 跨语言（收尾中）。
+- 关卡规格：L01（样板）、L02、L08、L10 已交付；L03–L07、L09、Epilogue、Labs 写作中。
+- 独立审计：docs/00 一致性审计、docs/00b 审计响应（P0 全处置）、docs/14 学习设计评审（2 PASS/11 需修）、docs/14b 机器契约校验（meta 13/13 PASS，8 FAIL 中 5 个契约缺口已由 Lead 修复）、docs/15 评审处置与 spec 冻结计划。
+- 技术可行性：docs/02b（无不可做关卡）；docs/02c L10 铺桥 spike **路线 A 10/10 通过、0 掉落**（B 作预录兜底）；docs/06b level-kit 实现规格（3 包，Day1 可照写）。
+- 评审修订波（12:08–12:20）：L01–L10/EP/Labs 的 blocking 已按 docs/14/14b 修复并自查 0 error；待 fresh critic 复评一次即可冻结（docs/15）。
+
+## 下一步（T1 开工时）
+
+1. CP0：用户确认 docs/11 §13 的 8 个问题 + 按 docs/17 安装 **Minecraft Java 26.1.2**（Prism Launcher；**不是 1.21.4/26.3**）。
+2. T1 09:30 前：完成 spec 修订并冻结（docs/15 §5 的 4 项门禁）。
+3. T1 09:00 起：仓库骨架 + 协议 zod + MockWorld + Paper 插件最小版 + L01 端到端。
+4. T1 20:00：M1 垂直切片验收（L1 在真 MC 跑通 + 录屏 90 秒）。
+
+## 对照方案评审（2026-10-31）
+
+- 已收到并评审另一份架构方案（`incoming/other-plan/`），结论：**母本用本方案**；吸收 4 项：顺序语义 auto-await（D36）、会话/权限不变量（D37）、参考解 tsc 全绿（D38）、单页 HTML 报告（D39）。详见 [docs/18](docs/18-comparison-other-plan.md)。
+
+## 阻塞 / 需要人类决策
+
+- 见 docs/11 §13（8 项，均有默认假设；未回复时按默认执行）。
+
+## 范围与风险变化
+
+- D4 细化：Act I 用「自然村庄 + 局部平整短路径 + 和平难度」保证 pathfinder 稳定；Act II 起扩展自然地形（M0 实测结论）。
+- 版本锁升级为不可协商项：MC/Paper 26.1.2 build 74 + mineflayer 4.39.0（禁止 26.2/26.3）。
+
+
+## 最终交付快照（2026-10-31）
+
+- **L01–L10 真实 Paper e2e 全部 PASS**；L10 双织偶真实 17 项、Studio 注入 11 项。
+- Studio：L05–L10 完整中文引导；挑战层说明卡；天空/天气/云；UOS 4/4。
+- 门禁：`npm test` 25 files / 235 tests；Studio e2e 6/6；纯中文 0 违规；`verify.sh` exit 0。
+- 桌面安装包 AppImage 125MB / rpm 23.17MB，隔离 `:98` 实测启动。
+- **明确边界**：桌面包仍 Mock-only；挑战层目前是可阅读说明而非可玩会话；真实人类键鼠盲测尚未执行（自动化代理为 UOS）。

@@ -1,0 +1,35 @@
+{
+  "name": "loomcraft",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "demo:l01": "tsx packages/runner/src/demo-l01.ts",
+    "verify": "bash scripts/verify.sh",
+    "dev:engine": "tsx apps/engine/src/server.ts",
+    "dev:studio": "npm --prefix apps/studio run dev:mock",
+    "mc:up": "bash scripts/mc-up.sh",
+    "mc:down": "bash scripts/mc-down.sh",
+    "mc:reset": "bash scripts/mc-reset.sh",
+    "it:real": "tsx it/l1-real.ts",
+    "desktop:assets": "node apps/desktop/scripts/build-assets.mjs",
+    "desktop:dev": "npm --prefix apps/desktop run dev",
+    "desktop:build": "npm --prefix apps/desktop run build",
+    "desktop:run": "apps/desktop/src-tauri/target/release/loomcraft-desktop",
+    "build:codex": "node scripts/build-codex.mjs",
+    "dev:engine:paper": "bash scripts/engine-paper.sh",
+    "it:engine-paper": "tsx it/engine-paper.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "0.28.2",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

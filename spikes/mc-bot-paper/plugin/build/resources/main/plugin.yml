@@ -1,0 +1,14 @@
+name: LoomSpike
+version: '0.1.0'
+main: dev.loom.spike.LoomSpikePlugin
+api-version: '26.1'
+description: THE LOOM spike plugin - WS JSON-RPC bridge + world snapshot
+author: scout-minecraft
+website: https://example.invalid/loom
+# Paper feature: runtime library download (no shading needed).
+libraries:
+  - org.java-websocket:Java-WebSocket:1.6.0
+commands:
+  loom:
+    description: Loom spike command
+    usage: /loom <hello|snapshot|ws|spawn|setblock>

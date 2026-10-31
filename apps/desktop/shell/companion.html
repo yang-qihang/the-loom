@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>织界 · 伴玩</title>
+<style>
+  @font-face { font-family:"Departure Mono"; src:url("./studio/fonts/DepartureMono-Regular.woff2") format("woff2"); font-display:swap; }
+  @font-face { font-family:"Zpix"; src:url("./studio/fonts/zpix.woff2") format("woff2"); font-display:swap; }
+  :root { --bg:#0d140f; --panel:#182418; --panel-2:#1e2d1e; --line:#4a5c42; --warm:#e5b368; --warm2:#ffd28b; --text:#f0ead8; --muted:#c2c9b4; --ok:#9acb79; --bad:#df8d70; --pixel:"Departure Mono","Zpix",ui-monospace,monospace; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; margin:0; }
+  body { background:var(--bg); color:var(--text); font-family:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif; font-size:13px; overflow:hidden;
+    background-image:repeating-linear-gradient(0deg,#ffffff03 0 1px,transparent 1px 8px),repeating-linear-gradient(90deg,#00000030 0 1px,transparent 1px 8px); }
+  .page { height:100%; min-height:0; padding:10px 12px 12px; display:flex; flex-direction:column; gap:8px; }
+  .head { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .head .rune { width:10px; height:10px; background:var(--warm); box-shadow:4px 0 0 -2px var(--ok); display:inline-block; color:transparent; overflow:hidden; }
+  .head .title { color:var(--warm2); letter-spacing:.08em; font-size:15px; font-family:var(--pixel); font-weight:700; }
+  .head .level { margin-left:auto; color:var(--muted); font-size:11px; font-family:var(--pixel); border:1px solid var(--line); padding:1px 6px; }
+  .speech { background:#141f15; border:1px solid var(--line); border-left:3px solid var(--warm); border-radius:0; padding:8px 10px; color:var(--text); line-height:1.65; min-height:40px; max-height:104px; overflow-y:auto; flex:0 1 auto; box-shadow:2px 2px 0 rgba(0,0,0,.35); }
+  .goals { display:flex; flex-direction:column; gap:5px; flex:0 1 auto; min-height:0; overflow-y:auto; }
+  .goal { display:flex; gap:8px; align-items:flex-start; color:var(--muted); font-size:12px; }
+  .goal .mark { width:16px; text-align:center; color:#5c4a34; }
+  .goal.done { color:var(--ok); }
+  .goal.done .mark { color:var(--ok); }
+  .buttons { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:2px; flex:0 0 auto; }
+  button, .btn { font-family:var(--pixel); font-size:13px; padding:7px 4px; border-radius:0; border:2px solid var(--line); background:var(--panel); color:var(--text); cursor:pointer; box-shadow:2px 2px 0 #070b07; }
+  button:hover { border-color:var(--warm); color:var(--warm2); background:var(--panel-2); }
+  button.primary { background:var(--warm); border-color:#8e5c26; color:#1c1307; font-weight:700; box-shadow:2px 2px 0 #5b3916; }
+  button.primary:hover { background:var(--warm2); }
+  button:active { transform:translate(1px,1px); box-shadow:1px 1px 0 #070b07; }
+  button:disabled { opacity:.4; cursor:default; }
+  .result { min-height:18px; color:var(--muted); font-size:12px; flex:0 0 auto; }
+  .result.ok { color:var(--ok); }
+  .result.bad { color:var(--bad); }
+  .log { background:#0a100b; border:1px solid var(--line); border-radius:0; padding:8px 10px; flex:1 1 auto; min-height:64px; overflow-y:auto; font-family:var(--pixel); font-size:11.5px; line-height:1.6; color:#c9c3a8; white-space:pre-wrap; }
+  .foot { display:flex; gap:8px; align-items:center; flex:0 0 auto; flex-wrap:wrap; padding-top:2px; }
+  .foot .hint { color:var(--muted); font-size:10px; margin-left:auto; line-height:1.4; }
+  .result.ok { color:var(--ok); }
+  /* 与 Studio 一致：全部直角、去渐变塑料感 */
+  * { border-radius:0 !important; }
+  button.primary { background:#6b5220 !important; }
+  .guide { border:1px solid var(--line); border-left:3px solid var(--ok); padding:5px 8px; max-height:86px; overflow-y:auto; flex:0 1 auto; }
+  .guide summary { color:var(--warm2); font-size:12px; cursor:pointer; }
+  .guide p { margin:4px 0 0; color:var(--text); font-size:12px; line-height:1.55; }
+  @media (max-height: 600px) {
+    .page { padding:6px 8px 8px; gap:5px; }
+    .head .title { font-size:13px; }
+    .speech { font-size:12px; max-height:64px; padding:6px 8px; }
+    .guide { max-height:58px; font-size:11px; }
+    .guide p { font-size:11px; line-height:1.45; }
+    .goal { font-size:11px; }
+    .buttons button { padding:5px 3px; font-size:12px; }
+    .log { font-size:10.5px; min-height:36px; padding:5px 7px; }
+    .foot .hint { font-size:9px; }
+  }
+  .conn-line { font-size:11px; color:var(--muted); flex:0 0 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .conn-line .ok { color:var(--ok); }
+  .conn-line .bad { color:var(--bad); }
+  .speech, .tip { border-radius:0 !important; }
+  .log, .card { border-radius:0 !important; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="head"><span class="rune">✦</span><span class="title">伴玩</span><span class="level" id="level-name">第一缕光</span></div>
+  <div class="conn-line" id="conn-line">连接检测中…</div>
+  <details class="guide" open>
+    <summary>开始前 · 先读这一句</summary>
+    <p id="guide-text">先看目标和提示，再点下面的「运行」。</p>
+  </details>
+  <div class="speech" id="speech">艾拉还没说话。先点「运行」，看看灰崽会做什么。</div>
+  <div class="goals" id="goals"></div>
+  <div class="buttons">
+    <button id="btn-run" class="primary" type="button">运行</button>
+    <button id="btn-stop" type="button">停止</button>
+    <button id="btn-reset" type="button">重置</button>
+  </div>
+  <div class="result" id="result"></div>
+  <div class="log" id="log">正在等织机……</div>
+  <div class="foot"><button id="btn-workbench" type="button">返回工作台</button><span class="hint">按控制键、上档键和 L 可置顶 · 跟随《我的世界》</span></div>
+</div>
+<script type="module">
+const params = new URLSearchParams(location.search);
+let BASE = params.get("engine") || "http://127.0.0.1:4317";
+try { BASE = localStorage.getItem("loom.engineUrl") || BASE; } catch { /* ignore */ }
+const SHARED_SESSION = params.get("session");
+const SHARED_LEVEL = params.get("level");
+const $ = id => document.getElementById(id);
+const append = line => { const log = $("log"); log.textContent += line + "\n"; log.scrollTop = log.scrollHeight; };
+let sessionId = null; let levelDef = null; let eventSource = null; let clientOk = null;
+function paintConn(engineOk, paperOk, botOk) {
+  const fmt = ok => ok === true ? "✓" : ok === false ? "✗" : "?";
+  $("conn-line").innerHTML = `织机 <span class="${engineOk ? "ok" : "bad"}">${fmt(engineOk)}</span> · Paper <span class="${paperOk ? "ok" : "bad"}">${fmt(paperOk)}</span> · 织偶 <span class="${botOk ? "ok" : "bad"}">${fmt(botOk)}</span>` + (clientOk === null ? "" : ` · 客户端 <span class="${clientOk ? "ok" : "bad"}">${fmt(clientOk)}</span>`);
+}
+window.addEventListener("message", event => {
+  if (event.data?.type !== "loom:conn") return;
+  clientOk = !!event.data.client; paintConn(engineOk, paperOk, botOk);
+});
+let engineOk = null, paperOk = null, botOk = null;
+async function refreshConn() {
+  try {
+    const h = await api("/api/health");
+    engineOk = !!h.ok;
+    paperOk = h.port !== "mock" && h.mc?.kind === "paper" && h.mc?.connected === true;
+    botOk = h.port !== "mock" && h.bot?.connected === true;
+  } catch { engineOk = false; paperOk = false; botOk = false; }
+  paintConn(engineOk, paperOk, botOk);
+}
+
+async function api(path, init) {
+  const response = await fetch(BASE + path, { headers: { "content-type": "application/json" }, ...init });
+  if (!response.ok) throw new Error(`织机返回 ${response.status}`);
+  return response.json();
+}
+function renderGoals(criteria) {
+  $("goals").innerHTML = "";
+  for (const criterion of criteria ?? []) {
+    const row = document.createElement("div");
+    row.className = "goal" + (criterion.passed ? " done" : "");
+    row.innerHTML = `<span class="mark">${criterion.passed ? "✓" : "○"}</span><span>${criterion.text ?? criterion.id}</span>`;
+    $("goals").append(row);
+  }
+}
+function speak(text) { $("speech").textContent = text; }
+
+async function boot() {
+  try {
+    if (SHARED_SESSION) {
+      sessionId = SHARED_SESSION;
+      levelDef = (await api("/api/levels/" + (SHARED_LEVEL || "L01"))).def;
+    } else {
+      const levels = await api("/api/levels");
+      const first = levels.levels[0];
+      const created = await api("/api/session", { method: "POST", body: JSON.stringify({ levelId: first.id }) });
+      sessionId = created.sessionId;
+      levelDef = (await api("/api/levels/" + first.id)).def;
+    }
+    $("level-name").textContent = levelDef.meta.title.zh;
+    const opening = levelDef.narrative?.opening ?? [];
+    $("guide-text").textContent = opening.length >= 2
+      ? opening[0] + " " + opening[1]
+      : (levelDef.task?.mainTask ?? "先运行一次，看看世界会怎样。");
+    speak(levelDef.narrative?.whyYou ?? levelDef.task?.playerBeat ?? levelDef.task?.mainTask ?? "先运行一次，看看世界会怎样。");
+    await resetGoals();
+    connectEvents();
+    append((SHARED_SESSION ? "已接上工作台会话：" : "伴玩模式已连接：") + levelDef.meta.title.zh);
+    await refreshConn();
+    setInterval(() => void refreshConn(), 4000);
+  } catch (error) {
+    append("# 连接织机失败：" + error.message + "\n先在工作台或向导里启动织机。");
+    speak("织机还没醒。回到工作台点「启动织机」，再回来。");
+  }
+}
+async function resetGoals() {
+  const snapshot = await api("/api/levels/" + levelDef.id);
+  const criteria = (snapshot.def.task.successCriteria ?? []).map(c => ({ id: c.id, text: c.text, passed: false }));
+  renderGoals(criteria);
+}
+function connectEvents() {
+  eventSource?.close();
+  eventSource = new EventSource(`${BASE}/api/events?sessionId=${encodeURIComponent(sessionId)}`);
+  eventSource.onmessage = message => {
+    try {
+      const event = JSON.parse(message.data);
+      if (event.type === "log") append("· " + event.line);
+      if (event.type === "objective") {
+        const rows = [...document.querySelectorAll(".goal")];
+        const index = (levelDef?.task.successCriteria ?? []).findIndex(c => c.id === event.id);
+        if (index >= 0 && rows[index]) { rows[index].className = "goal" + (event.done ? " done" : ""); rows[index].querySelector(".mark").textContent = event.done ? "✓" : "○"; }
+      }
+      if (event.type === "hint") speak(event.text);
+      if (event.type === "result") {
+        renderGoals(event.criteria);
+        $("result").className = "result " + (event.passed ? "ok" : "bad");
+        $("result").textContent = `${event.passed ? "通关" : "还没通"} · ${event.stars}/3 星`;
+        if (event.failures?.length) speak("还差一点：" + event.failures[0]);
+      }
+      if (event.type === "error") append("# " + event.message);
+      if (event.type === "state") append("[" + event.state + "]");
+    } catch { /* 忽略非 JSON 心跳 */ }
+  };
+  eventSource.onerror = () => append("[事件流重连中…]");
+}
+async function currentSource() {
+  const saved = localStorage.getItem("loom:lastSource");
+  if (saved && saved.trim()) return saved;
+  return levelDef?.code?.starterCode ?? "";
+}
+$("btn-run").onclick = async () => {
+  if (!sessionId) return append("# 还没有会话，先回工作台");
+  try {
+    const source = await currentSource();
+    const run = await api("/api/run", { method: "POST", body: JSON.stringify({ sessionId, source }) });
+    append(`运行 ${run.runId}`);
+    $("result").textContent = "运行中…";
+    const beat = await api("/api/player-beat", { method: "POST", body: JSON.stringify({ sessionId }) }).catch(() => null);
+    if (beat?.result?.passed) append("玩家节拍已模拟：第 4 盏灯点亮。");
+  } catch (error) { append("# 运行失败：" + error.message); }
+};
+$("btn-stop").onclick = async () => {
+  if (!sessionId) return;
+  try { await api("/api/stop", { method: "POST", body: JSON.stringify({ sessionId }) }); append("已停止运行。"); } catch (error) { append("# 停止失败：" + error.message); }
+};
+$("btn-reset").onclick = async () => {
+  if (!sessionId) return;
+  try { await api("/api/reset", { method: "POST", body: JSON.stringify({ sessionId }) }); append("场景已重置。"); $("result").textContent = ""; } catch (error) { append("# 重置失败：" + error.message); }
+};
+$("btn-workbench").onclick = () => {
+  try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); } catch { /* 单独打开时无父窗口 */ }
+  try { parent.postMessage({ type: "loom:toast", text: "已回到完整工作台" }, "*"); } catch { /* ignore */ }
+};
+void boot();
+</script>
+</body>
+</html>

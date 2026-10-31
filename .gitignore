@@ -1,0 +1,55 @@
+# deps / build
+**/node_modules/
+apps/studio/dist/
+plugin/build/
+plugin/.gradle/
+*.log
+# runtime world data / jars / downloads
+spikes/mc-bot-paper/server/world/
+spikes/mc-bot-paper/server/world_nether/
+spikes/mc-bot-paper/server/world_the_end/
+spikes/mc-bot-paper/server/logs/
+spikes/mc-bot-paper/server/*.jar
+spikes/mc-bot-paper/server/plugins/*.jar
+spikes/mc-bot-paper/server/*.dat*
+spikes/mc-bot-paper/server/*.pipe
+# local evidence scratch
+verify-reports/
+qa/evidence/
+incoming/
+.DS_Store
+
+# large archives
+*.zip
+*.tar.gz
+spikes/**/*.jar
+
+it/.mc-server/
+
+apps/studio/test-results/
+apps/studio/playwright-report/
+
+apps/desktop/src-tauri/target/
+apps/desktop/dist/
+
+# generated evidence contact sheets / scratch frames (keep only accepted per-level shots)
+evidence/scene-shots/*-sheet.png
+evidence/scene-shots/annc*.png
+evidence/scene-shots/L0*label*.png
+evidence/scene-shots/L03new-*.png
+evidence/scene-shots/L05top-*.png
+evidence/scene-shots/L05c-*.png
+evidence/scene-shots/L05d-*.png
+evidence/scene-shots/L09-t*.png
+# desktop build outputs (rebuild with scripts)
+apps/desktop/dist/
+apps/desktop/src-tauri/target/
+
+# 交接/发布时无需入库：桌面截图、原始 e2e 快照（保留 *-latest.json）
+apps/desktop/evidence/
+evidence/l*-real-20*.json
+evidence/l*-real-snapshot-20*.json
+
+# 本地构建生成的自包含真实运行时（约 1GB，不入库；由 scripts/build-runtime 生成）
+apps/desktop/src-tauri/runtime/real/
+evidence/l*-studio-20*.json

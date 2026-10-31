@@ -1,0 +1,197 @@
+{
+ "level": "L10",
+ "layer": "studio-session",
+ "startedAt": "2026-10-31T11:30:25.960Z",
+ "checks": {
+  "session.runMode-explicit": {
+   "ok": true,
+   "detail": "explicit"
+  },
+  "run.not-passed-before-player-beat": {
+   "ok": true,
+   "detail": 0
+  },
+  "run.no-runtime-error": {
+   "ok": true,
+   "detail": [
+    "全桥面（预铺 + 织偶补 + 合龙石）没有缺口",
+    "合龙石由玩家亲手落位（测试模式等价）",
+    "缺口随机时桥面仍无缺口、合龙石落位"
+   ]
+  },
+  "run.sandbox-agent-log": {
+   "ok": true,
+   "detail": [
+    "左织.moveTo(10, -1)",
+    "右织.moveTo(13, 1)",
+    "左织.place(\"oak_planks\", 10, 65, 0)",
+    "右织.place(\"oak_planks\", 13, 65, 0)",
+    "左织.moveTo(11, -1)",
+    "右织.moveTo(14, 1)"
+   ]
+  },
+  "player-beat-3-stars": {
+   "ok": true,
+   "detail": 3
+  },
+  "result-source-player-beat": {
+   "ok": true,
+   "detail": "player-beat"
+  },
+  "engine.levels-include-L10": {
+   "ok": true,
+   "detail": [
+    "L01",
+    "L02",
+    "L03",
+    "L04",
+    "L05",
+    "L06",
+    "L07",
+    "L08",
+    "L09",
+    "L10"
+   ]
+  },
+  "engine.session-created": {
+   "ok": true,
+   "detail": "sess-mvwbkspu-g0ali9"
+  },
+  "engine.run-runs-in-sandbox": {
+   "ok": true,
+   "detail": 0
+  },
+  "engine.sandbox-agent-logs": {
+   "ok": true,
+   "detail": [
+    "左织.moveTo(10, -1)",
+    "右织.moveTo(13, 1)",
+    "左织.place(\"oak_planks\", 10, 65, 0)",
+    "右织.place(\"oak_planks\", 13, 65, 0)"
+   ]
+  },
+  "engine.player-beat-3-stars": {
+   "ok": true,
+   "detail": 3
+  }
+ },
+ "result": {
+  "afterRun": {
+   "passed": false,
+   "stars": 0,
+   "failures": [
+    "全桥面（预铺 + 织偶补 + 合龙石）没有缺口",
+    "合龙石由玩家亲手落位（测试模式等价）",
+    "缺口随机时桥面仍无缺口、合龙石落位"
+   ],
+   "criteria": [
+    {
+     "id": "deck-full",
+     "passed": false
+    },
+    {
+     "id": "both-weavers",
+     "passed": true
+    },
+    {
+     "id": "materials-exact",
+     "passed": true
+    },
+    {
+     "id": "keystone-by-player",
+     "passed": false
+    }
+   ],
+   "hidden": [
+    {
+     "id": "h-bridge-ok",
+     "passed": false
+    },
+    {
+     "id": "h-both-ok",
+     "passed": true
+    }
+   ]
+  },
+  "final": {
+   "passed": true,
+   "stars": 3,
+   "failures": [],
+   "source": "player-beat"
+  }
+ },
+ "events": [
+  "state",
+  "state",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "log",
+  "state",
+  "objective",
+  "objective",
+  "objective",
+  "objective",
+  "hint",
+  "state",
+  "result",
+  "state",
+  "objective",
+  "objective",
+  "objective",
+  "objective",
+  "state",
+  "result"
+ ],
+ "engineSandboxLogs": [
+  "左织.moveTo(10, -1)",
+  "右织.moveTo(13, 1)",
+  "左织.place(\"oak_planks\", 10, 65, 0)",
+  "右织.place(\"oak_planks\", 13, 65, 0)",
+  "左织.moveTo(11, -1)",
+  "右织.moveTo(14, 1)",
+  "左织.place(\"oak_planks\", 11, 65, 0)",
+  "右织.place(\"oak_planks\", 14, 65, 0)",
+  "左织.say(\"左岸铺好了\")",
+  "右织.say(\"右岸铺好了\")",
+  "左织.say(\"桥面铺好了，最后一块交给织者\")"
+ ],
+ "errors": [],
+ "logs": [
+  "左织.moveTo(10, -1)",
+  "右织.moveTo(13, 1)",
+  "左织.place(\"oak_planks\", 10, 65, 0)",
+  "右织.place(\"oak_planks\", 13, 65, 0)",
+  "左织.moveTo(11, -1)",
+  "右织.moveTo(14, 1)",
+  "左织.place(\"oak_planks\", 11, 65, 0)",
+  "右织.place(\"oak_planks\", 14, 65, 0)",
+  "左织.say(\"左岸铺好了\")",
+  "右织.say(\"右岸铺好了\")",
+  "左织.say(\"桥面铺好了，最后一块交给织者\")"
+ ],
+ "engineSession": {
+  "sessionId": "sess-mvwbkspu-g0ali9",
+  "state": "READY",
+  "port": "mock"
+ },
+ "engineResult": {
+  "afterRun": {
+   "passed": false,
+   "stars": 0
+  },
+  "afterPlayerBeat": {
+   "passed": true,
+   "stars": 3
+  }
+ },
+ "finishedAt": "2026-10-31T11:30:30.474Z",
+ "ok": true
+}

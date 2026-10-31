@@ -1,0 +1,3040 @@
+{
+ "task": "task-30 / T2-MC real L04 e2e",
+ "level": "L04",
+ "startedAt": "2026-10-31T11:26:04.177Z",
+ "environment": {
+  "node": "v22.23.1",
+  "host": "127.0.0.1",
+  "mcPort": 25565,
+  "rpcPort": 8765,
+  "botName": "Golem1048",
+  "plugin": {
+   "ok": true,
+   "plugin": "loomcraft-mc",
+   "version": "0.1.0",
+   "mc": "26.1.2",
+   "tick": 1553,
+   "phase": "ready",
+   "prepared": true,
+   "levelId": "L03",
+   "sessionId": "ba576cd5-34f7-4fbd-a7b1-35b33dcfc137",
+   "epoch": 6,
+   "groundY": 65,
+   "bots": [
+    "Golem0961"
+   ],
+   "npcs": [
+    "eira",
+    "guard"
+   ],
+   "regionFrom": [
+    -40,
+    55,
+    -40
+   ],
+   "regionTo": [
+    40,
+    85,
+    40
+   ],
+   "agentSpawn": [
+    0,
+    65,
+    3
+   ],
+   "playerSpawn": [
+    0,
+    65,
+    0
+   ],
+   "center": [
+    0,
+    65,
+    0
+   ],
+   "tracked": 5352,
+   "events": 0,
+   "lastResetHash": "sha256:3f322292f40c004e0f67bf076379bbf7f9aba0bc84d7509a9b8211f3a9947eeb",
+   "lastResetMs": 13
+  }
+ },
+ "checks": {
+  "plugin.health": {
+   "ok": true,
+   "detail": {
+    "plugin": "loomcraft-mc",
+    "mc": "26.1.2",
+    "version": "0.1.0"
+   }
+  },
+  "L04.scene-ready": {
+   "ok": true,
+   "detail": {
+    "prepareMs": 1659,
+    "scene": {
+     "groundY": 65,
+     "arena": {
+      "from": [
+       -16,
+       55,
+       -24
+      ],
+      "to": [
+       40,
+       85,
+       40
+      ]
+     },
+     "trackedCount": 1812,
+     "kit": [
+      "minecraft:wheat_sprout"
+     ],
+     "agent": {
+      "pos": [
+       8,
+       65,
+       -10
+      ]
+     },
+     "npcs": [
+      "eira"
+     ]
+    }
+   }
+  },
+  "L04.stale-session-rejected": {
+   "ok": true,
+   "detail": {
+    "sessionId": "72e428a8-877a-4f24-92fc-2cc15ccdc011",
+    "epoch": 7
+   }
+  },
+  "L04.epoch-incremented": {
+   "ok": true,
+   "detail": {
+    "first": {
+     "sessionId": "72e428a8-877a-4f24-92fc-2cc15ccdc011",
+     "epoch": 7
+    },
+    "second": {
+     "sessionId": "db841596-946e-4433-9514-ba35c41c513c",
+     "epoch": 8
+    }
+   }
+  },
+  "L04.passed": {
+   "ok": true,
+   "detail": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "harvest-first",
+      "passed": true
+     },
+     {
+      "id": "planted-full",
+      "passed": true
+     },
+     {
+      "id": "golem-home",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "water-clean",
+      "passed": true
+     },
+     {
+      "id": "inside-field",
+      "passed": true
+     },
+     {
+      "id": "no-double-plant",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  },
+  "L04.stars-3": {
+   "ok": true,
+   "detail": 3
+  },
+  "L04.failures-empty": {
+   "ok": true,
+   "detail": []
+  },
+  "L04.actions": {
+   "ok": true,
+   "detail": {
+    "referenceRunMs": 60685
+   }
+  },
+  "L04.report-equals-mock": {
+   "ok": true,
+   "detail": {
+    "real": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "harvest-first",
+       "passed": true
+      },
+      {
+       "id": "planted-full",
+       "passed": true
+      },
+      {
+       "id": "golem-home",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "water-clean",
+       "passed": true
+      },
+      {
+       "id": "inside-field",
+       "passed": true
+      },
+      {
+       "id": "no-double-plant",
+       "passed": true
+      }
+     ],
+     "failures": []
+    },
+    "mock": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "harvest-first",
+       "passed": true
+      },
+      {
+       "id": "planted-full",
+       "passed": true
+      },
+      {
+       "id": "golem-home",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "water-clean",
+       "passed": true
+      },
+      {
+       "id": "inside-field",
+       "passed": true
+      },
+      {
+       "id": "no-double-plant",
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   }
+  },
+  "L04.digest-equals-mock": {
+   "ok": true,
+   "detail": {
+    "agentPlaces": 124,
+    "says": 5,
+    "blocks": 1812
+   }
+  },
+  "L04.reset-under-2s": {
+   "ok": true,
+   "detail": {
+    "a": 8,
+    "b": 7
+   }
+  },
+  "L04.reset-hash-stable": {
+   "ok": true,
+   "detail": {
+    "a": "sha256:1b782b27dfe603cea26f4927d4c8087420ec8a7299baeb04544af2665c6fd189",
+    "b": "sha256:1b782b27dfe603cea26f4927d4c8087420ec8a7299baeb04544af2665c6fd189"
+   }
+  },
+  "L04.reset-clears-events": {
+   "ok": true,
+   "detail": {
+    "events": 0
+   }
+  }
+ },
+ "reports": {
+  "reference": {
+   "real": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "harvest-first",
+      "passed": true
+     },
+     {
+      "id": "planted-full",
+      "passed": true
+     },
+     {
+      "id": "golem-home",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "water-clean",
+      "passed": true
+     },
+     {
+      "id": "inside-field",
+      "passed": true
+     },
+     {
+      "id": "no-double-plant",
+      "passed": true
+     }
+    ],
+    "failures": []
+   },
+   "mock": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "harvest-first",
+      "passed": true
+     },
+     {
+      "id": "planted-full",
+      "passed": true
+     },
+     {
+      "id": "golem-home",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "water-clean",
+      "passed": true
+     },
+     {
+      "id": "inside-field",
+      "passed": true
+     },
+     {
+      "id": "no-double-plant",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  }
+ },
+ "sessions": {
+  "first": {
+   "sessionId": "72e428a8-877a-4f24-92fc-2cc15ccdc011",
+   "epoch": 7
+  },
+  "second": {
+   "sessionId": "db841596-946e-4433-9514-ba35c41c513c",
+   "epoch": 8
+  }
+ },
+ "reset": {
+  "resetA": {
+   "ok": true,
+   "ms": 8,
+   "hash": "sha256:1b782b27dfe603cea26f4927d4c8087420ec8a7299baeb04544af2665c6fd189",
+   "tick": 2830,
+   "sessionId": "db841596-946e-4433-9514-ba35c41c513c",
+   "epoch": 8
+  },
+  "resetB": {
+   "ok": true,
+   "ms": 7,
+   "hash": "sha256:1b782b27dfe603cea26f4927d4c8087420ec8a7299baeb04544af2665c6fd189",
+   "tick": 2833,
+   "sessionId": "db841596-946e-4433-9514-ba35c41c513c",
+   "epoch": 8
+  }
+ },
+ "actions": [
+  {
+   "action": "moveTo(10,-8)",
+   "ms": 472
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,-8)",
+   "ms": 100
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,-8)",
+   "ms": 100
+  },
+  {
+   "action": "moveTo(11,-8)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,-8)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,-8)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,-8)",
+   "ms": 600
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,-8)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,-8)",
+   "ms": 51
+  },
+  {
+   "action": "moveTo(13,-8)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,-8)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,-8)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,-7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,-7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,-7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,-7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,-7)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,-7)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(12,-7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,-7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,-7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,-7)",
+   "ms": 450
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,-7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,-7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,-5)",
+   "ms": 650
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,-5)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,-5)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,-5)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,-5)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,-5)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,-5)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,-5)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,-5)",
+   "ms": 51
+  },
+  {
+   "action": "moveTo(13,-5)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,-5)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,-5)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(10,2)",
+   "ms": 1400
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,2)",
+   "ms": 450
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,2)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,2)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(13,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(14,2)",
+   "ms": 600
+  },
+  {
+   "action": "virtualPlace(minecraft:air@14,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@14,65,2)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(15,2)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@15,65,2)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@15,65,2)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(10,3)",
+   "ms": 650
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,3)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,3)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,3)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(12,3)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,3)",
+   "ms": 51
+  },
+  {
+   "action": "moveTo(13,3)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(14,3)",
+   "ms": 451
+  },
+  {
+   "action": "virtualPlace(minecraft:air@14,65,3)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@14,65,3)",
+   "ms": 51
+  },
+  {
+   "action": "moveTo(15,3)",
+   "ms": 449
+  },
+  {
+   "action": "virtualPlace(minecraft:air@15,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@15,65,3)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,4)",
+   "ms": 550
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(14,4)",
+   "ms": 3350
+  },
+  {
+   "action": "virtualPlace(minecraft:air@14,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@14,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(15,4)",
+   "ms": 600
+  },
+  {
+   "action": "virtualPlace(minecraft:air@15,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@15,65,4)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,6)",
+   "ms": 3600
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,6)",
+   "ms": 3150
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,6)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,6)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(12,6)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,6)",
+   "ms": 51
+  },
+  {
+   "action": "moveTo(13,6)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(14,6)",
+   "ms": 3151
+  },
+  {
+   "action": "virtualPlace(minecraft:air@14,65,6)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@14,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(15,6)",
+   "ms": 3350
+  },
+  {
+   "action": "virtualPlace(minecraft:air@15,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@15,65,6)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,7)",
+   "ms": 3400
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(14,7)",
+   "ms": 450
+  },
+  {
+   "action": "virtualPlace(minecraft:air@14,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@14,65,7)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(15,7)",
+   "ms": 400
+  },
+  {
+   "action": "virtualPlace(minecraft:air@15,65,7)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@15,65,7)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(10,12)",
+   "ms": 1350
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,12)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,12)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,12)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,12)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,12)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(12,12)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,12)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,12)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,12)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,12)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,12)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,13)",
+   "ms": 500
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,13)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,15)",
+   "ms": 650
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,15)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,16)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,16)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,16)",
+   "ms": 49
+  },
+  {
+   "action": "moveTo(11,16)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,16)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,16)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,16)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,16)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,16)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,16)",
+   "ms": 450
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,16)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,16)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(10,17)",
+   "ms": 3150
+  },
+  {
+   "action": "virtualPlace(minecraft:air@10,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@10,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(11,17)",
+   "ms": 51
+  },
+  {
+   "action": "virtualPlace(minecraft:air@11,65,17)",
+   "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@11,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(12,17)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@12,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@12,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(13,17)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:air@13,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,17)",
+   "ms": 50
+  },
+  {
+   "action": "moveTo(-4,14)",
+   "ms": 5700
+  },
+  {
+   "action": "say(东田：种下了 12 格)",
+   "ms": 0
+  },
+  {
+   "action": "say(中田：种下了 30 格)",
+   "ms": 0
+  },
+  {
+   "action": "say(西田：种下了 20 格)",
+   "ms": 0
+  },
+  {
+   "action": "say(三块田都收好种好了)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(10,-6)",
+   "ms": 8059
+  },
+  {
+   "action": "say(东田水渠：干净)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(-4,14)",
+   "ms": 4139
+  },
+  {
+   "action": "reset",
+   "ms": 130
+  },
+  {
+   "action": "reset",
+   "ms": 49
+  },
+  {
+   "action": "reset",
+   "ms": 55
+  }
+ ],
+ "errors": [],
+ "prepareMs": 1659,
+ "scene": {
+  "groundY": 65,
+  "arena": {
+   "from": [
+    -16,
+    55,
+    -24
+   ],
+   "to": [
+    40,
+    85,
+    40
+   ]
+  },
+  "trackedCount": 1812,
+  "kit": [
+   "minecraft:wheat_sprout"
+  ],
+  "agent": {
+   "pos": [
+    8,
+    65,
+    -10
+   ]
+  },
+  "npcs": [
+   "eira"
+  ]
+ },
+ "referenceRunMs": 60685,
+ "snapshot": {
+  "blocks": {
+   "-14,64,15": "minecraft:coarse_dirt",
+   "-14,64,16": "minecraft:coarse_dirt",
+   "-14,64,17": "minecraft:coarse_dirt",
+   "-14,64,18": "minecraft:coarse_dirt",
+   "-14,64,19": "minecraft:coarse_dirt",
+   "-14,64,20": "minecraft:coarse_dirt",
+   "-14,64,21": "minecraft:coarse_dirt",
+   "-14,64,22": "minecraft:coarse_dirt",
+   "-14,64,23": "minecraft:coarse_dirt",
+   "-13,64,15": "minecraft:coarse_dirt",
+   "-13,64,16": "minecraft:coarse_dirt",
+   "-13,64,17": "minecraft:coarse_dirt",
+   "-13,64,18": "minecraft:coarse_dirt",
+   "-13,64,19": "minecraft:coarse_dirt",
+   "-13,64,20": "minecraft:coarse_dirt",
+   "-13,64,21": "minecraft:coarse_dirt",
+   "-13,64,22": "minecraft:coarse_dirt",
+   "-13,64,23": "minecraft:coarse_dirt",
+   "-12,64,15": "minecraft:mossy_stone_bricks",
+   "-12,64,16": "minecraft:stone_bricks",
+   "-12,64,17": "minecraft:mossy_stone_bricks",
+   "-12,64,18": "minecraft:stone_bricks",
+   "-12,64,19": "minecraft:mossy_stone_bricks",
+   "-12,64,20": "minecraft:stone_bricks",
+   "-12,64,21": "minecraft:mossy_stone_bricks",
+   "-12,64,22": "minecraft:stone_bricks",
+   "-12,64,23": "minecraft:coarse_dirt",
+   "-11,64,15": "minecraft:stone_bricks",
+   "-11,64,16": "minecraft:mossy_stone_bricks",
+   "-11,64,17": "minecraft:stone_bricks",
+   "-11,64,18": "minecraft:mossy_stone_bricks",
+   "-11,64,19": "minecraft:stone_bricks",
+   "-11,64,20": "minecraft:mossy_stone_bricks",
+   "-11,64,21": "minecraft:stone_bricks",
+   "-11,64,22": "minecraft:mossy_stone_bricks",
+   "-11,64,23": "minecraft:coarse_dirt",
+   "-10,64,15": "minecraft:mossy_stone_bricks",
+   "-10,64,16": "minecraft:stone_bricks",
+   "-10,64,17": "minecraft:mossy_stone_bricks",
+   "-10,64,18": "minecraft:stone_bricks",
+   "-10,64,19": "minecraft:mossy_stone_bricks",
+   "-10,64,20": "minecraft:stone_bricks",
+   "-10,64,21": "minecraft:mossy_stone_bricks",
+   "-10,64,22": "minecraft:stone_bricks",
+   "-10,64,23": "minecraft:coarse_dirt",
+   "-9,64,15": "minecraft:stone_bricks",
+   "-9,64,16": "minecraft:mossy_stone_bricks",
+   "-9,64,17": "minecraft:stone_bricks",
+   "-9,64,18": "minecraft:mossy_stone_bricks",
+   "-9,64,19": "minecraft:stone_bricks",
+   "-9,64,20": "minecraft:mossy_stone_bricks",
+   "-9,64,21": "minecraft:stone_bricks",
+   "-9,64,22": "minecraft:mossy_stone_bricks",
+   "-9,64,23": "minecraft:coarse_dirt",
+   "-8,64,15": "minecraft:mossy_stone_bricks",
+   "-8,64,16": "minecraft:stone_bricks",
+   "-8,64,17": "minecraft:mossy_stone_bricks",
+   "-8,64,18": "minecraft:stone_bricks",
+   "-8,64,19": "minecraft:mossy_stone_bricks",
+   "-8,64,20": "minecraft:stone_bricks",
+   "-8,64,21": "minecraft:mossy_stone_bricks",
+   "-8,64,22": "minecraft:stone_bricks",
+   "-8,64,23": "minecraft:coarse_dirt",
+   "-7,64,15": "minecraft:stone_bricks",
+   "-7,64,16": "minecraft:mossy_stone_bricks",
+   "-7,64,17": "minecraft:stone_bricks",
+   "-7,64,18": "minecraft:mossy_stone_bricks",
+   "-7,64,19": "minecraft:stone_bricks",
+   "-7,64,20": "minecraft:mossy_stone_bricks",
+   "-7,64,21": "minecraft:stone_bricks",
+   "-7,64,22": "minecraft:mossy_stone_bricks",
+   "-7,64,23": "minecraft:coarse_dirt",
+   "-6,64,15": "minecraft:mossy_stone_bricks",
+   "-6,64,16": "minecraft:stone_bricks",
+   "-6,64,17": "minecraft:mossy_stone_bricks",
+   "-6,64,18": "minecraft:stone_bricks",
+   "-6,64,19": "minecraft:mossy_stone_bricks",
+   "-6,64,20": "minecraft:stone_bricks",
+   "-6,64,21": "minecraft:mossy_stone_bricks",
+   "-6,64,22": "minecraft:stone_bricks",
+   "-6,64,23": "minecraft:coarse_dirt",
+   "-5,64,15": "minecraft:stone_bricks",
+   "-5,64,16": "minecraft:mossy_stone_bricks",
+   "-5,64,17": "minecraft:stone_bricks",
+   "-5,64,18": "minecraft:mossy_stone_bricks",
+   "-5,64,19": "minecraft:stone_bricks",
+   "-5,64,20": "minecraft:mossy_stone_bricks",
+   "-5,64,21": "minecraft:stone_bricks",
+   "-5,64,22": "minecraft:mossy_stone_bricks",
+   "-5,64,23": "minecraft:coarse_dirt",
+   "-4,64,15": "minecraft:mossy_stone_bricks",
+   "-4,64,16": "minecraft:stone_bricks",
+   "-4,64,17": "minecraft:mossy_stone_bricks",
+   "-4,64,18": "minecraft:stone_bricks",
+   "-4,64,19": "minecraft:mossy_stone_bricks",
+   "-4,64,20": "minecraft:stone_bricks",
+   "-4,64,21": "minecraft:mossy_stone_bricks",
+   "-4,64,22": "minecraft:stone_bricks",
+   "-4,64,23": "minecraft:coarse_dirt",
+   "-3,64,15": "minecraft:stone_bricks",
+   "-3,64,16": "minecraft:mossy_stone_bricks",
+   "-3,64,17": "minecraft:stone_bricks",
+   "-3,64,18": "minecraft:mossy_stone_bricks",
+   "-3,64,19": "minecraft:stone_bricks",
+   "-3,64,20": "minecraft:mossy_stone_bricks",
+   "-3,64,21": "minecraft:stone_bricks",
+   "-3,64,22": "minecraft:mossy_stone_bricks",
+   "-3,64,23": "minecraft:coarse_dirt",
+   "-2,64,15": "minecraft:mossy_stone_bricks",
+   "-2,64,16": "minecraft:stone_bricks",
+   "-2,64,17": "minecraft:mossy_stone_bricks",
+   "-2,64,18": "minecraft:stone_bricks",
+   "-2,64,19": "minecraft:mossy_stone_bricks",
+   "-2,64,20": "minecraft:stone_bricks",
+   "-2,64,21": "minecraft:mossy_stone_bricks",
+   "-2,64,22": "minecraft:stone_bricks",
+   "-2,64,23": "minecraft:coarse_dirt",
+   "0,64,-10": "minecraft:coarse_dirt",
+   "0,64,-9": "minecraft:coarse_dirt",
+   "0,64,-8": "minecraft:coarse_dirt",
+   "0,64,-7": "minecraft:coarse_dirt",
+   "0,64,-6": "minecraft:coarse_dirt",
+   "0,64,-5": "minecraft:coarse_dirt",
+   "0,64,-4": "minecraft:coarse_dirt",
+   "0,64,-3": "minecraft:coarse_dirt",
+   "0,64,-2": "minecraft:coarse_dirt",
+   "1,64,-10": "minecraft:coarse_dirt",
+   "1,64,-9": "minecraft:coarse_dirt",
+   "1,64,-8": "minecraft:coarse_dirt",
+   "1,64,-7": "minecraft:coarse_dirt",
+   "1,64,-6": "minecraft:coarse_dirt",
+   "1,64,-5": "minecraft:coarse_dirt",
+   "1,64,-4": "minecraft:coarse_dirt",
+   "1,64,-3": "minecraft:coarse_dirt",
+   "1,64,-2": "minecraft:coarse_dirt",
+   "2,64,-10": "minecraft:coarse_dirt",
+   "2,64,-9": "minecraft:coarse_dirt",
+   "2,64,-8": "minecraft:coarse_dirt",
+   "2,64,-7": "minecraft:coarse_dirt",
+   "2,64,-6": "minecraft:coarse_dirt",
+   "2,64,-5": "minecraft:coarse_dirt",
+   "2,64,-4": "minecraft:coarse_dirt",
+   "2,64,-3": "minecraft:coarse_dirt",
+   "2,64,-2": "minecraft:coarse_dirt",
+   "3,64,-10": "minecraft:coarse_dirt",
+   "3,64,-9": "minecraft:coarse_dirt",
+   "3,64,-8": "minecraft:coarse_dirt",
+   "3,64,-7": "minecraft:coarse_dirt",
+   "3,64,-6": "minecraft:coarse_dirt",
+   "3,64,-5": "minecraft:coarse_dirt",
+   "3,64,-4": "minecraft:coarse_dirt",
+   "3,64,-3": "minecraft:coarse_dirt",
+   "3,64,-2": "minecraft:coarse_dirt",
+   "4,64,-10": "minecraft:coarse_dirt",
+   "4,64,-9": "minecraft:coarse_dirt",
+   "4,64,-8": "minecraft:coarse_dirt",
+   "4,64,-7": "minecraft:coarse_dirt",
+   "4,64,-6": "minecraft:coarse_dirt",
+   "4,64,-5": "minecraft:coarse_dirt",
+   "4,64,-4": "minecraft:coarse_dirt",
+   "4,64,-3": "minecraft:coarse_dirt",
+   "4,64,-2": "minecraft:coarse_dirt",
+   "5,64,-10": "minecraft:coarse_dirt",
+   "5,64,-9": "minecraft:coarse_dirt",
+   "5,64,-8": "minecraft:coarse_dirt",
+   "5,64,-7": "minecraft:coarse_dirt",
+   "5,64,-6": "minecraft:coarse_dirt",
+   "5,64,-5": "minecraft:coarse_dirt",
+   "5,64,-4": "minecraft:coarse_dirt",
+   "5,64,-3": "minecraft:coarse_dirt",
+   "5,64,-2": "minecraft:coarse_dirt",
+   "6,64,-10": "minecraft:gravel",
+   "6,64,-9": "minecraft:gravel",
+   "6,64,-8": "minecraft:gravel",
+   "6,64,-7": "minecraft:coarse_dirt",
+   "6,64,-6": "minecraft:stone_bricks",
+   "6,64,-5": "minecraft:coarse_dirt",
+   "6,64,-4": "minecraft:coarse_dirt",
+   "6,64,-3": "minecraft:coarse_dirt",
+   "6,64,-2": "minecraft:coarse_dirt",
+   "20,64,-18": "minecraft:coarse_dirt",
+   "20,64,-17": "minecraft:coarse_dirt",
+   "20,64,-16": "minecraft:coarse_dirt",
+   "20,64,-15": "minecraft:coarse_dirt",
+   "20,64,-14": "minecraft:coarse_dirt",
+   "20,64,-13": "minecraft:coarse_dirt",
+   "20,64,-12": "minecraft:prismarine",
+   "20,64,-11": "minecraft:prismarine",
+   "20,64,-10": "minecraft:prismarine",
+   "20,64,-9": "minecraft:prismarine",
+   "20,64,-8": "minecraft:prismarine",
+   "20,64,-7": "minecraft:prismarine",
+   "20,64,-6": "minecraft:prismarine",
+   "20,64,-5": "minecraft:prismarine",
+   "20,64,-4": "minecraft:prismarine",
+   "20,64,-3": "minecraft:prismarine",
+   "20,64,-2": "minecraft:prismarine",
+   "20,64,-1": "minecraft:prismarine",
+   "20,64,0": "minecraft:prismarine",
+   "20,64,1": "minecraft:prismarine",
+   "20,64,2": "minecraft:prismarine",
+   "20,64,3": "minecraft:prismarine",
+   "20,64,4": "minecraft:prismarine",
+   "20,64,5": "minecraft:prismarine",
+   "20,64,6": "minecraft:prismarine",
+   "21,64,-18": "minecraft:coarse_dirt",
+   "21,64,-17": "minecraft:coarse_dirt",
+   "21,64,-16": "minecraft:coarse_dirt",
+   "21,64,-15": "minecraft:coarse_dirt",
+   "21,64,-14": "minecraft:coarse_dirt",
+   "21,64,-13": "minecraft:coarse_dirt",
+   "21,64,-12": "minecraft:water",
+   "21,64,-11": "minecraft:water",
+   "21,64,-10": "minecraft:water",
+   "21,64,-9": "minecraft:water",
+   "21,64,-8": "minecraft:water",
+   "21,64,-7": "minecraft:water",
+   "21,64,-6": "minecraft:water",
+   "21,64,-5": "minecraft:water",
+   "21,64,-4": "minecraft:water",
+   "21,64,-3": "minecraft:water",
+   "21,64,-2": "minecraft:water",
+   "21,64,-1": "minecraft:water",
+   "21,64,0": "minecraft:water",
+   "21,64,1": "minecraft:water",
+   "21,64,2": "minecraft:water",
+   "21,64,3": "minecraft:water",
+   "21,64,4": "minecraft:water",
+   "21,64,5": "minecraft:water",
+   "21,64,6": "minecraft:water",
+   "22,64,-18": "minecraft:coarse_dirt",
+   "22,64,-17": "minecraft:coarse_dirt",
+   "22,64,-16": "minecraft:coarse_dirt",
+   "22,64,-15": "minecraft:coarse_dirt",
+   "22,64,-14": "minecraft:coarse_dirt",
+   "22,64,-13": "minecraft:coarse_dirt",
+   "22,64,-12": "minecraft:water",
+   "22,64,-11": "minecraft:water",
+   "22,64,-10": "minecraft:water",
+   "22,64,-9": "minecraft:water",
+   "22,64,-8": "minecraft:water",
+   "22,64,-7": "minecraft:water",
+   "22,64,-6": "minecraft:water",
+   "22,64,-5": "minecraft:water",
+   "22,64,-4": "minecraft:water",
+   "22,64,-3": "minecraft:water",
+   "22,64,-2": "minecraft:water",
+   "22,64,-1": "minecraft:water",
+   "22,64,0": "minecraft:water",
+   "22,64,1": "minecraft:water",
+   "22,64,2": "minecraft:water",
+   "22,64,3": "minecraft:water",
+   "22,64,4": "minecraft:water",
+   "22,64,5": "minecraft:water",
+   "22,64,6": "minecraft:water",
+   "23,64,-18": "minecraft:coarse_dirt",
+   "23,64,-17": "minecraft:coarse_dirt",
+   "23,64,-16": "minecraft:coarse_dirt",
+   "23,64,-15": "minecraft:coarse_dirt",
+   "23,64,-14": "minecraft:coarse_dirt",
+   "23,64,-13": "minecraft:coarse_dirt",
+   "23,64,-12": "minecraft:prismarine",
+   "23,64,-11": "minecraft:prismarine",
+   "23,64,-10": "minecraft:prismarine",
+   "23,64,-9": "minecraft:prismarine",
+   "23,64,-8": "minecraft:prismarine",
+   "23,64,-7": "minecraft:prismarine",
+   "23,64,-6": "minecraft:prismarine",
+   "23,64,-5": "minecraft:prismarine",
+   "23,64,-4": "minecraft:prismarine",
+   "23,64,-3": "minecraft:prismarine",
+   "23,64,-2": "minecraft:prismarine",
+   "23,64,-1": "minecraft:prismarine",
+   "23,64,0": "minecraft:prismarine",
+   "23,64,1": "minecraft:prismarine",
+   "23,64,2": "minecraft:prismarine",
+   "23,64,3": "minecraft:prismarine",
+   "23,64,4": "minecraft:prismarine",
+   "23,64,5": "minecraft:prismarine",
+   "23,64,6": "minecraft:prismarine",
+   "24,64,-18": "minecraft:coarse_dirt",
+   "24,64,-17": "minecraft:coarse_dirt",
+   "24,64,-16": "minecraft:coarse_dirt",
+   "24,64,-15": "minecraft:coarse_dirt",
+   "24,64,-14": "minecraft:coarse_dirt",
+   "24,64,-13": "minecraft:coarse_dirt",
+   "24,64,-12": "minecraft:coarse_dirt",
+   "24,64,-11": "minecraft:coarse_dirt",
+   "24,64,-10": "minecraft:coarse_dirt",
+   "24,64,-9": "minecraft:coarse_dirt",
+   "24,64,-8": "minecraft:coarse_dirt",
+   "24,64,-7": "minecraft:coarse_dirt",
+   "24,64,-6": "minecraft:stone_bricks",
+   "24,64,-5": "minecraft:coarse_dirt",
+   "24,64,-4": "minecraft:coarse_dirt",
+   "24,64,-3": "minecraft:coarse_dirt",
+   "24,64,-2": "minecraft:coarse_dirt",
+   "24,64,-1": "minecraft:coarse_dirt",
+   "24,64,0": "minecraft:coarse_dirt",
+   "24,64,1": "minecraft:coarse_dirt",
+   "24,64,2": "minecraft:coarse_dirt",
+   "24,64,3": "minecraft:coarse_dirt",
+   "24,64,4": "minecraft:coarse_dirt",
+   "24,64,5": "minecraft:coarse_dirt",
+   "24,64,6": "minecraft:coarse_dirt",
+   "25,64,-18": "minecraft:coarse_dirt",
+   "25,64,-17": "minecraft:coarse_dirt",
+   "25,64,-16": "minecraft:coarse_dirt",
+   "25,64,-15": "minecraft:coarse_dirt",
+   "25,64,-14": "minecraft:coarse_dirt",
+   "25,64,-13": "minecraft:coarse_dirt",
+   "25,64,-12": "minecraft:coarse_dirt",
+   "25,64,-11": "minecraft:coarse_dirt",
+   "25,64,-10": "minecraft:coarse_dirt",
+   "25,64,-9": "minecraft:coarse_dirt",
+   "25,64,-8": "minecraft:coarse_dirt",
+   "25,64,-7": "minecraft:coarse_dirt",
+   "25,64,-6": "minecraft:coarse_dirt",
+   "25,64,-5": "minecraft:coarse_dirt",
+   "25,64,-4": "minecraft:coarse_dirt",
+   "25,64,-3": "minecraft:coarse_dirt",
+   "25,64,-2": "minecraft:coarse_dirt",
+   "25,64,-1": "minecraft:coarse_dirt",
+   "25,64,0": "minecraft:coarse_dirt",
+   "25,64,1": "minecraft:coarse_dirt",
+   "25,64,2": "minecraft:coarse_dirt",
+   "25,64,3": "minecraft:coarse_dirt",
+   "25,64,4": "minecraft:coarse_dirt",
+   "25,64,5": "minecraft:coarse_dirt",
+   "25,64,6": "minecraft:coarse_dirt",
+   "26,64,-18": "minecraft:coarse_dirt",
+   "26,64,-17": "minecraft:coarse_dirt",
+   "26,64,-16": "minecraft:coarse_dirt",
+   "26,64,-15": "minecraft:coarse_dirt",
+   "26,64,-14": "minecraft:coarse_dirt",
+   "26,64,-13": "minecraft:coarse_dirt",
+   "26,64,-12": "minecraft:coarse_dirt",
+   "26,64,-11": "minecraft:coarse_dirt",
+   "26,64,-10": "minecraft:coarse_dirt",
+   "26,64,-9": "minecraft:coarse_dirt",
+   "26,64,-8": "minecraft:coarse_dirt",
+   "26,64,-7": "minecraft:coarse_dirt",
+   "26,64,-6": "minecraft:coarse_dirt",
+   "26,64,-5": "minecraft:coarse_dirt",
+   "26,64,-4": "minecraft:spruce_log",
+   "26,64,-3": "minecraft:coarse_dirt",
+   "26,64,-2": "minecraft:coarse_dirt",
+   "26,64,-1": "minecraft:coarse_dirt",
+   "26,64,0": "minecraft:coarse_dirt",
+   "26,64,1": "minecraft:coarse_dirt",
+   "26,64,2": "minecraft:coarse_dirt",
+   "26,64,3": "minecraft:coarse_dirt",
+   "26,64,4": "minecraft:coarse_dirt",
+   "26,64,5": "minecraft:coarse_dirt",
+   "26,64,6": "minecraft:coarse_dirt",
+   "27,64,-18": "minecraft:coarse_dirt",
+   "27,64,-17": "minecraft:coarse_dirt",
+   "27,64,-16": "minecraft:coarse_dirt",
+   "27,64,-15": "minecraft:coarse_dirt",
+   "27,64,-14": "minecraft:coarse_dirt",
+   "27,64,-13": "minecraft:coarse_dirt",
+   "27,64,-12": "minecraft:coarse_dirt",
+   "27,64,-11": "minecraft:coarse_dirt",
+   "27,64,-10": "minecraft:coarse_dirt",
+   "27,64,-9": "minecraft:coarse_dirt",
+   "27,64,-8": "minecraft:coarse_dirt",
+   "27,64,-7": "minecraft:coarse_dirt",
+   "27,64,-6": "minecraft:coarse_dirt",
+   "27,64,-5": "minecraft:coarse_dirt",
+   "27,64,-4": "minecraft:coarse_dirt",
+   "27,64,-3": "minecraft:coarse_dirt",
+   "27,64,-2": "minecraft:coarse_dirt",
+   "27,64,-1": "minecraft:coarse_dirt",
+   "27,64,0": "minecraft:coarse_dirt",
+   "27,64,1": "minecraft:coarse_dirt",
+   "27,64,2": "minecraft:coarse_dirt",
+   "27,64,3": "minecraft:coarse_dirt",
+   "27,64,4": "minecraft:coarse_dirt",
+   "27,64,5": "minecraft:coarse_dirt",
+   "27,64,6": "minecraft:coarse_dirt",
+   "28,64,-18": "minecraft:coarse_dirt",
+   "28,64,-17": "minecraft:coarse_dirt",
+   "28,64,-16": "minecraft:coarse_dirt",
+   "28,64,-15": "minecraft:coarse_dirt",
+   "28,64,-14": "minecraft:coarse_dirt",
+   "28,64,-13": "minecraft:coarse_dirt",
+   "28,64,-12": "minecraft:coarse_dirt",
+   "28,64,-11": "minecraft:coarse_dirt",
+   "28,64,-10": "minecraft:coarse_dirt",
+   "28,64,-9": "minecraft:coarse_dirt",
+   "28,64,-8": "minecraft:coarse_dirt",
+   "28,64,-7": "minecraft:coarse_dirt",
+   "28,64,-6": "minecraft:coarse_dirt",
+   "28,64,-5": "minecraft:coarse_dirt",
+   "28,64,-4": "minecraft:coarse_dirt",
+   "28,64,-3": "minecraft:coarse_dirt",
+   "28,64,-2": "minecraft:coarse_dirt",
+   "28,64,-1": "minecraft:coarse_dirt",
+   "28,64,0": "minecraft:coarse_dirt",
+   "28,64,1": "minecraft:coarse_dirt",
+   "28,64,2": "minecraft:coarse_dirt",
+   "28,64,3": "minecraft:coarse_dirt",
+   "28,64,4": "minecraft:coarse_dirt",
+   "28,64,5": "minecraft:coarse_dirt",
+   "28,64,6": "minecraft:coarse_dirt",
+   "29,64,-18": "minecraft:coarse_dirt",
+   "29,64,-17": "minecraft:coarse_dirt",
+   "29,64,-16": "minecraft:coarse_dirt",
+   "29,64,-15": "minecraft:coarse_dirt",
+   "29,64,-14": "minecraft:coarse_dirt",
+   "29,64,-13": "minecraft:coarse_dirt",
+   "29,64,-12": "minecraft:coarse_dirt",
+   "29,64,-11": "minecraft:coarse_dirt",
+   "29,64,-10": "minecraft:coarse_dirt",
+   "29,64,-9": "minecraft:coarse_dirt",
+   "29,64,-8": "minecraft:coarse_dirt",
+   "29,64,-7": "minecraft:coarse_dirt",
+   "29,64,-6": "minecraft:coarse_dirt",
+   "29,64,-5": "minecraft:coarse_dirt",
+   "29,64,-4": "minecraft:coarse_dirt",
+   "29,64,-3": "minecraft:coarse_dirt",
+   "29,64,-2": "minecraft:coarse_dirt",
+   "29,64,-1": "minecraft:coarse_dirt",
+   "29,64,0": "minecraft:coarse_dirt",
+   "29,64,1": "minecraft:coarse_dirt",
+   "29,64,2": "minecraft:coarse_dirt",
+   "29,64,3": "minecraft:coarse_dirt",
+   "29,64,4": "minecraft:coarse_dirt",
+   "29,64,5": "minecraft:coarse_dirt",
+   "29,64,6": "minecraft:coarse_dirt",
+   "30,64,-18": "minecraft:coarse_dirt",
+   "30,64,-17": "minecraft:coarse_dirt",
+   "30,64,-16": "minecraft:coarse_dirt",
+   "30,64,-15": "minecraft:coarse_dirt",
+   "30,64,-14": "minecraft:coarse_dirt",
+   "30,64,-13": "minecraft:coarse_dirt",
+   "30,64,-12": "minecraft:coarse_dirt",
+   "30,64,-11": "minecraft:coarse_dirt",
+   "30,64,-10": "minecraft:coarse_dirt",
+   "30,64,-9": "minecraft:coarse_dirt",
+   "30,64,-8": "minecraft:coarse_dirt",
+   "30,64,-7": "minecraft:coarse_dirt",
+   "30,64,-6": "minecraft:coarse_dirt",
+   "30,64,-5": "minecraft:coarse_dirt",
+   "30,64,-4": "minecraft:coarse_dirt",
+   "30,64,-3": "minecraft:coarse_dirt",
+   "30,64,-2": "minecraft:coarse_dirt",
+   "30,64,-1": "minecraft:coarse_dirt",
+   "30,64,0": "minecraft:spruce_log",
+   "30,64,1": "minecraft:coarse_dirt",
+   "30,64,2": "minecraft:coarse_dirt",
+   "30,64,3": "minecraft:coarse_dirt",
+   "30,64,4": "minecraft:coarse_dirt",
+   "30,64,5": "minecraft:coarse_dirt",
+   "30,64,6": "minecraft:coarse_dirt",
+   "20,64,18": "minecraft:prismarine",
+   "20,64,19": "minecraft:prismarine",
+   "20,64,20": "minecraft:prismarine",
+   "20,64,21": "minecraft:coarse_dirt",
+   "20,64,22": "minecraft:coarse_dirt",
+   "20,64,23": "minecraft:coarse_dirt",
+   "20,64,24": "minecraft:coarse_dirt",
+   "20,64,25": "minecraft:coarse_dirt",
+   "20,64,26": "minecraft:coarse_dirt",
+   "20,64,27": "minecraft:coarse_dirt",
+   "20,64,28": "minecraft:coarse_dirt",
+   "20,64,29": "minecraft:coarse_dirt",
+   "20,64,30": "minecraft:coarse_dirt",
+   "20,64,31": "minecraft:coarse_dirt",
+   "20,64,32": "minecraft:coarse_dirt",
+   "21,64,18": "minecraft:water",
+   "21,64,19": "minecraft:water",
+   "21,64,20": "minecraft:water",
+   "21,64,21": "minecraft:coarse_dirt",
+   "21,64,22": "minecraft:coarse_dirt",
+   "21,64,23": "minecraft:coarse_dirt",
+   "21,64,24": "minecraft:coarse_dirt",
+   "21,64,25": "minecraft:coarse_dirt",
+   "21,64,26": "minecraft:coarse_dirt",
+   "21,64,27": "minecraft:coarse_dirt",
+   "21,64,28": "minecraft:coarse_dirt",
+   "21,64,29": "minecraft:coarse_dirt",
+   "21,64,30": "minecraft:coarse_dirt",
+   "21,64,31": "minecraft:coarse_dirt",
+   "21,64,32": "minecraft:coarse_dirt",
+   "22,64,18": "minecraft:water",
+   "22,64,19": "minecraft:water",
+   "22,64,20": "minecraft:water",
+   "22,64,21": "minecraft:coarse_dirt",
+   "22,64,22": "minecraft:coarse_dirt",
+   "22,64,23": "minecraft:coarse_dirt",
+   "22,64,24": "minecraft:coarse_dirt",
+   "22,64,25": "minecraft:coarse_dirt",
+   "22,64,26": "minecraft:coarse_dirt",
+   "22,64,27": "minecraft:coarse_dirt",
+   "22,64,28": "minecraft:coarse_dirt",
+   "22,64,29": "minecraft:coarse_dirt",
+   "22,64,30": "minecraft:coarse_dirt",
+   "22,64,31": "minecraft:coarse_dirt",
+   "22,64,32": "minecraft:coarse_dirt",
+   "23,64,18": "minecraft:prismarine",
+   "23,64,19": "minecraft:prismarine",
+   "23,64,20": "minecraft:prismarine",
+   "23,64,21": "minecraft:coarse_dirt",
+   "23,64,22": "minecraft:coarse_dirt",
+   "23,64,23": "minecraft:coarse_dirt",
+   "23,64,24": "minecraft:coarse_dirt",
+   "23,64,25": "minecraft:coarse_dirt",
+   "23,64,26": "minecraft:coarse_dirt",
+   "23,64,27": "minecraft:coarse_dirt",
+   "23,64,28": "minecraft:coarse_dirt",
+   "23,64,29": "minecraft:coarse_dirt",
+   "23,64,30": "minecraft:coarse_dirt",
+   "23,64,31": "minecraft:coarse_dirt",
+   "23,64,32": "minecraft:coarse_dirt",
+   "24,64,18": "minecraft:stone_bricks",
+   "24,64,19": "minecraft:coarse_dirt",
+   "24,64,20": "minecraft:coarse_dirt",
+   "24,64,21": "minecraft:coarse_dirt",
+   "24,64,22": "minecraft:coarse_dirt",
+   "24,64,23": "minecraft:coarse_dirt",
+   "24,64,24": "minecraft:coarse_dirt",
+   "24,64,25": "minecraft:coarse_dirt",
+   "24,64,26": "minecraft:coarse_dirt",
+   "24,64,27": "minecraft:coarse_dirt",
+   "24,64,28": "minecraft:coarse_dirt",
+   "24,64,29": "minecraft:coarse_dirt",
+   "24,64,30": "minecraft:coarse_dirt",
+   "24,64,31": "minecraft:coarse_dirt",
+   "24,64,32": "minecraft:coarse_dirt",
+   "25,64,18": "minecraft:coarse_dirt",
+   "25,64,19": "minecraft:coarse_dirt",
+   "25,64,20": "minecraft:coarse_dirt",
+   "25,64,21": "minecraft:coarse_dirt",
+   "25,64,22": "minecraft:coarse_dirt",
+   "25,64,23": "minecraft:coarse_dirt",
+   "25,64,24": "minecraft:coarse_dirt",
+   "25,64,25": "minecraft:coarse_dirt",
+   "25,64,26": "minecraft:coarse_dirt",
+   "25,64,27": "minecraft:coarse_dirt",
+   "25,64,28": "minecraft:coarse_dirt",
+   "25,64,29": "minecraft:coarse_dirt",
+   "25,64,30": "minecraft:coarse_dirt",
+   "25,64,31": "minecraft:coarse_dirt",
+   "25,64,32": "minecraft:coarse_dirt",
+   "26,64,18": "minecraft:coarse_dirt",
+   "26,64,19": "minecraft:coarse_dirt",
+   "26,64,20": "minecraft:coarse_dirt",
+   "26,64,21": "minecraft:coarse_dirt",
+   "26,64,22": "minecraft:coarse_dirt",
+   "26,64,23": "minecraft:coarse_dirt",
+   "26,64,24": "minecraft:coarse_dirt",
+   "26,64,25": "minecraft:coarse_dirt",
+   "26,64,26": "minecraft:spruce_log",
+   "26,64,27": "minecraft:coarse_dirt",
+   "26,64,28": "minecraft:coarse_dirt",
+   "26,64,29": "minecraft:coarse_dirt",
+   "26,64,30": "minecraft:coarse_dirt",
+   "26,64,31": "minecraft:coarse_dirt",
+   "26,64,32": "minecraft:coarse_dirt",
+   "27,64,18": "minecraft:coarse_dirt",
+   "27,64,19": "minecraft:coarse_dirt",
+   "27,64,20": "minecraft:coarse_dirt",
+   "27,64,21": "minecraft:coarse_dirt",
+   "27,64,22": "minecraft:coarse_dirt",
+   "27,64,23": "minecraft:coarse_dirt",
+   "27,64,24": "minecraft:coarse_dirt",
+   "27,64,25": "minecraft:coarse_dirt",
+   "27,64,26": "minecraft:coarse_dirt",
+   "27,64,27": "minecraft:coarse_dirt",
+   "27,64,28": "minecraft:coarse_dirt",
+   "27,64,29": "minecraft:coarse_dirt",
+   "27,64,30": "minecraft:coarse_dirt",
+   "27,64,31": "minecraft:coarse_dirt",
+   "27,64,32": "minecraft:coarse_dirt",
+   "28,64,18": "minecraft:coarse_dirt",
+   "28,64,19": "minecraft:coarse_dirt",
+   "28,64,20": "minecraft:coarse_dirt",
+   "28,64,21": "minecraft:coarse_dirt",
+   "28,64,22": "minecraft:coarse_dirt",
+   "28,64,23": "minecraft:coarse_dirt",
+   "28,64,24": "minecraft:coarse_dirt",
+   "28,64,25": "minecraft:coarse_dirt",
+   "28,64,26": "minecraft:coarse_dirt",
+   "28,64,27": "minecraft:coarse_dirt",
+   "28,64,28": "minecraft:coarse_dirt",
+   "28,64,29": "minecraft:coarse_dirt",
+   "28,64,30": "minecraft:coarse_dirt",
+   "28,64,31": "minecraft:coarse_dirt",
+   "28,64,32": "minecraft:coarse_dirt",
+   "29,64,18": "minecraft:coarse_dirt",
+   "29,64,19": "minecraft:coarse_dirt",
+   "29,64,20": "minecraft:coarse_dirt",
+   "29,64,21": "minecraft:coarse_dirt",
+   "29,64,22": "minecraft:coarse_dirt",
+   "29,64,23": "minecraft:coarse_dirt",
+   "29,64,24": "minecraft:coarse_dirt",
+   "29,64,25": "minecraft:coarse_dirt",
+   "29,64,26": "minecraft:coarse_dirt",
+   "29,64,27": "minecraft:coarse_dirt",
+   "29,64,28": "minecraft:coarse_dirt",
+   "29,64,29": "minecraft:coarse_dirt",
+   "29,64,30": "minecraft:coarse_dirt",
+   "29,64,31": "minecraft:coarse_dirt",
+   "29,64,32": "minecraft:coarse_dirt",
+   "30,64,18": "minecraft:coarse_dirt",
+   "30,64,19": "minecraft:coarse_dirt",
+   "30,64,20": "minecraft:coarse_dirt",
+   "30,64,21": "minecraft:coarse_dirt",
+   "30,64,22": "minecraft:coarse_dirt",
+   "30,64,23": "minecraft:coarse_dirt",
+   "30,64,24": "minecraft:coarse_dirt",
+   "30,64,25": "minecraft:coarse_dirt",
+   "30,64,26": "minecraft:coarse_dirt",
+   "30,64,27": "minecraft:coarse_dirt",
+   "30,64,28": "minecraft:coarse_dirt",
+   "30,64,29": "minecraft:coarse_dirt",
+   "30,64,30": "minecraft:spruce_log",
+   "30,64,31": "minecraft:coarse_dirt",
+   "30,64,32": "minecraft:coarse_dirt",
+   "7,64,-12": "minecraft:gravel",
+   "8,64,-12": "minecraft:gravel",
+   "9,64,-12": "minecraft:gravel",
+   "7,64,-11": "minecraft:gravel",
+   "8,64,-11": "minecraft:gravel",
+   "9,64,-11": "minecraft:gravel",
+   "7,64,-10": "minecraft:gravel",
+   "8,64,-10": "minecraft:gravel",
+   "9,64,-10": "minecraft:gravel",
+   "7,64,-9": "minecraft:gravel",
+   "8,64,-9": "minecraft:gravel",
+   "9,64,-9": "minecraft:hay_block",
+   "7,64,-8": "minecraft:gravel",
+   "8,64,-8": "minecraft:gravel",
+   "9,64,-8": "minecraft:hay_block",
+   "7,64,-7": "minecraft:gravel",
+   "8,64,-7": "minecraft:cobblestone",
+   "9,64,-7": "minecraft:hay_block",
+   "7,64,-6": "minecraft:cobblestone",
+   "8,64,-6": "minecraft:stone_bricks",
+   "9,64,-6": "minecraft:hay_block",
+   "7,64,-5": "minecraft:gravel",
+   "8,64,-5": "minecraft:cobblestone",
+   "9,64,-5": "minecraft:hay_block",
+   "7,64,-4": "minecraft:cobblestone",
+   "8,64,-4": "minecraft:gravel",
+   "9,64,-4": "minecraft:hay_block",
+   "7,64,-3": "minecraft:gravel",
+   "8,64,-3": "minecraft:cobblestone",
+   "9,64,-3": "minecraft:gravel",
+   "7,64,-2": "minecraft:cobblestone",
+   "8,64,-2": "minecraft:gravel",
+   "9,64,-2": "minecraft:cobblestone",
+   "7,64,-1": "minecraft:gravel",
+   "8,64,-1": "minecraft:cobblestone",
+   "9,64,-1": "minecraft:gravel",
+   "7,64,0": "minecraft:cobblestone",
+   "8,64,0": "minecraft:gravel",
+   "9,64,0": "minecraft:cobblestone",
+   "7,64,1": "minecraft:gravel",
+   "8,64,1": "minecraft:cobblestone",
+   "9,64,1": "minecraft:hay_block",
+   "7,64,2": "minecraft:cobblestone",
+   "8,64,2": "minecraft:gravel",
+   "9,64,2": "minecraft:hay_block",
+   "7,64,3": "minecraft:gravel",
+   "8,64,3": "minecraft:cobblestone",
+   "9,64,3": "minecraft:hay_block",
+   "7,64,4": "minecraft:cobblestone",
+   "8,64,4": "minecraft:gravel",
+   "9,64,4": "minecraft:hay_block",
+   "7,64,5": "minecraft:gravel",
+   "8,64,5": "minecraft:stone_bricks",
+   "9,64,5": "minecraft:hay_block",
+   "7,64,6": "minecraft:cobblestone",
+   "8,64,6": "minecraft:gravel",
+   "9,64,6": "minecraft:hay_block",
+   "7,64,7": "minecraft:gravel",
+   "8,64,7": "minecraft:cobblestone",
+   "9,64,7": "minecraft:hay_block",
+   "7,64,8": "minecraft:cobblestone",
+   "8,64,8": "minecraft:gravel",
+   "9,64,8": "minecraft:hay_block",
+   "7,64,9": "minecraft:gravel",
+   "8,64,9": "minecraft:cobblestone",
+   "9,64,9": "minecraft:gravel",
+   "7,64,10": "minecraft:cobblestone",
+   "8,64,10": "minecraft:gravel",
+   "9,64,10": "minecraft:cobblestone",
+   "7,64,11": "minecraft:gravel",
+   "8,64,11": "minecraft:cobblestone",
+   "9,64,11": "minecraft:hay_block",
+   "7,64,12": "minecraft:cobblestone",
+   "8,64,12": "minecraft:gravel",
+   "9,64,12": "minecraft:hay_block",
+   "7,64,13": "minecraft:cobblestone",
+   "8,64,13": "minecraft:gravel",
+   "9,64,13": "minecraft:hay_block",
+   "7,64,14": "minecraft:gravel",
+   "8,64,14": "minecraft:stone_bricks",
+   "9,64,14": "minecraft:hay_block",
+   "7,64,15": "minecraft:cobblestone",
+   "8,64,15": "minecraft:gravel",
+   "9,64,15": "minecraft:hay_block",
+   "7,64,16": "minecraft:cobblestone",
+   "8,64,16": "minecraft:gravel",
+   "9,64,16": "minecraft:hay_block",
+   "7,64,17": "minecraft:gravel",
+   "8,64,17": "minecraft:cobblestone",
+   "9,64,17": "minecraft:hay_block",
+   "7,64,18": "minecraft:cobblestone",
+   "8,64,18": "minecraft:gravel",
+   "9,64,18": "minecraft:hay_block",
+   "7,64,19": "minecraft:gravel",
+   "8,64,19": "minecraft:cobblestone",
+   "9,64,19": "minecraft:gravel",
+   "7,64,20": "minecraft:cobblestone",
+   "8,64,20": "minecraft:gravel",
+   "9,64,20": "minecraft:cobblestone",
+   "7,64,21": "minecraft:gravel",
+   "8,64,21": "minecraft:cobblestone",
+   "9,64,21": "minecraft:gravel",
+   "7,64,22": "minecraft:cobblestone",
+   "8,64,22": "minecraft:gravel",
+   "9,64,22": "minecraft:cobblestone",
+   "7,64,23": "minecraft:gravel",
+   "8,64,23": "minecraft:cobblestone",
+   "9,64,23": "minecraft:gravel",
+   "7,64,24": "minecraft:cobblestone",
+   "8,64,24": "minecraft:gravel",
+   "9,64,24": "minecraft:cobblestone",
+   "7,64,25": "minecraft:gravel",
+   "8,64,25": "minecraft:cobblestone",
+   "9,64,25": "minecraft:gravel",
+   "7,64,26": "minecraft:cobblestone",
+   "8,64,26": "minecraft:gravel",
+   "9,64,26": "minecraft:cobblestone",
+   "7,64,27": "minecraft:stone_bricks",
+   "8,64,27": "minecraft:cobblestone",
+   "9,64,27": "minecraft:gravel",
+   "7,64,28": "minecraft:stone_bricks",
+   "8,64,28": "minecraft:gravel",
+   "9,64,28": "minecraft:cobblestone",
+   "7,64,29": "minecraft:stone_bricks",
+   "8,64,29": "minecraft:cobblestone",
+   "9,64,29": "minecraft:gravel",
+   "7,64,30": "minecraft:stone_bricks",
+   "8,64,30": "minecraft:gravel",
+   "9,64,30": "minecraft:cobblestone",
+   "-6,64,13": "minecraft:gravel",
+   "-6,64,14": "minecraft:stone_bricks",
+   "-5,64,13": "minecraft:cobblestone",
+   "-5,64,14": "minecraft:mossy_stone_bricks",
+   "-4,64,13": "minecraft:gravel",
+   "-4,64,14": "minecraft:stone_bricks",
+   "-3,64,13": "minecraft:cobblestone",
+   "-3,64,14": "minecraft:mossy_stone_bricks",
+   "-2,64,13": "minecraft:gravel",
+   "-2,64,14": "minecraft:stone_bricks",
+   "-1,64,13": "minecraft:cobblestone",
+   "-1,64,14": "minecraft:gravel",
+   "-1,64,15": "minecraft:cobblestone",
+   "0,64,13": "minecraft:gravel",
+   "0,64,14": "minecraft:cobblestone",
+   "0,64,15": "minecraft:gravel",
+   "1,64,13": "minecraft:cobblestone",
+   "1,64,14": "minecraft:gravel",
+   "1,64,15": "minecraft:cobblestone",
+   "2,64,13": "minecraft:gravel",
+   "2,64,14": "minecraft:cobblestone",
+   "2,64,15": "minecraft:gravel",
+   "3,64,13": "minecraft:cobblestone",
+   "3,64,14": "minecraft:gravel",
+   "3,64,15": "minecraft:cobblestone",
+   "4,64,13": "minecraft:gravel",
+   "4,64,14": "minecraft:cobblestone",
+   "4,64,15": "minecraft:gravel",
+   "5,64,13": "minecraft:cobblestone",
+   "5,64,14": "minecraft:gravel",
+   "5,64,15": "minecraft:cobblestone",
+   "6,64,13": "minecraft:gravel",
+   "6,64,14": "minecraft:cobblestone",
+   "6,64,15": "minecraft:gravel",
+   "6,64,-12": "minecraft:gravel",
+   "6,64,-11": "minecraft:gravel",
+   "10,64,-12": "minecraft:gravel",
+   "10,64,-11": "minecraft:gravel",
+   "10,64,-10": "minecraft:gravel",
+   "10,64,-9": "minecraft:hay_block",
+   "10,64,-8": "minecraft:hay_block",
+   "11,64,-8": "minecraft:dirt",
+   "12,64,-8": "minecraft:hay_block",
+   "13,64,-8": "minecraft:farmland",
+   "10,64,-7": "minecraft:farmland",
+   "11,64,-7": "minecraft:dirt",
+   "12,64,-7": "minecraft:hay_block",
+   "13,64,-7": "minecraft:hay_block",
+   "10,64,-6": "minecraft:prismarine",
+   "11,64,-6": "minecraft:prismarine",
+   "12,64,-6": "minecraft:prismarine",
+   "13,64,-6": "minecraft:prismarine",
+   "10,64,-5": "minecraft:dirt",
+   "11,64,-5": "minecraft:farmland",
+   "12,64,-5": "minecraft:hay_block",
+   "13,64,-5": "minecraft:farmland",
+   "10,64,-4": "minecraft:hay_block",
+   "11,64,-9": "minecraft:hay_block",
+   "11,64,-4": "minecraft:hay_block",
+   "12,64,-9": "minecraft:hay_block",
+   "12,64,-4": "minecraft:hay_block",
+   "13,64,-9": "minecraft:hay_block",
+   "13,64,-4": "minecraft:hay_block",
+   "14,64,-9": "minecraft:hay_block",
+   "14,64,-4": "minecraft:hay_block",
+   "14,64,-8": "minecraft:hay_block",
+   "14,64,-7": "minecraft:hay_block",
+   "14,64,-6": "minecraft:hay_block",
+   "14,64,-5": "minecraft:hay_block",
+   "15,64,-6": "minecraft:stone_bricks",
+   "10,64,2": "minecraft:hay_block",
+   "11,64,2": "minecraft:hay_block",
+   "12,64,2": "minecraft:dirt",
+   "13,64,2": "minecraft:dirt",
+   "14,64,2": "minecraft:dirt",
+   "15,64,2": "minecraft:farmland",
+   "10,64,3": "minecraft:hay_block",
+   "11,64,3": "minecraft:farmland",
+   "12,64,3": "minecraft:dirt",
+   "13,64,3": "minecraft:hay_block",
+   "14,64,3": "minecraft:dirt",
+   "15,64,3": "minecraft:farmland",
+   "10,64,4": "minecraft:dirt",
+   "11,64,4": "minecraft:farmland",
+   "12,64,4": "minecraft:dirt",
+   "13,64,4": "minecraft:dirt",
+   "14,64,4": "minecraft:hay_block",
+   "15,64,4": "minecraft:dirt",
+   "10,64,5": "minecraft:prismarine",
+   "11,64,5": "minecraft:prismarine",
+   "12,64,5": "minecraft:prismarine",
+   "13,64,5": "minecraft:prismarine",
+   "14,64,5": "minecraft:prismarine",
+   "15,64,5": "minecraft:prismarine",
+   "10,64,6": "minecraft:dirt",
+   "11,64,6": "minecraft:hay_block",
+   "12,64,6": "minecraft:hay_block",
+   "13,64,6": "minecraft:hay_block",
+   "14,64,6": "minecraft:hay_block",
+   "15,64,6": "minecraft:hay_block",
+   "10,64,7": "minecraft:dirt",
+   "11,64,7": "minecraft:dirt",
+   "12,64,7": "minecraft:dirt",
+   "13,64,7": "minecraft:dirt",
+   "14,64,7": "minecraft:hay_block",
+   "15,64,7": "minecraft:hay_block",
+   "10,64,1": "minecraft:hay_block",
+   "10,64,8": "minecraft:hay_block",
+   "11,64,1": "minecraft:hay_block",
+   "11,64,8": "minecraft:hay_block",
+   "12,64,1": "minecraft:hay_block",
+   "12,64,8": "minecraft:hay_block",
+   "13,64,1": "minecraft:hay_block",
+   "13,64,8": "minecraft:hay_block",
+   "14,64,1": "minecraft:hay_block",
+   "14,64,8": "minecraft:hay_block",
+   "15,64,1": "minecraft:hay_block",
+   "15,64,8": "minecraft:hay_block",
+   "16,64,1": "minecraft:hay_block",
+   "16,64,8": "minecraft:hay_block",
+   "16,64,2": "minecraft:hay_block",
+   "16,64,3": "minecraft:hay_block",
+   "16,64,4": "minecraft:hay_block",
+   "16,64,5": "minecraft:hay_block",
+   "16,64,6": "minecraft:hay_block",
+   "16,64,7": "minecraft:hay_block",
+   "17,64,5": "minecraft:stone_bricks",
+   "10,64,12": "minecraft:hay_block",
+   "11,64,12": "minecraft:dirt",
+   "12,64,12": "minecraft:dirt",
+   "13,64,12": "minecraft:farmland",
+   "10,64,13": "minecraft:dirt",
+   "11,64,13": "minecraft:hay_block",
+   "12,64,13": "minecraft:hay_block",
+   "13,64,13": "minecraft:dirt",
+   "10,64,14": "minecraft:prismarine",
+   "11,64,14": "minecraft:prismarine",
+   "12,64,14": "minecraft:prismarine",
+   "13,64,14": "minecraft:prismarine",
+   "10,64,15": "minecraft:farmland",
+   "11,64,15": "minecraft:hay_block",
+   "12,64,15": "minecraft:dirt",
+   "13,64,15": "minecraft:hay_block",
+   "10,64,16": "minecraft:hay_block",
+   "11,64,16": "minecraft:dirt",
+   "12,64,16": "minecraft:dirt",
+   "13,64,16": "minecraft:dirt",
+   "10,64,17": "minecraft:hay_block",
+   "11,64,17": "minecraft:dirt",
+   "12,64,17": "minecraft:hay_block",
+   "13,64,17": "minecraft:dirt",
+   "10,64,11": "minecraft:hay_block",
+   "10,64,18": "minecraft:hay_block",
+   "11,64,11": "minecraft:hay_block",
+   "11,64,18": "minecraft:hay_block",
+   "12,64,11": "minecraft:hay_block",
+   "12,64,18": "minecraft:hay_block",
+   "13,64,11": "minecraft:hay_block",
+   "13,64,18": "minecraft:hay_block",
+   "14,64,11": "minecraft:hay_block",
+   "14,64,18": "minecraft:hay_block",
+   "14,64,12": "minecraft:hay_block",
+   "14,64,13": "minecraft:hay_block",
+   "14,64,14": "minecraft:hay_block",
+   "14,64,15": "minecraft:hay_block",
+   "14,64,16": "minecraft:hay_block",
+   "14,64,17": "minecraft:hay_block",
+   "15,64,14": "minecraft:stone_bricks",
+   "21,64,7": "minecraft:water",
+   "22,64,7": "minecraft:water",
+   "20,64,7": "minecraft:prismarine",
+   "23,64,7": "minecraft:prismarine",
+   "21,64,8": "minecraft:water",
+   "22,64,8": "minecraft:water",
+   "20,64,8": "minecraft:prismarine",
+   "23,64,8": "minecraft:prismarine",
+   "21,64,9": "minecraft:water",
+   "22,64,9": "minecraft:water",
+   "20,64,9": "minecraft:prismarine",
+   "23,64,9": "minecraft:prismarine",
+   "21,64,10": "minecraft:water",
+   "22,64,10": "minecraft:water",
+   "20,64,10": "minecraft:prismarine",
+   "23,64,10": "minecraft:prismarine",
+   "21,64,11": "minecraft:water",
+   "22,64,11": "minecraft:water",
+   "20,64,11": "minecraft:prismarine",
+   "23,64,11": "minecraft:prismarine",
+   "21,64,12": "minecraft:water",
+   "22,64,12": "minecraft:water",
+   "20,64,12": "minecraft:prismarine",
+   "23,64,12": "minecraft:prismarine",
+   "21,64,13": "minecraft:water",
+   "22,64,13": "minecraft:water",
+   "20,64,13": "minecraft:prismarine",
+   "23,64,13": "minecraft:prismarine",
+   "21,64,14": "minecraft:water",
+   "22,64,14": "minecraft:water",
+   "20,64,14": "minecraft:prismarine",
+   "23,64,14": "minecraft:prismarine",
+   "21,64,15": "minecraft:water",
+   "22,64,15": "minecraft:water",
+   "20,64,15": "minecraft:prismarine",
+   "23,64,15": "minecraft:prismarine",
+   "21,64,16": "minecraft:water",
+   "22,64,16": "minecraft:water",
+   "20,64,16": "minecraft:prismarine",
+   "23,64,16": "minecraft:prismarine",
+   "21,64,17": "minecraft:water",
+   "22,64,17": "minecraft:water",
+   "20,64,17": "minecraft:prismarine",
+   "23,64,17": "minecraft:prismarine",
+   "4,64,27": "minecraft:stone_bricks",
+   "4,64,28": "minecraft:stone_bricks",
+   "4,64,29": "minecraft:stone_bricks",
+   "4,64,30": "minecraft:stone_bricks",
+   "5,64,27": "minecraft:stone_bricks",
+   "5,64,28": "minecraft:water",
+   "5,64,29": "minecraft:water",
+   "5,64,30": "minecraft:stone_bricks",
+   "6,64,27": "minecraft:stone_bricks",
+   "6,64,28": "minecraft:water",
+   "6,64,29": "minecraft:water",
+   "6,64,30": "minecraft:stone_bricks",
+   "-12,64,14": "minecraft:stone_bricks",
+   "-11,64,14": "minecraft:mossy_stone_bricks",
+   "-10,64,14": "minecraft:stone_bricks",
+   "-9,64,14": "minecraft:mossy_stone_bricks",
+   "-8,64,14": "minecraft:stone_bricks",
+   "-7,64,14": "minecraft:mossy_stone_bricks",
+   "10,65,-8": "minecraft:wheat_sprout",
+   "11,65,-8": "minecraft:wheat_sprout",
+   "12,65,-8": "minecraft:wheat_sprout",
+   "13,65,-8": "minecraft:wheat_sprout",
+   "10,65,-7": "minecraft:wheat_sprout",
+   "11,65,-7": "minecraft:wheat_sprout",
+   "12,65,-7": "minecraft:wheat_sprout",
+   "13,65,-7": "minecraft:wheat_sprout",
+   "10,65,-6": "minecraft:water",
+   "11,65,-6": "minecraft:water",
+   "12,65,-6": "minecraft:water",
+   "13,65,-6": "minecraft:water",
+   "10,65,-5": "minecraft:wheat_sprout",
+   "11,65,-5": "minecraft:wheat_sprout",
+   "12,65,-5": "minecraft:wheat_sprout",
+   "13,65,-5": "minecraft:wheat_sprout",
+   "10,65,2": "minecraft:wheat_sprout",
+   "11,65,2": "minecraft:wheat_sprout",
+   "12,65,2": "minecraft:wheat_sprout",
+   "13,65,2": "minecraft:wheat_sprout",
+   "14,65,2": "minecraft:wheat_sprout",
+   "15,65,2": "minecraft:wheat_sprout",
+   "10,65,3": "minecraft:wheat_sprout",
+   "11,65,3": "minecraft:wheat_sprout",
+   "12,65,3": "minecraft:wheat_sprout",
+   "13,65,3": "minecraft:wheat_sprout",
+   "14,65,3": "minecraft:wheat_sprout",
+   "15,65,3": "minecraft:wheat_sprout",
+   "10,65,4": "minecraft:wheat_sprout",
+   "11,65,4": "minecraft:wheat_sprout",
+   "12,65,4": "minecraft:wheat_sprout",
+   "13,65,4": "minecraft:wheat_sprout",
+   "14,65,4": "minecraft:wheat_sprout",
+   "15,65,4": "minecraft:wheat_sprout",
+   "10,65,5": "minecraft:water",
+   "11,65,5": "minecraft:water",
+   "12,65,5": "minecraft:water",
+   "13,65,5": "minecraft:water",
+   "14,65,5": "minecraft:water",
+   "15,65,5": "minecraft:water",
+   "10,65,6": "minecraft:wheat_sprout",
+   "11,65,6": "minecraft:wheat_sprout",
+   "12,65,6": "minecraft:wheat_sprout",
+   "13,65,6": "minecraft:wheat_sprout",
+   "14,65,6": "minecraft:wheat_sprout",
+   "15,65,6": "minecraft:wheat_sprout",
+   "10,65,7": "minecraft:wheat_sprout",
+   "11,65,7": "minecraft:wheat_sprout",
+   "12,65,7": "minecraft:wheat_sprout",
+   "13,65,7": "minecraft:wheat_sprout",
+   "14,65,7": "minecraft:wheat_sprout",
+   "15,65,7": "minecraft:wheat_sprout",
+   "10,65,12": "minecraft:wheat_sprout",
+   "11,65,12": "minecraft:wheat_sprout",
+   "12,65,12": "minecraft:wheat_sprout",
+   "13,65,12": "minecraft:wheat_sprout",
+   "10,65,13": "minecraft:wheat_sprout",
+   "11,65,13": "minecraft:wheat_sprout",
+   "12,65,13": "minecraft:wheat_sprout",
+   "13,65,13": "minecraft:wheat_sprout",
+   "10,65,14": "minecraft:water",
+   "11,65,14": "minecraft:water",
+   "12,65,14": "minecraft:water",
+   "13,65,14": "minecraft:water",
+   "10,65,15": "minecraft:wheat_sprout",
+   "11,65,15": "minecraft:wheat_sprout",
+   "12,65,15": "minecraft:wheat_sprout",
+   "13,65,15": "minecraft:wheat_sprout",
+   "10,65,16": "minecraft:wheat_sprout",
+   "11,65,16": "minecraft:wheat_sprout",
+   "12,65,16": "minecraft:wheat_sprout",
+   "13,65,16": "minecraft:wheat_sprout",
+   "10,65,17": "minecraft:wheat_sprout",
+   "11,65,17": "minecraft:wheat_sprout",
+   "12,65,17": "minecraft:wheat_sprout",
+   "13,65,17": "minecraft:wheat_sprout",
+   "-4,65,14": "minecraft:barrel",
+   "-4,65,15": "minecraft:oak_planks",
+   "-5,65,14": "minecraft:hay_block",
+   "14,65,26": "minecraft:hay_block",
+   "14,66,26": "minecraft:pumpkin",
+   "-11,65,15": "minecraft:spruce_log",
+   "-11,66,15": "minecraft:spruce_log",
+   "-11,67,15": "minecraft:spruce_log",
+   "-11,65,16": "minecraft:spruce_planks",
+   "-11,66,16": "minecraft:spruce_planks",
+   "-11,67,16": "minecraft:spruce_planks",
+   "-11,65,17": "minecraft:spruce_planks",
+   "-11,66,17": "minecraft:spruce_planks",
+   "-11,67,17": "minecraft:spruce_planks",
+   "-11,65,18": "minecraft:spruce_planks",
+   "-11,66,18": "minecraft:spruce_planks",
+   "-11,67,18": "minecraft:spruce_planks",
+   "-11,65,19": "minecraft:spruce_planks",
+   "-11,66,19": "minecraft:glass_pane",
+   "-11,67,19": "minecraft:spruce_planks",
+   "-11,65,20": "minecraft:spruce_planks",
+   "-11,66,20": "minecraft:spruce_planks",
+   "-11,67,20": "minecraft:spruce_planks",
+   "-11,65,21": "minecraft:spruce_log",
+   "-11,66,21": "minecraft:spruce_log",
+   "-11,67,21": "minecraft:spruce_log",
+   "-10,65,15": "minecraft:spruce_planks",
+   "-10,66,15": "minecraft:spruce_planks",
+   "-10,67,15": "minecraft:spruce_planks",
+   "-10,65,21": "minecraft:spruce_planks",
+   "-10,66,21": "minecraft:spruce_planks",
+   "-10,67,21": "minecraft:spruce_planks",
+   "-9,65,15": "minecraft:spruce_planks",
+   "-9,66,15": "minecraft:spruce_planks",
+   "-9,67,15": "minecraft:spruce_planks",
+   "-9,65,21": "minecraft:spruce_planks",
+   "-9,66,21": "minecraft:glass_pane",
+   "-9,67,21": "minecraft:spruce_planks",
+   "-8,65,15": "minecraft:spruce_planks",
+   "-8,66,15": "minecraft:spruce_planks",
+   "-8,67,15": "minecraft:spruce_planks",
+   "-8,65,21": "minecraft:spruce_planks",
+   "-8,66,21": "minecraft:spruce_planks",
+   "-8,67,21": "minecraft:spruce_planks",
+   "-7,65,15": "minecraft:spruce_planks",
+   "-7,66,15": "minecraft:glass_pane",
+   "-7,67,15": "minecraft:spruce_planks",
+   "-7,65,21": "minecraft:spruce_planks",
+   "-7,66,21": "minecraft:spruce_planks",
+   "-7,67,21": "minecraft:spruce_planks",
+   "-6,65,21": "minecraft:spruce_planks",
+   "-6,66,21": "minecraft:spruce_planks",
+   "-6,67,21": "minecraft:spruce_planks",
+   "-5,65,21": "minecraft:spruce_planks",
+   "-5,66,21": "minecraft:glass_pane",
+   "-5,67,21": "minecraft:spruce_planks",
+   "-4,65,17": "minecraft:spruce_planks",
+   "-4,66,17": "minecraft:spruce_planks",
+   "-4,67,17": "minecraft:spruce_planks",
+   "-4,65,18": "minecraft:spruce_planks",
+   "-4,66,18": "minecraft:spruce_planks",
+   "-4,67,18": "minecraft:spruce_planks",
+   "-4,65,19": "minecraft:spruce_planks",
+   "-4,66,19": "minecraft:spruce_planks",
+   "-4,67,19": "minecraft:spruce_planks",
+   "-4,65,20": "minecraft:spruce_planks",
+   "-4,66,20": "minecraft:glass_pane",
+   "-4,67,20": "minecraft:spruce_planks",
+   "-4,65,21": "minecraft:spruce_log",
+   "-4,66,21": "minecraft:spruce_log",
+   "-4,67,21": "minecraft:spruce_log",
+   "-12,68,14": "minecraft:dark_oak_planks",
+   "-12,68,15": "minecraft:dark_oak_planks",
+   "-12,68,16": "minecraft:dark_oak_planks",
+   "-12,68,17": "minecraft:dark_oak_planks",
+   "-12,68,18": "minecraft:dark_oak_planks",
+   "-12,68,19": "minecraft:dark_oak_planks",
+   "-12,68,20": "minecraft:dark_oak_planks",
+   "-12,68,21": "minecraft:dark_oak_planks",
+   "-12,68,22": "minecraft:dark_oak_planks",
+   "-11,68,14": "minecraft:dark_oak_planks",
+   "-11,68,15": "minecraft:dark_oak_planks",
+   "-11,68,16": "minecraft:dark_oak_planks",
+   "-11,68,17": "minecraft:dark_oak_planks",
+   "-11,68,18": "minecraft:dark_oak_planks",
+   "-11,68,19": "minecraft:dark_oak_planks",
+   "-11,68,20": "minecraft:dark_oak_planks",
+   "-11,68,21": "minecraft:dark_oak_planks",
+   "-11,68,22": "minecraft:dark_oak_planks",
+   "-10,68,14": "minecraft:dark_oak_planks",
+   "-10,68,15": "minecraft:dark_oak_planks",
+   "-10,68,16": "minecraft:dark_oak_planks",
+   "-10,68,17": "minecraft:dark_oak_planks",
+   "-10,68,18": "minecraft:dark_oak_planks",
+   "-10,68,19": "minecraft:dark_oak_planks",
+   "-10,68,20": "minecraft:dark_oak_planks",
+   "-10,68,21": "minecraft:dark_oak_planks",
+   "-10,68,22": "minecraft:dark_oak_planks",
+   "-9,68,14": "minecraft:dark_oak_planks",
+   "-9,68,15": "minecraft:dark_oak_planks",
+   "-9,68,16": "minecraft:dark_oak_planks",
+   "-9,68,17": "minecraft:dark_oak_planks",
+   "-9,68,18": "minecraft:dark_oak_planks",
+   "-9,68,19": "minecraft:dark_oak_planks",
+   "-9,68,20": "minecraft:dark_oak_planks",
+   "-9,68,21": "minecraft:dark_oak_planks",
+   "-9,68,22": "minecraft:dark_oak_planks",
+   "-8,68,14": "minecraft:dark_oak_planks",
+   "-8,68,15": "minecraft:dark_oak_planks",
+   "-8,68,16": "minecraft:dark_oak_planks",
+   "-8,68,17": "minecraft:dark_oak_planks",
+   "-8,68,18": "minecraft:dark_oak_planks",
+   "-8,68,19": "minecraft:dark_oak_planks",
+   "-8,68,20": "minecraft:dark_oak_planks",
+   "-8,68,21": "minecraft:dark_oak_planks",
+   "-8,68,22": "minecraft:dark_oak_planks",
+   "-7,68,14": "minecraft:lantern",
+   "-7,68,15": "minecraft:dark_oak_planks",
+   "-7,68,16": "minecraft:dark_oak_planks",
+   "-7,68,17": "minecraft:dark_oak_planks",
+   "-7,68,18": "minecraft:dark_oak_planks",
+   "-7,68,19": "minecraft:dark_oak_planks",
+   "-7,68,20": "minecraft:dark_oak_planks",
+   "-7,68,21": "minecraft:dark_oak_planks",
+   "-7,68,22": "minecraft:dark_oak_planks",
+   "-6,68,17": "minecraft:dark_oak_planks",
+   "-6,68,18": "minecraft:dark_oak_planks",
+   "-6,68,19": "minecraft:dark_oak_planks",
+   "-6,68,20": "minecraft:dark_oak_planks",
+   "-6,68,21": "minecraft:dark_oak_planks",
+   "-6,68,22": "minecraft:dark_oak_planks",
+   "-5,68,17": "minecraft:dark_oak_planks",
+   "-5,68,18": "minecraft:dark_oak_planks",
+   "-5,68,19": "minecraft:dark_oak_planks",
+   "-5,68,20": "minecraft:dark_oak_planks",
+   "-5,68,21": "minecraft:dark_oak_planks",
+   "-5,68,22": "minecraft:dark_oak_planks",
+   "-4,68,17": "minecraft:dark_oak_planks",
+   "-4,68,18": "minecraft:dark_oak_planks",
+   "-4,68,19": "minecraft:dark_oak_planks",
+   "-4,68,20": "minecraft:dark_oak_planks",
+   "-4,68,21": "minecraft:dark_oak_planks",
+   "-4,68,22": "minecraft:dark_oak_planks",
+   "-3,68,17": "minecraft:dark_oak_planks",
+   "-3,68,18": "minecraft:dark_oak_planks",
+   "-3,68,19": "minecraft:dark_oak_planks",
+   "-3,68,20": "minecraft:dark_oak_planks",
+   "-3,68,21": "minecraft:dark_oak_planks",
+   "-3,68,22": "minecraft:dark_oak_planks",
+   "-11,69,15": "minecraft:dark_oak_stairs",
+   "-11,69,16": "minecraft:dark_oak_stairs",
+   "-11,69,17": "minecraft:dark_oak_stairs",
+   "-11,69,18": "minecraft:dark_oak_stairs",
+   "-11,69,19": "minecraft:dark_oak_stairs",
+   "-11,69,20": "minecraft:dark_oak_stairs",
+   "-11,69,21": "minecraft:dark_oak_stairs",
+   "-10,69,15": "minecraft:dark_oak_stairs",
+   "-10,69,16": "minecraft:spruce_planks",
+   "-10,69,17": "minecraft:spruce_planks",
+   "-10,69,18": "minecraft:spruce_planks",
+   "-10,69,19": "minecraft:spruce_planks",
+   "-10,69,20": "minecraft:spruce_planks",
+   "-10,69,21": "minecraft:dark_oak_stairs",
+   "-9,69,15": "minecraft:dark_oak_stairs",
+   "-9,69,16": "minecraft:spruce_planks",
+   "-9,69,17": "minecraft:spruce_planks",
+   "-9,69,18": "minecraft:spruce_planks",
+   "-9,69,19": "minecraft:spruce_planks",
+   "-9,69,20": "minecraft:spruce_planks",
+   "-9,69,21": "minecraft:dark_oak_stairs",
+   "-8,69,15": "minecraft:dark_oak_stairs",
+   "-8,69,16": "minecraft:spruce_planks",
+   "-8,69,17": "minecraft:spruce_planks",
+   "-8,69,18": "minecraft:spruce_planks",
+   "-8,69,19": "minecraft:spruce_planks",
+   "-8,69,20": "minecraft:spruce_planks",
+   "-8,69,21": "minecraft:dark_oak_stairs",
+   "-7,69,15": "minecraft:dark_oak_stairs",
+   "-7,69,16": "minecraft:spruce_planks",
+   "-7,69,17": "minecraft:spruce_planks",
+   "-7,69,18": "minecraft:spruce_planks",
+   "-7,69,19": "minecraft:spruce_planks",
+   "-7,69,20": "minecraft:spruce_planks",
+   "-7,69,21": "minecraft:dark_oak_stairs",
+   "-6,69,15": "minecraft:dark_oak_stairs",
+   "-6,69,16": "minecraft:spruce_planks",
+   "-6,69,17": "minecraft:spruce_planks",
+   "-6,69,18": "minecraft:spruce_planks",
+   "-6,69,19": "minecraft:spruce_planks",
+   "-6,69,20": "minecraft:spruce_planks",
+   "-6,69,21": "minecraft:dark_oak_stairs",
+   "-5,69,15": "minecraft:dark_oak_stairs",
+   "-5,69,16": "minecraft:spruce_planks",
+   "-5,69,17": "minecraft:spruce_planks",
+   "-5,69,18": "minecraft:spruce_planks",
+   "-5,69,19": "minecraft:spruce_planks",
+   "-5,69,20": "minecraft:spruce_planks",
+   "-5,69,21": "minecraft:dark_oak_stairs",
+   "-4,69,15": "minecraft:dark_oak_stairs",
+   "-4,69,16": "minecraft:dark_oak_stairs",
+   "-4,69,17": "minecraft:dark_oak_stairs",
+   "-4,69,18": "minecraft:dark_oak_stairs",
+   "-4,69,19": "minecraft:dark_oak_stairs",
+   "-4,69,20": "minecraft:dark_oak_stairs",
+   "-4,69,21": "minecraft:dark_oak_stairs",
+   "-10,70,18": "minecraft:dark_oak_planks",
+   "-9,70,18": "minecraft:dark_oak_planks",
+   "-8,70,18": "minecraft:dark_oak_planks",
+   "-7,70,18": "minecraft:dark_oak_planks",
+   "-6,70,18": "minecraft:dark_oak_planks",
+   "-5,70,18": "minecraft:dark_oak_planks",
+   "-13,65,18": "minecraft:hay_block",
+   "-13,66,18": "minecraft:hay_block",
+   "-13,65,19": "minecraft:hay_block",
+   "-13,66,19": "minecraft:hay_block",
+   "-12,65,20": "minecraft:hay_block",
+   "-12,66,20": "minecraft:hay_block",
+   "-9,65,23": "minecraft:campfire",
+   "-8,65,23": "minecraft:oak_stairs",
+   "-10,65,23": "minecraft:oak_stairs",
+   "-2,65,19": "minecraft:composter",
+   "-2,65,18": "minecraft:barrel",
+   "-1,65,17": "minecraft:crafting_table",
+   "-13,65,-13": "minecraft:spruce_log",
+   "-11,65,-13": "minecraft:spruce_log",
+   "-13,65,-11": "minecraft:spruce_log",
+   "-11,65,-11": "minecraft:spruce_log",
+   "-13,66,-13": "minecraft:spruce_log",
+   "-11,66,-13": "minecraft:spruce_log",
+   "-13,66,-11": "minecraft:spruce_log",
+   "-11,66,-11": "minecraft:spruce_log",
+   "-13,67,-13": "minecraft:spruce_log",
+   "-11,67,-13": "minecraft:spruce_log",
+   "-13,67,-11": "minecraft:spruce_log",
+   "-11,67,-11": "minecraft:spruce_log",
+   "-13,68,-13": "minecraft:spruce_log",
+   "-11,68,-13": "minecraft:spruce_log",
+   "-13,68,-11": "minecraft:spruce_log",
+   "-11,68,-11": "minecraft:spruce_log",
+   "-13,69,-13": "minecraft:spruce_log",
+   "-11,69,-13": "minecraft:spruce_log",
+   "-13,69,-11": "minecraft:spruce_log",
+   "-11,69,-11": "minecraft:spruce_log",
+   "-13,70,-13": "minecraft:spruce_log",
+   "-11,70,-13": "minecraft:spruce_log",
+   "-13,70,-11": "minecraft:spruce_log",
+   "-11,70,-11": "minecraft:spruce_log",
+   "-13,71,-13": "minecraft:oak_planks",
+   "-11,71,-13": "minecraft:oak_planks",
+   "-13,71,-11": "minecraft:oak_planks",
+   "-11,71,-11": "minecraft:oak_planks",
+   "-13,72,-13": "minecraft:oak_planks",
+   "-11,72,-13": "minecraft:oak_planks",
+   "-13,72,-11": "minecraft:oak_planks",
+   "-11,72,-11": "minecraft:oak_planks",
+   "-13,73,-13": "minecraft:oak_planks",
+   "-11,73,-13": "minecraft:oak_planks",
+   "-13,73,-11": "minecraft:oak_planks",
+   "-11,73,-11": "minecraft:oak_planks",
+   "-13,71,-12": "minecraft:oak_planks",
+   "-12,71,-13": "minecraft:oak_planks",
+   "-12,71,-12": "minecraft:oak_planks",
+   "-12,71,-11": "minecraft:oak_planks",
+   "-11,71,-12": "minecraft:oak_planks",
+   "-13,72,-12": "minecraft:oak_planks",
+   "-12,72,-13": "minecraft:oak_planks",
+   "-12,72,-12": "minecraft:oak_planks",
+   "-12,72,-11": "minecraft:oak_planks",
+   "-11,72,-12": "minecraft:oak_planks",
+   "-13,73,-12": "minecraft:oak_planks",
+   "-12,73,-13": "minecraft:oak_planks",
+   "-12,73,-12": "minecraft:oak_planks",
+   "-12,73,-11": "minecraft:oak_planks",
+   "-11,73,-12": "minecraft:oak_planks",
+   "-12,74,-12": "minecraft:white_wool",
+   "-13,74,-12": "minecraft:white_wool",
+   "-11,74,-12": "minecraft:white_wool",
+   "-12,74,-13": "minecraft:white_wool",
+   "-12,74,-11": "minecraft:white_wool",
+   "-14,74,-12": "minecraft:white_wool",
+   "-10,74,-12": "minecraft:white_wool",
+   "-12,74,-14": "minecraft:white_wool",
+   "-12,74,-10": "minecraft:white_wool",
+   "-15,74,-12": "minecraft:white_wool",
+   "-9,74,-12": "minecraft:white_wool",
+   "-12,74,-15": "minecraft:white_wool",
+   "-12,74,-9": "minecraft:white_wool",
+   "-16,74,-12": "minecraft:white_wool",
+   "-8,74,-12": "minecraft:white_wool",
+   "-12,74,-16": "minecraft:white_wool",
+   "-12,74,-8": "minecraft:white_wool",
+   "1,65,-6": "minecraft:mossy_stone_bricks",
+   "1,65,-5": "minecraft:stone_bricks",
+   "1,65,-4": "minecraft:stone_bricks",
+   "1,65,-3": "minecraft:mossy_stone_bricks",
+   "2,65,-6": "minecraft:stone_bricks",
+   "2,65,-3": "minecraft:stone_bricks",
+   "3,65,-6": "minecraft:stone_bricks",
+   "3,65,-3": "minecraft:stone_bricks",
+   "4,65,-6": "minecraft:mossy_stone_bricks",
+   "4,65,-5": "minecraft:stone_bricks",
+   "4,65,-4": "minecraft:stone_bricks",
+   "4,65,-3": "minecraft:mossy_stone_bricks",
+   "1,66,-6": "minecraft:stone_bricks",
+   "1,66,-5": "minecraft:stone_bricks",
+   "1,66,-4": "minecraft:mossy_stone_bricks",
+   "1,66,-3": "minecraft:stone_bricks",
+   "2,66,-6": "minecraft:stone_bricks",
+   "2,66,-3": "minecraft:stone_bricks",
+   "3,66,-6": "minecraft:mossy_stone_bricks",
+   "3,66,-3": "minecraft:mossy_stone_bricks",
+   "4,66,-6": "minecraft:stone_bricks",
+   "4,66,-5": "minecraft:stone_bricks",
+   "4,66,-4": "minecraft:mossy_stone_bricks",
+   "4,66,-3": "minecraft:stone_bricks",
+   "1,67,-6": "minecraft:stone_bricks",
+   "1,67,-5": "minecraft:mossy_stone_bricks",
+   "1,67,-4": "minecraft:stone_bricks",
+   "1,67,-3": "minecraft:stone_bricks",
+   "2,67,-6": "minecraft:mossy_stone_bricks",
+   "2,67,-3": "minecraft:mossy_stone_bricks",
+   "3,67,-6": "minecraft:stone_bricks",
+   "3,67,-3": "minecraft:stone_bricks",
+   "4,67,-6": "minecraft:stone_bricks",
+   "4,67,-5": "minecraft:mossy_stone_bricks",
+   "4,67,-4": "minecraft:stone_bricks",
+   "4,67,-3": "minecraft:stone_bricks",
+   "1,68,-6": "minecraft:mossy_stone_bricks",
+   "1,68,-5": "minecraft:stone_bricks",
+   "1,68,-4": "minecraft:stone_bricks",
+   "1,68,-3": "minecraft:mossy_stone_bricks",
+   "2,68,-6": "minecraft:stone_bricks",
+   "2,68,-3": "minecraft:stone_bricks",
+   "3,68,-6": "minecraft:stone_bricks",
+   "3,68,-3": "minecraft:stone_bricks",
+   "4,68,-6": "minecraft:mossy_stone_bricks",
+   "4,68,-5": "minecraft:stone_bricks",
+   "4,68,-4": "minecraft:stone_bricks",
+   "4,68,-3": "minecraft:mossy_stone_bricks",
+   "1,69,-6": "minecraft:stone_bricks",
+   "1,69,-5": "minecraft:stone_bricks",
+   "1,69,-4": "minecraft:mossy_stone_bricks",
+   "1,69,-3": "minecraft:stone_bricks",
+   "2,69,-6": "minecraft:stone_bricks",
+   "2,69,-3": "minecraft:lantern",
+   "3,69,-6": "minecraft:mossy_stone_bricks",
+   "3,69,-3": "minecraft:mossy_stone_bricks",
+   "4,69,-6": "minecraft:stone_bricks",
+   "4,69,-5": "minecraft:stone_bricks",
+   "4,69,-4": "minecraft:mossy_stone_bricks",
+   "4,69,-3": "minecraft:stone_bricks",
+   "1,70,-6": "minecraft:mossy_stone_bricks",
+   "1,70,-5": "minecraft:mossy_stone_bricks",
+   "1,70,-4": "minecraft:mossy_stone_bricks",
+   "1,70,-3": "minecraft:mossy_stone_bricks",
+   "2,70,-6": "minecraft:mossy_stone_bricks",
+   "2,70,-5": "minecraft:mossy_stone_bricks",
+   "2,70,-4": "minecraft:mossy_stone_bricks",
+   "2,70,-3": "minecraft:mossy_stone_bricks",
+   "3,70,-6": "minecraft:mossy_stone_bricks",
+   "3,70,-5": "minecraft:mossy_stone_bricks",
+   "3,70,-4": "minecraft:mossy_stone_bricks",
+   "3,70,-3": "minecraft:mossy_stone_bricks",
+   "4,70,-6": "minecraft:mossy_stone_bricks",
+   "4,70,-5": "minecraft:mossy_stone_bricks",
+   "4,70,-4": "minecraft:mossy_stone_bricks",
+   "4,70,-3": "minecraft:mossy_stone_bricks",
+   "2,71,-4": "minecraft:stone_bricks",
+   "13,66,26": "minecraft:oak_fence",
+   "15,66,26": "minecraft:oak_fence",
+   "14,67,26": "minecraft:hay_block",
+   "13,65,25": "minecraft:oak_fence",
+   "15,65,25": "minecraft:oak_fence",
+   "13,65,27": "minecraft:oak_fence",
+   "15,65,27": "minecraft:oak_fence",
+   "12,65,26": "minecraft:poppy",
+   "16,65,26": "minecraft:dandelion",
+   "14,65,24": "minecraft:flower_pot",
+   "19,65,-9": "minecraft:oak_fence",
+   "19,65,-8": "minecraft:hay_block",
+   "19,65,-7": "minecraft:oak_fence",
+   "19,65,-5": "minecraft:oak_fence",
+   "19,65,-4": "minecraft:oak_fence",
+   "19,65,-3": "minecraft:oak_fence",
+   "19,65,-1": "minecraft:oak_fence",
+   "19,65,0": "minecraft:oak_fence",
+   "19,65,1": "minecraft:oak_fence",
+   "19,65,3": "minecraft:oak_fence",
+   "19,65,4": "minecraft:oak_fence",
+   "19,65,5": "minecraft:oak_fence",
+   "19,65,7": "minecraft:oak_fence",
+   "19,65,8": "minecraft:oak_fence",
+   "19,65,9": "minecraft:oak_fence",
+   "19,65,11": "minecraft:oak_fence",
+   "19,65,12": "minecraft:campfire",
+   "19,65,13": "minecraft:oak_fence",
+   "19,65,15": "minecraft:oak_fence",
+   "19,65,16": "minecraft:oak_fence",
+   "19,65,17": "minecraft:oak_fence",
+   "19,65,19": "minecraft:oak_fence",
+   "19,65,20": "minecraft:oak_fence",
+   "11,65,-11": "minecraft:oak_fence",
+   "12,65,-11": "minecraft:oak_fence",
+   "13,65,-11": "minecraft:oak_fence",
+   "15,65,-11": "minecraft:oak_fence",
+   "16,65,-11": "minecraft:oak_fence",
+   "17,65,-11": "minecraft:oak_fence",
+   "19,65,-11": "minecraft:oak_fence",
+   "11,65,21": "minecraft:oak_fence",
+   "12,65,21": "minecraft:oak_fence",
+   "13,65,21": "minecraft:oak_fence",
+   "15,65,21": "minecraft:oak_fence",
+   "16,65,21": "minecraft:oak_fence",
+   "17,65,21": "minecraft:oak_fence",
+   "19,65,21": "minecraft:oak_fence",
+   "6,65,-6": "minecraft:stone_bricks",
+   "6,66,-6": "minecraft:stone_bricks",
+   "6,67,-6": "minecraft:lantern",
+   "6,64,4": "minecraft:stone_bricks",
+   "6,65,4": "minecraft:stone_bricks",
+   "6,66,4": "minecraft:stone_bricks",
+   "6,67,4": "minecraft:lantern",
+   "24,65,-6": "minecraft:stone_bricks",
+   "24,66,-6": "minecraft:stone_bricks",
+   "24,67,-6": "minecraft:lantern",
+   "24,64,8": "minecraft:stone_bricks",
+   "24,65,8": "minecraft:stone_bricks",
+   "24,66,8": "minecraft:stone_bricks",
+   "24,67,8": "minecraft:lantern",
+   "24,65,18": "minecraft:stone_bricks",
+   "24,66,18": "minecraft:stone_bricks",
+   "24,67,18": "minecraft:lantern",
+   "6,65,22": "minecraft:barrel",
+   "6,66,22": "minecraft:flower_pot",
+   "18,65,22": "minecraft:barrel",
+   "19,65,22": "minecraft:hay_block",
+   "18,66,22": "minecraft:flower_pot",
+   "6,65,-2": "minecraft:barrel",
+   "6,66,-2": "minecraft:flower_pot",
+   "18,65,-8": "minecraft:barrel",
+   "18,66,-8": "minecraft:flower_pot",
+   "2,65,2": "minecraft:barrel",
+   "3,65,2": "minecraft:hay_block",
+   "2,66,2": "minecraft:flower_pot",
+   "5,65,18": "minecraft:campfire",
+   "5,65,24": "minecraft:campfire",
+   "19,65,26": "minecraft:campfire",
+   "-14,64,-2": "minecraft:spruce_log",
+   "-14,65,-2": "minecraft:spruce_log",
+   "-14,66,-2": "minecraft:spruce_log",
+   "-14,67,-2": "minecraft:spruce_log",
+   "-16,68,-3": "minecraft:flowering_azalea",
+   "-16,68,-2": "minecraft:azalea",
+   "-16,68,-1": "minecraft:flowering_azalea",
+   "-15,68,-4": "minecraft:flowering_azalea",
+   "-15,68,-3": "minecraft:azalea",
+   "-15,68,-2": "minecraft:flowering_azalea",
+   "-15,68,-1": "minecraft:azalea",
+   "-15,68,0": "minecraft:flowering_azalea",
+   "-14,68,-4": "minecraft:azalea",
+   "-14,68,-3": "minecraft:flowering_azalea",
+   "-14,68,-2": "minecraft:azalea",
+   "-14,68,-1": "minecraft:flowering_azalea",
+   "-14,68,0": "minecraft:azalea",
+   "-13,68,-4": "minecraft:flowering_azalea",
+   "-13,68,-3": "minecraft:azalea",
+   "-13,68,-2": "minecraft:flowering_azalea",
+   "-13,68,-1": "minecraft:azalea",
+   "-13,68,0": "minecraft:flowering_azalea",
+   "-12,68,-3": "minecraft:flowering_azalea",
+   "-12,68,-2": "minecraft:azalea",
+   "-12,68,-1": "minecraft:flowering_azalea",
+   "-14,64,26": "minecraft:spruce_log",
+   "-14,65,26": "minecraft:spruce_log",
+   "-14,66,26": "minecraft:spruce_log",
+   "-14,67,26": "minecraft:spruce_log",
+   "-16,68,25": "minecraft:flowering_azalea",
+   "-16,68,26": "minecraft:azalea",
+   "-16,68,27": "minecraft:flowering_azalea",
+   "-15,68,24": "minecraft:flowering_azalea",
+   "-15,68,25": "minecraft:azalea",
+   "-15,68,26": "minecraft:flowering_azalea",
+   "-15,68,27": "minecraft:azalea",
+   "-15,68,28": "minecraft:flowering_azalea",
+   "-14,68,24": "minecraft:azalea",
+   "-14,68,25": "minecraft:flowering_azalea",
+   "-14,68,26": "minecraft:azalea",
+   "-14,68,27": "minecraft:flowering_azalea",
+   "-14,68,28": "minecraft:azalea",
+   "-13,68,24": "minecraft:flowering_azalea",
+   "-13,68,25": "minecraft:azalea",
+   "-13,68,26": "minecraft:flowering_azalea",
+   "-13,68,27": "minecraft:azalea",
+   "-13,68,28": "minecraft:flowering_azalea",
+   "-12,68,25": "minecraft:flowering_azalea",
+   "-12,68,26": "minecraft:azalea",
+   "-12,68,27": "minecraft:flowering_azalea",
+   "26,65,-4": "minecraft:spruce_log",
+   "26,66,-4": "minecraft:spruce_log",
+   "26,67,-4": "minecraft:spruce_log",
+   "24,68,-5": "minecraft:flowering_azalea",
+   "24,68,-4": "minecraft:azalea",
+   "24,68,-3": "minecraft:flowering_azalea",
+   "25,68,-6": "minecraft:flowering_azalea",
+   "25,68,-5": "minecraft:azalea",
+   "25,68,-4": "minecraft:flowering_azalea",
+   "25,68,-3": "minecraft:azalea",
+   "25,68,-2": "minecraft:flowering_azalea",
+   "26,68,-6": "minecraft:azalea",
+   "26,68,-5": "minecraft:flowering_azalea",
+   "26,68,-4": "minecraft:azalea",
+   "26,68,-3": "minecraft:flowering_azalea",
+   "26,68,-2": "minecraft:azalea",
+   "27,68,-6": "minecraft:flowering_azalea",
+   "27,68,-5": "minecraft:azalea",
+   "27,68,-4": "minecraft:flowering_azalea",
+   "27,68,-3": "minecraft:azalea",
+   "27,68,-2": "minecraft:flowering_azalea",
+   "28,68,-5": "minecraft:flowering_azalea",
+   "28,68,-4": "minecraft:azalea",
+   "28,68,-3": "minecraft:flowering_azalea",
+   "26,64,10": "minecraft:spruce_log",
+   "26,65,10": "minecraft:spruce_log",
+   "26,66,10": "minecraft:spruce_log",
+   "26,67,10": "minecraft:spruce_log",
+   "24,68,9": "minecraft:flowering_azalea",
+   "24,68,10": "minecraft:azalea",
+   "24,68,11": "minecraft:flowering_azalea",
+   "25,68,8": "minecraft:flowering_azalea",
+   "25,68,9": "minecraft:azalea",
+   "25,68,10": "minecraft:flowering_azalea",
+   "25,68,11": "minecraft:azalea",
+   "25,68,12": "minecraft:flowering_azalea",
+   "26,68,8": "minecraft:azalea",
+   "26,68,9": "minecraft:flowering_azalea",
+   "26,68,10": "minecraft:azalea",
+   "26,68,11": "minecraft:flowering_azalea",
+   "26,68,12": "minecraft:azalea",
+   "27,68,8": "minecraft:flowering_azalea",
+   "27,68,9": "minecraft:azalea",
+   "27,68,10": "minecraft:flowering_azalea",
+   "27,68,11": "minecraft:azalea",
+   "27,68,12": "minecraft:flowering_azalea",
+   "28,68,9": "minecraft:flowering_azalea",
+   "28,68,10": "minecraft:azalea",
+   "28,68,11": "minecraft:flowering_azalea",
+   "26,65,26": "minecraft:spruce_log",
+   "26,66,26": "minecraft:spruce_log",
+   "26,67,26": "minecraft:spruce_log",
+   "24,68,25": "minecraft:flowering_azalea",
+   "24,68,26": "minecraft:azalea",
+   "24,68,27": "minecraft:flowering_azalea",
+   "25,68,24": "minecraft:flowering_azalea",
+   "25,68,25": "minecraft:azalea",
+   "25,68,26": "minecraft:flowering_azalea",
+   "25,68,27": "minecraft:azalea",
+   "25,68,28": "minecraft:flowering_azalea",
+   "26,68,24": "minecraft:azalea",
+   "26,68,25": "minecraft:flowering_azalea",
+   "26,68,26": "minecraft:azalea",
+   "26,68,27": "minecraft:flowering_azalea",
+   "26,68,28": "minecraft:azalea",
+   "27,68,24": "minecraft:flowering_azalea",
+   "27,68,25": "minecraft:azalea",
+   "27,68,26": "minecraft:flowering_azalea",
+   "27,68,27": "minecraft:azalea",
+   "27,68,28": "minecraft:flowering_azalea",
+   "28,68,25": "minecraft:flowering_azalea",
+   "28,68,26": "minecraft:azalea",
+   "28,68,27": "minecraft:flowering_azalea",
+   "2,64,30": "minecraft:spruce_log",
+   "2,65,30": "minecraft:spruce_log",
+   "2,66,30": "minecraft:spruce_log",
+   "2,67,30": "minecraft:spruce_log",
+   "0,68,29": "minecraft:flowering_azalea",
+   "0,68,30": "minecraft:azalea",
+   "0,68,31": "minecraft:flowering_azalea",
+   "1,68,28": "minecraft:flowering_azalea",
+   "1,68,29": "minecraft:azalea",
+   "1,68,30": "minecraft:flowering_azalea",
+   "1,68,31": "minecraft:azalea",
+   "1,68,32": "minecraft:flowering_azalea",
+   "2,68,28": "minecraft:azalea",
+   "2,68,29": "minecraft:flowering_azalea",
+   "2,68,30": "minecraft:azalea",
+   "2,68,31": "minecraft:flowering_azalea",
+   "2,68,32": "minecraft:azalea",
+   "3,68,28": "minecraft:flowering_azalea",
+   "3,68,29": "minecraft:azalea",
+   "3,68,30": "minecraft:flowering_azalea",
+   "3,68,31": "minecraft:azalea",
+   "3,68,32": "minecraft:flowering_azalea",
+   "4,68,29": "minecraft:flowering_azalea",
+   "4,68,30": "minecraft:azalea",
+   "4,68,31": "minecraft:flowering_azalea",
+   "-14,64,6": "minecraft:spruce_log",
+   "-14,65,6": "minecraft:spruce_log",
+   "-14,66,6": "minecraft:spruce_log",
+   "-14,67,6": "minecraft:spruce_log",
+   "-16,68,5": "minecraft:flowering_azalea",
+   "-16,68,6": "minecraft:azalea",
+   "-16,68,7": "minecraft:flowering_azalea",
+   "-15,68,4": "minecraft:flowering_azalea",
+   "-15,68,5": "minecraft:azalea",
+   "-15,68,6": "minecraft:flowering_azalea",
+   "-15,68,7": "minecraft:azalea",
+   "-15,68,8": "minecraft:flowering_azalea",
+   "-14,68,4": "minecraft:azalea",
+   "-14,68,5": "minecraft:flowering_azalea",
+   "-14,68,6": "minecraft:azalea",
+   "-14,68,7": "minecraft:flowering_azalea",
+   "-14,68,8": "minecraft:azalea",
+   "-13,68,4": "minecraft:flowering_azalea",
+   "-13,68,5": "minecraft:azalea",
+   "-13,68,6": "minecraft:flowering_azalea",
+   "-13,68,7": "minecraft:azalea",
+   "-13,68,8": "minecraft:flowering_azalea",
+   "-12,68,5": "minecraft:flowering_azalea",
+   "-12,68,6": "minecraft:azalea",
+   "-12,68,7": "minecraft:flowering_azalea",
+   "5,65,-10": "minecraft:oak_fence",
+   "5,66,-10": "minecraft:lantern",
+   "5,65,-4": "minecraft:oak_fence",
+   "5,66,-4": "minecraft:lantern",
+   "5,65,2": "minecraft:oak_fence",
+   "5,66,2": "minecraft:lantern",
+   "5,65,8": "minecraft:oak_fence",
+   "5,66,8": "minecraft:lantern",
+   "5,65,20": "minecraft:oak_fence",
+   "5,66,20": "minecraft:lantern",
+   "5,65,26": "minecraft:oak_fence",
+   "5,66,26": "minecraft:lantern",
+   "30,65,0": "minecraft:spruce_log",
+   "30,66,0": "minecraft:spruce_log",
+   "30,67,0": "minecraft:spruce_log",
+   "28,68,-1": "minecraft:flowering_azalea",
+   "28,68,0": "minecraft:azalea",
+   "28,68,1": "minecraft:flowering_azalea",
+   "29,68,-2": "minecraft:flowering_azalea",
+   "29,68,-1": "minecraft:azalea",
+   "29,68,0": "minecraft:flowering_azalea",
+   "29,68,1": "minecraft:azalea",
+   "29,68,2": "minecraft:flowering_azalea",
+   "30,68,-2": "minecraft:azalea",
+   "30,68,-1": "minecraft:flowering_azalea",
+   "30,68,0": "minecraft:azalea",
+   "30,68,1": "minecraft:flowering_azalea",
+   "30,68,2": "minecraft:azalea",
+   "31,68,-2": "minecraft:flowering_azalea",
+   "31,68,-1": "minecraft:azalea",
+   "31,68,0": "minecraft:flowering_azalea",
+   "31,68,1": "minecraft:azalea",
+   "31,68,2": "minecraft:flowering_azalea",
+   "32,68,-1": "minecraft:flowering_azalea",
+   "32,68,0": "minecraft:azalea",
+   "32,68,1": "minecraft:flowering_azalea",
+   "32,64,-12": "minecraft:spruce_log",
+   "32,65,-12": "minecraft:spruce_log",
+   "32,66,-12": "minecraft:spruce_log",
+   "32,67,-12": "minecraft:spruce_log",
+   "30,68,-13": "minecraft:flowering_azalea",
+   "30,68,-12": "minecraft:azalea",
+   "30,68,-11": "minecraft:flowering_azalea",
+   "31,68,-14": "minecraft:flowering_azalea",
+   "31,68,-13": "minecraft:azalea",
+   "31,68,-12": "minecraft:flowering_azalea",
+   "31,68,-11": "minecraft:azalea",
+   "31,68,-10": "minecraft:flowering_azalea",
+   "32,68,-14": "minecraft:azalea",
+   "32,68,-13": "minecraft:flowering_azalea",
+   "32,68,-12": "minecraft:azalea",
+   "32,68,-11": "minecraft:flowering_azalea",
+   "32,68,-10": "minecraft:azalea",
+   "33,68,-14": "minecraft:flowering_azalea",
+   "33,68,-13": "minecraft:azalea",
+   "33,68,-12": "minecraft:flowering_azalea",
+   "33,68,-11": "minecraft:azalea",
+   "33,68,-10": "minecraft:flowering_azalea",
+   "34,68,-13": "minecraft:flowering_azalea",
+   "34,68,-12": "minecraft:azalea",
+   "34,68,-11": "minecraft:flowering_azalea",
+   "34,64,16": "minecraft:spruce_log",
+   "34,65,16": "minecraft:spruce_log",
+   "34,66,16": "minecraft:spruce_log",
+   "34,67,16": "minecraft:spruce_log",
+   "32,68,15": "minecraft:flowering_azalea",
+   "32,68,16": "minecraft:azalea",
+   "32,68,17": "minecraft:flowering_azalea",
+   "33,68,14": "minecraft:flowering_azalea",
+   "33,68,15": "minecraft:azalea",
+   "33,68,16": "minecraft:flowering_azalea",
+   "33,68,17": "minecraft:azalea",
+   "33,68,18": "minecraft:flowering_azalea",
+   "34,68,14": "minecraft:azalea",
+   "34,68,15": "minecraft:flowering_azalea",
+   "34,68,16": "minecraft:azalea",
+   "34,68,17": "minecraft:flowering_azalea",
+   "34,68,18": "minecraft:azalea",
+   "35,68,14": "minecraft:flowering_azalea",
+   "35,68,15": "minecraft:azalea",
+   "35,68,16": "minecraft:flowering_azalea",
+   "35,68,17": "minecraft:azalea",
+   "35,68,18": "minecraft:flowering_azalea",
+   "36,68,15": "minecraft:flowering_azalea",
+   "36,68,16": "minecraft:azalea",
+   "36,68,17": "minecraft:flowering_azalea",
+   "30,65,30": "minecraft:spruce_log",
+   "30,66,30": "minecraft:spruce_log",
+   "30,67,30": "minecraft:spruce_log",
+   "28,68,29": "minecraft:flowering_azalea",
+   "28,68,30": "minecraft:azalea",
+   "28,68,31": "minecraft:flowering_azalea",
+   "29,68,28": "minecraft:flowering_azalea",
+   "29,68,29": "minecraft:azalea",
+   "29,68,30": "minecraft:flowering_azalea",
+   "29,68,31": "minecraft:azalea",
+   "29,68,32": "minecraft:flowering_azalea",
+   "30,68,28": "minecraft:azalea",
+   "30,68,29": "minecraft:flowering_azalea",
+   "30,68,30": "minecraft:azalea",
+   "30,68,31": "minecraft:flowering_azalea",
+   "30,68,32": "minecraft:azalea",
+   "31,68,28": "minecraft:flowering_azalea",
+   "31,68,29": "minecraft:azalea",
+   "31,68,30": "minecraft:flowering_azalea",
+   "31,68,31": "minecraft:azalea",
+   "31,68,32": "minecraft:flowering_azalea",
+   "32,68,29": "minecraft:flowering_azalea",
+   "32,68,30": "minecraft:azalea",
+   "32,68,31": "minecraft:flowering_azalea",
+   "-14,64,34": "minecraft:spruce_log",
+   "-14,65,34": "minecraft:spruce_log",
+   "-14,66,34": "minecraft:spruce_log",
+   "-14,67,34": "minecraft:spruce_log",
+   "-16,68,33": "minecraft:flowering_azalea",
+   "-16,68,34": "minecraft:azalea",
+   "-16,68,35": "minecraft:flowering_azalea",
+   "-15,68,32": "minecraft:flowering_azalea",
+   "-15,68,33": "minecraft:azalea",
+   "-15,68,34": "minecraft:flowering_azalea",
+   "-15,68,35": "minecraft:azalea",
+   "-15,68,36": "minecraft:flowering_azalea",
+   "-14,68,32": "minecraft:azalea",
+   "-14,68,33": "minecraft:flowering_azalea",
+   "-14,68,34": "minecraft:azalea",
+   "-14,68,35": "minecraft:flowering_azalea",
+   "-14,68,36": "minecraft:azalea",
+   "-13,68,32": "minecraft:flowering_azalea",
+   "-13,68,33": "minecraft:azalea",
+   "-13,68,34": "minecraft:flowering_azalea",
+   "-13,68,35": "minecraft:azalea",
+   "-13,68,36": "minecraft:flowering_azalea",
+   "-12,68,33": "minecraft:flowering_azalea",
+   "-12,68,34": "minecraft:azalea",
+   "-12,68,35": "minecraft:flowering_azalea",
+   "4,69,26": "minecraft:red_wool",
+   "-8,69,23": "minecraft:orange_wool"
+  },
+  "agents": {
+   "golem": {
+    "pos": [
+     -3,
+     65,
+     13
+    ]
+   }
+  },
+  "npcs": {
+   "eira": {
+    "pos": [
+     8,
+     65,
+     28
+    ]
+   }
+  },
+  "sayCount": 5,
+  "agentPlaceCount": 124,
+  "playerPlaceCount": 1,
+  "eventTypes": [
+   "agent.move:agent",
+   "block.place:agent",
+   "say:agent",
+   "block.place:player"
+  ]
+ },
+ "finishedAt": "2026-10-31T11:27:08.331Z",
+ "ok": true
+}

@@ -1,0 +1,940 @@
+{
+ "summary": {
+  "routeA": {
+   "success": "10/10",
+   "avgMs": 6770,
+   "avgPlaceMs": 3330,
+   "falls": 0,
+   "teleports": 0
+  },
+  "routeAControl": {
+   "success": "5/5",
+   "falls": 0
+  },
+  "routeB": {
+   "success": "5/5",
+   "avgMs": 7040,
+   "avgFillMs": 789
+  },
+  "mannequin": true,
+  "display": true,
+  "chatLatency": {
+   "rounds": 10,
+   "received": 10,
+   "p50": 1,
+   "max": 3
+  }
+ },
+ "results": {
+  "routeA": [
+   {
+    "trial": 1,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6801,
+    "placeMs": 3357,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 2,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6849,
+    "placeMs": 3385,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 3,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6800,
+    "placeMs": 3325,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 4,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6750,
+    "placeMs": 3310,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 5,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6800,
+    "placeMs": 3282,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 6,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6750,
+    "placeMs": 3316,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 7,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6700,
+    "placeMs": 3355,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 8,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6750,
+    "placeMs": 3329,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 9,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6750,
+    "placeMs": 3304,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 10,
+    "rescue": true,
+    "success": true,
+    "durationMs": 6750,
+    "placeMs": 3338,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   }
+  ],
+  "routeAControl": [
+   {
+    "trial": 101,
+    "rescue": false,
+    "success": true,
+    "durationMs": 6846,
+    "placeMs": 3345,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 102,
+    "rescue": false,
+    "success": true,
+    "durationMs": 6800,
+    "placeMs": 3333,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 103,
+    "rescue": false,
+    "success": true,
+    "durationMs": 6850,
+    "placeMs": 3365,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 104,
+    "rescue": false,
+    "success": true,
+    "durationMs": 6800,
+    "placeMs": 3345,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   },
+   {
+    "trial": 105,
+    "rescue": false,
+    "success": true,
+    "durationMs": 6750,
+    "placeMs": 3284,
+    "falls": 0,
+    "teleports": 0,
+    "walked": 3,
+    "placements": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1
+    },
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "by": {
+     "LeftWeaver": 2,
+     "RightWeaver": 1,
+     "HumanLike": 1
+    },
+    "keystone": {
+     "by": "HumanLike",
+     "actorType": "player",
+     "byPlayer": true
+    },
+    "botDeaths": [
+     0,
+     0
+    ]
+   }
+  ],
+  "routeB": [
+   {
+    "trial": 1,
+    "success": true,
+    "durationMs": 7050,
+    "fillMs": 750,
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "keystone": "player",
+    "displays": 3
+   },
+   {
+    "trial": 2,
+    "success": true,
+    "durationMs": 7050,
+    "fillMs": 850,
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "keystone": "player",
+    "displays": 3
+   },
+   {
+    "trial": 3,
+    "success": true,
+    "durationMs": 7050,
+    "fillMs": 799,
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "keystone": "player",
+    "displays": 3
+   },
+   {
+    "trial": 4,
+    "success": true,
+    "durationMs": 7050,
+    "fillMs": 799,
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "keystone": "player",
+    "displays": 3
+   },
+   {
+    "trial": 5,
+    "success": true,
+    "durationMs": 7000,
+    "fillMs": 749,
+    "bridge": {
+     "got": {
+      "1": "minecraft:oak_planks",
+      "2": "minecraft:oak_planks",
+      "3": "minecraft:oak_planks",
+      "4": "minecraft:oak_planks",
+      "5": "minecraft:oak_planks",
+      "6": "minecraft:oak_planks",
+      "7": "minecraft:lodestone",
+      "8": "minecraft:oak_planks",
+      "9": "minecraft:oak_planks",
+      "10": "minecraft:oak_planks",
+      "11": "minecraft:oak_planks",
+      "12": "minecraft:oak_planks"
+     },
+     "complete": true,
+     "planks": 11
+    },
+    "keystone": "player",
+    "displays": 3
+   }
+  ],
+  "mannequin": {
+   "rpc": {
+    "ok": true,
+    "uuid": "ae861b3d-e14a-4ad0-a3ad-202a7aef613b",
+    "type": "minecraft:mannequin",
+    "profile": "PaperResolvableProfile[impl=net.minecraft.world.item.component.ResolvableProfile$Static@547fed26]"
+   },
+   "freshEntities": [
+    {
+     "id": 324,
+     "name": "mannequin",
+     "type": "living",
+     "pos": {
+      "x": -2,
+      "y": 100,
+      "z": 2
+     }
+    }
+   ],
+   "mannequinSeen": {
+    "id": 324,
+    "name": "mannequin",
+    "type": "living",
+    "pos": {
+     "x": -2,
+     "y": 100,
+     "z": 2
+    }
+   },
+   "note": "visual skin cannot be verified without a real MC client; server-side profile set + protocol-level entity visibility only"
+  },
+  "display": {
+   "freshEntities": [
+    {
+     "id": 325,
+     "type": "other",
+     "name": "item_display"
+    }
+   ],
+   "targetId": 325,
+   "samples": 40,
+   "uniquePositions": 30,
+   "firstX": -1.73,
+   "lastX": 14,
+   "moved": true,
+   "note": "bot-side positions show interpolated server positions; client-side smoothness not verifiable without MC client"
+  },
+  "chatLatency": {
+   "rounds": 10,
+   "received": 10,
+   "p50": 1,
+   "max": 3
+  },
+  "logs": [
+   "WS_OPEN",
+   "PING {\"ok\":true,\"pong\":true,\"rpc\":2037}",
+   "BOTS_READY",
+   "RIG_READY",
+   "ROUTE_A_TRIAL {\"trial\":1,\"rescue\":true,\"success\":true,\"durationMs\":6801,\"placeMs\":3357,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":2,\"rescue\":true,\"success\":true,\"durationMs\":6849,\"placeMs\":3385,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":3,\"rescue\":true,\"success\":true,\"durationMs\":6800,\"placeMs\":3325,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":4,\"rescue\":true,\"success\":true,\"durationMs\":6750,\"placeMs\":3310,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":5,\"rescue\":true,\"success\":true,\"durationMs\":6800,\"placeMs\":3282,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":6,\"rescue\":true,\"success\":true,\"durationMs\":6750,\"placeMs\":3316,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":7,\"rescue\":true,\"success\":true,\"durationMs\":6700,\"placeMs\":3355,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":8,\"rescue\":true,\"success\":true,\"durationMs\":6750,\"placeMs\":3329,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":9,\"rescue\":true,\"success\":true,\"durationMs\":6750,\"placeMs\":3304,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":10,\"rescue\":true,\"success\":true,\"durationMs\":6750,\"placeMs\":3338,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":101,\"rescue\":false,\"success\":true,\"durationMs\":6846,\"placeMs\":3345,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":102,\"rescue\":false,\"success\":true,\"durationMs\":6800,\"placeMs\":3333,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":103,\"rescue\":false,\"success\":true,\"durationMs\":6850,\"placeMs\":3365,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":104,\"rescue\":false,\"success\":true,\"durationMs\":6800,\"placeMs\":3345,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_A_TRIAL {\"trial\":105,\"rescue\":false,\"success\":true,\"durationMs\":6750,\"placeMs\":3284,\"falls\":0,\"teleports\":0,\"walked\":3,\"placements\":{\"LeftWeaver\":2,\"RightWeaver\":1},\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"by\":{\"LeftWeaver\":2,\"RightWeaver\":1,\"HumanLike\":1},\"keystone\":{\"by\":\"HumanLike\",\"actorType\":\"player\",\"byPlayer\":true},\"botDeaths\":[0,0]}",
+   "ROUTE_B_TRIAL {\"trial\":1,\"success\":true,\"durationMs\":7050,\"fillMs\":750,\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"keystone\":\"player\",\"displays\":3}",
+   "ROUTE_B_TRIAL {\"trial\":2,\"success\":true,\"durationMs\":7050,\"fillMs\":850,\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"keystone\":\"player\",\"displays\":3}",
+   "ROUTE_B_TRIAL {\"trial\":3,\"success\":true,\"durationMs\":7050,\"fillMs\":799,\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"keystone\":\"player\",\"displays\":3}",
+   "ROUTE_B_TRIAL {\"trial\":4,\"success\":true,\"durationMs\":7050,\"fillMs\":799,\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"keystone\":\"player\",\"displays\":3}",
+   "ROUTE_B_TRIAL {\"trial\":5,\"success\":true,\"durationMs\":7000,\"fillMs\":749,\"bridge\":{\"got\":{\"1\":\"minecraft:oak_planks\",\"2\":\"minecraft:oak_planks\",\"3\":\"minecraft:oak_planks\",\"4\":\"minecraft:oak_planks\",\"5\":\"minecraft:oak_planks\",\"6\":\"minecraft:oak_planks\",\"7\":\"minecraft:lodestone\",\"8\":\"minecraft:oak_planks\",\"9\":\"minecraft:oak_planks\",\"10\":\"minecraft:oak_planks\",\"11\":\"minecraft:oak_planks\",\"12\":\"minecraft:oak_planks\"},\"complete\":true,\"planks\":11},\"keystone\":\"player\",\"displays\":3}",
+   "CHAT_LATENCY {\"rounds\":10,\"received\":10,\"p50\":1,\"max\":3}",
+   "SKIN_URL http://textures.minecraft.net/texture/292009a4925b58f02c77dadc3ecef07ea4c7472f64e0fdc32ce5522489362680",
+   "MANNEQUIN {\"rpc\":{\"ok\":true,\"uuid\":\"ae861b3d-e14a-4ad0-a3ad-202a7aef613b\",\"type\":\"minecraft:mannequin\",\"profile\":\"PaperResolvableProfile[impl=net.minecraft.world.item.component.ResolvableProfile$Static@547fed26]\"},\"freshEntities\":[{\"id\":324,\"name\":\"mannequin\",\"type\":\"living\",\"pos\":{\"x\":-2,\"y\":100,\"z\":2}}],\"mannequinSeen\":{\"id\":324,\"name\":\"mannequin\",\"type\":\"living\",\"pos\":{\"x\":-2,\"y\":100,\"z\":2}},\"note\":\"visual skin cannot be verified without a real MC client; server-side profile set + protocol-level entity visibility only\"}",
+   "ITEMDISPLAY {\"freshEntities\":[{\"id\":325,\"type\":\"other\",\"name\":\"item_display\"}],\"targetId\":325,\"samples\":40,\"uniquePositions\":30,\"firstX\":-1.73,\"lastX\":14,\"moved\":true,\"note\":\"bot-side positions show interpolated server positions; client-side smoothness not verifiable without MC client\"}",
+   "SUMMARY {\"routeA\":{\"success\":\"10/10\",\"avgMs\":6770,\"avgPlaceMs\":3330,\"falls\":0,\"teleports\":0},\"routeAControl\":{\"success\":\"5/5\",\"falls\":0},\"routeB\":{\"success\":\"5/5\",\"avgMs\":7040,\"avgFillMs\":789},\"mannequin\":true,\"display\":true,\"chatLatency\":{\"rounds\":10,\"received\":10,\"p50\":1,\"max\":3}}"
+  ]
+ }
+}

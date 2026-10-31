@@ -1,0 +1,11 @@
+{
+  "name": "loomcraft-bot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "LoomCraft golem bot manager (Mineflayer 4.39.0). Service channel only: moveTo/place/say, every action timeout-guarded.",
+  "dependencies": {
+    "mineflayer": "4.39.0",
+    "mineflayer-pathfinder": "2.4.5"
+  }
+}

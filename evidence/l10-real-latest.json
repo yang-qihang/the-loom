@@ -1,0 +1,496 @@
+{
+ "level": "L10",
+ "startedAt": "2026-10-31T11:30:07.514Z",
+ "bots": {
+  "left": "LeftWeaver",
+  "right": "RightWeaver"
+ },
+ "checks": {
+  "plugin.health": {
+   "ok": true,
+   "detail": null
+  },
+  "both-bots-online": {
+   "ok": true,
+   "detail": [
+    "LeftWeaver",
+    "RightWeaver"
+   ]
+  },
+  "session-level": {
+   "ok": true,
+   "detail": "L10"
+  },
+  "stale-session-rejected": {
+   "ok": true,
+   "detail": null
+  },
+  "give.LeftWeaver": {
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "gave": "minecraft:oak_planks",
+    "count": 4
+   }
+  },
+  "give.RightWeaver": {
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "gave": "minecraft:oak_planks",
+    "count": 4
+   }
+  },
+  "give.HumanLike": {
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "gave": "minecraft:lodestone",
+    "count": 1
+   }
+  },
+  "keystone.human-player": {
+   "ok": true,
+   "detail": {
+    "seq": 50,
+    "type": "block.place",
+    "tick": 6566,
+    "actor": "HumanLike",
+    "actorType": "player",
+    "pos": [
+     12,
+     65,
+     0
+    ],
+    "data": {
+     "block": "minecraft:lodestone"
+    }
+   }
+  },
+  "reference.passed": {
+   "ok": true,
+   "detail": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "deck-full",
+      "passed": true
+     },
+     {
+      "id": "both-weavers",
+      "passed": true
+     },
+     {
+      "id": "materials-exact",
+      "passed": true
+     },
+     {
+      "id": "keystone-by-player",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "h-bridge-ok",
+      "passed": true
+     },
+     {
+      "id": "h-both-ok",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  },
+  "reference.stars-3": {
+   "ok": true,
+   "detail": 3
+  },
+  "reference.failures-empty": {
+   "ok": true,
+   "detail": []
+  },
+  "no-virtual-fallback": {
+   "ok": true,
+   "detail": []
+  },
+  "report-equals-mock": {
+   "ok": true,
+   "detail": {
+    "real": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "deck-full",
+       "passed": true
+      },
+      {
+       "id": "both-weavers",
+       "passed": true
+      },
+      {
+       "id": "materials-exact",
+       "passed": true
+      },
+      {
+       "id": "keystone-by-player",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "h-bridge-ok",
+       "passed": true
+      },
+      {
+       "id": "h-both-ok",
+       "passed": true
+      }
+     ],
+     "failures": []
+    },
+    "mock": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "deck-full",
+       "passed": true
+      },
+      {
+       "id": "both-weavers",
+       "passed": true
+      },
+      {
+       "id": "materials-exact",
+       "passed": true
+      },
+      {
+       "id": "keystone-by-player",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "h-bridge-ok",
+       "passed": true
+      },
+      {
+       "id": "h-both-ok",
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   }
+  },
+  "digest-equals-mock": {
+   "ok": true,
+   "detail": {
+    "places": 4
+   }
+  },
+  "reset.under-2s": {
+   "ok": true,
+   "detail": {
+    "resetA": {
+     "ok": true,
+     "ms": 4,
+     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
+     "tick": 6580,
+     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
+     "epoch": 19
+    },
+    "resetB": {
+     "ok": true,
+     "ms": 3,
+     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
+     "tick": 6586,
+     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
+     "epoch": 19
+    }
+   }
+  },
+  "reset.hash-stable": {
+   "ok": true,
+   "detail": {
+    "resetA": {
+     "ok": true,
+     "ms": 4,
+     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
+     "tick": 6580,
+     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
+     "epoch": 19
+    },
+    "resetB": {
+     "ok": true,
+     "ms": 3,
+     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
+     "tick": 6586,
+     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
+     "epoch": 19
+    }
+   }
+  },
+  "reset.clears-events": {
+   "ok": true,
+   "detail": {
+    "events": 0
+   }
+  }
+ },
+ "reports": {
+  "reference": {
+   "real": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "deck-full",
+      "passed": true
+     },
+     {
+      "id": "both-weavers",
+      "passed": true
+     },
+     {
+      "id": "materials-exact",
+      "passed": true
+     },
+     {
+      "id": "keystone-by-player",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "h-bridge-ok",
+      "passed": true
+     },
+     {
+      "id": "h-both-ok",
+      "passed": true
+     }
+    ],
+    "failures": []
+   },
+   "mock": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "deck-full",
+      "passed": true
+     },
+     {
+      "id": "both-weavers",
+      "passed": true
+     },
+     {
+      "id": "materials-exact",
+      "passed": true
+     },
+     {
+      "id": "keystone-by-player",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "h-bridge-ok",
+      "passed": true
+     },
+     {
+      "id": "h-both-ok",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  }
+ },
+ "errors": [],
+ "actions": [
+  {
+   "action": "moveTo(10,-1)",
+   "ms": 1648
+  },
+  {
+   "action": "place(minecraft:oak_planks@10,65,0)",
+   "ms": 68
+  },
+  {
+   "action": "moveTo(11,-1)",
+   "ms": 431
+  },
+  {
+   "action": "place(minecraft:oak_planks@11,65,0)",
+   "ms": 20
+  },
+  {
+   "action": "say(左岸铺好了)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(13,1)",
+   "ms": 2248
+  },
+  {
+   "action": "place(minecraft:oak_planks@13,65,0)",
+   "ms": 13
+  },
+  {
+   "action": "moveTo(14,1)",
+   "ms": 88
+  },
+  {
+   "action": "place(minecraft:oak_planks@14,65,0)",
+   "ms": 11
+  },
+  {
+   "action": "say(右岸铺好了)",
+   "ms": 0
+  },
+  {
+   "action": "say(桥面铺好了，最后一块交给织者)",
+   "ms": 0
+  },
+  {
+   "action": "reset",
+   "ms": 286
+  },
+  {
+   "action": "reset",
+   "ms": 298
+  }
+ ],
+ "prepareMs": 2643,
+ "plugin": {
+  "levelId": "L10",
+  "bots": [
+   "LeftWeaver",
+   "RightWeaver"
+  ],
+  "region": [
+   [
+    -8,
+    60,
+    -3
+   ],
+   [
+    36,
+    84,
+    9
+   ]
+  ],
+  "playerSpawn": [
+   14,
+   65,
+   3
+  ],
+  "agentSpawn": [
+   0,
+   65,
+   0
+  ]
+ },
+ "messages": [
+  {
+   "kind": "send",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "send",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "send",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "send",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "LeftWeaver",
+   "text": "2"
+  }
+ ],
+ "referenceRunMs": 2645,
+ "snapshot": {
+  "agentPlaceCount": 4,
+  "playerPlaceCount": 1,
+  "actors": [
+   "LeftWeaver:agent",
+   "RightWeaver:agent",
+   "HumanLike:player"
+  ],
+  "bridge": {
+   "deck": 28,
+   "gap": 5,
+   "gapStart": 10,
+   "bridgeWidth": 3,
+   "deckY": 65,
+   "keystone": [
+    12,
+    65,
+    0
+   ],
+   "leftBank": [
+    1,
+    65,
+    0
+   ],
+   "rightBank": [
+    26,
+    65,
+    0
+   ],
+   "materialsTotal": 4,
+   "leftAgent": "LeftWeaver",
+   "rightAgent": "RightWeaver"
+  }
+ },
+ "reset": {
+  "resetA": {
+   "ok": true,
+   "ms": 4,
+   "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
+   "tick": 6580,
+   "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
+   "epoch": 19
+  },
+  "resetB": {
+   "ok": true,
+   "ms": 3,
+   "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
+   "tick": 6586,
+   "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
+   "epoch": 19
+  }
+ },
+ "finishedAt": "2026-10-31T11:30:16.174Z",
+ "ok": true
+}

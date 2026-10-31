@@ -1,0 +1,11 @@
+name: LoomCraft
+version: '0.1.0'
+main: dev.loomcraft.mc.LoomPlugin
+api-version: '26.1'
+description: THE LOOM Minecraft world service (WorldPort JSON-RPC over WebSocket)
+author: loomcraft
+website: https://example.invalid/loomcraft
+commands:
+  loom:
+    description: LoomCraft world service status
+    usage: /loom <status|reset>

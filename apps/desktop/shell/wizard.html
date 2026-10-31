@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>织界 · 首启向导</title>
+<style>
+  :root { --bg:#16110c; --panel:#221a12; --line:#4a3826; --warm:#d6a85c; --warm2:#f5cd80; --text:#f1e5cd; --muted:#b8a488; --ok:#9fce8a; --bad:#e08a7a; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100%; background:
+      radial-gradient(1000px 380px at 50% -80px, rgba(214,168,92,0.18), transparent 70%), var(--bg);
+    color:var(--text); font-family:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    display:flex; justify-content:center; padding:34px 28px 28px; }
+  .wrap { width:min(860px,100%); }
+  h1 { font-size:26px; letter-spacing:4px; color:var(--warm2); margin:0 0 6px; font-weight:600; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:22px; line-height:1.8; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card h2 { margin:0 0 6px; font-size:14px; color:var(--warm); letter-spacing:1px; }
+  .detail { font-size:12px; color:var(--muted); line-height:1.7; min-height:34px; }
+  .pill { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); margin-bottom:6px; }
+  .pill.ok { color:#1d2a16; background:var(--ok); border-color:var(--ok); }
+  .pill.bad { color:#2a1512; background:var(--bad); border-color:var(--bad); }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+  button { font-family:inherit; font-size:13px; padding:8px 16px; border-radius:7px; border:1px solid var(--line);
+    background:#2b2117; color:var(--text); cursor:pointer; }
+  button:hover { border-color:var(--warm); color:var(--warm2); }
+  button.primary { background:linear-gradient(180deg,#7a5a2e,#5c421f); border-color:var(--warm); color:#ffe8b8; }
+  button:disabled { opacity:.45; cursor:default; }
+  .tip { margin-top:22px; border-left:3px solid var(--warm); padding:10px 14px; background:rgba(214,168,92,0.07);
+    color:var(--muted); font-size:12px; line-height:1.9; border-radius:0 8px 8px 0; }
+  .log { margin-top:16px; font-size:12px; color:var(--muted); white-space:pre-wrap; min-height:18px; }
+  /* 与 Studio 一致：全部直角、去渐变塑料感 */
+  * { border-radius:0 !important; }
+  button.primary { background:#6b5220 !important; }
+  .speech, .tip { border-radius:0 !important; }
+  .log, .card { border-radius:0 !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>织界 · 欢迎来到织机旁</h1>
+  <div class="sub">这台织机会在窗口里直接运行你写的符文，并驱动《我的世界》里的灰崽。<br/>先确认四件事，就可以进入工坊。</div>
+  <div class="grid">
+    <div class="card"><span class="pill" id="pill-java">检测中</span><h2>运行环境</h2><div class="detail" id="detail-java">正在检测系统运行环境……</div></div>
+    <div class="card"><span class="pill" id="pill-node">检测中</span><h2>织机运行时</h2><div class="detail" id="detail-node">织机以后台进程运行……</div></div>
+    <div class="card"><span class="pill" id="pill-prism">检测中</span><h2>《我的世界》客户端</h2><div class="detail" id="detail-prism">正在检测启动器……</div></div>
+    <div class="card"><span class="pill" id="pill-paper">检测中</span><h2>世界服务端</h2><div class="detail" id="detail-paper">正在检测服务端与插件……</div></div>
+  </div>
+  <div class="engine-mode">
+    <label for="engine-url">真实织机地址（可选；安装包已内置，默认无需填写）</label>
+    <div class="engine-row">
+      <input id="engine-url" type="url" placeholder="http://127.0.0.1:4320" autocomplete="off" />
+      <button id="btn-save-engine" type="button">保存地址</button>
+      <button id="btn-clear-engine" type="button">恢复内置</button>
+    </div>
+  </div>
+  <div class="actions">
+    <button id="btn-probe" type="button">重新检测</button>
+    <button id="btn-engine" type="button">启动织机</button>
+    <button id="btn-paper" type="button">启动世界</button>
+    <button id="btn-prism" type="button">启动《我的世界》</button>
+    <button id="btn-enter" class="primary" type="button">进入工坊</button>
+  </div>
+  <div class="log" id="log"></div>
+  <div class="tip">
+    建议把《我的世界》设为「无边框窗口」或切到窗口化全屏；织界窗口可点「置顶」或按控制键、上档键和 L 保持可见；在 Minecraft 里按控制键、上档键和 K 可直接切回工坊（鼠标自动释放，游戏不暂停）；打开「伴玩」后变成 420×620 的小窗。
+    只留目标、艾拉的一句话和运行按钮，两者并排就能看着灰崽在村里干活。
+  </div>
+</div>
+<script type="module">
+let seq = 0;
+const pending = new Map();
+window.addEventListener("message", event => {
+  const data = event.data;
+  if (!data || data.type !== "loom:invoke-result" || !pending.has(data.id)) return;
+  const entry = pending.get(data.id);
+  pending.delete(data.id);
+  if (data.ok) entry.resolve(data.result);
+  else entry.reject(new Error(data.error));
+});
+const invoke = (command, args) => {
+  const t = window.__TAURI__;
+  if (t?.core?.invoke) return t.core.invoke(command, args);
+  // 作为 iframe 运行时，经由壳页面代理 Tauri IPC。
+  const id = ++seq;
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    try {
+      parent.postMessage({ type: "loom:invoke", id, command, args }, "*");
+    } catch (error) {
+      pending.delete(id);
+      reject(error);
+    }
+  });
+};
+const $ = id => document.getElementById(id);
+try { $("engine-url").value = localStorage.getItem("loom.engineUrl") || ""; } catch { /* ignore */ }
+$("btn-save-engine").onclick = () => {
+  const value = $("engine-url").value.trim().replace(/\/$/, "");
+  try { localStorage.setItem("loom.engineUrl", value); } catch { /* ignore */ }
+  log(value ? "已保存真实织机地址；进入工坊后会连接它。请确认外部引擎与 Paper 已启动。" : "已恢复内置 Mock 织机。");
+};
+$("btn-clear-engine").onclick = () => {
+  $("engine-url").value = "";
+  try { localStorage.removeItem("loom.engineUrl"); } catch { /* ignore */ }
+  log("已恢复内置 Mock 织机。");
+};
+const setPill = (id, probe) => {
+  const pill = $("pill-" + id); const detail = $("detail-" + id);
+  pill.className = "pill " + (probe.ok ? "ok" : probe.ok === false ? "bad" : "");
+  pill.textContent = probe.ok ? "就绪" : probe.ok === false ? "需要处理" : "检测中";
+  detail.textContent = probe.detail || "";
+};
+const log = text => { $("log").textContent = text; };
+
+async function probe() {
+  log("正在检测本机环境…");
+  try {
+    const report = await invoke("env_probe");
+    setPill("java", report.java); setPill("node", report.node); setPill("prism", report.prism); setPill("paper", report.paper);
+    log([report.java, report.node, report.prism, report.paper].filter(p => !p.ok).map(p => "· " + p.detail).join("\n") || "四个步骤都就绪了。");
+  } catch (error) { log("# 检测失败：" + error); }
+}
+
+$("btn-probe").onclick = () => void probe();
+$("btn-engine").onclick = async () => {
+  log("正在启动织机……");
+  try { const r = await invoke("start_engine"); log(r.detail); } catch (e) { log("# 启动织机失败：" + e); }
+};
+$("btn-paper").onclick = async () => {
+  log("正在启动世界服务端（首次启动约十到二十秒）……");
+  try { const r = await invoke("start_paper"); log(r.detail); } catch (e) { log("# 启动世界失败：" + e); }
+};
+$("btn-prism").onclick = async () => {
+  log("正在启动《我的世界》启动器……");
+  try { const r = await invoke("launch_prism"); log(r.detail); } catch (e) { log("# 启动《我的世界》失败：" + e); }
+};
+$("btn-enter").onclick = () => {
+  try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); } catch { location.href = "./studio/index.html"; }
+};
+void probe();
+setInterval(() => void probe(), 8000);
+</script>
+</body>
+</html>

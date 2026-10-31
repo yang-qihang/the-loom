@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-31T05:13:52.461Z",
+  "root": "/home/yqh0919/Documents/deepseek-harness/default-workspace",
+  "files": {
+    "content/levels/L02.content.test.ts": "0c89528ed2bf670afd27ff4c2b300dbab37a84c02850f93f4650d56eb13af45d",
+    "content/levels/L03.content.test.ts": "0a96049e03bc345ae24428efb18847f8105b14094d82e8ddef489a4b1e40502e",
+    "content/levels/L04.content.test.ts": "17b8f310501227fa6d743f417a3af1b7853ef3875182a5ef131927a237996e80",
+    "packages/mockworld/src/readonly.test.ts": "5b890c261ea7f0cc69a2e31c81e76fd98706b904bba76039669f30d842efb78e",
+    "packages/runner/src/guard-tests.test.ts": "0d312e31bf3100e5e8e73c79dc49f3b6bf69c3a682ee1fba1cd4cc20b508dfff",
+    "packages/runner/src/l01.e2e.test.ts": "a4df79de8c80416dcb9fd012425db932069ea3f9d0d47d444f8be20b2f86ccbb",
+    "packages/runner/src/sandbox.test.ts": "bae3bbc0e1aa885bfb8e72447b542fb62b8dc39f8405693591709e3746a00d74",
+    "packages/runner/src/transform.test.ts": "f4749d2cff5af8054aa3325be2aafa8b8d4aa3e975f25d1fcb63db941bf7f4fd",
+    "packages/session/src/binding.test.ts": "4b17ddd63595d7a6b3942a0cdb0b1dd6c2d52c6d17d83abb73b32b5b7a51b5f2",
+    "packages/session/src/engine-http.test.ts": "4edf30980d46d90b451dde7865a63a68b928cf40f70adf656dd40071863ade88",
+    "packages/session/src/session.test.ts": "be2f7499786a20e8c50cde138188df8cd18e886ba7eb62e86550c2c30fcc9297",
+    "packages/worldport/src/mock-port.test.ts": "c63900e16c32ae798474ccc07c145ecafc8385af05e9a8dfd0dba6562d9524c5",
+    "qa/red-team.mjs": "b7ec9c11a960e54a35ed77830d86c2aabbaa0a833b3e5dcfa7f5f4f3d824056c"
+  },
+  "count": 13
+}
