@@ -63,6 +63,14 @@ export function configureMonaco(): void {
       "editorBracketMatch.border": "#e8b46a",
       "editorWidget.background": "#1e1710",
       "editorWidget.border": "#4a3826",
+      "menu.background": "#17120d",
+      "menu.foreground": "#f0ead2",
+      "menu.border": "#4a3826",
+      "menu.selectionBackground": "#3d2f1f",
+      "menu.selectionForeground": "#ffcf7d",
+      "menu.separatorBackground": "#4a3826",
+      "editorSuggestWidget.background": "#1e1710",
+      "editorSuggestWidget.border": "#4a3826",
     },
   });
 }

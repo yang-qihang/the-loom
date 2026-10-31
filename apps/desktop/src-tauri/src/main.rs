@@ -20,7 +20,7 @@ use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut,
 const ENGINE_PORT: u16 = 4317;
 const MC_PORT: u16 = 25565;
 const PIN_SHORTCUT: &str = "Ctrl+Shift+L";
-const FOCUS_SHORTCUT: &str = "Ctrl+Shift+K";
+const FOCUS_SHORTCUT: &str = "Alt+Z";
 const COMPANION_WIDTH: u32 = 420;
 const COMPANION_HEIGHT: u32 = 620;
 const WORKBENCH_WIDTH: u32 = 1280;
@@ -44,7 +44,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             always_on_top: false,
-            focus_follow: true,
+            focus_follow: false,
             mode: "workbench".into(),
             page: "wizard".into(),
             prism_command: None,
@@ -615,12 +615,16 @@ fn set_pin(app: tauri::AppHandle, value: bool) -> Result<bool, String> {
 #[tauri::command]
 fn focus_workbench(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        // 同一个快捷键来回切：织界在前时收起，焦点交给 Minecraft；不在前时拉起织界。
+        // 显式双向切换：织界在前 → 交给 Minecraft；Minecraft 在前 → Escape 松鼠标 + 拉起织界。
         if window.is_focused().unwrap_or(false) {
+            if let Some(display) = x11_focus::DisplayHandle::open() {
+                if display.focus_minecraft() {
+                    return;
+                }
+            }
             let _ = window.minimize();
             return;
         }
-        // 游戏正在前台时，先让游戏松开鼠标（Escape 打开游戏菜单），再拉起织界。
         if let Some(display) = x11_focus::DisplayHandle::open() {
             display.send_escape();
         }
@@ -1094,7 +1098,7 @@ fn main() {
                     if event.state != ShortcutState::Pressed {
                         return;
                     }
-                    if shortcut.matches(Modifiers::CONTROL | Modifiers::SHIFT, Code::KeyK) {
+                    if shortcut.matches(Modifiers::ALT, Code::KeyZ) {
                         focus_workbench(app);
                     } else {
                         let _ = toggle_pin_internal(app);
@@ -1127,7 +1131,7 @@ fn main() {
             });
             match app
                 .global_shortcut()
-                .register(Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyK))
+                .register(Shortcut::new(Some(Modifiers::ALT), Code::KeyZ))
             {
                 Ok(()) => {
                     let state = app.state::<AppState>();
@@ -1152,7 +1156,6 @@ fn main() {
                     state.log("shortcut", &format!("注册 {PIN_SHORTCUT} 失败：{error}"));
                 }
             }
-            start_focus_follow(app.handle().clone());
             let startup_handle = app.handle().clone();
             std::thread::spawn(move || {
                 // 页面若因 JS 错误没调用 show_main_window，5 秒后兜底显示，避免永久不可见。

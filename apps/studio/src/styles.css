@@ -1992,3 +1992,23 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 }
 .monaco-menu .action-label { color: #f0ead2 !important; }
 .monaco-menu .keybinding { color: #a9b896 !important; }
+
+/* Monaco 右键菜单/浮层必须有实底；不同 Monaco 版本类名不同，一并兜底。 */
+.monaco-menu-container,
+.monaco-menu,
+.monaco-editor .context-view,
+.monaco-editor .context-view > div,
+.monaco-editor .monaco-action-bar.vertical,
+.monaco-editor [role="menu"] {
+  background: #17120d !important;
+  background-color: #17120d !important;
+  opacity: 1 !important;
+  border-color: #4a3826 !important;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.6) !important;
+}
+.monaco-menu .action-label,
+.monaco-menu .monaco-menu-option,
+.monaco-editor [role="menuitem"] { color: #f0ead2 !important; }
+.monaco-menu .action-item:hover,
+.monaco-menu .monaco-menu-option.active,
+.monaco-editor [role="menuitem"]:hover { background: #2b2117 !important; }
