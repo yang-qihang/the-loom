@@ -609,6 +609,19 @@ fn focus_workbench(app: &tauri::AppHandle) {
 }
 
 #[tauri::command]
+fn show_main_window(app: tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+}
+
+#[tauri::command]
+fn engine_ready() -> bool {
+    port_open(engine_port())
+}
+
+#[tauri::command]
 fn set_webview_zoom(window: tauri::WebviewWindow, scale: f64) -> Result<(), String> {
     window.set_zoom(scale).map_err(|error| error.to_string())
 }
@@ -919,6 +932,11 @@ fn main() {
             }
             let startup_handle = app.handle().clone();
             std::thread::spawn(move || {
+                // 页面若因 JS 错误没调用 show_main_window，5 秒后兜底显示，避免永久不可见。
+                std::thread::sleep(Duration::from_secs(5));
+                if let Some(window) = startup_handle.get_webview_window("main") {
+                    let _ = window.show();
+                }
                 let state = startup_handle.state::<AppState>();
                 if find_real_runtime(&state).is_some() {
                     match spawn_bundled_paper(&state) {
@@ -956,7 +974,9 @@ fn main() {
             window_toggle_maximize,
             window_close,
             window_start_drag,
-            set_webview_zoom
+            set_webview_zoom,
+            engine_ready,
+            show_main_window
         ])
         .build(tauri::generate_context!())
         .expect("构建织界桌面应用失败");

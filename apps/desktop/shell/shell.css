@@ -159,3 +159,15 @@ body.companion .loom-bar .win-btn { width: 28px; height: 26px; }
   .loom-bar { height: auto; flex: 0 0 auto; padding: 7px 10px; }
   body.companion .loom-bar { height: auto; flex: 0 0 auto; }
 }
+
+/* 启动遮罩：标题栏/iframe 尚未完成首帧时，先用深色铺底，避免整窗白闪。 */
+.boot-splash {
+  position: absolute; inset: 0; z-index: 80; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  background: #0e1710; color: #f0ead2;
+  transition: opacity .18s ease; pointer-events: none;
+}
+.boot-splash.is-hidden { opacity: 0; visibility: hidden; }
+.boot-mark { font-family: "Zpix", "Departure Mono", monospace; font-size: 64px; letter-spacing: 10px; color: #f0d68a; }
+.boot-line { font-family: "Zpix", "Departure Mono", monospace; font-size: 14px; color: #a9b896; }
+.loom-main { background: #0e1710; }

@@ -71,24 +71,58 @@ function renderMode() {
   document.body.classList.toggle("companion", companion);
 }
 
+let pendingPage = null;
+let pendingTimer = null;
+
+function frameUrl(page) {
+  if (page === "wizard") return "./wizard.html";
+  const engine = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
+  const params = new URLSearchParams();
+  params.set("engine", engine);
+  params.set("scale", String(settings.uiScale));
+  if (page === "companion") {
+    if (currentSession) params.set("session", currentSession);
+    if (currentLevel) params.set("level", currentLevel);
+    return `${engine}/companion.html?${params.toString()}`;
+  }
+  return `${engine}/studio/index.html?${params.toString()}`;
+}
+
+async function waitEngineThen(page, attempt = 0) {
+  if (page !== pendingPage) return;
+  let ready = false;
+  try { ready = await invoke("engine_ready"); } catch { /* fallback below */ }
+  if (!ready) {
+    try {
+      const base = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
+      const response = await fetch(base + "/api/health", { signal: AbortSignal.timeout(700) });
+      ready = response.ok;
+    } catch { /* still booting */ }
+  }
+  if (page !== pendingPage) return;
+  if (ready) {
+    pendingPage = null;
+    els.iframe.src = frameUrl(page);
+    return;
+  }
+  if (attempt > 120) { pendingPage = null; return; }
+  pendingTimer = setTimeout(() => void waitEngineThen(page, attempt + 1), 500);
+}
+
 function show(page) {
-  let next = page === "wizard" ? "./wizard.html" : "";
-  try {
-    const engine = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
-    const params = new URLSearchParams();
-    params.set("engine", engine);
-    params.set("scale", String(settings.uiScale));
-    if (page === "companion") {
-      if (currentSession) params.set("session", currentSession);
-      if (currentLevel) params.set("level", currentLevel);
-      next = `${engine}/companion.html?${params.toString()}`;
-    } else if (page === "workbench") {
-      next = `${engine}/studio/index.html?${params.toString()}`;
-    }
-  } catch { /* ignore */ }
-  els.iframe.src = next || "./wizard.html";
   settings.page = page;
   void invoke("save_settings", { settings }).catch(() => {});
+  if (page === "wizard") {
+    pendingPage = null;
+    if (pendingTimer) clearTimeout(pendingTimer);
+    els.iframe.src = "./wizard.html";
+    return;
+  }
+  pendingPage = page;
+  if (pendingTimer) clearTimeout(pendingTimer);
+  // 引擎还没起来时先显示本地向导，避免 iframe 对着 connection refused 永久白屏。
+  els.iframe.src = "./wizard.html";
+  void waitEngineThen(page, 0);
 }
 
 async function loadSettings() {
@@ -243,6 +277,8 @@ async function applyTauriEvents() {
 }
 
 await loadSettings();
+document.getElementById("boot-splash")?.classList.add("is-hidden");
+try { await invoke("show_main_window"); } catch { /* old shell */ }
 void refreshStatus();
 setInterval(refreshStatus, 4000);
 window.__loomShell = { show, toast };
