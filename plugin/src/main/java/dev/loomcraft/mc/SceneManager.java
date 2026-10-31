@@ -902,7 +902,8 @@ public final class SceneManager implements Listener {
         }
         for (Map.Entry<Material, Integer> entry : pendingPlayerItems.entrySet()) {
             p.getInventory().addItem(new ItemStack(entry.getKey(), entry.getValue()));
-            p.sendMessage(Component.text("已把「" + entry.getKey().name().toLowerCase() + "」放进你的背包；按 E 打开物品栏，拖到快捷栏。"));
+            p.getInventory().setItem(0, new ItemStack(entry.getKey(), entry.getValue()));
+            p.sendMessage(Component.text("已把「" + entry.getKey().name().toLowerCase() + "」放进快捷栏第 1 格。"));
         }
         if (!pendingPlayerItems.isEmpty()) {
             p.sendMessage(Component.text("第 4 盏灯在村道尽头：x=2, z=16。手持灯笼，准星对准灯柱顶端，按鼠标右键。"));
