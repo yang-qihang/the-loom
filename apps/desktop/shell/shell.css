@@ -87,7 +87,7 @@ body.companion .btn { padding: 4px 9px; font-size: 12px; white-space: nowrap; }
 }
 body { background: var(--bg); }
 .loom-bar {
-  height: 44px; flex: 0 0 44px; gap: 12px; padding: 0 10px;
+  height: 56px; flex: 0 0 56px; gap: 12px; padding: 0 12px;
   background: #101c13; border-bottom: 2px solid var(--line);
 }
 .brand { align-items: center; gap: 7px; }
@@ -107,14 +107,14 @@ body.companion .bar-status { gap: 3px; margin-left: 2px; }
 .bar-actions { margin-left: 0; gap: 6px; align-items: center; }
 .btn {
   border: 2px solid var(--line); border-radius: 0; background: var(--panel);
-  color: var(--text); padding: 3px 9px; font-size: 12px; line-height: 18px;
+  color: var(--text); padding: 7px 11px; font-size: 12px; line-height: 18px;
   box-shadow: none; text-shadow: none; font-family: inherit;
 }
 .btn:hover { border-color: var(--warm); color: var(--warm-2); background: var(--panel-2); }
 .btn.primary { background: #6b5220; border-color: var(--warm); color: #ffe9b0; }
 .win-sep { width: 2px; height: 20px; background: var(--line); margin: 0 4px; }
 .win-btn {
-  width: 30px; height: 26px; padding: 0; border: 2px solid var(--line);
+  width: 32px; height: 32px; padding: 0; border: 2px solid var(--line);
   background: var(--panel); color: var(--muted); border-radius: 0;
   font-family: inherit; font-size: 12px; line-height: 1; cursor: pointer;
 }

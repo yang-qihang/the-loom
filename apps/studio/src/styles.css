@@ -1889,3 +1889,11 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   gap: 8px;
 }
 .map-title-row .map-head-actions .mode-chip { position: static; }
+
+/* 关卡墙标题与下面内容之间留出呼吸，不再贴住。 */
+.map-title-row { margin-bottom: 18px; }
+.map-head { margin-bottom: 30px; }
+@media (max-width: 1000px) {
+  .map-title-row { margin-bottom: 14px; }
+  .map-head { margin-bottom: 24px; }
+}
