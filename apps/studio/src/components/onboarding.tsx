@@ -51,6 +51,15 @@ export function PrologueOverlay({ mode, onDone }: PrologueProps) {
         </div>
         <p className="narrative-note">{prologue.skippable}</p>
         <div className="narrative-actions">
+          <button
+            type="button"
+            className="btn btn-quiet"
+            onClick={() => setIndex((current) => Math.max(0, current - 1))}
+            disabled={index === 0}
+            data-testid="onboarding-prev"
+          >
+            上一页
+          </button>
           <button type="button" className="btn btn-quiet" onClick={onDone} data-testid="onboarding-skip">
             {chrome.onboarding.skip}
           </button>
@@ -98,6 +107,15 @@ export function ActIntroOverlay({ act, mode, onDone }: ActIntroProps) {
         </div>
         <p className="narrative-note">{prologue.skippable}</p>
         <div className="narrative-actions">
+          <button
+            type="button"
+            className="btn btn-quiet"
+            onClick={() => setIndex((current) => Math.max(0, current - 1))}
+            disabled={index === 0}
+            data-testid="act-prev"
+          >
+            上一页
+          </button>
           <button type="button" className="btn btn-quiet" onClick={onDone} data-testid="act-skip">
             {chrome.onboarding.skip}
           </button>

@@ -406,6 +406,15 @@ export function Workbench({
                 {chrome.workbench.codeLabel}
               </span>
               <span className="kbd">{labels.keyRun}</span>
+              <button
+                type="button"
+                className="btn btn-primary btn-run-top"
+                onClick={() => void runProgram()}
+                disabled={phase === "running" || !level}
+                data-testid="btn-run-top"
+              >
+                {buttons.run}
+              </button>
               <div className="editor-font-controls" role="group" aria-label="代码字号">
                 <button
                   type="button"
