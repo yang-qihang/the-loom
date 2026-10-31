@@ -8,11 +8,22 @@ APPDIR="$BUNDLE/appimage/Loomcraft.AppDir"
 RUNTIME_FILE="${LOOM_APPIMAGE_RUNTIME:-/tmp/type2-runtime-x86_64}"
 APPIMAGE_TOOL="$HOME/.cache/tauri/linuxdeploy-plugin-appimage.AppImage"
 
-echo "[package] 0/5 停止旧织界/内置 runtime（避免删除运行中目录造成 uv_cwd 错误）"
-for pid in $(ps -eo pid=,cmd= | awk '/Loomcraft_0\.1\.0_amd64\.AppImage|loomcraft-desktop|runtime\/real\/(engine\.mjs|java)/ && !/awk/ {print $1}'); do
-  kill "$pid" 2>/dev/null || true
-done
-sleep 1
+echo "[package] 0/5 停止旧织界/内置 runtime（按 cwd 识别，避免 uv_cwd 错误）"
+python3 - "$ROOT" <<'PY'
+import os, sys, signal, glob
+roots=[os.path.abspath(sys.argv[1]), os.path.expanduser('~/.loomcraft')]
+for d in glob.glob('/proc/[0-9]*'):
+    try:
+        pid=int(d.split('/')[-1]); comm=open(d+'/comm').read().strip(); cwd=os.readlink(d+'/cwd')
+        cmd=open(d+'/cmdline','rb').read().replace(b'\0',b' ').decode(errors='replace')
+    except Exception: continue
+    if not (comm.startswith('java') or comm.startswith('node') or 'loomcraft' in comm.lower() or 'Loomcraft' in cmd): continue
+    if not any(cwd==r or cwd.startswith(r+os.sep) for r in roots): continue
+    if not any(x in cmd for x in ('paper.jar','engine.mjs','loomcraft-desktop','Loomcraft_0.1.0_amd64.AppImage')): continue
+    try: os.kill(pid, signal.SIGTERM)
+    except Exception: pass
+PY
+sleep 2
 
 echo "[package] 1/5 清理旧 AppDir/旧 AppImage"
 rm -rf "$BUNDLE/appimage"

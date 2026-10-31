@@ -1074,9 +1074,12 @@ fn start_focus_follow(app: tauri::AppHandle) {
 }
 
 fn main() {
-    // KDE/GNOME 的 Wayland 会话下，GTK 窗口的 always-on-top 与 X11 全局快捷键都不可靠。
-    // 强制走 XWayland，让置顶/跨窗口快捷键与 Minecraft（通常也是 XWayland）一致工作。
-    if std::env::var_os("WAYLAND_DISPLAY").is_some() && std::env::var_os("GDK_BACKEND").is_none() {
+    // KDE/GNOME 的 Wayland 会话下，GTK 窗口的 always-on-top 与全局快捷键都不可靠；
+    // 去掉 WAYLAND_DISPLAY / 把 session type 设为 x11，让 Tauri 的 global-shortcut 走 X11，
+    // 而不是弹出 xdg-desktop-portal 的全局快捷键授权框（授权状态损坏后 Alt+Z 会完全失效）。
+    if std::env::var_os("WAYLAND_DISPLAY").is_some() {
+        std::env::remove_var("WAYLAND_DISPLAY");
+        std::env::set_var("XDG_SESSION_TYPE", "x11");
         std::env::set_var("GDK_BACKEND", "x11");
     }
     let _lock_path = acquire_single_instance();

@@ -52,6 +52,20 @@ collect_pids() {
   done
 }
 
+# 先清理 cwd 位于织界 runtime 的旧 Paper/引擎（相对路径 cmdline 也能识别）。
+python3 - "$HOME/.loomcraft" "$ROOT" <<'PY'
+import os, sys, signal, glob
+roots=[os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])]
+for d in glob.glob('/proc/[0-9]*'):
+    try:
+        pid=int(d.split('/')[-1]); comm=open(d+'/comm').read().strip(); cwd=os.readlink(d+'/cwd'); cmd=open(d+'/cmdline','rb').read().replace(b'\0',b' ').decode(errors='replace')
+    except Exception: continue
+    if not (comm.startswith('java') or comm.startswith('node')): continue
+    if not any(cwd==r or cwd.startswith(r+os.sep) for r in roots): continue
+    if not any(x in cmd for x in ('paper.jar','engine.mjs')): continue
+    try: os.kill(pid, signal.SIGTERM)
+    except Exception: pass
+PY
 PIDS="$(collect_pids)"
 if [ -n "$PIDS" ]; then
   echo "[launch] 关闭旧织界实例与后端：$(echo $PIDS | tr '\n' ' ')"
