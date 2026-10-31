@@ -38,6 +38,10 @@
 ## 快速开始（玩家）
 
 ```bash
+# 推荐：自动清理旧实例/残留 Paper/引擎，再启动并等待后端就绪
+bash scripts/launch-desktop.sh
+
+# 手动启动
 ./apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft-x86_64.AppImage
 # 或 Fedora: sudo rpm -i apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm
 ```
