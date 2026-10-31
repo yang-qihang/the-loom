@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import { DesktopTitlebar } from "./components/DesktopTitlebar";
 import { isDesktopShell } from "./desktop";
+
+const scale = new URLSearchParams(window.location.search).get("scale");
+if (scale) document.documentElement.style.zoom = scale;
 import { installNativeGuard } from "./native-guard";
 import "./styles.css";
 

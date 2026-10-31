@@ -24,6 +24,11 @@ const els = {
 let settings = { alwaysOnTop: false, mode: "workbench", page: "wizard", uiScale: 0.8 };
 let currentSession = null;
 let currentLevel = null;
+// 迁移旧版开发地址：新自包含包内置引擎在 4317，旧的 4320 外部地址只会让 Studio 连错。
+try {
+  const savedEngine = localStorage.getItem("loom.engineUrl");
+  if (savedEngine && /^http:\/\/127\.0\.0\.1:4320\/?$/.test(savedEngine)) localStorage.removeItem("loom.engineUrl");
+} catch { /* ignore */ }
 try {
   const savedScale = Number(localStorage.getItem("loom.uiScale"));
   if (savedScale >= 0.7 && savedScale <= 1.2) settings.uiScale = savedScale;
@@ -67,20 +72,21 @@ function renderMode() {
 }
 
 function show(page) {
-  const map = { wizard: "./wizard.html", workbench: "./studio/index.html", companion: "./companion.html" };
-  let next = map[page] ?? map.wizard;
+  let next = page === "wizard" ? "./wizard.html" : "";
   try {
-    const engine = localStorage.getItem("loom.engineUrl");
+    const engine = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
     const params = new URLSearchParams();
-    if (engine) params.set("engine", engine);
+    params.set("engine", engine);
+    params.set("scale", String(settings.uiScale));
     if (page === "companion") {
       if (currentSession) params.set("session", currentSession);
       if (currentLevel) params.set("level", currentLevel);
+      next = `${engine}/companion.html?${params.toString()}`;
+    } else if (page === "workbench") {
+      next = `${engine}/studio/index.html?${params.toString()}`;
     }
-    const query = params.toString();
-    if (query) next += "?" + query;
   } catch { /* ignore */ }
-  els.iframe.src = next;
+  els.iframe.src = next || "./wizard.html";
   settings.page = page;
   void invoke("save_settings", { settings }).catch(() => {});
 }
@@ -91,6 +97,11 @@ async function loadSettings() {
     if (loaded) settings = { ...settings, ...loaded };
   } catch {
     toast("读取设置失败，使用默认值");
+  }
+  // 修复历史坏状态：伴玩模式不能承载完整工作台页面，否则会把 1280 宽界面塞进 420 小窗。
+  if (settings.mode === "companion" && settings.page === "workbench") {
+    settings.mode = "workbench";
+    try { await invoke("set_mode", { mode: "workbench" }); } catch { /* old shell */ }
   }
   renderPin();
   renderMode();

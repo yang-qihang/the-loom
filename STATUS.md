@@ -8,13 +8,13 @@
 
 - **可玩**：L01–L09（Mock + Studio；真实 MC 已验收 L01–L04）。L10 为终局设计/预演（多织偶运行时未接）。
 - **真实 MC**：Engine `LOOM_WORLD=paper` 跑通 L01–L04（34/34 check，3 星）；真实评分与 Mock 逐项一致。
-- **桌面**：Tauri 2 AppImage 120MB / rpm 18MB，无浏览器、置顶/伴玩；App 内 engine 默认 Mock-only（真实 Paper 用 `npm run dev:engine:paper`，未收进安装包）。
+- **桌面**：Tauri 2 自包含安装包（AppImage 356MB / RPM 382MB）；包内带 Node/Java/Paper/插件/世界/真实引擎/织偶。
 - **质量**：185 项自动化测试全绿；verify l0–l3+lg exit 0；门禁 8 pass / 1 warn / G-FRESH-READER Round 4 仍 tracked fail（需继续收敛）；Studio 真实 Playwright 5/5（含文字溢出自动断言、等待玩家、错误态、试符台、织典）。
 - **真实 MC 视觉**：客户端已在 Xvfb 真实启动进服；L01 完成村门/风车/池塘/集市/村舍/苔藓小径/灯笼等美术 pass，L02 完成谷仓/鸡舍/水槽/树/干草等美术 pass；真实 L1/L2 e2e PASS；截图 evidence/scene-shots/L01.png、L02.png；场景质量门 `qa/scene-quality.mjs`；流程 docs/34、docs/35。
 - **场景美术（region-aware）**：新增 `scripts/scene-shot.mjs` + 插件 `session.status` 的 region/spawn/center 与 `player.teleport yaw/pitch`，截图不再拍旧竞技场。**L01–L09 全部通过真实截图质量门**（L04 修复 y65 逻辑田不可见 + 天气；L08 修复插件补灰柱/相机在场景外，真机主视角能看到烟囱/熔炉/红石门/工具架；自然材质约 85%，红石灯/羊毛为小面积点缀）；L07 实拍仍空/灰，继续返工；L06 机位需调整；L09/L10 未做。L05 第三次返工：clearRegion 中心从空草地改到工地，playerSpawn=(13,64,-2)，真实机位可见脚手架/工棚/半成品房/木料场；自然材质为主、点缀色 3.88%。已向并行 agent 强调：不得为了凑丰富滥用高饱和彩色，点缀色小面积使用。
-- **桌面最新包（v36）**：AppImage 124.20MiB / rpm 23.15MiB，含自绘像素标题栏（无系统窗框）、拖动/双击最大化/最小化/关闭、原生行为收口、编辑器 A-/A+、系统页、伴玩直角+像素化；实测在隔离 `:98 + Openbox`，`:0` 零自动化；Mock-only 已写明。
+- **桌面最新包**：AppImage 356MB / rpm 382MB，包内带 Node/Java/Paper/插件/世界/真实引擎/织偶；自绘像素标题栏、拖动/最大化/最小化/关闭、A-/A+、系统页、伴玩、四颗连接灯。
 - **游戏内提示**：`POST /api/in-game` 支持 `title`（短句大字）与 `actionbar`（长句小字）；真实客户端截图 20/21 已验证不裁切；Studio 开始/等待/报错/通关/重置都已接入。
-- **真实玩家路径验收（未完成）**：L01–L04 真实 Paper e2e 通过；L01–L10 已全部真实 Paper e2e PASS（各 3 星，L10 双织偶含 Studio 会话注入）；Studio L05–L10 中文引导已补齐；每关天空/天气配置已拆分并按 Act 集成。桌面安装包最新重打（Mock-only 未变）；UOS 4/4、纯中文 0 违规；挑战层 UI、真人键鼠验收仍待补。禁止把 Mock 全绿说成「所有关卡跑通」。
+- **真实玩家路径验收**：L01–L10 真实 Paper e2e 全 PASS（各 3 星，L10 双织偶含 Studio 会话注入）；UOS 4/4、纯中文 0 违规；挑战层仍为说明卡，真人键鼠盲测未执行。
 - **世界内中文标注**：插件 `annotations.set/clear/visible` 已实现并打日志（L01 一次生成 6 个、直接测试 2 个 ArmorStand 名牌）；Studio 有「世界标注：开/关」与说明。**受控测试里 2.2x TextDisplay 可见但过大；1.2x 在 L01 实际机位仍不易看到，标注字号/机位未定稿，未宣称可用。**
 - **零 MC 基础引导**：只在「轮到你」阶段出现可折叠「第一次玩 Minecraft？」分步说明（切窗口/WASD/准星/右键），并提供「我弄乱了世界，重置本关」一键恢复；Playwright 已断言。
 - **随时重置**：工作台顶栏「重置本关」+ 结算页重置常驻。
@@ -72,7 +72,7 @@
 - Studio：L05–L10 完整中文引导；挑战层说明卡；天空/天气/云；UOS 4/4。
 - 门禁：`npm test` 25 files / 235 tests；Studio e2e 6/6；纯中文 0 违规；`verify.sh` exit 0。
 - 桌面安装包 AppImage 125MB / rpm 23.17MB，隔离 `:98` 实测启动。
-- **明确边界**：桌面包仍 Mock-only；挑战层目前是可阅读说明而非可玩会话；真实人类键鼠盲测尚未执行（自动化代理为 UOS）。
+- **明确边界**：挑战层目前是可阅读说明而非可玩会话；真实人类键鼠盲测尚未执行（自动化代理为 UOS）。
 
 
 ## 自包含安装包（2026-10-31 20:52）

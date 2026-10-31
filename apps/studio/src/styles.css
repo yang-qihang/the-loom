@@ -1897,3 +1897,8 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   .map-title-row { margin-bottom: 14px; }
   .map-head { margin-bottom: 24px; }
 }
+
+/* 关卡墙标题与下面按钮/说明之间再留出一段明显空隙。 */
+.map-title-row { gap: 16px; margin-bottom: 24px; }
+.map-title-row > div:first-child { padding-bottom: 2px; }
+.map-head h1 { margin-bottom: 2px; }

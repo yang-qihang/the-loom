@@ -340,6 +340,22 @@ fn find_real_runtime(state: &AppState) -> Option<PathBuf> {
     None
 }
 
+fn copy_dir_all(from: &Path, to: &Path) -> Result<(), String> {
+    fs::create_dir_all(to).map_err(|error| error.to_string())?;
+    let entries = fs::read_dir(from).map_err(|error| format!("读取运行时资源失败：{error}"))?;
+    for entry in entries {
+        let entry = entry.map_err(|error| error.to_string())?;
+        let source = entry.path();
+        let target = to.join(entry.file_name());
+        if source.is_dir() {
+            copy_dir_all(&source, &target)?;
+        } else {
+            fs::copy(&source, &target).map_err(|error| format!("复制运行时文件失败：{error}"))?;
+        }
+    }
+    Ok(())
+}
+
 fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
     if port_open(MC_PORT) {
         return Ok(OpStatus { ok: true, detail: "世界已在运行（127.0.0.1:25565）。".into() });
@@ -347,7 +363,19 @@ fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
     let Some(real) = find_real_runtime(state) else {
         return Err("安装包内没有真实运行时（runtime/real）。".into());
     };
-    let paper_dir = real.join("paper");
+    let source_paper = real.join("paper");
+    let paper_dir = loom_dir().join("runtime").join("paper");
+    // AppImage 的挂载点只读；Paper 需要写 world/session.lock、日志、server.properties。
+    if !paper_dir.join("paper.jar").exists() || !paper_dir.join("world").exists() {
+        if paper_dir.exists() {
+            let _ = fs::remove_dir_all(&paper_dir);
+        }
+        state.log("lifecycle", "首次启动：复制内置 Paper 世界到可写目录");
+        copy_dir_all(&source_paper, &paper_dir)?;
+        for world in ["world", "world_nether", "world_the_end"] {
+            let _ = fs::remove_file(paper_dir.join(world).join("session.lock"));
+        }
+    }
     let java = real.join("java/bin/java");
     let jar = paper_dir.join("paper.jar");
     if !java.exists() || !jar.exists() {
@@ -434,6 +462,7 @@ fn spawn_engine_child(state: &AppState) -> Result<OpStatus, String> {
             .env("LOOM_BOT_NAME", "Golem")
             .env("LD_LIBRARY_PATH", &lib)
             .env("NODE_PATH", real.join("node_modules"))
+            .env("LOOM_STUDIO_DIR", real.join("studio"))
             .stdin(Stdio::null())
             .stdout(Stdio::from(log_file))
             .stderr(Stdio::from(log_file_err))
@@ -607,7 +636,15 @@ fn env_probe(app: tauri::AppHandle) -> EnvReport {
     let node = probe_node();
     let prism_command = state.settings.lock().ok().and_then(|guard| guard.prism_command.clone());
     let prism = probe_prism(prism_command.as_deref());
-    let paper = probe_paper(state.repo_root.as_deref(), java.ok);
+    let paper = if find_real_runtime(&state).is_some() {
+        if port_open(MC_PORT) {
+            Probe { ok: true, detail: "内置 Paper 世界已在运行（127.0.0.1:25565）。".into(), hint: None }
+        } else {
+            Probe { ok: true, detail: "包内 Java + Paper 已就绪；启动时会自动拉起。".into(), hint: Some("无需系统 Java/Paper。".into()) }
+        }
+    } else {
+        probe_paper(state.repo_root.as_deref(), java.ok)
+    };
     let engine = match find_engine_script(&state) {
         Some(path) if node.ok => Probe { ok: true, detail: format!("引擎可执行：{}", path.display()), hint: None },
         Some(path) => Probe { ok: false, detail: format!("找到引擎但没有 node：{}", path.display()), hint: Some("安装 Node 22+ 后重试。".into()) },

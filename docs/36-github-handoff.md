@@ -53,7 +53,7 @@ npx tsx it/l10-real.ts          # PASS (双织偶, 17 checks)
    - 不允许用后台 teleport 冒充玩家路径，也不允许削弱 grading 来「变绿」。
 2. **L10 多织偶运行时**：engine 当前单 bot；需扩展 `WorldPort.agent` / runner SDK / plugin `bots.set` / 消息收发，接入 docs/02c 的 lane。
 3. **Fresh Reader 剩余 blocker**：见 `docs/31-fresh-reader-report.md` 与 `docs/32-fresh-reader-fix-tracker.md`；含错误提示、标注可读性、序章身份说明等。
-4. **桌面真实 Paper 集成**：桌面包当前 Mock-only（Paper/bot 为 stub）；真实 Paper 走 `npm run dev:engine:paper`，未收进安装包。
+4. **桌面真实运行时**：最新安装包已内置 Node/Java/Paper/插件/世界/真实引擎与织偶；首次启动把 Paper 世界复制到可写目录再启动。
 
 ## 6. 交接时必须先做的清理
 

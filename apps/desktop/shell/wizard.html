@@ -4,31 +4,63 @@
 <meta charset="UTF-8" />
 <title>织界 · 首启向导</title>
 <style>
+  @font-face { font-family:"Departure Mono"; src:url("./studio/fonts/DepartureMono-Regular.woff2") format("woff2"); font-display:swap; }
+  @font-face { font-family:"Zpix"; src:url("./studio/fonts/zpix.woff2") format("woff2"); font-display:swap; }
   :root { --bg:#16110c; --panel:#221a12; --line:#4a3826; --warm:#d6a85c; --warm2:#f5cd80; --text:#f1e5cd; --muted:#b8a488; --ok:#9fce8a; --bad:#e08a7a; }
-  * { box-sizing:border-box; }
+  * { box-sizing:border-box; border-radius:0 !important; }
   body { margin:0; min-height:100%; background:
       radial-gradient(1000px 380px at 50% -80px, rgba(214,168,92,0.18), transparent 70%), var(--bg);
-    color:var(--text); font-family:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    color:var(--text); font-family:"Departure Mono","Zpix","Noto Sans SC",ui-monospace,monospace;
     display:flex; justify-content:center; padding:34px 28px 28px; }
   .wrap { width:min(860px,100%); }
-  h1 { font-size:26px; letter-spacing:4px; color:var(--warm2); margin:0 0 6px; font-weight:600; }
+  h1 { font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:26px; letter-spacing:4px; color:var(--warm2); margin:0 0 6px; font-weight:600; }
   .sub { color:var(--muted); font-size:13px; margin-bottom:22px; line-height:1.8; }
   .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
-  .card h2 { margin:0 0 6px; font-size:14px; color:var(--warm); letter-spacing:1px; }
+  .card h2 { font-family:"Departure Mono","Zpix",ui-monospace,monospace; margin:0 0 6px; font-size:14px; color:var(--warm); letter-spacing:1px; }
   .detail { font-size:12px; color:var(--muted); line-height:1.7; min-height:34px; }
   .pill { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); margin-bottom:6px; }
   .pill.ok { color:#1d2a16; background:var(--ok); border-color:var(--ok); }
   .pill.bad { color:#2a1512; background:var(--bad); border-color:var(--bad); }
   .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
-  button { font-family:inherit; font-size:13px; padding:8px 16px; border-radius:7px; border:1px solid var(--line);
+  button { font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:13px; padding:8px 16px; border-radius:7px; border:1px solid var(--line);
     background:#2b2117; color:var(--text); cursor:pointer; }
   button:hover { border-color:var(--warm); color:var(--warm2); }
   button.primary { background:linear-gradient(180deg,#7a5a2e,#5c421f); border-color:var(--warm); color:#ffe8b8; }
   button:disabled { opacity:.45; cursor:default; }
-  .tip { margin-top:22px; border-left:3px solid var(--warm); padding:10px 14px; background:rgba(214,168,92,0.07);
-    color:var(--muted); font-size:12px; line-height:1.9; border-radius:0 8px 8px 0; }
+  .tip { margin-top:22px; border:2px solid var(--line); border-left:3px solid var(--warm); padding:12px 16px 14px; background:#17120e; color:var(--muted); font-size:12px; line-height:1.85; }
+  .tip-title { font-family:"Departure Mono","Zpix",ui-monospace,monospace; color:var(--warm2); font-size:16px; letter-spacing:3px; margin:0 0 10px; }
+  .tip-list { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .tip-list li { position:relative; padding-left:16px; }
+  .tip-list li::before { content:""; position:absolute; left:0; top:8px; width:6px; height:6px; background:var(--warm); }
+  .tip-list strong { color:var(--text); font-weight:600; }
   .log { margin-top:16px; font-size:12px; color:var(--muted); white-space:pre-wrap; min-height:18px; }
+  .loom-wordmark {
+    font-family:"Zpix","Departure Mono",ui-monospace,monospace;
+    font-size:76px; line-height:1; letter-spacing:12px; color:var(--warm2);
+    margin:0 0 4px; image-rendering:pixelated; text-shadow:none;
+  }
+  .loom-wordmark-en {
+    font-family:"Departure Mono","Zpix",ui-monospace,monospace;
+    color:var(--muted); font-size:11px; letter-spacing:6px; margin:0 0 20px;
+  }
+  .engine-mode { margin:28px 0 0; padding:14px 14px 12px; border:2px solid #4a3a24; background:#17120e; }
+  .engine-mode label {
+    display:block; margin:0 0 10px; color:#d8c8a8; font-size:13px; line-height:1.6;
+    font-family:"Zpix","Departure Mono",ui-monospace,monospace; letter-spacing:0.4px;
+  }
+  .engine-row { display:flex; gap:8px; align-items:stretch; }
+  .engine-row input {
+    flex:1; min-width:0; height:38px; border:2px solid #6b5638; background:#211a12; color:#f0e6d2;
+    padding:0 10px; font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:14px;
+  }
+  .engine-row button {
+    height:38px; padding:0 12px; border:2px solid #6b5638; background:#211a12; color:#f0e6d2;
+    font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:13px; line-height:34px;
+    cursor:pointer; box-shadow:none;
+  }
+  .engine-row button:hover { border-color:var(--warm); color:var(--warm2); background:#2b2117; }
+  .sub, .detail, .log, .tip, .pill, button, input { font-family:"Departure Mono","Zpix",ui-monospace,monospace; }
   /* 与 Studio 一致：全部直角、去渐变塑料感 */
   * { border-radius:0 !important; }
   button.primary { background:#6b5220 !important; }
@@ -38,7 +70,9 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>织界 · 欢迎来到织机旁</h1>
+  <div class="loom-wordmark" aria-hidden="true">织界</div>
+  <p class="loom-wordmark-en">THE LOOM</p>
+  <h1>欢迎来到织机旁</h1>
   <div class="sub">这台织机会在窗口里直接运行你写的符文，并驱动《我的世界》里的灰崽。<br/>先确认四件事，就可以进入工坊。</div>
   <div class="grid">
     <div class="card"><span class="pill" id="pill-java">检测中</span><h2>运行环境</h2><div class="detail" id="detail-java">正在检测系统运行环境……</div></div>
@@ -49,7 +83,7 @@
   <div class="engine-mode">
     <label for="engine-url">真实织机地址（可选；安装包已内置，默认无需填写）</label>
     <div class="engine-row">
-      <input id="engine-url" type="url" placeholder="http://127.0.0.1:4320" autocomplete="off" />
+      <input id="engine-url" type="url" placeholder="默认使用内置织机：127.0.0.1:4317（留空即可）" autocomplete="off" />
       <button id="btn-save-engine" type="button">保存地址</button>
       <button id="btn-clear-engine" type="button">恢复内置</button>
     </div>
@@ -62,10 +96,16 @@
     <button id="btn-enter" class="primary" type="button">进入工坊</button>
   </div>
   <div class="log" id="log"></div>
-  <div class="tip">
-    建议把《我的世界》设为「无边框窗口」或切到窗口化全屏；织界窗口可点「置顶」或按控制键、上档键和 L 保持可见；在 Minecraft 里按控制键、上档键和 K 可直接切回工坊（鼠标自动释放，游戏不暂停）；打开「伴玩」后变成 420×620 的小窗。
-    只留目标、艾拉的一句话和运行按钮，两者并排就能看着灰崽在村里干活。
-  </div>
+  <section class="tip">
+    <h2 class="tip-title">怎么开始</h2>
+    <ul class="tip-list">
+      <li><strong>窗口</strong>：把《我的世界》设为「无边框窗口」或窗口化全屏，别用独占全屏。</li>
+      <li><strong>置顶</strong>：织界可点「置顶」，或按控制键、上档键和 L 保持可见。</li>
+      <li><strong>切回工坊</strong>：在 Minecraft 里按控制键、上档键和 K；鼠标会自动释放，游戏不暂停。</li>
+      <li><strong>伴玩</strong>：打开后变成 420×620 小窗，只留目标、艾拉的一句话和运行按钮。</li>
+      <li><strong>并排</strong>：代码窗口和 Minecraft 各占一边，就能一边看效果一边改下一句。</li>
+    </ul>
+  </section>
 </div>
 <script type="module">
 let seq = 0;
@@ -94,7 +134,11 @@ const invoke = (command, args) => {
   });
 };
 const $ = id => document.getElementById(id);
-try { $("engine-url").value = localStorage.getItem("loom.engineUrl") || ""; } catch { /* ignore */ }
+try {
+  const saved = localStorage.getItem("loom.engineUrl") || "";
+  $("engine-url").value = /^http:\/\/127\.0\.0\.1:4320\/?$/.test(saved) ? "" : saved;
+  if (!saved || /^http:\/\/127\.0\.0\.1:4320\/?$/.test(saved)) localStorage.removeItem("loom.engineUrl");
+} catch { /* ignore */ }
 $("btn-save-engine").onclick = () => {
   const value = $("engine-url").value.trim().replace(/\/$/, "");
   try { localStorage.setItem("loom.engineUrl", value); } catch { /* ignore */ }

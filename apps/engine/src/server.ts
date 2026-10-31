@@ -1,4 +1,6 @@
 import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { AddressInfo } from "node:net";
 import { MockWorldPort } from "../../../packages/worldport/src/mock-port";
@@ -336,8 +338,27 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
     throw new SessionError(`未知接口 ${method} ${path}`, "NOT_FOUND");
   };
 
+  const studioDir = path.resolve(process.env.LOOM_STUDIO_DIR ?? path.join(process.cwd(), "studio"));
+  const mime = (file: string): string => {
+    const ext = path.extname(file).toLowerCase();
+    return ({ ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".ttf": "font/ttf", ".ico": "image/x-icon" } as Record<string, string>)[ext] ?? "application/octet-stream";
+  };
+  const serveStatic = (res: http.ServerResponse, pathname: string): boolean => {
+    if (!fs.existsSync(studioDir)) return false;
+    let rel = pathname;
+    if (rel === "/" || rel === "/studio" || rel === "/studio/") rel = "/studio/index.html";
+    if (rel === "/companion.html") rel = "/companion.html";
+    if (!rel.startsWith("/studio/") && rel !== "/companion.html") return false;
+    const file = path.resolve(studioDir, "." + rel.replace(/^\/studio/, "").replace(/^\/companion\.html$/, "/companion.html"));
+    if (!file.startsWith(studioDir + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return false;
+    res.writeHead(200, { "content-type": mime(file), "cache-control": "no-store" });
+    fs.createReadStream(file).pipe(res);
+    return true;
+  };
+
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "127.0.0.1"}`);
+    if (req.method === "GET" && serveStatic(res, url.pathname)) return;
     void route(req, res, url).catch((error: unknown) => {
       if (res.headersSent) {
         res.end();

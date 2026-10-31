@@ -55,6 +55,16 @@ async function copyFrontend() {
   await mkdir(join(distDir, "studio"), { recursive: true });
   await cp(join(studioDir, "dist"), join(distDir, "studio"), { recursive: true });
   await cp(join(desktopDir, "shell"), distDir, { recursive: true });
+  // 自包含真实引擎使用同源 Studio/伴玩：把静态 UI 放进 runtime/real/studio。
+  const realStudio = join(runtimeDir, "real", "studio");
+  if (existsSync(join(runtimeDir, "real", "engine.mjs"))) {
+    await rm(realStudio, { recursive: true, force: true });
+    await mkdir(realStudio, { recursive: true });
+    await cp(join(distDir, "studio"), realStudio, { recursive: true });
+    let companion = await readFile(join(desktopDir, "shell", "companion.html"), "utf8");
+    companion = companion.replaceAll('url("./studio/fonts/', 'url("./fonts/');
+    await writeFile(join(realStudio, "companion.html"), companion, "utf8");
+  }
   log("前端资源复制完成（dist/index.html + dist/studio/ + dist/companion.html）");
 }
 

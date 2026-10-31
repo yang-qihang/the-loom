@@ -68,4 +68,4 @@ npx tauri build
 - `apps/desktop/src-tauri/target/release/bundle/appimage/*.AppImage`
 - `apps/desktop/src-tauri/target/release/bundle/rpm/*.rpm`
 
-当前包约 125MB（Mock-only），真实运行时全内置后会显著变大，构建前请评估磁盘/CI 缓存。
+当前自包含安装包：AppImage 356MB / RPM 382MB；构建时约 1GB 运行时资源，构建前请评估磁盘/CI 缓存。
