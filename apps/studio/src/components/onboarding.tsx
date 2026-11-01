@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { acts, buttons, chrome, fill, journal, journalLabels, levelCopy, prologue, unlockedTerms } from "../copy";
+import { ConceptRevealCard } from "./ConceptRevealCard";
 import type { StudioProgress } from "../progress";
 import { RichText } from "./RichText";
 
@@ -190,6 +191,9 @@ interface JournalProps {
 export function JournalOverlay({ progress, onClose, onReplayPrologue, onReplayAct, onOpenRepl, onOpenCodex }: JournalProps) {
   const terms = useMemo(() => unlockedTerms(progress.levelsStarted), [progress.levelsStarted]);
   const lastLevel = progress.lastCompletedLevelId ? levelCopy(progress.lastCompletedLevelId) : null;
+  // 概念揭晓：优先刚通关的关卡，其次最近开始的关卡。
+  const conceptLevelId = progress.lastCompletedLevelId
+    ?? (progress.levelsStarted.length > 0 ? progress.levelsStarted[progress.levelsStarted.length - 1] : null);
   const ACT_NUMERALS = ["一", "二", "三"];
   const replayActNumber = progress.actsSeen.length > 0 ? Math.max(...progress.actsSeen) : 1;
   const replayActLabel = fill(journalLabels.replayAct, { 幕: ACT_NUMERALS[replayActNumber - 1] ?? "一" });
@@ -231,6 +235,11 @@ export function JournalOverlay({ progress, onClose, onReplayPrologue, onReplayAc
               </ul>
             )}
           </section>
+          {conceptLevelId ? (
+            <section className="journal-section" data-testid="journal-concept">
+              <ConceptRevealCard levelId={conceptLevelId} variant="journal" onOpenCodex={onOpenCodex} />
+            </section>
+          ) : null}
           <section className="journal-section">
             <h3>{journalLabels.last}</h3>
             <p>{lastLevel?.journalRecap ?? journalLabels.emptyLast}</p>

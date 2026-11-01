@@ -18,7 +18,9 @@ import type { GoalState } from "./GoalList";
 import type { LevelView, RunResult, SessionPhase, StudioEngine, StudioEvent } from "../types";
 import { CoachCard } from "./CoachCard";
 import { CodeEditor, type CodeEditorHandle } from "./CodeEditor";
+import { ConceptRevealCard } from "./ConceptRevealCard";
 import { GoalList } from "./GoalList";
+import { PositionHud } from "./PositionHud";
 import { ResultCard } from "./ResultCard";
 import { SceneIllustration } from "./SceneIllustration";
 import { skyFor } from "./scene-sky";
@@ -33,6 +35,10 @@ interface WorkbenchProps {
   onBack: () => void;
   onOpenJournal: () => void;
   onOpenCodex: () => void;
+  /** 打开指令手册（顶栏按钮/教练卡链接；App 统一渲染模态）。 */
+  onOpenManual: () => void;
+  /** 用当前关卡打开试符台（REPL 不再强制跳回第一关）。 */
+  onOpenRepl: () => void;
   onCompleted: () => void;
   nextLevel: LevelCard | null;
   onNextLevel: (levelId: string) => void;
@@ -58,6 +64,8 @@ export function Workbench({
   onBack,
   onOpenJournal,
   onOpenCodex,
+  onOpenManual,
+  onOpenRepl,
   onCompleted,
   nextLevel,
   onNextLevel,
@@ -70,6 +78,12 @@ export function Workbench({
   const [logs, setLogs] = useState<string[]>([]);
   const [result, setResult] = useState<RunResult | null>(null);
   const [error, setError] = useState<WorkbenchError | null>(null);
+  /** 引擎 SSE hint 事件（每次 run 失败最多 1 条，不刷屏）。 */
+  const [engineHint, setEngineHint] = useState<string | null>(null);
+  /** 从 result.progress 推出的「第一个未完成目标」的引导。 */
+  const [resultHint, setResultHint] = useState<string | null>(null);
+  /** 目标完成提示（✓ 目标完成 + 下一步）。 */
+  const [completedNotice, setCompletedNotice] = useState<{ goal: string; next: string | null } | null>(null);
   const [hintIndex, setHintIndex] = useState(0);
   const [pinned, setPinned] = useState(false);
   const [annotationsOn, setAnnotationsOn] = useState(() => {
@@ -173,10 +187,26 @@ export function Workbench({
         if (hasResult) {
           setLogs((previous) => (previous.length > 1 ? previous : [...previous, chrome.workbench.runFinished]));
         }
+        if (hasResult && !event.result.passed) {
+          const steps = event.result.progress ?? [];
+          const pending = steps.filter((step) => !step.passed);
+          const done = steps.filter((step) => step.passed);
+          const pendingGoal = pending[0] ? level?.objectives.find((goal) => goal.id === pending[0].id) : undefined;
+          setResultHint(pendingGoal?.hint ?? null);
+          if (!event.result.playerBeatReady && done.length > 0 && pending.length > 0) {
+            setCompletedNotice({ goal: done[done.length - 1]?.text ?? "", next: pending[0].text });
+          } else {
+            setCompletedNotice(null);
+          }
+        }
         if (event.result.passed) {
           setPhase("graded");
           setSettleOpen(true);
         }
+      } else if (event.type === "hint") {
+        // 引擎按节点发引导（每次 run 失败最多 1 条）；相同文案去重，避免刷屏。
+        const text = String(event.text ?? "").trim();
+        if (text) setEngineHint((previous) => (previous === text ? previous : text));
       } else if (event.type === "error") {
         setResult(null);
         setPhase("error");
@@ -196,7 +226,7 @@ export function Workbench({
       }
     });
     return unsubscribe;
-  }, [engine, levelId, sessionId]);
+  }, [engine, level, levelId, sessionId]);
 
   useEffect(() => {
     if (!result?.passed || completedRef.current) return;
@@ -215,6 +245,9 @@ export function Workbench({
     setLogs([]);
     setHintIndex(0);
     setSettleOpen(false);
+    setEngineHint(null);
+    setResultHint(null);
+    setCompletedNotice(null);
     goalIndexRef.current.clear();
     if (level) {
       goalIndexRef.current = new Map(level.objectives.map((goal, index) => [goal.id, index]));
@@ -229,6 +262,9 @@ export function Workbench({
     setResult(null);
     setError(null);
     setLogs([chrome.workbench.runStarted]);
+    setEngineHint(null);
+    setResultHint(null);
+    setCompletedNotice(null);
     errorHoldRef.current = false;
     setPhase("running");
     try {
@@ -324,13 +360,21 @@ export function Workbench({
     if (phase === "running") return copy.coachOpen[1] ?? copy.firstStep;
     if (result?.passed) return copy.coachReact[3] ?? copy.settle.stars;
     if (waitingForPlayer) return `轮到你了：${copy.playerBeatUI}`;
+    if (completedNotice) {
+      return fill(chrome.workbench.progressDoneNext, {
+        目标: completedNotice.goal,
+        下一步: completedNotice.next ?? chrome.workbench.progressAllDone,
+      });
+    }
     if (result) {
       // 失败但还没轮到玩家：直接说还差哪一条（目标真值来自引擎 progress），不提前教玩家节拍。
       const pending = goals.filter((goal) => !goal.done);
       return `还没完成：${pending[0]?.text ?? copy.goals[0]}`;
     }
     return copy.firstStep;
-  }, [copy, error, goals, loadError, phase, result, waitingForPlayer]);
+  }, [completedNotice, copy, error, goals, loadError, phase, result, waitingForPlayer]);
+  // 引导优先级：引擎 SSE hint（内容层写的 2–4 句）→ result.progress 里第一个未完成目标的 hint。
+  const progressHint = engineHint ?? resultHint;
   const hint = copy && hintIndex > 0 ? resolveCopy(copy.hints[hintIndex - 1]) : null;
 
   return (
@@ -361,6 +405,8 @@ export function Workbench({
                     </>
                   ) : null}
                   <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
+                  <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-manual-menu">{chrome.workbench.manualButton}</button>
+                  <button type="button" className="btn btn-quiet" onClick={onOpenRepl} data-testid="btn-repl-menu">{chrome.workbench.replButton}</button>
                   <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
                   <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
                   <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
@@ -376,6 +422,8 @@ export function Workbench({
                 </>
               ) : null}
               <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
+              <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-manual">{chrome.workbench.manualButton}</button>
+              <button type="button" className="btn btn-quiet" onClick={onOpenRepl} data-testid="btn-repl-top">{chrome.workbench.replButton}</button>
               <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} title="世界里的中文浮空字是路标，帮你认第几盏灯、谁是艾拉和灰崽；不想看可以随时关掉。" data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
               <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
               <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
@@ -522,6 +570,7 @@ export function Workbench({
                 </div>
               ) : null}
             </section>
+            <PositionHud engine={engine} sessionId={sessionId} level={level} onOpenManual={onOpenManual} />
             <SceneIllustration levelId={levelId} />
             {copy?.challenge ? (
               <details className="card challenge" data-testid="challenge-card">
@@ -536,6 +585,8 @@ export function Workbench({
               hintLevel={hintIndex}
               canHint={!!copy && hintIndex < copy.hints.length}
               onHint={showHint}
+              progressHint={progressHint}
+              onOpenManual={onOpenManual}
             />
             {waitingForPlayer ? (
               <section className="card waiting" aria-label="轮到你">
@@ -603,6 +654,7 @@ export function Workbench({
             <h2 data-ui-title>{copy.settle.title}</h2>
             <Stars stars={result.stars} />
             <p className="settle-line">{copy.settle.stars}</p>
+            <ConceptRevealCard levelId={levelId} level={level} onOpenCodex={onOpenCodex} />
             {copy.settle.detail ? <p className="settle-detail">{copy.settle.detail}</p> : null}
             <ul className="settle-goals">
               {goals.map((goal) => (

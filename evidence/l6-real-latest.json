@@ -1,27 +1,27 @@
 {
  "task": "task-30 / T2-MC real L06 e2e",
  "level": "L06",
- "startedAt": "2026-11-01T04:22:36.901Z",
+ "startedAt": "2026-11-01T05:38:48.420Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem236",
+  "botName": "Golem84",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 10135,
+   "tick": 1267,
    "phase": "ready",
    "prepared": true,
    "levelId": "L05",
-   "sessionId": "dd711deb-768b-4e47-8136-c4c9c847e97c",
-   "epoch": 17,
+   "sessionId": "650190b9-080a-4ee0-b692-d7ed81ab1bcd",
+   "epoch": 2,
    "groundY": 64,
    "bots": [
-    "Golem185"
+    "Golem28"
    ],
    "npcs": [],
    "regionFrom": [
@@ -42,7 +42,7 @@
    "playerSpawn": [
     13,
     64,
-    -2
+    6
    ],
    "center": [
     13,
@@ -56,7 +56,7 @@
     "minecraft:oak_sign": 8
    },
    "playerBeat": {
-    "sessionId": "dd711deb-768b-4e47-8136-c4c9c847e97c",
+    "sessionId": "650190b9-080a-4ee0-b692-d7ed81ab1bcd",
     "armed": false,
     "active": false,
     "hint": "",
@@ -65,8 +65,8 @@
     "done": false,
     "ok": true
    },
-   "lastResetHash": "sha256:4ae76f3d5d3f8bd9a5dcf5fbd9318b57bdd68bae1db2adcc60c2cc7c74d34729",
-   "lastResetMs": 13
+   "lastResetHash": "sha256:7b061cd549b3861a783c629b4945094dad06916c38e7272baa4b8a14157a1708",
+   "lastResetMs": 40
   }
  },
  "checks": {
@@ -81,7 +81,7 @@
   "L06.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 1950,
+    "prepareMs": 2552,
     "scene": {
      "groundY": 65,
      "arena": {
@@ -118,20 +118,20 @@
   "L06.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "41368d9d-399e-44a3-8bdf-072fac0c2789",
-    "epoch": 18
+    "sessionId": "9329f9b0-2d15-4843-8d51-04908f1dcda1",
+    "epoch": 3
    }
   },
   "L06.epoch-incremented": {
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "41368d9d-399e-44a3-8bdf-072fac0c2789",
-     "epoch": 18
+     "sessionId": "9329f9b0-2d15-4843-8d51-04908f1dcda1",
+     "epoch": 3
     },
     "second": {
-     "sessionId": "8dd43e6d-5a42-47c6-befa-a77de9761b91",
-     "epoch": 19
+     "sessionId": "88261a22-71eb-4a26-8630-f590cd4ec24d",
+     "epoch": 4
     }
    }
   },
@@ -186,7 +186,7 @@
   "L06.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 73410
+    "referenceRunMs": 73649
    }
   },
   "L06.report-equals-mock": {
@@ -272,22 +272,22 @@
    "ok": true,
    "detail": {
     "agentPlaces": 11,
-    "says": 2,
+    "says": 3,
     "blocks": 1726
    }
   },
   "L06.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 6,
-    "b": 6
+    "a": 32,
+    "b": 34
    }
   },
   "L06.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:b4008b04f43368f1ab85c5e9b8f8a6803e379be1a38a8372be267195166616c0",
-    "b": "sha256:b4008b04f43368f1ab85c5e9b8f8a6803e379be1a38a8372be267195166616c0"
+    "a": "sha256:9b932a14468c48f5102867a46e491c92a7b93dc8376f981b3921ab73d8224492",
+    "b": "sha256:9b932a14468c48f5102867a46e491c92a7b93dc8376f981b3921ab73d8224492"
    }
   },
   "L06.reset-clears-events": {
@@ -377,22 +377,22 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "41368d9d-399e-44a3-8bdf-072fac0c2789",
-   "epoch": 18
+   "sessionId": "9329f9b0-2d15-4843-8d51-04908f1dcda1",
+   "epoch": 3
   },
   "second": {
-   "sessionId": "8dd43e6d-5a42-47c6-befa-a77de9761b91",
-   "epoch": 19
+   "sessionId": "88261a22-71eb-4a26-8630-f590cd4ec24d",
+   "epoch": 4
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 6,
-   "hash": "sha256:b4008b04f43368f1ab85c5e9b8f8a6803e379be1a38a8372be267195166616c0",
-   "tick": 11679,
-   "sessionId": "8dd43e6d-5a42-47c6-befa-a77de9761b91",
-   "epoch": 19,
+   "ms": 32,
+   "hash": "sha256:9b932a14468c48f5102867a46e491c92a7b93dc8376f981b3921ab73d8224492",
+   "tick": 2831,
+   "sessionId": "88261a22-71eb-4a26-8630-f590cd4ec24d",
+   "epoch": 4,
    "checkpointSize": 2053,
    "restoredBlocks": 12,
    "removedEntities": 5,
@@ -402,11 +402,11 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 6,
-   "hash": "sha256:b4008b04f43368f1ab85c5e9b8f8a6803e379be1a38a8372be267195166616c0",
-   "tick": 11682,
-   "sessionId": "8dd43e6d-5a42-47c6-befa-a77de9761b91",
-   "epoch": 19,
+   "ms": 34,
+   "hash": "sha256:9b932a14468c48f5102867a46e491c92a7b93dc8376f981b3921ab73d8224492",
+   "tick": 2834,
+   "sessionId": "88261a22-71eb-4a26-8630-f590cd4ec24d",
+   "epoch": 4,
    "checkpointSize": 2053,
    "restoredBlocks": 0,
    "removedEntities": 5,
@@ -417,24 +417,24 @@
  },
  "actions": [
   {
-   "action": "say(账本上有工具3件，杂货5件。)",
+   "action": "say(账本：工具 3 件，杂货 5 件。)",
    "ms": 0
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 1266
+   "ms": 1247
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3250
+   "ms": 3101
   },
   {
    "action": "moveTo(0,2)",
-   "ms": 2000
+   "ms": 1999
   },
   {
    "action": "virtualPlace(minecraft:iron_axe@0,65,0)",
-   "ms": 100
+   "ms": 99
   },
   {
    "action": "moveTo(8,20)",
@@ -446,7 +446,7 @@
   },
   {
    "action": "moveTo(2,2)",
-   "ms": 1250
+   "ms": 1249
   },
   {
    "action": "virtualPlace(minecraft:iron_pickaxe@2,65,0)",
@@ -454,47 +454,47 @@
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 3400
+   "ms": 3450
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3050
+   "ms": 3232
   },
   {
    "action": "moveTo(4,2)",
-   "ms": 900
+   "ms": 921
   },
   {
    "action": "virtualPlace(minecraft:iron_sword@4,65,0)",
-   "ms": 100
+   "ms": 98
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 3400
+   "ms": 3448
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3050
+   "ms": 3107
   },
   {
    "action": "moveTo(0,8)",
-   "ms": 1800
+   "ms": 1803
   },
   {
    "action": "virtualPlace(minecraft:raw_iron@0,65,6)",
-   "ms": 100
+   "ms": 91
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 3050
+   "ms": 3092
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3050
+   "ms": 3057
   },
   {
    "action": "moveTo(2,8)",
-   "ms": 1450
+   "ms": 1449
   },
   {
    "action": "virtualPlace(minecraft:coal@2,65,6)",
@@ -502,31 +502,31 @@
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 2900
+   "ms": 2700
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3051
+   "ms": 3049
   },
   {
    "action": "moveTo(4,8)",
-   "ms": 1099
+   "ms": 1101
   },
   {
    "action": "virtualPlace(minecraft:honeycomb@4,65,6)",
-   "ms": 101
+   "ms": 100
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 2699
+   "ms": 2702
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3050
+   "ms": 3097
   },
   {
    "action": "moveTo(0,14)",
-   "ms": 2350
+   "ms": 2351
   },
   {
    "action": "virtualPlace(minecraft:bread@0,65,12)",
@@ -534,11 +534,11 @@
   },
   {
    "action": "moveTo(8,20)",
-   "ms": 2150
+   "ms": 2151
   },
   {
    "action": "moveTo(9,3)",
-   "ms": 3050
+   "ms": 3048
   },
   {
    "action": "moveTo(2,14)",
@@ -546,11 +546,15 @@
   },
   {
    "action": "virtualPlace(minecraft:carrot@2,65,12)",
-   "ms": 100
+   "ms": 102
+  },
+  {
+   "action": "say(八件货都进桶了。)",
+   "ms": 0
   },
   {
    "action": "moveTo(18,3)",
-   "ms": 3400
+   "ms": 3438
   },
   {
    "action": "moveTo(18,0)",
@@ -558,11 +562,11 @@
   },
   {
    "action": "virtualPlace(minecraft:iron_axe@20,65,0)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(18,3)",
-   "ms": 50
+   "ms": 47
   },
   {
    "action": "moveTo(18,6)",
@@ -578,15 +582,15 @@
   },
   {
    "action": "moveTo(18,12)",
-   "ms": 1450
+   "ms": 1449
   },
   {
    "action": "virtualPlace(minecraft:iron_sword@20,65,12)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(10,18)",
-   "ms": 2350
+   "ms": 2351
   },
   {
    "action": "say(账清了，塔卡。)",
@@ -594,19 +598,19 @@
   },
   {
    "action": "reset",
-   "ms": 132
+   "ms": 143
   },
   {
    "action": "reset",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "reset",
-   "ms": 57
+   "ms": 76
   }
  ],
  "errors": [],
- "prepareMs": 1950,
+ "prepareMs": 2552,
  "scene": {
   "groundY": 65,
   "arena": {
@@ -638,7 +642,7 @@
    "donkey"
   ]
  },
- "referenceRunMs": 73410,
+ "referenceRunMs": 73649,
  "snapshot": {
   "blocks": {
    "-15,64,-3": "minecraft:moss_block",
@@ -2449,7 +2453,7 @@
     ]
    }
   },
-  "sayCount": 2,
+  "sayCount": 3,
   "agentPlaceCount": 11,
   "playerPlaceCount": 1,
   "eventTypes": [
@@ -2459,6 +2463,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-11-01T04:23:54.441Z",
+ "finishedAt": "2026-11-01T05:40:07.014Z",
  "ok": true
 }

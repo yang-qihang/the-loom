@@ -222,10 +222,31 @@ const L05_BASE: LevelDef = defineLevel({
       { type: "villager", role: "npc", id: "mason", name: "石匠阿灰" },
       { type: "villager", role: "npc", id: "apprentice", name: "学徒小穗" },
     ],
+    // 命名坐标点（docs/48 §1.1）：沙箱里可直接当全局变量用，如 golem.moveTo(eira)。
+    points: {
+      eira: { pos: [22, 65, 8], name: "艾拉" },
+      well: { pos: [12, 64, 9], name: "村井" },
+      plot1: { pos: [0, 63, 0], name: "一号地基（西北角）" },
+      plot2: { pos: [12, 63, 0], name: "二号地基（西北角）" },
+      plot3: { pos: [24, 63, 0], name: "三号地基（西北角）" },
+      plot4: { pos: [0, 63, 14], name: "四号地基（西北角）" },
+      plot5: { pos: [24, 63, 14], name: "五号地基（西北角）" },
+      sign1: { pos: [1, 64, 3], name: "一号门牌位" },
+      sign2: { pos: [13, 64, 3], name: "二号门牌位" },
+      sign3: { pos: [25, 64, 3], name: "三号门牌位" },
+      sign4: { pos: [1, 64, 17], name: "四号门牌位" },
+      sign5: { pos: [25, 64, 17], name: "五号门牌位" },
+    },
+    // 玩家出生点：东西主路中央，朝北正对五块房区；离灰崽 (20,64,6) 有 7 格，不会怼脸。
+    playerSpawn: [13, 64, 6],
   },
   code: {
     expectedLoc: 60,
     starterCode: `// 五块地的数据在 world.vars.plots 里：每块地有 x、z（西北角）和 style（屋顶风格）。
+// 命名点 plot1…plot5 指向五块地的西北角，eira 是艾拉；也可以直接读 plots[i].x / plots[i].z。
+// 打算写成骨架（注释先给你结构，函数名可以自己起）：
+//   function buildHut(x, z, style) { ...先算材料，再摆地基/墙/屋顶/门窗... }
+//   for (const plot of world.vars.plots) { buildHut(plot.x, plot.z, plot.style) }
 // 每栋房的摆法（照这个位置一格一格摆）：
 //   地基：从 (x, 63, z) 起的 3×3 圆石；
 //   墙：一圈 8 格（y64），材料按风格：橡木→oak_planks、云杉→spruce_planks、砖→bricks；
@@ -431,23 +452,31 @@ golem.say("五栋房子都立起来了。")
     {
       id: "l05-houses-built",
       text: "五块地各立起一栋能住的房子",
+      hint: "写一个 function buildHut(x, z, style)，把一栋房的地基、墙、屋顶、门窗火把一次摆完；再对 world.vars.plots 里的五块地各调用一次。每块地的坐标就在 plots[i].x、plots[i].z、plots[i].style 里，不用自己猜；命名点 plot1…plot5 也指向五块地的西北角。",
       check: g => plotList(g.var("plots")).every(p => hutCells(p).every(c => g.block(c.pos).id === C + c.block)),
     },
     {
       id: "l05-styles-follow",
       text: "每栋的墙和屋顶按地块样式走",
+      hint: "墙和屋顶材料跟着 style 走：橡木用 oak_planks / oak_slab，云杉用 spruce_planks / spruce_slab，砖用 bricks / stone_brick_slab。在函数里用 if 或三元表达式按 style 选材料，五块地共用同一段写法，不要按地块各抄一遍。",
       check: g => plotList(g.var("plots")).every(p => hutCells(p).every(c => g.block(c.pos).id === C + c.block)),
     },
     {
       id: "l05-signs-ready",
       text: "五块门牌由你亲手挂到门口",
       player: true,
+      hint: "代码把五栋房和门口都立好后，轮到你亲手挂门牌：走到每栋门口（命名点 sign1…sign5，或 world.vars.signs 里的坐标），手持门牌对准门口按右键。门牌是活人的活，灰崽替不了你。",
       check: g => {
         const signs = posList(g.var("signs"));
         const placed = playerPlaces(g);
         return signs.every(s => g.block(s).id === C + "oak_sign" && placed.some(e => samePos(e.pos, s)));
       },
     },
+  ],
+  // 名副其实（docs/48 §1.9）：本关必须真的用函数与循环，复制五段不算。
+  codeRequirements: [
+    { id: "l05-function", text: "把一栋房的摆法写成一个 function，并在五块地上调用", kind: "function", min: 1 },
+    { id: "l05-loop", text: "用 for 循环（或 while）遍历地块，而不是复制粘贴五段", kind: "loop", min: 1 },
   ],
   phases: ["三栋橡木房", "第四栋换屋顶", "第五块地与门牌"],
 });

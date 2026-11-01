@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { chrome } from "../copy";
-import type { EngineMode, ReplHistoryEntry, StudioEngine } from "../types";
+import { chrome, levelCopy } from "../copy";
+import type { LevelView, ReplHistoryEntry, StudioEngine } from "../types";
+import { pointRows, xzText, type PointRow } from "./guidance-data";
 import { RichText } from "./RichText";
 
 interface ReplScreenProps {
   engine: StudioEngine;
+  /** 当前关卡（修复「打开 REPL 跳回第一关」：用工作台/地图当前关卡建 REPL 会话）。 */
+  levelId: string;
   onBack: () => void;
+  /** 打开指令手册（App 统一渲染）。 */
+  onOpenManual?: () => void;
 }
 
 interface Example {
@@ -47,8 +52,9 @@ function formatReplValue(raw: string | undefined): string {
   return text;
 }
 
-export function ReplScreen({ engine, onBack }: ReplScreenProps) {
+export function ReplScreen({ engine, levelId, onBack, onOpenManual }: ReplScreenProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [level, setLevel] = useState<LevelView | null>(null);
   const [entries, setEntries] = useState<ReplHistoryEntry[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -56,12 +62,15 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const levelTitle = level?.title ?? levelCopy(levelId)?.title ?? levelId;
+  const points: PointRow[] = level ? pointRows(level) : [];
 
   useEffect(() => {
     let disposed = false;
+    // 当前关卡的 REPL：世界/命名点都来自这一关，不再强制 L01。
     void (async () => {
       try {
-        const id = await engine.createReplSession();
+        const id = await engine.createReplSession(levelId);
         if (disposed) return;
         setSessionId(id);
         const history = await engine.replHistory(id);
@@ -70,10 +79,18 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
         if (!disposed) setError(cleanReplError(cause instanceof Error ? cause.message : undefined));
       }
     })();
+    void engine
+      .loadLevel(levelId)
+      .then((loaded) => {
+        if (!disposed) setLevel(loaded);
+      })
+      .catch(() => {
+        /* 关卡视图只为显示标题/命名点；失败不阻塞 REPL。 */
+      });
     return () => {
       disposed = true;
     };
-  }, [engine]);
+  }, [engine, levelId]);
 
   useEffect(() => {
     listRef.current?.scrollTo?.({ top: listRef.current.scrollHeight });
@@ -84,6 +101,15 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
     const line = input.trim();
     if (!line) {
       setError(chrome.runeBench.errorGeneric);
+      return;
+    }
+    // help / 手册：不打到引擎，直接翻开指令手册（零基础随时可查）。
+    if (line === "help" || line === "帮助" || line === "手册") {
+      setInput("");
+      setError(null);
+      setNotice(chrome.runeBench.helpOpened);
+      onOpenManual?.();
+      inputRef.current?.focus();
       return;
     }
     // 先做一次括号/引号配对检查：缺括号时给出「括号没写完」，不要误报「数字没写对」。
@@ -124,7 +150,7 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
       setBusy(false);
       inputRef.current?.focus();
     }
-  }, [busy, engine, input, sessionId]);
+  }, [busy, engine, input, onOpenManual, sessionId]);
 
   const clearHistory = useCallback(() => {
     setEntries([]);
@@ -165,10 +191,20 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
           <div className="repl-title-block">
             <h2 data-ui-title>{chrome.runeBench.title}</h2>
             <p className="repl-subtitle">{chrome.runeBench.subtitle}</p>
+            <span className="repl-level-chip" data-testid="repl-current-level">
+              {chrome.runeBench.currentLevel}：{levelTitle}
+            </span>
           </div>
-          <span className={engine.mode === "mock" ? "mode-chip is-mock" : "mode-chip"}>
-            {engine.mode === "mock" ? chrome.mode.local : chrome.mode.real}
-          </span>
+          <div className="repl-head-actions">
+            {onOpenManual ? (
+              <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-repl-manual">
+                {chrome.runeBench.manual}
+              </button>
+            ) : null}
+            <span className={engine.mode === "mock" ? "mode-chip is-mock" : "mode-chip"}>
+              {engine.mode === "mock" ? chrome.mode.local : chrome.mode.real}
+            </span>
+          </div>
         </header>
 
         <div className="repl-body">
@@ -200,6 +236,7 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
               </button>
             </div>
             <p className="repl-hint">{chrome.runeBench.inputHint}</p>
+            <p className="repl-hint repl-help-hint">{chrome.runeBench.helpHint}</p>
             {error ? (
               <p className="repl-error" role="alert" data-testid="repl-error">
                 {error}
@@ -236,6 +273,19 @@ export function ReplScreen({ engine, onBack }: ReplScreenProps) {
                 ))}
               </ul>
             </div>
+            {points.length > 0 ? (
+              <div className="repl-points" data-testid="repl-points">
+                <p className="repl-points-title">{chrome.runeBench.pointsTitle}</p>
+                <ul className="repl-point-list">
+                  {points.map((point) => (
+                    <li className="repl-point" key={point.key} data-testid={`repl-point-${point.key}`}>
+                      <code>{point.key}</code>
+                      <span className="repl-point-pos">（{xzText(point.pos)}）</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
 
           <section className="repl-history" aria-label={chrome.runeBench.title}>

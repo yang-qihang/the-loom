@@ -8,6 +8,7 @@ const scale = new URLSearchParams(window.location.search).get("scale");
 if (scale) document.documentElement.style.zoom = scale;
 import { installNativeGuard } from "./native-guard";
 import "./styles.css";
+import "./guidance.css";
 
 if (isDesktopShell()) installNativeGuard();
 

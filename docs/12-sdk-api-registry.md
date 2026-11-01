@@ -1,10 +1,11 @@
 # 12 — SDK API Registry（学生可见接口的唯一权威来源）
 
-> 状态：v1（冻结候选，CP1 后不再改名）｜负责人：Lead｜最后更新：2026-10-31
+> 状态：v2（2026-11-01 Round 2：语义化 API + 命名坐标点；旧签名保留兼容）｜负责人：Lead｜最后更新：2026-11-01
 > 用途：所有关卡 spec 的 `apiIntroduced` / `apiAllowlist`、`packages/sdk` 的 `.d.ts`、Monaco 补全、validator 的越级检查，都以本文件为准。
 > 规则：**改名 = 改契约**，需要 ADR + Lead 签字；关卡 spec 里出现 registry 之外的名字，validator 直接报错。
-> 历史说明（2026-11-01 文档审计）：本文件是设计期学生 API 命名契约；实现以 `packages/level-spec` 的 `LevelDef` 与内容代码为准，2026-11-01 的进度/玩家节拍接口不在本文件范围（见 docs/46 §2）。
-> 上游：docs/05-curriculum.md、docs/06-level-spec-system.md、content/levels/*.md
+> 历史说明：v1 是设计期命名契约；2026-11-01 Round 2 按用户反馈（`place("air")` 反人类、坐标靠猜）增补语义化 API 与命名点，新增内容见 §1.2、§3 各关表与 §6；旧签名保留兼容，不改评分真值。
+> 上游：docs/05-curriculum.md、docs/06-level-spec-system.md、docs/48-round2-guidance-api-visual-plan.md、content/levels/*.md
+> 实现：`packages/sdk/src/index.ts`（学生类型）、`packages/sdk/src/api-registry.ts`（指令手册单一数据源）、`packages/worldport/src/index.ts`（PointLike/命名点视图）、`packages/mockworld/src/index.ts`（语义实现）
 
 ---
 
@@ -13,7 +14,7 @@
 1. **读写分离**：读操作**同步**返回缓存快照（不返回 Promise）；写操作**异步**（返回 `Promise<void>`）。Act I–II 学生可不写 `await`（runner 自动插 await，顺序模式，见 §1.1）；Act III（L9 起）切显式 await 模式。
 2. 命名：写操作用动词开头（`moveTo`、`collect`、`deposit`、`ringBell`）；读操作名词/属性（`pos`、`time`、`scenario`、`chest`）；布尔读用 `is/has`。
 3. 单位：坐标 = 方块坐标；距离 = 方块；时间 = 游戏 tick（1s = 20 ticks）或秒（`wait(seconds)` 用秒）。
-4. 坐标约定：`(x, z)` 为水平面（与 Minecraft 一致，`x` 东、`z` 南），`y` 为高度；**学生 API 一律用 `(x, z)` 两参数表示水平位置**，需要高度时用 `(x, y, z)`。**展开规则（2026-10-31 定稿）**：注册表中写作 `pos` 的参数，学生面一律展开为 `(x, z)`；引擎侧 SDK 接收客户端传来的 `Vec2/Vec3` 并做适配。所有关卡 spec 的示例必须按展开后的签名书写（如 `golem.collect("egg", x, z)`、`golem.deposit(x, z, "egg", n)`）。
+4. 坐标约定（2026-11-01 Round 2 更新）：**优先用命名坐标点**——关卡在 `LevelDef.world.points` 里声明 `eira`/`barrel`/`lamp1` 等点，运行时注入为同名全局常量，学生写 `golem.moveTo(eira)`、`golem.deposit("egg", barrel)` 即可，不用背数字。仍支持 `(x, z)` 两参数与 `(x, y, z)` 三参数形状；需要坐标时用命名点、游戏内位置 HUD 或 `golem.pos`（见 §1.2）。关卡示例必须优先使用命名点写法。
 5. 世界错误：SDK 抛出 `GolemError` / `WorldError`，带 `humanMessage`（中文人话）；学生代码不需要认识内部 code。
 6. 不暴露：RPC 名、socket、JSON、bot 内部状态、插件实现类名、原始 NBT。
 7. 兼容：同一符号在不同关卡的签名不变；新关卡只能「新增」符号，不能改变旧符号语义。
@@ -43,18 +44,48 @@
 - **会话**：`GameSession` 读取关卡 `runMode` 选择模式；`/api/run` 行为不变（结果仍走 SSE）。
 - **超时**：显式模式参考解较长，Engine 可按关卡预算传 `runTimeoutMs`（D20：`timeLimitSec + 10s`；T4 接线）。
 
+## 1.2 命名坐标点与 PointLike（2026-11-01 Round 2）
+
+**问题**：旧引导说「回到艾拉身边」，但新手根本不知道艾拉坐标；`golem.place("air", …)` 这类底层调用也不像人的语言。
+
+**方案**：关卡声明命名点，SDK 注入全局常量；所有接受位置的方法同时接受命名点。
+
+```ts
+// LevelDef.world.points（关卡声明，键名即学生可见全局变量名）
+interface NamedPoint { pos: [number, number, number]; name: string }
+// L02 例：{ eira: {pos:[0,65,6], name:"艾拉"}, barrel:{pos:[0,65,-6], name:"木桶"}, perch1:{...} }
+
+// 学生可见点（冻结只读）：{ x, y, z, name }
+type PointLike = NamedPoint | { x: number; y?: number; z: number } | [number, number, number]
+```
+
+规则：
+
+1. **命名点即全局常量**：`eira`、`barrel`、`lamp1` 等直接可用，无需 import/声明；同关内名字唯一。
+2. **`world.points` 可遍历**：`Object.keys(world.points)` 列出本关全部点名（指令手册/REPL `help` 也展示）。
+3. **接受 PointLike 的方法统一**：`moveTo`/`place`/`collect`/`deposit`/`world.container`；`moveTo` 只用 x/z 走路，`place`/`collect`/`deposit` 用点上的 y。
+4. **兼容**：`moveTo(x,z)`、`place(block,x,y,z)` 旧签名不删；旧示例只在历史文档里保留。
+5. **坐标怎么拿**：命名点 → 位置 HUD（灰崽/艾拉/木桶）→ `golem.pos`（日志或表达式）→ `console.log` 打印；不要求玩家猜数字。
+6. **术语呈现**：概念用「中文名（English term）」并列（变量（variable）、闭包（closure）、高阶函数（higher-order function）、接口（interface）…）；API 名保持英文原样（`golem.collect`），不翻译、不造中文别名。文案政策见 docs/20 §3b。
+
+---
+
 ## 2. 类型定义（`.d.ts` 摘要）
 
 ```ts
 type Vec2 = { x: number; z: number }
-type Vec3 = { x: number; y: number; z: number }
+type Vec3 = [number, number, number]
 type BlockId = string        // "minecraft:oak_log" 或简写 "oak_log"
 type ItemId = string         // "minecraft:wheat_seeds" 或简写 "wheat_seeds"
 type EntityKind = "zombie" | "villager" | "iron_golem" | "allay" | "chicken" | "trader" | "llama"
 
-interface ItemStack { kind: ItemId; count: number; name?: string }
-interface Container { pos: Vec3; items(): ItemStack[]; count(item: ItemId): number }
+interface NamedPoint { readonly x: number; readonly y: number; readonly z: number; readonly name: string }
+type PointLike = NamedPoint | { readonly x: number; readonly y?: number; readonly z: number } | Vec3
+interface ItemStack { item: ItemId; count: number }  // L6/L7 容器列表项形状（实现以 packages/sdk 为准）
+/** 容器只读视图：world.container(barrel).count("egg") / .items() */
+interface Container { count(item: ItemId): number; items(): ItemStack[] }
 interface Entity { id: string; kind: EntityKind | string; pos: Vec3; name?: string; health?: number }
+// 以下为设计期摘要；学生可见类型的唯一实现见 packages/sdk/src/index.ts（Vec3 是元组，Golem 语义方法在类型上为可选、运行时按 PointLike 重载）。
 interface Machine { start(): void; stop(): void; status(): string }  // L8 学生面同步签名；引擎内部异步排队（L9 才显式 Promise）
 interface Job { id: string; name: string; requires: "axe" | "pickaxe" | "sword" | "shovel" | "hoe"; at: Vec3 }
 type Recipe = "weakness" | "swiftness" | "healing"           // L9 酿造配方（仅本关可见）
@@ -69,22 +100,28 @@ interface Brew { recipe: Recipe; stand: Vec3; done: Promise<void> }  // L9：Fut
 |---|---|---|---|
 | `golem` | `Golem` | — | 织偶单例（L10 前） |
 | `golem.pos` | `Vec3` | 读（同步） | 当前位置（只读快照） |
-| `golem.moveTo(x, z)` | `Promise<void>` | 写 | 寻路走到 (x, z) 同一高度地面 |
-| `golem.place(block, x, y, z)` | `Promise<void>` | 写 | 在指定位置放置方块（必须有相邻支撑） |
+| `golem.moveTo(x, z)` | `Promise<void>` | 写 | 寻路走到 (x, z) 同一高度地面（旧签名，保留兼容） |
+| `golem.moveTo(target)` | `Promise<void>` | 写 | 走到命名点（`golem.moveTo(eira)`）或 `{x,y,z}`/三元组；只用 x/z 走路 |
+| `golem.goTo(target)` | `Promise<void>` | 写 | `moveTo(target)` 的同义词（教学用词二选一，文档推荐 `moveTo`） |
+| `golem.place(block, x, y, z)` | `Promise<void>` | 写 | 在指定位置放置方块（必须有相邻支撑；旧签名，保留兼容） |
+| `golem.place(block, target)` | `Promise<void>` | 写 | 在命名点所在格放方块（高度取点上的 y；如 `golem.place("lantern", lamp1)`） |
+| `world.points` | `Record<string, NamedPoint>` | 读（同步） | 本关命名点表；键名同时是沙箱全局常量 |
 | `golem.say(text)` | `Promise<void>` | 写 | 织偶在头顶气泡/聊天里说话 |
-| `golem.where()` | `Vec2` | 读（同步） | `golem.pos` 的兼容别名（L01 spec 使用；二者同义） |
+| `golem.where()` | `Vec2` | 读（同步） | `golem.pos` 的设计期别名（历史 spec 用名）；2026-11-01 实现以 `golem.pos` 为准，新内容不要再写 `where` |
 
 ### L2（变量 / 记忆）
 
 | 符号 | 签名 | 读/写 | 说明 |
 |---|---|---|---|
 | `golem.count(item)` | `number` | 读（同步） | 背包里某物品数量 |
-| `golem.has(item, count?)` | `boolean` | 读（同步） | 背包是否够数 |
-| `golem.collect(item, x, z)` | `Promise<number>` | 写（返回收集数量） | 从 (x,z) 处的方块/容器收集物品到背包（如鸡窝的鸡蛋） |
-| `golem.deposit(x, z, item, count)` | `Promise<void>` | 写 | 把背包里 count 个 item 放进 (x,z) 处容器（桶/箱子） |
-| `world.container(x, z)` | `Container` | 读（同步） | 只读容器快照（含 count/items） |
+| `golem.has(item, count?)` | `boolean` | 读（同步） | 背包是否够数（兼容保留） |
+| `golem.collect(item, target)` | `Promise<void>` | 写 | 把目标格上的物品收进背包（`collect("egg", perch1)`）；目标格变空气，背包 +1 |
+| `golem.deposit(item, target, count?)` | `Promise<void>` | 写 | 把背包里的 item 放进目标容器，默认 1 件（`deposit("egg", barrel)`）；count 可一次倒多件 |
+| `world.container(target)` | `Container` | 读（同步） | 只读容器视图：`.count(item)` / `.items()`（如 `world.container(barrel).count("egg")`） |
 
 > 关卡作者若已使用 `takeEgg`/`storeEggs`/`barrelCount` 等关卡专用名，**建议改为上面通用 API**；如保留，必须在 spec 「代码与 API」节加「与 registry 的映射表」，validator 白名单需包含映射后的通用名。
+
+> **废弃反例（2026-11-01 Round 2 起禁止出现在 starter/reference/引导文案）**：用 `golem.place("air", x, y, z)` 表示「收蛋」、用 `golem.place("egg", x, y, z)` 表示「倒蛋」——底层方块操作冒充业务动作，学生看不懂。改语义 API：收 → `golem.collect("egg", perch)`；倒 → `golem.deposit("egg", barrel)`；查数 → `golem.count("egg")` / `world.container(barrel).count("egg")`。
 
 ### L3（分支 / 场景试炼）
 
@@ -220,8 +257,8 @@ interface Agent extends Golem { send(msg: string): Promise<void>; receive(timeou
 
 | 关卡 | 新符号数 | 新增符号 |
 |---|---|---|
-| L1 | 4 | `golem.pos`、`golem.moveTo`、`golem.place`、`golem.say`（+兼容 `where`） |
-| L2 | 4 | `golem.count`、`golem.collect`、`golem.deposit`、`world.container` |
+| L1 | 4+点 | `golem.pos`、`golem.moveTo`、`golem.place`、`golem.say`（+兼容 `where`）；命名点全局常量 + `world.points`（同族读法，按 1 个读符号计） |
+| L2 | 4 | `golem.count`、`golem.collect`、`golem.deposit`、`world.container`（+`golem.goTo` 为 moveTo 别名，标 `kind: extension`） |
 | L3 | 4 | `world.scenario`、`world.countEntities`、`golem.ringBell`、`golem.placeTorch`（+`patrol`） |
 | L4 | 3 | `world.field`、`golem.plant`、`golem.harvest`（+`placeScarecrow`） |
 | L5 | 3 | `world.plot`、`golem.fill`、`golem.placeSign`（+`clear`） |
@@ -239,3 +276,18 @@ interface Agent extends Golem { send(msg: string): Promise<void>; receive(timeou
 - 关卡 spec 中如出现 registry 之外的名称（例如 L02 的 `takeEgg/storeEggs/barrelCount`），二选一：**改为通用名**（推荐）或在 spec 末尾提供「名字 → registry 名」映射；validator 会检查映射并给出引用计数。
 - 已冻结：`golem.moveTo`、`golem.place`、`golem.say`、`golem.pos`、`world.scenario`、`world.field`、`world.container`、`world.machines`、`world.startBrewing`、`agent`。改这些 = 破坏 L01/L03 已冻结 spec，必须 Lead 签字。
 - 本文件与 `docs/07-architecture.md` §3 的协议是两层：协议面向引擎↔插件（RPC 名），registry 面向学生（语义名）；不要混用。
+
+## 6. 2026-11-01 Round 2 变更摘要（docs/48）
+
+> 术语呈现（2026-11-01 政策）：概念统一「中文名（English term）」，必要英文术语保留英文原词；本文件 §3 的 API 名保持英文原样。
+
+| 变更 | 内容 | 契约位置 |
+|---|---|---|
+| 语义化动作 | `collect(item, target)`、`deposit(item, target, count?)`、`count(item)`、`world.container(target).count/items()`；旧 `place("air")`/`place("egg")` 反例废弃 | docs/48 §1.2/§1.3；实现 `packages/sdk/src/index.ts`、`packages/worldport/src/index.ts`、`packages/mockworld/src/index.ts` |
+| 命名坐标点 | `LevelDef.world.points: Record<string, NamedPoint>`；运行时注入同名全局常量 + `world.points` | docs/48 §1.1；`packages/level-spec/src/index.ts`（`NamedPoint`/`pointsView`）、`packages/worldport/src/index.ts`（`toSdkPoints`） |
+| PointLike 重载 | `moveTo(target)`、`goTo(target)`、`place(block, target)`；旧 `(x,z)`/`(x,y,z)` 签名保留兼容 | docs/48 §1.2；`packages/worldport/src/index.ts`（`SemanticAgentActions`/`resolveTarget`） |
+| 指令手册 | `packages/sdk/src/api-registry.ts` 成为学生 API 文档单一数据源（签名/一句人话/可照抄示例/引入关卡）；Studio 工作台「指令手册」与 REPL 复用 | docs/48 §1.5 |
+| 引导 hint | `ProgressStep.hint`（2–4 句：怎样算完成 + 可照抄写法 + 坐标从哪来）；失败时进 Studio 教练卡 + 游戏内 actionbar（节流） | docs/48 §1.4；`packages/level-spec/src/index.ts`（`ProgressStep.hint`/`progressView`） |
+| 位置信息 | Studio 位置 HUD（灰崽/关键点坐标）与 REPL 使用**当前关卡**（不再跳回 L01） | docs/48 §1.6 |
+
+> 计数规则不变：新关卡只新增符号、不改旧语义；`goTo` 属同族别名，不单独计教学符号，但必须出现在 `apiAllowlist`。

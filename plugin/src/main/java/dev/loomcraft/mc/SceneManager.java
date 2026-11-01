@@ -87,6 +87,8 @@ public final class SceneManager implements Listener {
 
     private final Map<String, String> baseBlocks = new TreeMap<>(); // checkpoint: "x,y,z" -> physical id
     private final Map<String, String> baseAlias = new TreeMap<>();  // checkpoint: "x,y,z" -> requested id
+    /** 运行期被清成空气的格子（从 baseAlias 虚拟块上收走/挖掉）：快照必须报 air 而不是 checkpoint 里的旧虚拟块。 */
+    private final Set<String> liveAir = new TreeSet<>();
     private final Map<String, String> alias = new TreeMap<>();      // live virtual ids
     private final Set<String> placedPositions = new LinkedHashSet<>();
     private final Set<String> tracked = new LinkedHashSet<>();
@@ -246,6 +248,7 @@ public final class SceneManager implements Listener {
         baseBlocks.clear();
         baseAlias.clear();
         alias.clear();
+        liveAir.clear();
         placedPositions.clear();
         tracked.clear();
         npcSpecs.clear();
@@ -708,12 +711,15 @@ public final class SceneManager implements Listener {
         baseBlocks.put(k, physicalId);
         if (!requested.equals(physicalId)) baseAlias.put(k, requested);
         else baseAlias.remove(k);
+        liveAir.remove(k);
     }
 
     private void setLive(World world, int[] pos, String requested) {
         String k = key(pos);
         placedPositions.add(k);
         tracked.add(k);
+        if (requested.equals("minecraft:air")) liveAir.add(k);
+        else liveAir.remove(k);
         String prior = alias.containsKey(k) ? alias.get(k) : baseAlias.get(k);
         boolean priorLogical = prior != null && LOGICAL_PLANE.contains(prior);
         if (isLogicalPlane(requested, pos[1]) || (pos[1] == groundY && requested.equals("minecraft:air") && priorLogical)) {
@@ -1332,7 +1338,10 @@ public final class SceneManager implements Listener {
         for (Object o : Json.list(params.get("positions"))) {
             int[] pos = Json.vec3(o);
             String k = key(pos);
-            String id = alias.get(k);
+            // 与 snapshot 一致：live alias（player/golem 放的虚拟块）→ baseAlias（content prepare 摆的虚拟块，
+            // 如蛋/幼苗）→ 物理方块。否则语义 API（collect/harvest）看不到 base 层的虚拟方块。
+            String id = liveAir.contains(k) ? "minecraft:air" : alias.get(k);
+            if (id == null) id = baseAlias.get(k);
             if (id == null) id = world.getBlockAt(pos[0], pos[1], pos[2]).getType().getKey().toString();
             blocks.put(k, id);
         }
@@ -1537,6 +1546,7 @@ public final class SceneManager implements Listener {
             spawnDeferredNpcs();
             alias.clear();
             alias.putAll(baseAlias);
+            liveAir.clear();
             placedPositions.clear();
             applyWorldState();
             teleportActorsToSpawns();
@@ -1651,7 +1661,10 @@ public final class SceneManager implements Listener {
         positions.addAll(baseAlias.keySet());
         for (String k : positions) {
             int[] p = parseKey(k);
-            String id = alias.get(k);
+            // 与 world.blocks 一致：live alias → baseAlias（content prepare 的虚拟块）→ 物理方块。
+            // 快照真值必须还原学生/关卡声明的逻辑 id（egg、wheat_sprout…），否则 digest 与 Mock 对不上。
+            String id = liveAir.contains(k) ? "minecraft:air" : alias.get(k);
+            if (id == null) id = baseAlias.get(k);
             if (id == null) id = world.getBlockAt(p[0], p[1], p[2]).getType().getKey().toString();
             blocks.put(k, id);
         }

@@ -57,6 +57,20 @@ export interface PredictItem {
   options: string[];
 }
 
+/** 概念揭晓（docs/48 §1.6）：结算页/手记/织典展示「你刚才学的概念」。 */
+export interface ConceptReveal {
+  /** 中文名（如「变量」）。 */
+  term: string;
+  /** 英文原词（如 variable）；缺失时不显示括号。 */
+  en?: string;
+  /** 一句话：它是什么。 */
+  what: string;
+  /** 一句话：为什么要用它。 */
+  why: string;
+  /** 指回玩家刚才做的事。 */
+  mapping: string;
+}
+
 export interface LevelCopy {
   title: string;
   act: string;
@@ -82,6 +96,8 @@ export interface LevelCopy {
   opening: Opening;
   journalRecap?: string;
   trialUI?: TrialUI;
+  /** 玩家可见概念揭晓（内容团队写；缺失时回退织典页）。 */
+  conceptReveal?: ConceptReveal;
 }
 
 export interface PrologueScreen {

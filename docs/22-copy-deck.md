@@ -1,9 +1,9 @@
-# 22 — UI 文案包 v3.1（纯中文 · 完整句 · 引导）
+# 22 — UI 文案包 v3.1（自然中文 + 必要英文术语 · 完整句 · 引导）
 
 > 状态：v3.1（T2 文案基线；目标面板自 2026-11-01 起以引擎 `LevelDef.progress` 为唯一真值，copy `goals` 仅作旧引擎回退）｜负责人：scout-pedagogy（T2-COPY）｜最后更新：2026-11-01
 > 上游：`docs/25-onboarding-and-guidance.md`（引导规格与文本预算）、`docs/23-world-bible.md`（世界观名词，已含三夜试炼/麦穗节/加练）、`docs/20-quality-bar.md` §3/§3b、`docs/05`、L01–L04 spec
 > 下游：`apps/studio` 文案层（`apps/studio/src/copy/levels.json`）、插件字幕、level spec 的 `narrative.opening/worldState/whyYou`、`scripts/check-copy.mjs --pure-zh`
-> 硬规则：界面叙述全部纯中文；代码引用只允许反引号包裹 + 同句中文说法；不出现「玩家/用户/您」；运行统一「回车运行」；引导可跳过，但跳过也计入存档、随时可在「旅途手记」回看。
+> 硬规则（2026-11-01 政策更新）：**界面叙述用自然中文；必须用的英文计算机术语保留英文原词**（`for` 循环、`let` 变量、`Promise.all`、`async/await`、`closure`、`higher-order function`、`interface` 等），概念统一「中文名（English term）」；不为「纯中文」硬翻术语。代码引用用反引号 + 同句中文说法；UI 英文标签（Run/Stop/Reset 等）仍禁止；不出现「玩家/用户/您」；运行统一「回车运行」；引导可跳过，但跳过也计入存档、随时可在「旅途手记」回看。政策原文见 `docs/20` §3b。
 > 交付：JSON 共 **375 条**（v3 的 328 条主体全部保留，其中 **121 条改写为完整句**；新增 50 条：13 个控件标签 + 13 条控件说明 + 状态/地图墙/试符台/手记/身份名词补全）。序章 8 屏、三幕开场各 3 屏、L01–L04 每关开场 3 句、旅途手记 4 节；`_meta.sentenceStyleRefs = "complete"`；`codeRefs` 标注合法代码引用 5 条。本轮只改文档，**未改代码/关卡，未 git commit**。
 > 2026-11-01 更新：`apps/studio/src/copy/levels.json` 已含 L01–L10 全部关卡文案与引导；目标/进度文案改由引擎 `progress` 提供（docs/46 §2.3），本文件 §2 中的「目标（3 条）」保留作文案基准。375 条为 v3.1 交付口径，后续追加条目以 JSON 文件为准。
 
@@ -18,15 +18,16 @@
 7. 三夜试炼/麦穗节/加练 已由 Lead 合并进 `docs/23` §2（commit 001fc86）；本文件 §5.3 保留核对清单，并提议把「旅途手记」登记为 UI 词。
 8. v3.1 盲读：5 个 fresh agent（零编程/玩过 MC/文学编辑/手游玩家/语言老师）回答五问，**25/25 通过**；P3 指出「我是艾拉/你是新来的织者」太近、规则重复，已改（见 §4）。
 
-## 1. 纯中文与引导规范
+## 1. 自然中文 + 必要英文术语 与引导规范（2026-11-01 更新）
 
 ### 1.1 红线（对齐 docs/20 §3b）
 
 | 允许 | 不允许 |
 |---|---|
-| 代码编辑器里的英文标识符、行号、文件名 | 叙述句里夹英文术语（「用 moveTo 走到灯下」→「让灰崽走到灯下」） |
+| 代码编辑器里的英文标识符、行号、文件名 | 把英文当普通叙述词（`click`/`check` 之类）；用英文标签代替 UI 中文名 |
 | 反引号包裹的代码引用 + 同句中文说法 | 界面标签用英文（`Run`/`Stop`/`Level`/`Objective`/`mock` 等） |
 | 按键名「回车」（运行统一「回车运行」） | 把英文按键组合当文案主语（`Ctrl + Enter 运行`） |
+| 必要术语保留英文并首次给解释：变量（variable）、`for` 循环、闭包（closure）、`Promise.all` | 为「纯中文」硬翻术语（closure→「封闭体」）或整句中英混杂的翻译腔 |
 | 数字、坐标、单位 | 翻译腔：「让我们来…」「通过…来实现…」「这是一个…的过程」 |
 
 ### 1.2 按钮动词表（全中文）
@@ -914,7 +915,7 @@
 }
 ```
 
-> 结构：字符串 = 纯中文文案；对象 `{text, codeRefs}` = 含合法代码引用的文案；`prologue/acts/journal/global.rules` 为 v3 新增引导层。`_meta` 为说明，lint 跳过。
+> 结构：字符串 = 自然中文文案（必要英文术语保留，见 §1）；对象 `{text, codeRefs}` = 含合法代码引用的文案；`prologue/acts/journal/global.rules` 为 v3 新增引导层。`_meta` 为说明，lint 跳过。
 
 ## 2.6 序章（8 屏，每屏 ≤2 句）
 
@@ -1072,7 +1073,7 @@ Round 1（v3，见 `docs/31`）的两大文案层 blocker——身份不统一�
 
 ```ts
 type Copy = string | { text: string; codeRefs: string[] };
-// prologue/acts/journal/global.rules 为 v3 新增引导层；键名固定，值全部纯中文。
+// prologue/acts/journal/global.rules 为 v3 新增引导层；键名固定，值用自然中文 + 必要英文术语。
 ```
 
 ### 5.2 `check-copy.mjs --pure-zh` 接入

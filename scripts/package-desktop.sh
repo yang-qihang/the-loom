@@ -3,6 +3,12 @@
 # 目标：不再出现「UI 是新的、engine/plugin 是旧的」或 AppImage 图标/runtime 缺失。
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# 构建机沙箱：~/.gradle / ~/.cargo / ~/.cache 只读；默认落到工作区可写副本（可被环境变量覆盖）。
+export GRADLE_USER_HOME="${GRADLE_USER_HOME:-$ROOT/tmp/plugin-work/gradle-home}"
+export CARGO_HOME="${CARGO_HOME:-$ROOT/tmp/build-env/cargo}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$ROOT/tmp/build-env/cache}"
+export APPIMAGE_EXTRACT_AND_RUN="${APPIMAGE_EXTRACT_AND_RUN:-1}"
+mkdir -p "$GRADLE_USER_HOME" "$CARGO_HOME" "$XDG_CACHE_HOME"
 BUNDLE="$ROOT/apps/desktop/src-tauri/target/release/bundle"
 APPDIR="$BUNDLE/appimage/Loomcraft.AppDir"
 RUNTIME_FILE="${LOOM_APPIMAGE_RUNTIME:-/tmp/type2-runtime-x86_64}"
@@ -35,8 +41,9 @@ bash "$ROOT/scripts/build-real-runtime.sh"
 echo "[package] 3/5 构建 Studio 与桌面壳前端"
 (cd "$ROOT/apps/desktop" && npm run assets)
 
-echo "[package] 4/5 tauri build（RPM 正常产出；AppImage 由下一步手动封）"
-(cd "$ROOT/apps/desktop" && npx tauri build) || true
+echo "[package] 4/5 tauri build（RPM + AppDir；AppImage 失败时由下一步手动封）"
+# 本机 FUSE 不可用：让 tauri 内的 linuxdeploy/AppImage 工具自动解包运行。
+(cd "$ROOT/apps/desktop" && APPIMAGE_EXTRACT_AND_RUN=1 npx tauri build) || true
 [ -x "$APPDIR/usr/bin/loomcraft-desktop" ] || { echo "[package] tauri build 未产出 AppDir" >&2; exit 2; }
 
 echo "[package] 5/5 封 AppImage + 统一文件名"
@@ -51,13 +58,20 @@ if [ ! -x "$APPIMAGE_TOOL" ]; then
   echo "[package] 缺少 linuxdeploy-plugin-appimage：$APPIMAGE_TOOL" >&2
   exit 2
 fi
-(cd "$BUNDLE/appimage" && APPIMAGE_RUNTIME_FILE="$RUNTIME_FILE" ARCH=x86_64 "$APPIMAGE_TOOL" --appdir=Loomcraft.AppDir)
-cp "$BUNDLE/appimage/Loomcraft-x86_64.AppImage" "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage"
+if [ ! -x "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage" ]; then
+  echo "[package] 手动封 AppImage（APPIMAGE_EXTRACT_AND_RUN=1，无 FUSE 环境）"
+  (cd "$BUNDLE/appimage" && APPIMAGE_EXTRACT_AND_RUN=1 APPIMAGE_RUNTIME_FILE="$RUNTIME_FILE" ARCH=x86_64 "$APPIMAGE_TOOL" --appdir=Loomcraft.AppDir)
+fi
+if [ -f "$BUNDLE/appimage/Loomcraft-x86_64.AppImage" ]; then
+  cp "$BUNDLE/appimage/Loomcraft-x86_64.AppImage" "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage"
+fi
 
 # 一次性验收：运行时/插件/字体/包体必须同时是新的
 test -f "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage"
 grep -q 'playerGive' "$ROOT/apps/desktop/src-tauri/runtime/real/engine.mjs"
 javap -p -classpath "$ROOT/apps/desktop/src-tauri/runtime/real/paper/plugins/loomcraft-plugin.jar" -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem'
-grep -Rq 'Iosevka' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || true
+grep -Rq 'Iosevka' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null && { echo "[package] 包里仍有 Iosevka 字体残留" >&2; exit 4; } || true
+grep -Rq 'Maple Mono' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || { echo "[package] 包里没有 Maple Mono 字体" >&2; exit 4; }
+test -f "$ROOT/apps/desktop/src-tauri/runtime/real/paper/world/.loom-world-version" || { echo "[package] 缺世界布局版本 marker" >&2; exit 4; }
 echo "[package] OK"
 ls -lh "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage" "$BUNDLE/rpm/"*.rpm 2>/dev/null || true

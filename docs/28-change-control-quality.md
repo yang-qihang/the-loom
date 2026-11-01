@@ -1,7 +1,7 @@
 # 28 — 变更控制与质量门 v2（新功能不得绕过保证体系）
 
 > 状态：v1 冻结｜负责人：Lead｜最后更新：2026-10-31
-> 背景：用户连续加入 REPL、引导/序章、桌面封装（Tauri）、总在最前/伴玩、纯中文 UI、反「秀气」挑战层等需求。
+> 背景：用户连续加入 REPL、引导/序章、桌面封装（Tauri）、总在最前/伴玩、中文 UI（2026-11-01 政策更新为「自然中文 + 必要英文术语」）、反「秀气」挑战层等需求。
 > 底线：**任何新功能都必须同时带来规格、测试、证据与门禁；不允许以「先做出来再说」绕过 QA；不允许降低既有覆盖率或改动测试过关。**
 > 现行文件（2026-11-01 复核）：变更控制/FAP 仍有效；当前 gate 状态见 `qa/README.md` §6。
 > 上游：docs/20-quality-bar.md、docs/29、docs/30
@@ -23,7 +23,7 @@
 | 功能 | Gate | 命令/证据 | 通过标准 |
 |---|---|---|---|
 | 反「秀气」挑战层/体量 | **G-SCALE** | `level:validate`（LOC/阶段/挑战/隐藏测试）；每关 content 测试含 challenge 三态（挑战解过 / 偷懒失败 / 写死失败） | 所有已实现关卡达标；未达标 spec 不允许进入实现 |
-| 纯中文 UI | **G-PURE-ZH** | `npx tsx scripts/check-copy.mjs --pure-zh --strict`；人工按 docs/20 §3b 复核 | 0 违规叙述；合法代码引用允许 |
+| 文案（自然中文 + 必要英文术语） | **G-PURE-ZH** | `npx tsx scripts/check-copy.mjs --pure-zh --strict`；人工按 docs/20 §3b 复核 | 0 违规叙述；合法代码引用与 `TECHNICAL_TERMS` 白名单术语允许（2026-11-01 政策） |
 | 标题中线对齐/视觉细节 | **G-UI-ALIGN** | Studio Playwright：标题 bbox 中心与视口中心差 ≤2px；标题不换行；无横向滚动；图标/文字中线对齐抽样 | 3 屏全过 + 截图 |
 | 引导/背景/序章 | **G-ONBOARD** | 5 个 fresh agent 只看「序章+当前关开场+目标面板」回答五问；检查手记可回看 | ≥4/5 全答对；缺口补文案 |
 | Fresh Reader（没玩过 MC 的文学读者） | **G-FRESH-READER** | fresh subagent 只看截图/界面文字；输出困惑 JSON + 改写建议 | blocker=0、major=0；无翻译腔/AI 味/中英混排；自然度≥4；五问≥4（docs/30） |

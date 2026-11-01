@@ -219,9 +219,23 @@ const L09_BASE: LevelDef = defineLevel({
       { type: "witch", role: "npc", id: "granny", name: "苔婆" },
       { type: "zombie_villager", role: "target", id: "sick", name: "生病的村民" },
     ],
+    // 命名坐标点（docs/48 §1.1）：沙箱里可直接当全局变量用，如 golem.moveTo(eira)。
+    points: {
+      eira: { pos: [0, 65, 6], name: "艾拉" },
+      cage: { pos: [10, 65, 7], name: "牢笼（放金苹果）" },
+      chest: { pos: [0, 65, -6], name: "取金苹果的木桶" },
+      cauldron: { pos: [-10, 65, -8], name: "苔婆的炼药锅" },
+      bell: { pos: [0, 65, 14], name: "暮钟" },
+      weakStand: { pos: [-2, 65, -5], name: "左酿造台（虚弱药水）" },
+      healStand: { pos: [2, 65, -5], name: "右酿造台（治疗药水）" },
+      weakShelf: { pos: [-2, 65, -3], name: "左材料架" },
+      healShelf: { pos: [2, 65, -3], name: "右材料架" },
+    },
+    // 玩家出生点：营地南侧主路，朝北正对两座酿造台；离灰崽 (0,65,0) 有 10 格，不会怼脸。
+    playerSpawn: [0, 65, 10],
   },
   code: {
-    expectedLoc: 83,
+    expectedLoc: 82,
     starterCode: `type Pos = [number, number, number]
 type Stand = {
   id: string
@@ -231,6 +245,8 @@ type Stand = {
   ingredient: string
   backup: string
 }
+// 命名点：eira（艾拉）、weakStand / healStand（两座酿造台）、weakShelf / healShelf（材料架）、
+// chest（取金苹果的木桶）、cauldron（炼药锅）、cage（牢笼）、bell（暮钟）。坐标也能在手册里查。
 const vars = world.vars
 const stands = vars.brewStands as Stand[]
 const materials = vars.materials as Record<string, string>
@@ -364,10 +380,10 @@ async function 收尾(): Promise<void> {
 }
 
 await golem.moveTo((stands[0].stand[0] + stands[1].stand[0]) / 2, stands[0].stand[2] + 1)
-const 左坛 = 安全酿(stands[0])
-const 右坛 = 安全酿(stands[1])
+// 把每座台 map 成一个 Promise（还没做好的事情可以先拿在手里），再一起等
+const 两坛 = stands.map(台 => 安全酿(台))
 await 取苹果()
-await Promise.all([左坛, 右坛])
+await Promise.all(两坛)
 await 交付()
 await 布置治愈()
 await 报时()
@@ -532,11 +548,13 @@ await golem.say("三坛一起出坛，节日药水备齐")
     {
       id: "l09-two-brews",
       text: "两坛药同时开酿，都按时出坛",
+      hint: "两座酿造台在 world.vars.brewStands（命名点 weakStand / healStand）。写 async function 酿一坛(台)，依次 await 走到、开酿（water_bottle）、投料、出坛（potion）；两座台各自开始后，最后 await Promise.all([左坛, 右坛]) 一起等，不要一坛等完再一坛。",
       check: g => brewedOk(g) && brewedConcurrently(g),
     },
     {
       id: "l09-apple-in-wait",
       text: "取金苹果藏在酿造的等待里",
+      hint: "取金苹果要藏在酿造的等待里：两坛开火之后、出坛之前，走到 world.vars.chest（命名点 chest）用 golem.place(\"air\", chest) 把苹果拿走。等待时间和移动重叠，入夜前才做得完。",
       check: g => {
         const apples = appleTaken(g);
         if (apples.length === 0) return false;
@@ -550,10 +568,16 @@ await golem.say("三坛一起出坛，节日药水备齐")
     {
       id: "l09-deliver-cure",
       text: "交付三瓶药水，摆好金苹果",
+      hint: "三瓶药水要交到 world.vars.cauldron（命名点 cauldron）：走到锅边用 golem.place(\"potion\", cauldron) 放三次；再把金苹果放到 world.vars.cage（命名点 cage）上布置治愈。最后 golem.moveTo(eira) 报一句时间，钟留给玩家敲。",
       check: g =>
         potionsAtCauldron(g).length >= 3 &&
         agentPlaces(g, "golden_apple").some(e => samePos(e.pos, pos(g.var("cage")))),
     },
+  ],
+  // 名副其实（docs/48 §1.9）：本关必须真的用 async/await + Promise.all 并发等待。
+  codeRequirements: [
+    { id: "l09-promise-all", text: "用 Promise.all 一起等两坛药，而不是一坛等完再一坛", kind: "promise-combinator", min: 1 },
+    { id: "l09-higher-order", text: "用 map/filter 把多座酿造台当成一组处理（每座台 map 成一个 Promise）", kind: "higher-order", min: 1 },
   ],
   phases: ["顺序版到并发版", "缺料降级"],
 });

@@ -1,5 +1,19 @@
 import { chrome, fill, levelCards, levelCopy, resolveCopy } from "../copy";
-import type { Criterion, EngineMode, LevelView, ReplHistoryEntry, ReplKind, ReplOutcome, RunResult, SessionPhase, StudioEngine, StudioEvent } from "../types";
+import type {
+  ApiReferenceView,
+  Criterion,
+  EngineMode,
+  LevelView,
+  NamedPointView,
+  ReplHistoryEntry,
+  ReplKind,
+  ReplOutcome,
+  RunResult,
+  SessionPhase,
+  SnapshotView,
+  StudioEngine,
+  StudioEvent,
+} from "../types";
 import { EngineUnavailableError } from "../types";
 
 const DEFAULT_BASE = "http://127.0.0.1:4317";
@@ -33,6 +47,7 @@ interface RawEvent {
   state?: string;
   phase?: string;
   epoch?: number;
+  level?: number;
   line?: string;
   id?: string;
   text?: string;
@@ -46,6 +61,7 @@ interface RawEvent {
   failures?: string[];
   progress?: Criterion[];
   playerBeatReady?: boolean;
+  codeCriteria?: Criterion[];
 }
 
 const criteriaOf = (value: unknown): Criterion[] =>
@@ -59,6 +75,10 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
     return { type: "state", state: phase as SessionPhase };
   }
   if (raw.type === "log") return { type: "log", line: String(raw.line ?? "") };
+  if (raw.type === "hint") {
+    // docs/48 §1.4：引擎按节点发引导（每次 run 失败最多 1 条），教练卡展示。
+    return { type: "hint", level: Number(raw.level ?? 1), text: String(raw.text ?? "") };
+  }
   if (raw.type === "objective") {
     return { type: "objective", id: String(raw.id ?? ""), text: String(raw.text ?? ""), done: Boolean(raw.done) };
   }
@@ -76,6 +96,7 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
         // 旧引擎没有 progress/playerBeatReady：空数组/undefined 时 Studio 走兼容回退。
         progress: criteriaOf(payload.progress),
         ...(playerBeatReady !== undefined ? { playerBeatReady } : {}),
+        ...(Array.isArray(payload.codeCriteria) ? { codeCriteria: criteriaOf(payload.codeCriteria) } : {}),
       },
     };
   }
@@ -119,22 +140,32 @@ export class HttpEngine implements StudioEngine {
         id?: string;
         meta?: { title?: { zh?: string }; act?: number; order?: number };
         code?: { starterCode?: string; referenceSolution?: string };
+        world?: { points?: Record<string, NamedPointView> };
       };
       starterCode?: string;
       /** docs/46 §2.3：引擎给出的玩家可见任务进度（唯一真值）。 */
-      progress?: Array<{ id?: string; text?: string; player?: boolean }>;
+      progress?: Array<{ id?: string; text?: string; player?: boolean; hint?: string }>;
+      /** docs/48 §1.5：引擎给出的本关命名点视图（比 def.world.points 更全，含自动派生项）。 */
+      points?: Record<string, NamedPointView>;
     }>(`/api/levels/${id}`);
     const copy = levelCopy(id);
     const def = data.def ?? {};
     const progress = (data.progress ?? []).filter(
-      (step): step is { id: string; text: string } => !!step && typeof step.id === "string" && step.id.length > 0,
+      (step): step is { id: string; text: string; player?: boolean; hint?: string } =>
+        !!step && typeof step.id === "string" && step.id.length > 0,
     );
-    // 目标面板 id/text 优先用引擎 progress；旧引擎没有 progress 时回退 copy.goals（兼容）。
+    // 目标面板 id/text/hint 优先用引擎 progress；旧引擎没有 progress 时回退 copy.goals（兼容）。
     const objectives = progress.length > 0
-      ? progress.map((step) => ({ id: step.id, text: String(step.text ?? "") }))
+      ? progress.map((step) => ({
+          id: step.id,
+          text: String(step.text ?? ""),
+          ...(step.hint ? { hint: step.hint } : {}),
+          ...(step.player === true ? { player: true } : {}),
+        }))
       : copy
         ? copy.goals.map((text, index) => ({ id: LEGACY_GOAL_IDS[index] ?? `goal-${index}`, text }))
         : [];
+    const points = data.points && Object.keys(data.points).length > 0 ? data.points : def.world?.points;
     return {
       id,
       title: copy?.title ?? def.meta?.title?.zh ?? id,
@@ -144,6 +175,8 @@ export class HttpEngine implements StudioEngine {
       referenceSolution: def.code?.referenceSolution ?? "",
       objectives,
       hints: copy ? copy.hints.map((hint) => resolveCopy(hint)) : [],
+      ...(points && Object.keys(points).length > 0 ? { points } : {}),
+      ...(copy?.conceptReveal ? { conceptReveal: copy.conceptReveal } : {}),
     };
   }
 
@@ -159,12 +192,37 @@ export class HttpEngine implements StudioEngine {
     await this.request("/api/run", { method: "POST", body: JSON.stringify({ sessionId, source }) });
   }
 
-  async createReplSession(): Promise<string> {
+  async createReplSession(levelId?: string): Promise<string> {
     const data = await this.request<{ sessionId: string }>("/api/session", {
       method: "POST",
-      body: JSON.stringify({ levelId: "L01", mode: "repl" }),
+      body: JSON.stringify({ levelId: levelId ?? "L01", mode: "repl" }),
     });
     return data.sessionId;
+  }
+
+  /** 位置 HUD：引擎会话快照（docs/48 §1.6）；引擎还没有该端点时返回 null 让 UI 降级。 */
+  async snapshot(sessionId: string): Promise<SnapshotView | null> {
+    try {
+      const data = await this.request<SnapshotView & { snapshot?: SnapshotView }>(`/api/session/${encodeURIComponent(sessionId)}/snapshot`);
+      const snapshot = data.snapshot ?? data;
+      return snapshot && typeof snapshot === "object" ? snapshot : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** 指令手册：引擎的 api-reference 端点（远端优先；缺失时组件直接用本地 registry）。 */
+  async apiReference(levelId: string): Promise<ApiReferenceView | null> {
+    try {
+      const data = await this.request<Partial<ApiReferenceView>>(`/api/api-reference?levelId=${encodeURIComponent(levelId)}`);
+      if (!data || (!Array.isArray(data.api) && !data.points)) return null;
+      return {
+        api: Array.isArray(data.api) ? data.api : [],
+        points: data.points && typeof data.points === "object" ? data.points : {},
+      };
+    } catch {
+      return null;
+    }
   }
 
   async repl(sessionId: string, line: string): Promise<ReplOutcome> {

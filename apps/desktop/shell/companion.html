@@ -4,12 +4,15 @@
 <meta charset="UTF-8" />
 <title>织界 · 伴玩</title>
 <style>
-  @font-face { font-family:"Departure Mono"; src:url("./studio/fonts/DepartureMono-Regular.woff2") format("woff2"); font-display:swap; }
-  @font-face { font-family:"Zpix"; src:url("./studio/fonts/zpix.woff2") format("woff2"); font-display:swap; }
-  :root { --bg:#0d140f; --panel:#182418; --panel-2:#1e2d1e; --line:#4a5c42; --warm:#e5b368; --warm2:#ffd28b; --text:#f0ead8; --muted:#c2c9b4; --ok:#9acb79; --bad:#df8d70; --pixel:"Departure Mono","Zpix",ui-monospace,monospace; }
+  /* Round 2：伴玩与 Studio 共用随包 Maple Mono CN（唯一 UI/日志字体）。 */
+  @font-face { font-family:"Maple Mono"; src:url("./studio/fonts/MapleMono-CN-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:swap; }
+  @font-face { font-family:"Maple Mono"; src:url("./studio/fonts/MapleMono-CN-Italic.woff2") format("woff2"); font-weight:400; font-style:italic; font-display:swap; }
+  @font-face { font-family:"Maple Mono"; src:url("./studio/fonts/MapleMono-CN-SemiBold.woff2") format("woff2"); font-weight:600; font-style:normal; font-display:swap; }
+  @font-face { font-family:"Maple Mono"; src:url("./studio/fonts/MapleMono-CN-SemiBold.woff2") format("woff2"); font-weight:700; font-style:normal; font-display:swap; }
+  :root { --bg:#0d140f; --panel:#182418; --panel-2:#1e2d1e; --line:#4a5c42; --warm:#e5b368; --warm2:#ffd28b; --text:#f0ead8; --muted:#c2c9b4; --ok:#9acb79; --bad:#df8d70; --pixel:"Maple Mono",ui-monospace,monospace; }
   * { box-sizing:border-box; }
   html, body { height:100%; margin:0; }
-  body { background:var(--bg); color:var(--text); font-family:"Noto Sans SC","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif; font-size:13px; overflow:hidden;
+  body { background:var(--bg); color:var(--text); font-family:"Maple Mono","Noto Sans SC","Source Han Sans SC",system-ui,sans-serif; font-size:13px; overflow:hidden;
     background-image:repeating-linear-gradient(0deg,#ffffff03 0 1px,transparent 1px 8px),repeating-linear-gradient(90deg,#00000030 0 1px,transparent 1px 8px); }
   .page { height:100%; min-height:0; padding:10px 12px 12px; display:flex; flex-direction:column; gap:8px; }
   .head { display:flex; align-items:center; gap:8px; flex:0 0 auto; }

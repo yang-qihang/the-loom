@@ -1,0 +1,1443 @@
+{
+  "startedAt": "2026-11-01T05:40:09.205Z",
+  "player": "LoomShot",
+  "levels": {
+    "L01": {
+      "levelId": "L01",
+      "create": {
+        "status": 201,
+        "createMs": 1966,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            2,
+            14,
+            16
+          ]
+        ],
+        "lookTarget": [
+          2,
+          14.5,
+          16
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          2,
+          14.5,
+          16
+        ],
+        "yaw": 177.51044707800085,
+        "pitch": -9.2758752958768
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L01.png",
+        "bytes": 888693,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          2,
+          11,
+          4
+        ],
+        "eye": [
+          2.5,
+          12.620000000000001,
+          4.5
+        ],
+        "anchor": [
+          -7,
+          12.5,
+          9
+        ],
+        "lookTarget": [
+          2,
+          14.5,
+          16
+        ],
+        "yaw": 177.51044707800085,
+        "pitch": -9.2758752958768,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:gravel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "villager-1",
+            "pos": [
+              2,
+              11,
+              2
+            ],
+            "distance": 2
+          },
+          {
+            "id": "eira",
+            "pos": [
+              0,
+              11,
+              6
+            ],
+            "distance": 2.8284271247461903
+          },
+          {
+            "id": "villager-0",
+            "pos": [
+              -2,
+              11,
+              -4
+            ],
+            "distance": 8.94427190999916
+          },
+          {
+            "id": "villager-2",
+            "pos": [
+              -2,
+              11,
+              18
+            ],
+            "distance": 14.560219778561038
+          }
+        ],
+        "npcInFront": [
+          {
+            "id": "eira",
+            "pos": [
+              0,
+              11,
+              6
+            ],
+            "distance": 2.8284271247461903
+          }
+        ],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": null,
+          "solidCount": 0,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 1,
+          "ratio": 0.0625
+        },
+        "image": {
+          "mean": 0.505442,
+          "stddev": 0.212036
+        },
+        "flags": [
+          "贴脸 NPC：eira@2.8m"
+        ]
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L01.png",
+        "bytes": 1005285,
+        "camera": [
+          2,
+          16,
+          -2
+        ],
+        "yaw": 178.36342295838327,
+        "pitch": 10.104767997941648,
+        "image": {
+          "mean": 0.566949,
+          "stddev": 0.214902
+        }
+      }
+    },
+    "L02": {
+      "levelId": "L02",
+      "create": {
+        "status": 201,
+        "createMs": 1793,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            4,
+            66,
+            -6
+          ]
+        ],
+        "lookTarget": [
+          4,
+          66.5,
+          -6
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          4,
+          66.5,
+          -6
+        ],
+        "yaw": -11.976132444203357,
+        "pitch": 0.40761993553358217
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L02.png",
+        "bytes": 1283773,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          0,
+          65,
+          10
+        ],
+        "eye": [
+          0.5,
+          66.62,
+          10.5
+        ],
+        "anchor": [
+          -8,
+          66.5,
+          3
+        ],
+        "lookTarget": [
+          4,
+          66.5,
+          -6
+        ],
+        "yaw": -11.976132444203357,
+        "pitch": 0.40761993553358217,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:gravel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "eira",
+            "pos": [
+              0,
+              65,
+              6
+            ],
+            "distance": 4
+          },
+          {
+            "id": "hens",
+            "pos": [
+              -11,
+              65,
+              13
+            ],
+            "distance": 11.40175425099138
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": null,
+          "solidCount": 0,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 0,
+          "ratio": 0
+        },
+        "image": {
+          "mean": 0.311527,
+          "stddev": 0.100245
+        },
+        "flags": []
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L02.png",
+        "bytes": 1770750,
+        "camera": [
+          -1,
+          70,
+          16
+        ],
+        "yaw": -11.309932474020213,
+        "pitch": 12.5787215392899,
+        "image": {
+          "mean": 0.321945,
+          "stddev": 0.127558
+        }
+      }
+    },
+    "L03": {
+      "levelId": "L03",
+      "create": {
+        "status": 201,
+        "createMs": 2185,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            0,
+            65,
+            0
+          ]
+        ],
+        "lookTarget": [
+          0,
+          65.5,
+          0
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          0,
+          65.5,
+          0
+        ],
+        "yaw": 2.2906100426385296,
+        "pitch": 5.115960186107445
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L03.png",
+        "bytes": 1146777,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          0,
+          65,
+          12
+        ],
+        "eye": [
+          0.5,
+          66.62,
+          12.5
+        ],
+        "anchor": [
+          3,
+          66.5,
+          8
+        ],
+        "lookTarget": [
+          0,
+          65.5,
+          0
+        ],
+        "yaw": 2.2906100426385296,
+        "pitch": 5.115960186107445,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:gravel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "eira",
+            "pos": [
+              0,
+              65,
+              6
+            ],
+            "distance": 6
+          },
+          {
+            "id": "guard",
+            "pos": [
+              3,
+              65,
+              3
+            ],
+            "distance": 9.486832980505138
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": {
+            "pos": [
+              0,
+              65,
+              4
+            ],
+            "block": "minecraft:stone_bricks"
+          },
+          "solidCount": 8,
+          "occluded": true
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 0,
+          "ratio": 0
+        },
+        "image": {
+          "mean": 0.283851,
+          "stddev": 0.0964188
+        },
+        "flags": [
+          "看向场景锚点被遮挡（首个遮挡 minecraft:stone_bricks@[0,65,4]）"
+        ]
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L03.png",
+        "bytes": 1871639,
+        "camera": [
+          0,
+          70,
+          18
+        ],
+        "yaw": 1.548157698977968,
+        "pitch": 18.298537079640965,
+        "image": {
+          "mean": 0.259887,
+          "stddev": 0.104171
+        }
+      }
+    },
+    "L04": {
+      "levelId": "L04",
+      "create": {
+        "status": 201,
+        "createMs": 2044,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            14,
+            67,
+            26
+          ]
+        ],
+        "lookTarget": [
+          14,
+          67.5,
+          26
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          14,
+          67.5,
+          26
+        ],
+        "yaw": -175.10090754621226,
+        "pitch": -2.86823495902657
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L04.png",
+        "bytes": 1428186,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          12,
+          65,
+          8
+        ],
+        "eye": [
+          12.5,
+          66.62,
+          8.5
+        ],
+        "anchor": [
+          -16,
+          69,
+          35
+        ],
+        "lookTarget": [
+          14,
+          67.5,
+          26
+        ],
+        "yaw": -175.10090754621226,
+        "pitch": -2.86823495902657,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:hay_block",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "eira",
+            "pos": [
+              8,
+              65,
+              28
+            ],
+            "distance": 20.39607805437114
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": null,
+          "solidCount": 0,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 0,
+          "ratio": 0
+        },
+        "image": {
+          "mean": 0.524312,
+          "stddev": 0.228952
+        },
+        "flags": []
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L04.png",
+        "bytes": 2031300,
+        "camera": [
+          11,
+          70,
+          2
+        ],
+        "yaw": -173.92754359279232,
+        "pitch": 9.889295076013227,
+        "image": {
+          "mean": 0.554995,
+          "stddev": 0.232944
+        }
+      }
+    },
+    "L05": {
+      "levelId": "L05",
+      "create": {
+        "status": 201,
+        "createMs": 2093,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            1,
+            64,
+            3
+          ],
+          [
+            13,
+            64,
+            3
+          ],
+          [
+            25,
+            64,
+            3
+          ],
+          [
+            1,
+            64,
+            17
+          ],
+          [
+            25,
+            64,
+            17
+          ]
+        ],
+        "lookTarget": [
+          1,
+          64,
+          17
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          1,
+          64,
+          17
+        ],
+        "yaw": 130.03025927188972,
+        "pitch": 5.667212445201871
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L05.png",
+        "bytes": 1543027,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          13,
+          64,
+          6
+        ],
+        "eye": [
+          13.5,
+          65.62,
+          6.5
+        ],
+        "anchor": [
+          11,
+          65.5,
+          -2
+        ],
+        "lookTarget": [
+          1,
+          64,
+          17
+        ],
+        "yaw": 130.03025927188972,
+        "pitch": 5.667212445201871,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:gravel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "mason",
+            "pos": [
+              16,
+              64,
+              4
+            ],
+            "distance": 3.6055512754639896
+          },
+          {
+            "id": "eira",
+            "pos": [
+              22,
+              65,
+              8
+            ],
+            "distance": 9.273618495495704
+          },
+          {
+            "id": "carpenter",
+            "pos": [
+              2,
+              64,
+              4
+            ],
+            "distance": 11.180339887498947
+          },
+          {
+            "id": "apprentice",
+            "pos": [
+              26,
+              64,
+              -4
+            ],
+            "distance": 16.401219466856723
+          },
+          {
+            "id": "newcomers",
+            "pos": [
+              -4,
+              64,
+              10
+            ],
+            "distance": 17.46424919657298
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": {
+            "pos": [
+              3,
+              64,
+              14
+            ],
+            "block": "minecraft:stone_bricks"
+          },
+          "solidCount": 2,
+          "occluded": true
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 0,
+          "ratio": 0
+        },
+        "image": {
+          "mean": 0.433688,
+          "stddev": 0.217784
+        },
+        "flags": [
+          "看向场景锚点被遮挡（首个遮挡 minecraft:stone_bricks@[3,64,14]）"
+        ]
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L05.png",
+        "bytes": 2401561,
+        "camera": [
+          18,
+          69,
+          2
+        ],
+        "yaw": 129.64417495714483,
+        "pitch": 16.240215887121224,
+        "image": {
+          "mean": 0.542834,
+          "stddev": 0.244836
+        }
+      }
+    },
+    "L06": {
+      "levelId": "L06",
+      "create": {
+        "status": 201,
+        "createMs": 2446,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            13,
+            65,
+            20
+          ]
+        ],
+        "lookTarget": [
+          13,
+          65.5,
+          20
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          13,
+          65.5,
+          20
+        ],
+        "yaw": -149.03624346792648,
+        "pitch": 7.297143252197171
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L06.png",
+        "bytes": 1462759,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          8,
+          65,
+          12
+        ],
+        "eye": [
+          8.5,
+          66.62,
+          12.5
+        ],
+        "anchor": [
+          -24,
+          66.5,
+          0
+        ],
+        "lookTarget": [
+          13,
+          65.5,
+          20
+        ],
+        "yaw": -149.03624346792648,
+        "pitch": 7.297143252197171,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:barrel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "taka",
+            "pos": [
+              10,
+              65,
+              20
+            ],
+            "distance": 8.246211251235321
+          },
+          {
+            "id": "llama-a",
+            "pos": [
+              3,
+              65,
+              20
+            ],
+            "distance": 9.433981132056603
+          },
+          {
+            "id": "llama-b",
+            "pos": [
+              13,
+              65,
+              20
+            ],
+            "distance": 9.433981132056603
+          },
+          {
+            "id": "donkey",
+            "pos": [
+              15,
+              65,
+              22
+            ],
+            "distance": 12.206555615733702
+          },
+          {
+            "id": "eira",
+            "pos": [
+              16,
+              65,
+              22
+            ],
+            "distance": 12.806248474865697
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": {
+            "pos": [
+              11,
+              65,
+              18
+            ],
+            "block": "minecraft:chest"
+          },
+          "solidCount": 3,
+          "occluded": true
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 0,
+          "ratio": 0
+        },
+        "image": {
+          "mean": 0.464479,
+          "stddev": 0.225102
+        },
+        "flags": [
+          "看向场景锚点被遮挡（首个遮挡 minecraft:chest@[11,65,18]）"
+        ]
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L06.png",
+        "bytes": 2245065,
+        "camera": [
+          5,
+          70,
+          7
+        ],
+        "yaw": -149.03624346792648,
+        "pitch": 22.774054200109514,
+        "image": {
+          "mean": 0.535144,
+          "stddev": 0.23095
+        }
+      }
+    },
+    "L07": {
+      "levelId": "L07",
+      "create": {
+        "status": 201,
+        "createMs": 2282,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            -10,
+            65,
+            0
+          ],
+          [
+            -10,
+            65,
+            6
+          ],
+          [
+            -10,
+            65,
+            12
+          ]
+        ],
+        "lookTarget": [
+          -10,
+          65.5,
+          6
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          -10,
+          65.5,
+          6
+        ],
+        "yaw": 108.43494882292202,
+        "pitch": 5.778255691945891
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L07.png",
+        "bytes": 1556875,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          0,
+          65,
+          2
+        ],
+        "eye": [
+          0.5,
+          66.62,
+          2.5
+        ],
+        "anchor": [
+          5,
+          68.5,
+          3
+        ],
+        "lookTarget": [
+          -10,
+          65.5,
+          6
+        ],
+        "yaw": 108.43494882292202,
+        "pitch": 5.778255691945891,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:gravel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "allays",
+            "pos": [
+              -10,
+              65,
+              6
+            ],
+            "distance": 10.77032961426901
+          },
+          {
+            "id": "allay-2",
+            "pos": [
+              -6,
+              65,
+              14
+            ],
+            "distance": 13.416407864998739
+          },
+          {
+            "id": "eira",
+            "pos": [
+              4,
+              65,
+              18
+            ],
+            "distance": 16.492422502470642
+          },
+          {
+            "id": "allay-3",
+            "pos": [
+              18,
+              65,
+              10
+            ],
+            "distance": 19.697715603592208
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": null,
+          "solidCount": 0,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 1,
+          "ratio": 0.0625
+        },
+        "image": {
+          "mean": 0.49518,
+          "stddev": 0.229679
+        },
+        "flags": []
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L07.png",
+        "bytes": 2858247,
+        "camera": [
+          6,
+          70,
+          0
+        ],
+        "yaw": 108.43494882292202,
+        "pitch": 19.38570909277532,
+        "image": {
+          "mean": 0.512699,
+          "stddev": 0.235732
+        }
+      }
+    },
+    "L08": {
+      "levelId": "L08",
+      "create": {
+        "status": 201,
+        "createMs": 1933,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            0,
+            65,
+            8
+          ]
+        ],
+        "lookTarget": [
+          0,
+          65.5,
+          8
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          0,
+          65.5,
+          8
+        ],
+        "yaw": 177.70938995736148,
+        "pitch": 5.115960186107445
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L08.png",
+        "bytes": 1575293,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          0,
+          65,
+          -5
+        ],
+        "eye": [
+          0.5,
+          66.62,
+          -4.5
+        ],
+        "anchor": [
+          -12,
+          66.5,
+          10
+        ],
+        "lookTarget": [
+          0,
+          65.5,
+          8
+        ],
+        "yaw": 177.70938995736148,
+        "pitch": 5.115960186107445,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:polished_andesite",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "worker",
+            "pos": [
+              7,
+              65,
+              3
+            ],
+            "distance": 10.63014581273465
+          },
+          {
+            "id": "eira",
+            "pos": [
+              -4,
+              65,
+              6
+            ],
+            "distance": 11.704699910719626
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": null,
+          "solidCount": 0,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 0,
+          "ratio": 0
+        },
+        "image": {
+          "mean": 0.369367,
+          "stddev": 0.106073
+        },
+        "flags": []
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L08.png",
+        "bytes": 1815746,
+        "camera": [
+          0,
+          70,
+          -11
+        ],
+        "yaw": 178.45184230102205,
+        "pitch": 18.298537079640965,
+        "image": {
+          "mean": 0.361759,
+          "stddev": 0.120163
+        }
+      }
+    },
+    "L09": {
+      "levelId": "L09",
+      "create": {
+        "status": 201,
+        "createMs": 1862,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            10,
+            65,
+            7
+          ],
+          [
+            0,
+            65,
+            14
+          ]
+        ],
+        "lookTarget": [
+          5,
+          65.5,
+          10.5
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          5,
+          65.5,
+          10.5
+        ],
+        "yaw": -90,
+        "pitch": 13.976310666026937
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L09.png",
+        "bytes": 1057941,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          0,
+          65,
+          10
+        ],
+        "eye": [
+          0.5,
+          66.62,
+          10.5
+        ],
+        "anchor": [
+          0,
+          66.5,
+          3
+        ],
+        "lookTarget": [
+          5,
+          65.5,
+          10.5
+        ],
+        "yaw": -90,
+        "pitch": 13.976310666026937,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:gravel",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "eira",
+            "pos": [
+              0,
+              65,
+              6
+            ],
+            "distance": 4
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": {
+            "pos": [
+              3,
+              65,
+              10
+            ],
+            "block": "minecraft:stone_bricks"
+          },
+          "solidCount": 5,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 1,
+          "ratio": 0.0625
+        },
+        "image": {
+          "mean": 0.349592,
+          "stddev": 0.142361
+        },
+        "flags": []
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L09.png",
+        "bytes": 2588059,
+        "camera": [
+          -6,
+          70,
+          10
+        ],
+        "yaw": -90,
+        "pitch": 30.236076190856497,
+        "image": {
+          "mean": 0.375432,
+          "stddev": 0.147436
+        }
+      }
+    },
+    "L10": {
+      "levelId": "L10",
+      "create": {
+        "status": 201,
+        "createMs": 2281,
+        "state": "READY"
+      },
+      "focal": {
+        "source": "playerBeat",
+        "beats": [
+          [
+            12,
+            65,
+            0
+          ]
+        ],
+        "lookTarget": [
+          12,
+          65.5,
+          0
+        ]
+      },
+      "look": {
+        "lookTarget": [
+          12,
+          65.5,
+          0
+        ],
+        "yaw": 21.037511025421818,
+        "pitch": 9.136227610611849
+      },
+      "birth": {
+        "file": "evidence/scene-shots/hi-res/birth-L10.png",
+        "bytes": 879138,
+        "likelyLoadingOrBlocked": false,
+        "spawn": [
+          14,
+          65,
+          6
+        ],
+        "eye": [
+          14.5,
+          66.62,
+          6.5
+        ],
+        "anchor": [
+          14,
+          66.5,
+          0
+        ],
+        "lookTarget": [
+          12,
+          65.5,
+          0
+        ],
+        "yaw": 21.037511025421818,
+        "pitch": 9.136227610611849,
+        "spawnBlocks": {
+          "feet": "minecraft:air",
+          "head": "minecraft:air",
+          "below": "minecraft:moss_block",
+          "twoBelow": "minecraft:air"
+        },
+        "npcDistances": [
+          {
+            "id": "villager-2",
+            "pos": [
+              30,
+              65,
+              1
+            ],
+            "distance": 16.76305461424021
+          },
+          {
+            "id": "villager-0",
+            "pos": [
+              30,
+              65,
+              -1
+            ],
+            "distance": 17.46424919657298
+          },
+          {
+            "id": "villager-1",
+            "pos": [
+              31,
+              65,
+              0
+            ],
+            "distance": 18.02775637731995
+          },
+          {
+            "id": "villager-3",
+            "pos": [
+              31,
+              65,
+              -1
+            ],
+            "distance": 18.38477631085024
+          },
+          {
+            "id": "eira",
+            "pos": [
+              -4,
+              65,
+              2
+            ],
+            "distance": 18.439088914585778
+          }
+        ],
+        "npcInFront": [],
+        "occlusion": {
+          "sampled": 24,
+          "firstSolid": {
+            "pos": [
+              12,
+              65,
+              2
+            ],
+            "block": "minecraft:stone_bricks"
+          },
+          "solidCount": 6,
+          "occluded": false
+        },
+        "wallProximity": {
+          "probes": 16,
+          "solid": 1,
+          "ratio": 0.0625
+        },
+        "image": {
+          "mean": 0.505685,
+          "stddev": 0.210973
+        },
+        "flags": []
+      },
+      "hero": {
+        "file": "evidence/scene-shots/hi-res/hero-L10.png",
+        "bytes": 1011425,
+        "camera": [
+          16,
+          70,
+          12
+        ],
+        "yaw": 19.79887635452493,
+        "pitch": 24.733561385863936,
+        "image": {
+          "mean": 0.619903,
+          "stddev": 0.171997
+        }
+      }
+    }
+  },
+  "errors": [],
+  "plugin": {
+    "ok": true,
+    "plugin": "loomcraft-mc",
+    "version": "0.1.0",
+    "mc": "26.1.2",
+    "tick": 14038,
+    "phase": "ready",
+    "prepared": true,
+    "levelId": "L10",
+    "sessionId": "f5a08792-4f33-449d-b85d-521c7ada246b",
+    "epoch": 31,
+    "groundY": 65,
+    "bots": [
+      "ShotGolem"
+    ],
+    "npcs": [
+      "eira",
+      "villager-0",
+      "villager-1",
+      "villager-2",
+      "villager-3"
+    ],
+    "regionFrom": [
+      -8,
+      60,
+      -3
+    ],
+    "regionTo": [
+      36,
+      84,
+      9
+    ],
+    "agentSpawn": [
+      0,
+      65,
+      0
+    ],
+    "playerSpawn": [
+      14,
+      65,
+      6
+    ],
+    "center": [
+      14,
+      65,
+      3
+    ],
+    "tracked": 411,
+    "events": 0,
+    "checkpointSize": 1142,
+    "playerKit": {
+      "minecraft:lodestone": 4
+    },
+    "playerBeat": {
+      "sessionId": "f5a08792-4f33-449d-b85d-521c7ada246b",
+      "armed": true,
+      "active": false,
+      "hint": "手持合龙石，对准中央基座按右键",
+      "beats": [
+        {
+          "pos": [
+            12,
+            65,
+            0
+          ],
+          "block": "minecraft:lodestone",
+          "done": false
+        }
+      ],
+      "items": [
+        "minecraft:lodestone"
+      ],
+      "done": false,
+      "ok": true
+    },
+    "lastResetHash": "",
+    "lastResetMs": 0
+  },
+  "finishedAt": "2026-11-01T05:42:40.383Z"
+}

@@ -1,0 +1,874 @@
+{
+  "generatedAt": "2026-11-01T05:25:54.288Z",
+  "cases": [
+    {
+      "name": "empty",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 0,
+          "identifiers": []
+        },
+        "error": "源码为空"
+      }
+    },
+    {
+      "name": "plain calls",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 2,
+          "identifiers": [
+            "moveTo",
+            "place"
+          ]
+        }
+      }
+    },
+    {
+      "name": "variables",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 1,
+          "const": 1,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 1,
+          "template": 1,
+          "call": 1,
+          "identifiers": [
+            "banked",
+            "barrel",
+            "say"
+          ]
+        }
+      }
+    },
+    {
+      "name": "branch",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 1,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 2,
+          "identifiers": [
+            "moveTo",
+            "say",
+            "threat",
+            "vars"
+          ]
+        }
+      }
+    },
+    {
+      "name": "loop",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 1,
+          "if": 0,
+          "ternary": 0,
+          "for": 1,
+          "while": 1,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 3,
+          "identifiers": [
+            "cell",
+            "cells",
+            "collect",
+            "count",
+            "moveTo",
+            "perch"
+          ]
+        }
+      }
+    },
+    {
+      "name": "function",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 1,
+          "arrow": 1,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 1,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 2,
+          "identifiers": [
+            "list",
+            "map",
+            "pack"
+          ]
+        }
+      }
+    },
+    {
+      "name": "async",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 1,
+          "arrow": 0,
+          "async": 1,
+          "await": 2,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 3,
+          "identifiers": [
+            "moveTo",
+            "run",
+            "say"
+          ]
+        }
+      }
+    },
+    {
+      "name": "promise all",
+      "analysis": {
+        "ok": true,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 1,
+          "promiseCombinator": 1,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 3,
+          "identifiers": [
+            "all",
+            "moveTo",
+            "say"
+          ]
+        }
+      }
+    },
+    {
+      "name": "syntax error",
+      "analysis": {
+        "ok": false,
+        "shape": {
+          "let": 0,
+          "const": 0,
+          "if": 0,
+          "ternary": 0,
+          "for": 0,
+          "while": 0,
+          "function": 0,
+          "arrow": 0,
+          "async": 0,
+          "await": 0,
+          "promiseCombinator": 0,
+          "arrayMethod": 0,
+          "objectLiteral": 0,
+          "template": 0,
+          "call": 0,
+          "identifiers": []
+        },
+        "error": "')' expected."
+      }
+    }
+  ],
+  "audit": [
+    {
+      "level": "L01",
+      "abstractions": [
+        "A0",
+        "A1"
+      ],
+      "shape": {
+        "let": 0,
+        "const": 0,
+        "if": 0,
+        "ternary": 0,
+        "for": 0,
+        "while": 0,
+        "function": 0,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 8,
+        "identifiers": [
+          "moveTo",
+          "place"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": false
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "level": "L02",
+      "abstractions": [
+        "A2"
+      ],
+      "shape": {
+        "let": 0,
+        "const": 0,
+        "if": 0,
+        "ternary": 0,
+        "for": 0,
+        "while": 0,
+        "function": 0,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 26,
+        "identifiers": [
+          "moveTo",
+          "place",
+          "say"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": false
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "level": "L03",
+      "abstractions": [
+        "A3"
+      ],
+      "shape": {
+        "let": 0,
+        "const": 1,
+        "if": 4,
+        "ternary": 0,
+        "for": 0,
+        "while": 0,
+        "function": 0,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 45,
+        "identifiers": [
+          "gateOpen",
+          "moveTo",
+          "place",
+          "say",
+          "scenario",
+          "threat",
+          "trapped",
+          "vars"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": false
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": false
+        }
+      ]
+    },
+    {
+      "level": "L04",
+      "abstractions": [
+        "A4"
+      ],
+      "shape": {
+        "let": 9,
+        "const": 3,
+        "if": 3,
+        "ternary": 0,
+        "for": 3,
+        "while": 3,
+        "function": 0,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 17,
+        "identifiers": [
+          "cA",
+          "cB",
+          "cC",
+          "cols",
+          "fieldA",
+          "fieldB",
+          "fieldC",
+          "moveTo",
+          "place",
+          "rA",
+          "rB",
+          "rC",
+          "rows",
+          "say",
+          "seeds",
+          "seedsA",
+          "seedsB",
+          "seedsC",
+          "vars",
+          "waterRow"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "level": "L05",
+      "abstractions": [
+        "A5",
+        "A6"
+      ],
+      "shape": {
+        "let": 6,
+        "const": 13,
+        "if": 4,
+        "ternary": 0,
+        "for": 6,
+        "while": 0,
+        "function": 3,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 34,
+        "identifiers": [
+          "cell",
+          "cells",
+          "dx",
+          "dz",
+          "fifth",
+          "fourth",
+          "hutPlan",
+          "length",
+          "moveTo",
+          "place",
+          "plan",
+          "plan4",
+          "plan5",
+          "plot",
+          "plots",
+          "push",
+          "roofOf",
+          "say",
+          "slab",
+          "style",
+          "vars",
+          "wall",
+          "wallOf"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "level": "L06",
+      "abstractions": [
+        "A7",
+        "A8"
+      ],
+      "shape": {
+        "let": 7,
+        "const": 9,
+        "if": 5,
+        "ternary": 0,
+        "for": 0,
+        "while": 3,
+        "function": 1,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 18,
+        "identifiers": [
+          "boxes",
+          "cargo",
+          "cargoBox",
+          "food",
+          "foodSlot",
+          "id",
+          "item",
+          "job",
+          "jobs",
+          "kind",
+          "kindOf",
+          "length",
+          "materialSlot",
+          "materials",
+          "moveTo",
+          "needs",
+          "place",
+          "say",
+          "slot",
+          "station",
+          "supplyCount",
+          "toolCount",
+          "toolSlot",
+          "tools",
+          "trader",
+          "vars"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "level": "L07",
+      "abstractions": [
+        "A9",
+        "A10"
+      ],
+      "shape": {
+        "let": 9,
+        "const": 28,
+        "if": 7,
+        "ternary": 0,
+        "for": 2,
+        "while": 7,
+        "function": 0,
+        "arrow": 9,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 46,
+        "identifiers": [
+          "boxes",
+          "cargo",
+          "cell",
+          "filter",
+          "first",
+          "food",
+          "foodCount",
+          "foodStep",
+          "home",
+          "id",
+          "isFood",
+          "isOre",
+          "isWood",
+          "item",
+          "items",
+          "kind",
+          "length",
+          "makeRule",
+          "mapAll",
+          "moveTo",
+          "ore",
+          "oreCount",
+          "oreStep",
+          "out",
+          "pipe",
+          "place",
+          "placements",
+          "plan",
+          "planFood",
+          "planFor",
+          "planOre",
+          "planRecheckFood",
+          "planRecheckOre",
+          "planRecheckWood",
+          "planWood",
+          "push",
+          "recheck",
+          "recheckBoxes",
+          "recheckPlacements",
+          "say",
+          "second",
+          "slot",
+          "slots",
+          "test",
+          "value",
+          "vars",
+          "wood",
+          "woodCount",
+          "woodStep"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "level": "L08",
+      "abstractions": [
+        "A11"
+      ],
+      "shape": {
+        "let": 0,
+        "const": 14,
+        "if": 2,
+        "ternary": 4,
+        "for": 3,
+        "while": 0,
+        "function": 4,
+        "arrow": 0,
+        "async": 0,
+        "await": 0,
+        "promiseCombinator": 0,
+        "arrayMethod": 1,
+        "objectLiteral": 4,
+        "template": 0,
+        "call": 23,
+        "identifiers": [
+          "Machine",
+          "MachineSpec",
+          "Step",
+          "all",
+          "combine",
+          "combined",
+          "fleet",
+          "id",
+          "kind",
+          "lever",
+          "machineOf",
+          "machines",
+          "map",
+          "moveTo",
+          "ms",
+          "name",
+          "place",
+          "plan",
+          "pos",
+          "push",
+          "reverse",
+          "reversed",
+          "runAll",
+          "say",
+          "slice",
+          "spec",
+          "specs",
+          "standX",
+          "standZ",
+          "startSteps",
+          "status",
+          "step",
+          "steps",
+          "stopAll",
+          "stopSteps",
+          "switchPos",
+          "vars"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "level": "L09",
+      "abstractions": [
+        "A12"
+      ],
+      "shape": {
+        "let": 1,
+        "const": 11,
+        "if": 1,
+        "ternary": 1,
+        "for": 1,
+        "while": 0,
+        "function": 11,
+        "arrow": 0,
+        "async": 11,
+        "await": 33,
+        "promiseCombinator": 1,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 35,
+        "identifiers": [
+          "Error",
+          "Pos",
+          "Record",
+          "Stand",
+          "all",
+          "backup",
+          "bell",
+          "brewStands",
+          "cage",
+          "cauldron",
+          "chest",
+          "dawn",
+          "id",
+          "ingredient",
+          "materials",
+          "moveTo",
+          "name",
+          "place",
+          "say",
+          "shelf",
+          "stand",
+          "stands",
+          "vars",
+          "交付",
+          "出坛",
+          "剩余",
+          "取苹果",
+          "右坛",
+          "安全酿",
+          "左坛",
+          "布置治愈",
+          "开酿",
+          "投料",
+          "报时",
+          "收尾",
+          "材料",
+          "用备方",
+          "走到",
+          "酿一坛",
+          "错误"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "level": "L10",
+      "abstractions": [
+        "A13"
+      ],
+      "shape": {
+        "let": 4,
+        "const": 15,
+        "if": 4,
+        "ternary": 0,
+        "for": 4,
+        "while": 0,
+        "function": 6,
+        "arrow": 0,
+        "async": 6,
+        "await": 24,
+        "promiseCombinator": 1,
+        "arrayMethod": 0,
+        "objectLiteral": 0,
+        "template": 0,
+        "call": 39,
+        "identifiers": [
+          "Error",
+          "agent",
+          "all",
+          "ceil",
+          "collect",
+          "count",
+          "deckY",
+          "gapStart",
+          "keystone",
+          "left",
+          "materialsBox",
+          "moveTo",
+          "place",
+          "receive",
+          "right",
+          "say",
+          "send",
+          "supply",
+          "text",
+          "vars",
+          "waitIdle",
+          "取到",
+          "右份额",
+          "右取料",
+          "右织开工",
+          "右铺桥",
+          "回话",
+          "块数",
+          "左份额",
+          "左取料",
+          "左织开工",
+          "左铺桥",
+          "木板",
+          "材料总数",
+          "桥面高度",
+          "缺口起点"
+        ]
+      },
+      "sampleRequirements": [
+        {
+          "id": "vars",
+          "text": "用变量",
+          "passed": true
+        },
+        {
+          "id": "loop",
+          "text": "用循环",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

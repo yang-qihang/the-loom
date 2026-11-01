@@ -6,15 +6,12 @@
  * 数值与教学意图以 content/levels/L04-wheat-spell.md 为准（A4 循环）：
  * 三块田都要先收残株、再种满（水渠整行跳过），种子不够时种到没种子就停，最后回谷仓。
  *
- * T1 MockWorld 学生面只有 golem.moveTo/place/say/pos 与只读 world.vars
- * （docs/21 §2；docs/12 的 world.field / golem.plant / harvest 尚未接线），所以本文件用
- * 「等价动作」实现：
- *   田的数据 = world.vars.fieldA / fieldB / fieldC（字段同 registry 的 Field：rows/cols/x/z/waterRow/seeds）
- *   收割    = 走到格子边 place("air", x, 65, z)
- *   种下    = 同一格 place("wheat_sprout", x, 65, z)
- *   放稻草人 = 玩家节拍：playerPlace("pumpkin", 稻草人位置)
- * 真实 Paper 版接线后，学生代码换成 world.field() / golem.harvest / golem.plant，
- * 田数据与判定不变。
+ * Round 2（docs/48）起学生面用**语义 API**：
+ *   收残株 = golem.harvest("wheat", [x, 65, z])（成熟麦收进背包；空格/非作物格 no-op）
+ *   种新麦 = golem.plant("wheat", [x, 65, z])（落下 wheat_sprout）
+ *   固定点名 = barn / scarecrow / fieldA..C / eira（沙箱全局常量）；田格坐标由 field 数据算出来
+ * 评分仍读 legacy 事件（harvest → place air、plant → place wheat_sprout），与旧版一致；
+ * 真实 Paper 版由 PaperWorldPort 的 RichAgentActions 映射到同一套事件。
  */
 import { defineLevel, type GraderApi, type LevelDef } from "../../packages/level-spec/src/index";
 import type { LevelContent } from "../../packages/worldport/src/index";
@@ -156,31 +153,32 @@ const matureOf = (g: GraderApi, key: (typeof MATURE)[number]): Pos[] => g.var(ke
 
 /** 内容层文案：错误点名行号与改哪个符号，不用「循环边界」这类黑话（FR-023/FR-024）。 */
 export const L04_COPY: ContentCopy = {
-  coordinateRule: "括号里的两个数是横着第几格、前后第几格；先写 moveTo 走到格子边，再写 place 收残株或下种。",
+  coordinateRule:
+    "田的位置固定，格子坐标是 `[a.x + 列, 65, a.z + 行]`；先 moveTo 走到那一格，再 harvest 收残株、plant 种新麦。行数、列数、水渠行、种子数都在 world.vars.fieldA 这类田数据里，不用数。",
   golemNote: "golem 就是灰崽：代码里写 golem，指的就是你身边这只织偶。",
   hints: [
-    "田多大不用数：问田地一句，它会报出行数和列数。",
-    "别把行数、列数写进代码；外层走行，内层走列，水渠那一行跳过。",
+    "田多大不用数：田地数据里就写着行数和列数。",
+    "别把行数、列数写进循环头里；外层走行，内层走列，水渠那一行跳过。",
     "种子不够时，用按条件停的循环来种，种到没种子就停下。",
   ],
   errors: [
     {
       line: 8,
-      reason: "第 8 行走多了一格：最后一格本来不用碰。",
-      fix: "把 <= 改成 <，再运行一次，看是不是刚好种满。照抄：",
-      sample: "for (let r = 0; r < f.rows; r++) {",
+      reason: "第 8 行走多了一格：r <= 会多跑一行，最后一格本来不用碰。",
+      fix: "把循环条件里的 <= 改成 <，再运行一次，看是不是刚好种满。照抄：",
+      sample: "for (let r = 0; r < a.rows; r++) {",
     },
     {
       line: 9,
       reason: "第 9 行把 5 固定住了：田换了大小就种得不对。",
-      fix: "行数用 f.rows，列数用 f.cols，它们会自己报数。照抄：",
-      sample: "for (let c = 0; c < f.cols; c++) {",
+      fix: "行数用 a.rows，列数用 a.cols，它们会自己报数。照抄：",
+      sample: "for (let c = 0; c < a.cols; c++) {",
     },
     {
       line: 10,
       reason: "第 10 行把种子下到了水渠里，那一行不能种。",
-      fix: "判断里跳过 f.waterRow 这一行。照抄：",
-      sample: "if (r !== f.waterRow) {",
+      fix: "判断里跳过 a.waterRow 这一行。照抄：",
+      sample: "if (r !== a.waterRow) {",
     },
     {
       line: 12,
@@ -190,19 +188,71 @@ export const L04_COPY: ContentCopy = {
     },
     {
       line: 13,
-      reason: "第 13 行少了先收残株这一步，成熟麦挡着种不下去。",
-      fix: "同一格先收掉残株，再放新麦苗。照抄：",
-      sample: 'golem.place("air", f.x + c, 65, f.z + r)',
+      reason: "第 13 行少了先收残株这一步：成熟麦挡着种不下去。",
+      fix: "同一格先 harvest 收掉残株，再 plant 新麦苗。照抄：",
+      sample: 'golem.harvest("wheat", [a.x + c, 65, a.z + r])',
     },
     {
       line: 20,
       reason: "第 20 行田种完了还没回谷仓。",
-      fix: "最后走到谷仓门口（-4, 14），就算收工。照抄：",
-      sample: "golem.moveTo(-4, 14)",
+      fix: "最后让灰崽走到谷仓（barn 就是谷仓的名字），就算收工。照抄：",
+      sample: "golem.moveTo(barn)",
     },
   ],
   timeout: "灰崽走了很久还没走完，八成是同一步在绕圈。按「重置」再来一遍，看看 r 有没有一步一步往前走。",
 };
+
+/**
+ * L04 场景关键坐标：vars 与命名点共用同一份，避免「面板一套、代码一套」。
+ * 田的尺寸随机，所以只有田的原点/谷仓/稻草人/艾拉是固定命名点；格子坐标由
+ * `a.x + 列`、`a.z + 行` 算出来（写成 [x, 65, z] 传给 harvest/plant）。
+ */
+const L04_BARN: Pos = [-4, 65, 14];
+const L04_SCARECROW: Pos = [14, 67, 26]; // 稻草人头顶（南瓜头空位）
+const L04_EIRA: Pos = [8, 65, 28];
+
+const L04_POINTS: Record<string, { pos: Pos; name: string }> = {
+  eira: { pos: L04_EIRA, name: "艾拉" },
+  barn: { pos: L04_BARN, name: "谷仓" },
+  scarecrow: { pos: L04_SCARECROW, name: "稻草人" },
+  fieldA: { pos: [FIELD_A.field.x, 65, FIELD_A.field.z], name: "东田" },
+  fieldB: { pos: [FIELD_B.field.x, 65, FIELD_B.field.z], name: "中田" },
+  fieldC: { pos: [FIELD_C.field.x, 65, FIELD_C.field.z], name: "西田" },
+};
+
+/**
+ * L04「名副其实」代码要求（docs/48 §1.9）：本关教「循环」。
+ * - 两层循环（行 × 列）重复同一组动作；
+ * - 循环里用 if 跳过水渠那一行；
+ * - 循环的次数跟着田走（条件里读 a.rows / a.cols，不是写死 5）。
+ * starter 只有写死 5×5 的两层 for、没有 if，三条里只满足第一条；参考解三条全满足。
+ */
+const CODE_REQUIREMENTS = [
+  {
+    id: "l04-loop",
+    text: "用 for 循环一层走行、一层走列，把整片田重复走完",
+    kind: "loop" as const,
+    min: 2,
+  },
+  {
+    id: "l04-branch",
+    text: "循环里用 if 跳过水渠那一行，别把种子丢进水里",
+    kind: "branch" as const,
+    min: 1,
+  },
+  {
+    id: "l04-dynamic-bound",
+    text: "循环的次数由田的大小决定：条件里读 a.rows / a.cols，不是写死的 5",
+    kind: "custom" as const,
+    test: (source: string): boolean => {
+      const code = source
+        .split("\n")
+        .map(line => line.replace(/\/\/.*$/, ""))
+        .join("\n");
+      return /(?:for|while)\s*\([^)]*<\s*[A-Za-z_$][\w$]*\s*\.\s*(?:rows|cols)/.test(code);
+    },
+  },
+];
 
 const L04_BASE: LevelDef = defineLevel({
   id: "L04",
@@ -239,9 +289,13 @@ const L04_BASE: LevelDef = defineLevel({
       matureCellsC: FIELD_C.matureCells.map(m => [...m]),
       challengeField: { ...CH.field },
       challengeMature: CH.matureCells.map(m => [...m]),
-      barn: [-4, 65, 14],
-      scarecrow: [14, 67, 26], // 稻草人头顶（南瓜头空位）：干草身体在 y65/66，玩家把南瓜放到这格
+      barn: L04_BARN,
+      scarecrow: L04_SCARECROW, // 稻草人头顶（南瓜头空位）：干草身体在 y65/66，玩家把南瓜放到这格
     },
+    // 命名点：barn / scarecrow / fieldA..C / eira 直接可写；田的格子坐标由 field 数据算出来。
+    points: L04_POINTS,
+    // 玩家出生点：农道旁的田埂上朝北，能看到东/中两块田与谷仓；不在田格逻辑层里。
+    playerSpawn: [12, 65, 8],
     entities: [
       { type: "golem", role: "agent", id: "golem", name: "灰崽" },
       { type: "villager", role: "npc", id: "eira", name: "艾拉" },
@@ -250,21 +304,22 @@ const L04_BASE: LevelDef = defineLevel({
   code: {
     expectedLoc: 56,
     starterCode: `// 三块田的数据在 world.vars.fieldA / fieldB / fieldC 里（行数、列数、水渠行、种子数都在里面）。
-// 每格的活：先 golem.place("air", x, 65, z) 收掉残株，再 golem.place("wheat_sprout", x, 65, z) 种下。
-
+// 每一格的活分两步：先收掉上一季的残株（golem.harvest），再种下新麦（golem.plant）。
+// 成熟麦的位置记在 world.vars.matureCellsA / matureCellsB / matureCellsC 里；空格不用收，harvest 不会报错。
+// 田的位置固定：第 r 行第 c 列的格子是 [a.x + c, 65, a.z + r]，先 moveTo 走过去再动手。
 // 现在只种了东田左上角一块固定的 5×5，另外两块田还没碰，也没先收残株。
 const a = world.vars.fieldA
 for (let r = 0; r < 5; r++) {
   for (let c = 0; c < 5; c++) {
     golem.moveTo(a.x + c, a.z + r)
-    golem.place("wheat_sprout", a.x + c, 65, a.z + r)
+    golem.plant("wheat", [a.x + c, 65, a.z + r])
   }
 }
 
-// 东田还没种对：行数和列数要读 a.rows、a.cols，水渠那一行跳过，种子用完就停。
+// 东田还没种对：行数、列数要读 a.rows、a.cols，水渠那一行跳过，种子用完就停。
 // 中田、西田是同样的活：数据在 world.vars.fieldB 和 world.vars.fieldC 里。
-// 三块田都种完以后，回谷仓（-4, 14）报一报各种了多少格。
-golem.moveTo(-4, 14)
+// 三块田都种完以后，回谷仓（barn 就是谷仓的名字）报一报各种了多少格。
+golem.moveTo(barn)
 `,
     referenceSolution: `// 阶段一：东田——先收残株，再种新种；种子用完就停
 const a = world.vars.fieldA
@@ -274,8 +329,8 @@ while (rA < a.rows && seedsA > 0) {
   for (let cA = 0; cA < a.cols; cA++) {
     if (rA !== a.waterRow && seedsA > 0) {
       golem.moveTo(a.x + cA, a.z + rA)
-      golem.place("air", a.x + cA, 65, a.z + rA)
-      golem.place("wheat_sprout", a.x + cA, 65, a.z + rA)
+      golem.harvest("wheat", [a.x + cA, 65, a.z + rA])
+      golem.plant("wheat", [a.x + cA, 65, a.z + rA])
       seedsA = seedsA - 1
     }
   }
@@ -290,8 +345,8 @@ while (rB < b.rows && seedsB > 0) {
   for (let cB = 0; cB < b.cols; cB++) {
     if (rB !== b.waterRow && seedsB > 0) {
       golem.moveTo(b.x + cB, b.z + rB)
-      golem.place("air", b.x + cB, 65, b.z + rB)
-      golem.place("wheat_sprout", b.x + cB, 65, b.z + rB)
+      golem.harvest("wheat", [b.x + cB, 65, b.z + rB])
+      golem.plant("wheat", [b.x + cB, 65, b.z + rB])
       seedsB = seedsB - 1
     }
   }
@@ -306,8 +361,8 @@ while (rC < c.rows && seedsC > 0) {
   for (let cC = 0; cC < c.cols; cC++) {
     if (rC !== c.waterRow && seedsC > 0) {
       golem.moveTo(c.x + cC, c.z + rC)
-      golem.place("air", c.x + cC, 65, c.z + rC)
-      golem.place("wheat_sprout", c.x + cC, 65, c.z + rC)
+      golem.harvest("wheat", [c.x + cC, 65, c.z + rC])
+      golem.plant("wheat", [c.x + cC, 65, c.z + rC])
       seedsC = seedsC - 1
     }
   }
@@ -315,7 +370,7 @@ while (rC < c.rows && seedsC > 0) {
 }
 
 // 阶段四：回谷仓，报三块田各种了多少格
-golem.moveTo(-4, 14)
+golem.moveTo(barn)
 golem.say("东田：种下了 " + (a.seeds - seedsA) + " 格")
 golem.say("中田：种下了 " + (b.seeds - seedsB) + " 格")
 golem.say("西田：种下了 " + (c.seeds - seedsC) + " 格")
@@ -324,7 +379,7 @@ golem.say("三块田都收好种好了")
 // 收工前再走一遍东田的水渠，确认渠里没有种子
 golem.moveTo(a.x, a.z + a.waterRow)
 golem.say("东田水渠：干净")
-golem.moveTo(-4, 14)
+golem.moveTo(barn)
 `,
   },
   task: {
@@ -467,11 +522,15 @@ golem.moveTo(-4, 14)
       },
     ],
   },
+  // 「名副其实」：本关要求学生真的用循环（docs/48 §1.9）。
+  codeRequirements: CODE_REQUIREMENTS,
   // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值（南瓜节拍不占目标）。
   progress: [
     {
       id: "l04-harvest-first",
       text: "先收掉上一季留下的残株",
+      hint:
+        "每一格先收残株、再种新麦：`golem.harvest(\"wheat\", [x, 65, z])` 收掉成熟麦，`golem.plant(\"wheat\", [x, 65, z])` 种下新苗。成熟麦的位置记在 `world.vars.matureCellsA` 这类数据里；空格 harvest 不会报错。顺序不能反：先 plant 的话，成熟麦那格会被挡住。",
       check: g => {
         const airs = agentPlaces(g, "air");
         const sprouts = agentPlaces(g, "wheat_sprout");
@@ -488,6 +547,8 @@ golem.moveTo(-4, 14)
     {
       id: "l04-planted-full",
       text: "把能种的地方都种满",
+      hint:
+        "田的尺寸不要在代码里写死：行数读 `a.rows`、列数读 `a.cols`，水渠那一行（`a.waterRow`）用 if 跳过。格子坐标是 `[a.x + 列, 65, a.z + 行]`：先 `golem.moveTo(a.x + 列, a.z + 行)` 走过去，再 `golem.plant(\"wheat\", [a.x + 列, 65, a.z + 行])`；种子用完就停（外层循环条件写 `seeds > 0`）。三块田的写法一样，只是数据换成 fieldB、fieldC。",
       check: g => {
         let plantedAll = 0;
         let expectedAll = 0;
@@ -507,9 +568,16 @@ golem.moveTo(-4, 14)
     {
       id: "l04-home",
       text: "种完以后回到谷仓",
+      hint:
+        "三块田都种完以后，让灰崽走回谷仓门口：`golem.moveTo(barn)`——barn 就是谷仓的名字，指令手册里能查到。最后别忘了报一报每块田种了多少格，再点「运行」；目标面板全部打勾就通关。",
       check: g => g.withinRadius(g.agent("golem"), { pos: pos(g.var("barn")) }, 5),
     },
   ],
+  narrative: {
+    opening: ["雨一直下，上一季的麦子还在地里；再拖，冬天就没粮。", "先收残株，再把能种的地方种满，最后回谷仓。", "田一年比一年大：用写的次数追田永远追不上，得让循环替你数格子。"],
+    worldState: "三块田的尺寸每季都在变，水渠的位置也不一样。",
+    whyYou: "把「每一格」写成「每一行、每一列」，田多大，循环就跑多久。",
+  },
   phases: ["东中西三块田", "回谷仓复查"],
 });
 
@@ -536,14 +604,14 @@ while (r < f.rows && seeds > 0) {
   for (let col = 0; col < f.cols; col++) {
     if (r !== f.waterRow && r !== f.waterRow2 && seeds > 0) {
       golem.moveTo(f.x + col, f.z + r)
-      golem.place("air", f.x + col, 65, f.z + r)
-      golem.place("wheat_sprout", f.x + col, 65, f.z + r)
+      golem.harvest("wheat", [f.x + col, 65, f.z + r])
+      golem.plant("wheat", [f.x + col, 65, f.z + r])
       seeds = seeds - 1
     }
   }
   r = r + 1
 }
-golem.moveTo(-4, 14)
+golem.moveTo(barn)
 golem.say("挑战田：两行水渠都让开了")
 `,
   check: g => {

@@ -8,6 +8,9 @@ DEST="$ROOT/apps/desktop/src-tauri/runtime/real"
 PAPER_SRC="${LOOM_PAPER_DIR:-$ROOT/it/.mc-server}"
 JAVA_HOME_SRC="${LOOM_JAVA_HOME:-$HOME/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/java/java-runtime-epsilon}"
 NODE_BIN="${LOOM_NODE_BIN:-$(command -v node)}"
+# 构建机沙箱：~/.gradle 只读，默认用工作区内的可写副本（可用环境变量覆盖）。
+export GRADLE_USER_HOME="${GRADLE_USER_HOME:-$ROOT/tmp/plugin-work/gradle-home}"
+mkdir -p "$GRADLE_USER_HOME"
 
 [ -f "$PAPER_SRC/paper.jar" ] || { echo "缺少 $PAPER_SRC/paper.jar" >&2; exit 2; }
 [ -x "$JAVA_HOME_SRC/bin/java" ] || { echo "缺少 Java runtime：$JAVA_HOME_SRC（用 LOOM_JAVA_HOME 覆盖）" >&2; exit 2; }

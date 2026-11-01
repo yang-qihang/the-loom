@@ -37,6 +37,47 @@ export interface ProgressStep {
   text: string;
   check: (g: GraderApi) => boolean;
   player?: boolean;
+  /**
+   * 这一步的详细引导（2–4 句）：怎样才算完成、可以照抄的写法、坐标从哪来。
+   * 会话在失败/完成时按此向游戏内 actionbar 与 Studio 教练卡推送（docs/48 §1.4）。
+   */
+  hint?: string;
+}
+
+/** 代码要求的判定种类（由 runner 的 AST 分析器实现；content 只写声明式数据，浏览器打包安全）。 */
+export type CodeRequirementKind =
+  | "calls"
+  | "variables"
+  | "mutable-variable"
+  | "branch"
+  | "loop"
+  | "function"
+  | "object"
+  | "higher-order"
+  | "async"
+  | "promise-combinator"
+  | "template"
+  | "custom";
+
+/** 代码要求：关卡声明「必须真的用到的抽象」，会话在 verify 时用 AST 统计逐条判定。 */
+export interface CodeRequirement {
+  id: string;
+  text: string;
+  kind: CodeRequirementKind;
+  /** 数量下限（calls/variables/function 等，默认见 runner 的实现）。 */
+  min?: number;
+  /** 额外说明（可给学生看的原因）。 */
+  detail?: string;
+  /** 自定义判定（仅 Node 侧可用；content 优先用 kind，避免浏览器打包 typescript）。 */
+  test?: (source: string) => boolean;
+}
+
+/** 关卡声明的命名坐标点：注入沙箱为同名全局常量（如 eira、barrel），并显示在指令手册/HUD。 */
+export interface NamedPoint {
+  /** 世界坐标 [x, y, z]（y 用于 place/collect 的目标高度；moveTo 只用 x/z）。 */
+  pos: [number, number, number];
+  /** 学生可见名字（如「艾拉」「木桶」）。 */
+  name: string;
 }
 
 export interface ProgressResult {
@@ -72,6 +113,13 @@ export interface LevelDef {
   world: {
     vars: Record<string, unknown>;
     entities: Array<{ type: string; role: string; id?: string; name?: string }>;
+    /** 命名坐标点（docs/48 §1.1）：键名即沙箱全局变量名。 */
+    points?: Record<string, NamedPoint>;
+    /**
+     * 玩家出生点（真人视角第一人称起点，docs/48 §1.8）：不应与 agentSpawn 重合、不应在方块里/贴脸 NPC。
+     * 引擎 deriveLayout 的优先级：PAPER_SCENE_HINTS.playerSpawn > world.playerSpawn > arena 中心。
+     */
+    playerSpawn?: [number, number, number];
   };
   code: { starterCode: string; referenceSolution: string; expectedLoc: number };
   task: {
@@ -85,6 +133,12 @@ export interface LevelDef {
   };
   /** 玩家可见的任务进度（≤3 条；Studio 目标面板按此逐条打勾）。 */
   progress?: ProgressStep[];
+  /**
+   * 「名副其实」代码要求（docs/48 §1.9）：本关必须真的用到的编程抽象，按学生源码判定。
+   * 会话在 verify 时用 analyzeStudentCode 同时评估；结果并入可见 criteria（不满足则本关不通过）。
+   * id 稳定、text 面向学生（如「用 let 变量记住已经收了几枚」）。
+   */
+  codeRequirements?: CodeRequirement[];
   /** 可跳过的挑战层：不计星，但必须有独立判定（docs/20 §3c）。 */
   challenge?: ChallengeDef;
   /** 引导（docs/25）：世界状态 / 三句开场 / 为什么是你。 */
@@ -197,8 +251,40 @@ export function evaluateProgress(level: LevelDef, snapshot: WorldSnapshot): Prog
 }
 
 /** Studio 渲染目标面板所需的最小视图（函数不能过 JSON）。 */
-export function progressView(level: LevelDef): Array<{ id: string; text: string; player: boolean }> {
-  return (level.progress ?? []).map(step => ({ id: step.id, text: step.text, player: step.player === true }));
+export function progressView(level: LevelDef): Array<{ id: string; text: string; player: boolean; hint?: string }> {
+  return (level.progress ?? []).map(step => ({
+    id: step.id,
+    text: step.text,
+    player: step.player === true,
+    ...(step.hint ? { hint: step.hint } : {}),
+  }));
+}
+
+/** 命名坐标点视图（含自动派生项），供引擎 / HUD / 指令手册使用。 */
+export function pointsView(level: LevelDef): Record<string, NamedPoint> {
+  const points: Record<string, NamedPoint> = { ...(level.world.points ?? {}) };
+  const vars = level.world.vars as Record<string, unknown>;
+  const asPos = (value: unknown): [number, number, number] | null =>
+    Array.isArray(value) && value.length === 3 && value.every(v => typeof v === "number")
+      ? [value[0] as number, value[1] as number, value[2] as number]
+      : null;
+  const fallback: Array<[string, string]> = [
+    ["eira", "艾拉"],
+    ["barrel", "木桶"],
+    ["bucket", "倒蛋位"],
+    ["barn", "谷仓"],
+    ["gate", "北门"],
+    ["well", "井"],
+    ["bell", "钟"],
+    ["keystone", "合龙石基座"],
+  ];
+  for (const [key, name] of fallback) {
+    if (!points[key]) {
+      const pos = asPos(vars[key]);
+      if (pos) points[key] = { pos, name };
+    }
+  }
+  return points;
 }
 
 const samePos = (a: number[] | undefined, b: number[]): boolean =>

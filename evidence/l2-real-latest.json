@@ -1,19 +1,19 @@
 {
  "task": "task-30 / T2-MC real L02 e2e",
  "level": "L02",
- "startedAt": "2026-11-01T04:36:52.850Z",
+ "startedAt": "2026-11-01T06:10:13.068Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem41",
+  "botName": "Golem29",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 49,
+   "tick": 114,
    "phase": "idle",
    "prepared": false,
    "levelId": "L01",
@@ -73,7 +73,7 @@
   "L02.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 2754,
+    "prepareMs": 2753,
     "scene": {
      "groundY": 65,
      "arena": {
@@ -89,9 +89,7 @@
       ]
      },
      "trackedCount": 1916,
-     "kit": [
-      "minecraft:egg"
-     ],
+     "kit": [],
      "agent": {
       "pos": [
        0,
@@ -109,7 +107,7 @@
   "L02.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "7c679a84-63c7-450f-9dfe-72c3a500f7c2",
+    "sessionId": "56df2806-0905-45e4-9317-b51d4e6751a3",
     "epoch": 1
    }
   },
@@ -117,11 +115,11 @@
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "7c679a84-63c7-450f-9dfe-72c3a500f7c2",
+     "sessionId": "56df2806-0905-45e4-9317-b51d4e6751a3",
      "epoch": 1
     },
     "second": {
-     "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+     "sessionId": "8f067b9c-ddcf-436a-8d27-7c68029640ca",
      "epoch": 2
     }
    }
@@ -169,7 +167,7 @@
   "L02.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 24257
+    "referenceRunMs": 18307
    }
   },
   "L02.report-equals-mock": {
@@ -239,22 +237,22 @@
    "ok": true,
    "detail": {
     "agentPlaces": 8,
-    "says": 5,
-    "blocks": 1915
+    "says": 1,
+    "blocks": 1910
    }
   },
   "L02.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 34,
-    "b": 33
+    "a": 32,
+    "b": 19
    }
   },
   "L02.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733",
-    "b": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733"
+    "a": "sha256:97d1c9570ff165c2f313d833c1f174b736a49017c956fd8d94c41e52222b7d76",
+    "b": "sha256:97d1c9570ff165c2f313d833c1f174b736a49017c956fd8d94c41e52222b7d76"
    }
   },
   "L02.reset-clears-events": {
@@ -328,24 +326,24 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "7c679a84-63c7-450f-9dfe-72c3a500f7c2",
+   "sessionId": "56df2806-0905-45e4-9317-b51d4e6751a3",
    "epoch": 1
   },
   "second": {
-   "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+   "sessionId": "8f067b9c-ddcf-436a-8d27-7c68029640ca",
    "epoch": 2
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 34,
-   "hash": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733",
-   "tick": 620,
-   "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+   "ms": 32,
+   "hash": "sha256:97d1c9570ff165c2f313d833c1f174b736a49017c956fd8d94c41e52222b7d76",
+   "tick": 568,
+   "sessionId": "8f067b9c-ddcf-436a-8d27-7c68029640ca",
    "epoch": 2,
-   "checkpointSize": 5431,
-   "restoredBlocks": 8,
+   "checkpointSize": 5430,
+   "restoredBlocks": 9,
    "removedEntities": 2,
    "playerKit": {
     "minecraft:cake": 8
@@ -353,12 +351,12 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 33,
-   "hash": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733",
-   "tick": 623,
-   "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+   "ms": 19,
+   "hash": "sha256:97d1c9570ff165c2f313d833c1f174b736a49017c956fd8d94c41e52222b7d76",
+   "tick": 571,
+   "sessionId": "8f067b9c-ddcf-436a-8d27-7c68029640ca",
    "epoch": 2,
-   "checkpointSize": 5431,
+   "checkpointSize": 5430,
    "restoredBlocks": 0,
    "removedEntities": 2,
    "playerKit": {
@@ -369,7 +367,7 @@
  "actions": [
   {
    "action": "moveTo(-16,10)",
-   "ms": 3583
+   "ms": 3579
   },
   {
    "action": "virtualPlace(minecraft:air@-16,65,10)",
@@ -393,23 +391,23 @@
   },
   {
    "action": "moveTo(-10,10)",
-   "ms": 700
+   "ms": 701
   },
   {
    "action": "virtualPlace(minecraft:air@-10,65,10)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "moveTo(1,-6)",
-   "ms": 3599
+   "ms": 3600
   },
   {
    "action": "virtualPlace(minecraft:egg@1,65,-6)",
-   "ms": 102
+   "ms": 100
   },
   {
    "action": "moveTo(-8,10)",
-   "ms": 3398
+   "ms": 3251
   },
   {
    "action": "virtualPlace(minecraft:air@-8,65,10)",
@@ -417,7 +415,7 @@
   },
   {
    "action": "moveTo(-6,10)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:air@-6,65,10)",
@@ -425,47 +423,15 @@
   },
   {
    "action": "moveTo(1,-6)",
-   "ms": 3400
+   "ms": 3399
   },
   {
-   "action": "virtualPlace(minecraft:egg@1,65,-6)",
+   "action": "virtualPlace(minecraft:egg@1,66,-6)",
    "ms": 50
   },
   {
-   "action": "moveTo(-16,12)",
-   "ms": 4150
-  },
-  {
-   "action": "say(孵蛋窝一：玻璃罩还在)",
-   "ms": 0
-  },
-  {
-   "action": "moveTo(-14,12)",
-   "ms": 88
-  },
-  {
-   "action": "say(孵蛋窝二：玻璃罩还在)",
-   "ms": 0
-  },
-  {
-   "action": "moveTo(-12,12)",
-   "ms": 739
-  },
-  {
-   "action": "say(孵蛋窝三：玻璃罩还在)",
-   "ms": 0
-  },
-  {
-   "action": "moveTo(-14,12)",
-   "ms": 90
-  },
-  {
-   "action": "say(三个孵蛋窝都还在)",
-   "ms": 0
-  },
-  {
    "action": "moveTo(0,6)",
-   "ms": 2890
+   "ms": 2000
   },
   {
    "action": "say(木桶里有 6 枚蛋)",
@@ -473,19 +439,19 @@
   },
   {
    "action": "reset",
-   "ms": 155
+   "ms": 149
   },
   {
    "action": "reset",
-   "ms": 50
+   "ms": 37
   },
   {
    "action": "reset",
-   "ms": 71
+   "ms": 62
   }
  ],
  "errors": [],
- "prepareMs": 2754,
+ "prepareMs": 2753,
  "scene": {
   "groundY": 65,
   "arena": {
@@ -501,9 +467,7 @@
    ]
   },
   "trackedCount": 1916,
-  "kit": [
-   "minecraft:egg"
-  ],
+  "kit": [],
   "agent": {
    "pos": [
     0,
@@ -516,7 +480,7 @@
    "hens"
   ]
  },
- "referenceRunMs": 24257,
+ "referenceRunMs": 18307,
  "snapshot": {
   "blocks": {
    "-24,64,-18": "minecraft:moss_block",
@@ -2430,18 +2394,19 @@
    "3,65,2": "minecraft:lantern",
    "2,65,6": "minecraft:campfire",
    "-4,65,8": "minecraft:flower_pot",
-   "1,65,-6": "minecraft:egg",
    "0,65,2": "minecraft:hay_block",
    "2,65,8": "minecraft:oak_fence",
+   "1,65,-6": "minecraft:egg",
    "4,66,-6": "minecraft:cake",
-   "0,65,6": "minecraft:air"
+   "0,65,6": "minecraft:air",
+   "1,66,-6": "minecraft:egg"
   },
   "agents": {
    "golem": {
     "pos": [
-     -1,
+     0,
      65,
-     7
+     4
     ]
    }
   },
@@ -2461,7 +2426,7 @@
     ]
    }
   },
-  "sayCount": 5,
+  "sayCount": 1,
   "agentPlaceCount": 8,
   "playerPlaceCount": 1,
   "eventTypes": [
@@ -2471,6 +2436,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-11-01T04:37:21.883Z",
+ "finishedAt": "2026-11-01T06:10:36.128Z",
  "ok": true
 }

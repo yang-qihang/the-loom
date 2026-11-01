@@ -1,0 +1,586 @@
+{
+  "levels": {
+    "L01": {
+      "spawn": [
+        2,
+        11,
+        4
+      ],
+      "golemSpawn": [
+        0,
+        11,
+        0
+      ],
+      "spawnToGolem": 4.47213595499958,
+      "npcs": [
+        {
+          "id": "villager-1",
+          "pos": [
+            2,
+            11,
+            2
+          ],
+          "d": 2
+        },
+        {
+          "id": "eira",
+          "pos": [
+            0,
+            11,
+            6
+          ],
+          "d": 2.83
+        },
+        {
+          "id": "villager-0",
+          "pos": [
+            -2,
+            11,
+            -4
+          ],
+          "d": 8.94
+        },
+        {
+          "id": "villager-2",
+          "pos": [
+            -2,
+            11,
+            18
+          ],
+          "d": 14.56
+        }
+      ],
+      "spawnBlocks": {
+        "2,11,4": "minecraft:air",
+        "2,12,4": "minecraft:air",
+        "2,10,4": "minecraft:gravel"
+      },
+      "groundY": 11,
+      "region": [
+        [
+          -26,
+          9,
+          -12
+        ],
+        [
+          12,
+          20,
+          32
+        ]
+      ]
+    },
+    "L02": {
+      "spawn": [
+        0,
+        65,
+        0
+      ],
+      "golemSpawn": [
+        0,
+        65,
+        0
+      ],
+      "spawnToGolem": 0,
+      "npcs": [
+        {
+          "id": "eira",
+          "pos": [
+            0,
+            65,
+            6
+          ],
+          "d": 6
+        },
+        {
+          "id": "hens",
+          "pos": [
+            -11,
+            65,
+            13
+          ],
+          "d": 17.03
+        }
+      ],
+      "spawnBlocks": {
+        "0,65,0": "minecraft:air",
+        "0,66,0": "minecraft:air",
+        "0,64,0": "minecraft:cobblestone"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -32,
+          60,
+          -32
+        ],
+        [
+          32,
+          80,
+          32
+        ]
+      ]
+    },
+    "L03": {
+      "spawn": [
+        0,
+        65,
+        12
+      ],
+      "golemSpawn": [
+        0,
+        65,
+        3
+      ],
+      "spawnToGolem": 9,
+      "npcs": [
+        {
+          "id": "eira",
+          "pos": [
+            0,
+            65,
+            6
+          ],
+          "d": 6
+        },
+        {
+          "id": "guard",
+          "pos": [
+            3,
+            65,
+            3
+          ],
+          "d": 9.49
+        }
+      ],
+      "spawnBlocks": {
+        "0,65,12": "minecraft:air",
+        "0,66,12": "minecraft:air",
+        "0,64,12": "minecraft:gravel"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -40,
+          55,
+          -40
+        ],
+        [
+          40,
+          85,
+          40
+        ]
+      ]
+    },
+    "L04": {
+      "spawn": [
+        12,
+        65,
+        8
+      ],
+      "golemSpawn": [
+        8,
+        65,
+        -10
+      ],
+      "spawnToGolem": 18.439088914585778,
+      "npcs": [
+        {
+          "id": "eira",
+          "pos": [
+            8,
+            65,
+            28
+          ],
+          "d": 20.4
+        }
+      ],
+      "spawnBlocks": {
+        "12,65,8": "minecraft:air",
+        "12,66,8": "minecraft:air",
+        "12,64,8": "minecraft:hay_block"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -16,
+          55,
+          -24
+        ],
+        [
+          40,
+          85,
+          40
+        ]
+      ]
+    },
+    "L05": {
+      "spawn": [
+        13,
+        64,
+        6
+      ],
+      "golemSpawn": [
+        20,
+        64,
+        6
+      ],
+      "spawnToGolem": 7,
+      "npcs": [
+        {
+          "id": "mason",
+          "pos": [
+            16,
+            64,
+            4
+          ],
+          "d": 3.61
+        },
+        {
+          "id": "eira",
+          "pos": [
+            22,
+            65,
+            8
+          ],
+          "d": 9.27
+        },
+        {
+          "id": "carpenter",
+          "pos": [
+            2,
+            64,
+            4
+          ],
+          "d": 11.18
+        },
+        {
+          "id": "apprentice",
+          "pos": [
+            26,
+            64,
+            -4
+          ],
+          "d": 16.4
+        }
+      ],
+      "spawnBlocks": {
+        "13,64,6": "minecraft:air",
+        "13,65,6": "minecraft:air",
+        "13,63,6": "minecraft:gravel"
+      },
+      "groundY": 64,
+      "region": [
+        [
+          -18,
+          55,
+          -26
+        ],
+        [
+          44,
+          85,
+          22
+        ]
+      ]
+    },
+    "L06": {
+      "spawn": [
+        8,
+        65,
+        12
+      ],
+      "golemSpawn": [
+        9,
+        65,
+        26
+      ],
+      "spawnToGolem": 14.0356688476182,
+      "npcs": [
+        {
+          "id": "taka",
+          "pos": [
+            10,
+            65,
+            20
+          ],
+          "d": 8.25
+        },
+        {
+          "id": "llama-a",
+          "pos": [
+            3,
+            65,
+            20
+          ],
+          "d": 9.43
+        },
+        {
+          "id": "llama-b",
+          "pos": [
+            13,
+            65,
+            20
+          ],
+          "d": 9.43
+        },
+        {
+          "id": "donkey",
+          "pos": [
+            15,
+            65,
+            22
+          ],
+          "d": 12.21
+        }
+      ],
+      "spawnBlocks": {
+        "8,65,12": "minecraft:air",
+        "8,66,12": "minecraft:air",
+        "8,64,12": "minecraft:barrel"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -16,
+          55,
+          -4
+        ],
+        [
+          32,
+          85,
+          28
+        ]
+      ]
+    },
+    "L07": {
+      "spawn": [
+        0,
+        65,
+        2
+      ],
+      "golemSpawn": [
+        0,
+        65,
+        24
+      ],
+      "spawnToGolem": 22,
+      "npcs": [
+        {
+          "id": "allays",
+          "pos": [
+            -10,
+            65,
+            6
+          ],
+          "d": 10.77
+        },
+        {
+          "id": "allay-2",
+          "pos": [
+            -6,
+            65,
+            14
+          ],
+          "d": 13.42
+        },
+        {
+          "id": "eira",
+          "pos": [
+            4,
+            65,
+            18
+          ],
+          "d": 16.49
+        },
+        {
+          "id": "allay-3",
+          "pos": [
+            18,
+            65,
+            10
+          ],
+          "d": 19.7
+        }
+      ],
+      "spawnBlocks": {
+        "0,65,2": "minecraft:air",
+        "0,66,2": "minecraft:air",
+        "0,64,2": "minecraft:gravel"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -42,
+          55,
+          -40
+        ],
+        [
+          42,
+          85,
+          44
+        ]
+      ]
+    },
+    "L08": {
+      "spawn": [
+        0,
+        65,
+        -5
+      ],
+      "golemSpawn": [
+        0,
+        65,
+        0
+      ],
+      "spawnToGolem": 5,
+      "npcs": [
+        {
+          "id": "worker",
+          "pos": [
+            7,
+            65,
+            3
+          ],
+          "d": 10.63
+        },
+        {
+          "id": "eira",
+          "pos": [
+            -4,
+            65,
+            6
+          ],
+          "d": 11.7
+        }
+      ],
+      "spawnBlocks": {
+        "0,65,-5": "minecraft:air",
+        "0,66,-5": "minecraft:air",
+        "0,64,-5": "minecraft:polished_andesite"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -24,
+          60,
+          -22
+        ],
+        [
+          24,
+          82,
+          12
+        ]
+      ]
+    },
+    "L09": {
+      "spawn": [
+        0,
+        65,
+        0
+      ],
+      "golemSpawn": [
+        0,
+        65,
+        0
+      ],
+      "spawnToGolem": 0,
+      "npcs": [
+        {
+          "id": "eira",
+          "pos": [
+            0,
+            65,
+            6
+          ],
+          "d": 6
+        }
+      ],
+      "spawnBlocks": {
+        "0,65,0": "minecraft:air",
+        "0,66,0": "minecraft:air",
+        "0,64,0": "minecraft:gravel"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -32,
+          60,
+          -32
+        ],
+        [
+          32,
+          80,
+          32
+        ]
+      ]
+    },
+    "L10": {
+      "spawn": [
+        14,
+        65,
+        3
+      ],
+      "golemSpawn": [
+        0,
+        65,
+        0
+      ],
+      "spawnToGolem": 14.317821063276352,
+      "npcs": [
+        {
+          "id": "villager-2",
+          "pos": [
+            30,
+            65,
+            1
+          ],
+          "d": 16.12
+        },
+        {
+          "id": "villager-0",
+          "pos": [
+            30,
+            65,
+            -1
+          ],
+          "d": 16.49
+        },
+        {
+          "id": "villager-1",
+          "pos": [
+            31,
+            65,
+            0
+          ],
+          "d": 17.26
+        },
+        {
+          "id": "villager-3",
+          "pos": [
+            31,
+            65,
+            -1
+          ],
+          "d": 17.46
+        }
+      ],
+      "spawnBlocks": {
+        "14,65,3": "minecraft:air",
+        "14,66,3": "minecraft:air",
+        "14,64,3": "minecraft:moss_block"
+      },
+      "groundY": 65,
+      "region": [
+        [
+          -8,
+          60,
+          -3
+        ],
+        [
+          36,
+          84,
+          9
+        ]
+      ]
+    }
+  }
+}

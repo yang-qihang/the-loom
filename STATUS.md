@@ -1,6 +1,23 @@
 # STATUS — 项目状态（Lead 维护，每个集成点更新）
 
-## 2026-11-01 试玩反馈修复（最新，v1.4）
+## 2026-11-01 Round 2（v1.5，已完成）
+
+第二轮试玩反馈的修复与增强已全部落地并终验，契约/验收清单与实施结果见 `docs/48-round2-guidance-api-visual-plan.md` §6。
+
+- **语义 API**：新增 `collect`/`deposit`/`count`/`harvest`/`plant`/`world.container`/`goTo`/`moveTo(point)`/`place(block, point)` 与命名坐标点（`LevelDef.world.points` → 沙箱全局常量 + `world.points`）；旧 `place("air")` 反例废弃，旧签名保留且评分事件语义完全一致（collect→air、deposit→item）。
+- **引导**：`ProgressStep.hint`（2–4 句：怎样算完成/可照抄写法/坐标从哪来），失败时进教练卡 + 游戏内 actionbar（每次失败 1 条、去重不刷屏）；指令手册（顶栏/教练卡/REPL 三入口，可开关/搜索/复制示例）；位置 HUD（灰崽/关键点/木桶计数，1s 轮询、页面隐藏暂停）。
+- **REPL**：试符台用当前关卡打开（不再跳回 L01），显示「当前关卡：X」，`help` 打开本关指令手册，命名点与 `golem.pos` 可读。
+- **概念揭晓**：结算/手记/织典按关揭示正式术语（L01 函数调用、L02 变量、L03 分支、L04 循环、L05 函数、L06 记录、L07 高阶函数、L08 接口、L09 异步、L10 协议），不回避专业术语。
+- **名实相符**：每关 `codeRequirements` + AST 分析器判定；starter 全不满足、参考解全满足；L02 参考解真用变量、L06 真用记录/switch、L07 真用 filter/map 流水线等。
+- **字体/Monaco**：嵌包 Maple Mono CN（OFL），代码与提示类 UI 统一（Zpix 仅装饰大标题）；Monaco 右键菜单不透明并中文化（根因：Monaco 0.57 默认 `useShadowDOM:true` 隔离主题 CSS，已设 `useShadowDOM:false`）。
+- **起始点/截图**：10 关 `world.playerSpawn` 落盘；修复 L02/L09「玩家出生与灰崽重合、镜头糊在模型体内」；真实 Minecraft 26.1.2 客户端高清重拍（2560×990 ×10 关，含 L10）替换 Studio 关卡素材与 report 证据；Studio UI DPR2 高清截图。
+- **文案政策**：自然中文 + 必要英文术语（`for` 循环、`let` 变量、`Promise.all`…），`check-copy --pure-zh --strict` 0 违规。
+
+**终验**：`tsc` 0；`npm test` 25 files / 235 tests；content 162 tests；`verify.sh` pass（仅 Round 1 遗留 `G-FRESH-READER` tracked warning）；Studio e2e 6/6 + local 2/2；guidance 隔离冒烟 42/42；monaco-font 22/22 + 桌面壳 8/8；真实 Paper e2e L01–L10 全 PASS；重新打包 AppImage（428MB）/ RPM（435MB，2026-11-01 14:13），包内已含新字体/引擎/插件/世界素材。证据：`evidence/playtest-fix/start-positions.md`、`evidence/scene-shots/hi-res/`、`evidence/ui-hires/`、`evidence/monaco-font-verify.json`、`evidence/code-analysis.json`、`apps/studio/public/world/`、`report/`。
+
+**已知边界**：真实 Paper 模式单会话（开 REPL 会 dispose 当前关卡会话，mock 无感）；L10 出生朝向看不到桥（素材用桥面机位并注明）；L03 钟本体在钟楼内不可见（对钟楼右键可完成）；`guard-tests` manifest drift 为 Round 1 前基线。
+
+## 2026-11-01 试玩反馈修复（v1.4，已完成）
 
 用户真实试玩反馈的 4 类问题已全部修复，并按「同类问题全关卡一次解决」落地（详见 `docs/46-playtest-fix-plan.md` §5）：
 

@@ -16,7 +16,7 @@ bash scripts/verify.sh --strict-content # 内容线测试失败也判红（默�
 
 | 层 | 内容 | 命令（verify.sh 内） | 失败判据 |
 |---|---|---|---|
-| l0 静态 | typecheck + 纯中文文案 gate + 测试 hash 冻结 | `npm run typecheck`、`scripts/check-copy.mjs --pure-zh`、`scripts/guard-tests.mjs --check --warn` | typecheck 非 0；copy 默认告警，`--strict-copy` 判红 |
+| l0 静态 | typecheck + 文案 gate（自然中文 + 术语白名单）+ 测试 hash 冻结 | `npm run typecheck`、`scripts/check-copy.mjs --pure-zh`、`scripts/guard-tests.mjs --check --warn` | typecheck 非 0；copy 默认告警，`--strict-copy` 判红 |
 | l1 单测 | `packages/**` vitest（content 测试归 l3） | `npx vitest run packages` | 任一测试失败 |
 | l2 契约 | 关卡 meta + WorldSnapshot/WorldEvent/评分报告 schema | `npx tsx qa/spec-check.mjs`、`npx tsx qa/contract-check.mjs` | meta/schema 失败 |
 | l3 内容验收 | L01 MockWorld 全流程 + `content/levels/*.test.ts` | `npx tsx qa/content-check.mjs`、（有 tests 时）`npx vitest run --config qa/vitest.content.config.ts` | reference 非 3 星 / starter 通过（content 测试默认告警，`--strict-content` 判红） |
@@ -31,7 +31,7 @@ node scripts/check-copy.mjs --json qa/evidence/qa-copy.json [--strict]
 ```
 
 
-## 2b. 纯中文 UI 文案 lint（docs/20 §3b）
+## 2b. UI 文案 lint：自然中文 + 必要英文术语（docs/20 §3b，2026-11-01 更新）
 
 ```bash
 npx tsx scripts/check-copy.mjs --pure-zh --json qa/evidence/qa-copy.json   # 报告
@@ -40,12 +40,12 @@ npx tsx scripts/check-copy.mjs --self-test                                # 分�
 ```
 
 - 扫描源：`apps/studio/src/copy/*.json` + `content/levels/*.content.ts` 的 LevelDef 叙述字段 + `packages/level-spec` 的 L01 常量。
-- 规则：叙述串里连续拉丁字母（≥2）→ FAIL；豁免：反引号代码引用、代码标识符/表达式、文件名/路径、行号、CLI 命令、模板占位符、按键名、品牌名（与「织界」并列）。
+- 规则（2026-11-01 放宽）：叙述串里连续拉丁字母（≥2）→ 检查是否属于：反引号代码引用、代码标识符/表达式、文件名/路径、行号、CLI 命令、模板占位符、按键名、品牌名、**计算机术语白名单 `TECHNICAL_TERMS`（`for`/`let`/`Promise.all`/`async`/`closure`/`higher-order`/`interface` 等）**、**「中文名（English term）」中英并列**；否则 FAIL。UI 英文标签仍 FAIL。自测 `node scripts/check-copy.mjs --self-test` = 14/14。
 - 专有名词：`Minecraft` / `TypeScript` 必须带中文解释（`Minecraft（我的世界）`）才放行；UI 英文标签 `Run/Stop/Reset/Level/Objective/Coach/Result/Mock` 直接 FAIL。
 - 已接入 `scripts/verify.sh` l0：默认**告警不阻塞**；`--strict-copy` 时违规判红。证据里的 `proofOnHead` 用 git HEAD 快照验证检测器（不参与门禁）。
 
 
-### 2b.1 纯中文扫描结果（2026-10-31 13:24 快照，保留作历史）
+### 2b.1 文案扫描结果（2026-10-31 13:24 快照，保留作历史）
 
 > 最新：`qa/evidence/qa-copy.json` 当前 **0 违规**（0 FAIL / 0 WARN），G-PURE-ZH pass。以下为当时快照，勿当现状引用。
 

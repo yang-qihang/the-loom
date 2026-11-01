@@ -5,16 +5,12 @@
  * 散线（让东西忘记自己是啥的灰白线头）、织者之印（只有活人手能完成的最后一步）。
  * 数值与教学意图以 content/levels/L03-bell-at-dusk.md 为准（A3 分支）。
  *
- * T1 MockWorld 学生面只有 golem.moveTo/place/say/pos 与只读 world.vars
- * （docs/21 §2；docs/12 的 world.scenario / countEntities / ringBell / placeTorch 尚未接线），
- * 因此本文件用「等价动作」实现：
- *   今晚剧本 = world.vars.scenario（字段同 registry 的 Scenario：threat/trapped/gateOpen）
- *   敲钟    = 走到钟边 place("bell", 钟坐标)（真实 MC 里是 golem.ringBell()）
- *   点火把  = 走到暗处 place("torch", 坐标)（真实 MC 里是 golem.placeTorch(x, z)）
- *   堵北门  = 走到门口 place("cobblestone", 门坐标)
- *   敲晨钟  = 玩家节拍：playerPlace("bell", 钟坐标)（actorType=player，不算守夜钟声）
- * 真实 Paper 版接线后，学生代码换成 world.scenario / golem.ringBell / golem.placeTorch，
- * 剧本数据与判定不变。
+ * Round 2（docs/48）起学生面用**命名点**：bell / well / gate / door / eastWall / eira /
+ * lamp1..8 / house1..4 直接是沙箱全局常量，学生写 `golem.moveTo(well)`、
+ * `golem.place("bell", bell)`，不用从面板上抄坐标。
+ * 敲钟/点火把/堵门仍是「走到点上再放方块」的等价动作（ringBell/placeTorch 尚未接线），
+ * 评分真值与 legacy block.place 事件不变：钟声只认 agent 在钟格放的 bell；火把要落在
+ * 灯柱格与人家门口格；北门格变圆石即「堵上」。
  */
 import { defineLevel, type GraderApi, type LevelDef } from "../../packages/level-spec/src/index";
 import type { LevelContent } from "../../packages/worldport/src/index";
@@ -49,14 +45,15 @@ const scenarioOf = (g: GraderApi): Scenario => g.var("scenario") as Scenario;
 
 /** 内容层文案：剧本卡统一叫「上面三张卡」，入口统一写「运行」，铁傀儡不是灰崽（FR-020/021/022）。 */
 export const L03_COPY: ContentCopy = {
-  coordinateRule: "括号里的两个数是横着第几格、前后第几格；先写 moveTo 让灰崽走过去，再用 place 放灯或敲钟。",
+  coordinateRule:
+    "名字优先：钟是 bell、井是 well、北门是 gate、村口大门是 door、艾拉是 eira；八根灯柱是 lamp1 到 lamp8，四户人家门口是 house1 到 house4。先 moveTo 走过去，再用 place 放东西，坐标都在指令手册里。",
   golemNote: "golem 就是灰崽：代码里写 golem，指的就是你身边这只织偶；铁傀儡不是灰崽，它是村里的守卫。",
   cards: { title: "接下来三夜的剧本", headers: ["第 1 夜（今晚）", "第 2 夜", "第 3 夜"] },
   entry: "写完点底部的「运行」，开始这三夜的试炼。",
   hints: [
-    "先看上面三张卡：哪一夜有威胁？哪一夜有人被困？北门开着吗？",
-    "三种夜对应三个分支：有人被困、有僵尸、什么都没有。",
-    "救人的分支里，先问有没有僵尸，再去井边，最后把人带回门口。",
+    "先读上面三张剧本卡：s.trapped 是不是 true？s.threat 大于 0 吗？s.gateOpen 呢？",
+    "三种夜晚对应三段分支：if (s.trapped) / else if (s.threat > 0) / else；别每晚都做同一件事。",
+    "名字都在指令手册里：钟是 bell、井是 well、村口大门是 door、北门是 gate；救人先 moveTo(well) 再 moveTo(door)。",
   ],
   errors: [
     {
@@ -69,31 +66,31 @@ export const L03_COPY: ContentCopy = {
       line: 9,
       reason: "第 9 行条件写反了：有僵尸才敲钟，没有僵尸不该敲。",
       fix: "把 0 改成 1 以上的数，或者把比较反过来。照抄：",
-      sample: 'if (s.threat > 0) { golem.place("bell", 0, 65, 0) }',
+      sample: "if (s.threat > 0) {",
     },
     {
-      line: 11,
-      reason: "第 11 行少了引号：剧本里写的是字符串，要带引号。",
-      fix: "把 zombie 用英文双引号包起来。照抄：",
-      sample: 'if (s.threat > 0) {',
+      line: 10,
+      reason: "第 10 行名字写错了：钟叫 bell、井叫 well、北门叫 gate，手册里都能抄。",
+      fix: "照着指令手册把名字改对。照抄：",
+      sample: "golem.moveTo(bell)",
     },
     {
       line: 14,
-      reason: "第 14 行少了一段「不是这样就……」——代码里就是 else；安静的夜也要点亮暗处的灯。",
+      reason: "第 14 行少了一段「不是这样就……」——代码里就是 else；安静的夜也要有安排。",
       fix: "在 if 后面补一段 else，写安静夜要做的事。照抄：",
-      sample: '} else { golem.place("torch", -8, 65, 2) }',
+      sample: "} else {",
     },
     {
       line: 18,
-      reason: "第 18 行只走到门口：有人被困时，灰崽要先去井边，再把人带回门口。",
-      fix: "先去井边（-4, 18），再去门口（6, 22）。照抄：",
-      sample: "golem.moveTo(-4, 18)",
+      reason: "第 18 行只走到门口：有人被困时，要先到井边，再把人带回门口。",
+      fix: "先去 well，再去 door。照抄：",
+      sample: "golem.moveTo(well)",
     },
     {
       line: 22,
       reason: "第 22 行顺序反了：先救人，再敲钟，最后堵门。",
       fix: "把救人的那一段挪到最前面。照抄：",
-      sample: "golem.moveTo(6, 22)",
+      sample: "golem.moveTo(well)",
     },
   ],
   timeout: "灰崽走了很久还没走完，八成是同一步在绕圈。按「重置」再来一遍，看看哪一段被重复写了。",
@@ -132,6 +129,66 @@ export const L03_SCENE = {
   ],
 } as const;
 
+/**
+ * L03 场景关键坐标：vars 与命名点共用同一份，避免「面板一套、代码一套」。
+ * 命名点键名就是沙箱里的同名全局常量（docs/48 §1.1），学生写 moveTo(well)、place("bell", bell)。
+ */
+const L03_BELL: Pos = [0, 65, 0];
+const L03_GATE: Pos = [14, 65, -6];
+const L03_WELL: Pos = [-4, 65, 18];
+const L03_DOOR: Pos = [6, 65, 22];
+const L03_EAST_WALL: Pos = [22, 65, 2];
+const L03_EIRA: Pos = [0, 65, 6];
+/** 村口八根灯柱：夜里得有光，散线才退得慢。 */
+const L03_LAMPS: Pos[] = [
+  [-8, 65, 2],
+  [8, 65, 2],
+  [-14, 65, -2],
+  [14, 65, 2],
+  [-6, 65, 10],
+  [6, 65, 10],
+  [-12, 65, -8],
+  [12, 65, -8],
+];
+/** 四户人家的门口（夜里逐户送火把）。 */
+const L03_HOUSES: Pos[] = [
+  [-1, 65, 4],
+  [5, 65, 12],
+  [-6, 65, 8],
+  [10, 65, 14],
+];
+
+const L03_POINTS: Record<string, { pos: Pos; name: string }> = {
+  eira: { pos: L03_EIRA, name: "艾拉" },
+  bell: { pos: L03_BELL, name: "钟" },
+  well: { pos: L03_WELL, name: "井" },
+  gate: { pos: L03_GATE, name: "北门" },
+  door: { pos: L03_DOOR, name: "村口大门" },
+  eastWall: { pos: L03_EAST_WALL, name: "东墙散线" },
+  ...Object.fromEntries(L03_LAMPS.map((pos, index) => [`lamp${index + 1}`, { pos, name: `${index + 1} 号灯柱` }])),
+  ...Object.fromEntries(L03_HOUSES.map((pos, index) => [`house${index + 1}`, { pos, name: `${index + 1} 户人家门口` }])),
+};
+
+/**
+ * L03「名副其实」代码要求（docs/48 §1.9）：本关教「分支」。
+ * 三种夜晚对应三段分支（if / else if / else），starter 只写了一段 if，两处都不满足；
+ * 参考解 4 个 if（含 else if）满足。
+ */
+const CODE_REQUIREMENTS = [
+  {
+    id: "l03-branch",
+    text: "用 if 按今晚的剧本选做法：不是每晚都做同一件事",
+    kind: "branch" as const,
+    min: 1,
+  },
+  {
+    id: "l03-three-nights",
+    text: "三种夜晚都写到：if / else if / else 各一段，一个程序连过三夜",
+    kind: "branch" as const,
+    min: 3,
+  },
+];
+
 const L03_BASE: LevelDef = defineLevel({
   id: "L03",
   meta: {
@@ -161,17 +218,21 @@ const L03_BASE: LevelDef = defineLevel({
       scenarioIndex: 1,
       // RT-03：world.vars 是冻结只读副本，运行时数据必须在 def 里静态声明（测试克隆 def 换 scenario）
       scenario: { night: 2, threat: 3, trapped: false, gateOpen: false },
-      bell: [0, 65, 0],
-      gate: [14, 65, -6],
-      well: [-4, 65, 18],
-      door: [6, 65, 22],
-      eastWall: [22, 65, 2], // 第五夜（挑战）的第二处威胁
+      bell: L03_BELL,
+      gate: L03_GATE,
+      well: L03_WELL,
+      door: L03_DOOR,
+      eastWall: L03_EAST_WALL, // 第五夜（挑战）的第二处威胁
       // 村口八根灯柱：夜里得有光，散线才退得慢
-      lamps: [[-8, 65, 2], [8, 65, 2], [-14, 65, -2], [14, 65, 2], [-6, 65, 10], [6, 65, 10], [-12, 65, -8], [12, 65, -8]],
+      lamps: L03_LAMPS,
       // 四户人家的门（夜里逐户送火把）
-      houses: [[-1, 65, 4], [5, 65, 12], [-6, 65, 8], [10, 65, 14]],
-      eira: [0, 65, 6],
+      houses: L03_HOUSES,
+      eira: L03_EIRA,
     },
+    // 命名点：bell / well / gate / door / lamp1..8 / house1..4 / eira 直接可写，不用背坐标。
+    points: L03_POINTS,
+    // 玩家出生点：南侧主路上朝北，正对钟楼；不在钟楼结构里、不与灰崽出生点重合。
+    playerSpawn: [0, 65, 12],
     entities: [
       { type: "golem", role: "agent", id: "golem", name: "灰崽" },
       { type: "villager", role: "npc", id: "eira", name: "艾拉" },
@@ -180,92 +241,103 @@ const L03_BASE: LevelDef = defineLevel({
   code: {
     expectedLoc: 58,
     starterCode: `// 上面三张卡就是今晚的剧本：安静夜、北门有僵尸、井边有人被困。
-// 程序读到的，就是这三张卡写的事。
 // 铁傀儡不是灰崽：它是村里的守卫；灰崽是你写符文驱动的织偶。
-// 这张卡说的三件事，就是下面三个分支。
+// 剧本已经读进 s 里：s.trapped 表示有人被困，s.threat 表示威胁大小，s.gateOpen 表示北门开着。
 const s = world.vars.scenario
 
-// 今晚有威胁：先敲钟，再去北门守着
+// 这一关的点都有名字，指令手册里能查到：bell 是钟、well 是井、gate 是北门、door 是村口大门、eira 是艾拉。
+// 八根灯柱叫 lamp1 到 lamp8；四户人家的门口叫 house1 到 house4。
+// 走过去用 golem.moveTo(名字)，放东西用 golem.place(东西, 名字)。
+
+// 今晚有威胁：先走去敲钟，再去北门守着
 if (s.threat > 0) {
-  golem.place("bell", 0, 65, 0)
-  golem.moveTo(14, -6)
+  golem.moveTo(bell)
+  golem.place("bell", bell)
+  golem.moveTo(gate)
 }
 
-// 剩下两段你来补。
-// 有人被困的夜里，灰崽要先到井边，再把人带回门口。
-// 一个威胁都没有的夜里，把暗处的灯点亮，八根灯柱补齐。
+// 剩下两段你来补：
+// 有人被困的夜里（s.trapped 为 true），先到 well，再把人带到 door。
+// 既没有威胁、也没有人被困的夜里，不敲钟，把灯柱和人家门口补亮。
 // 最后从北门绕到井边、钟楼看一圈，回艾拉身边报平安。
 `,
     referenceSolution: `const s = world.vars.scenario
 
-// 阶段一：守夜——先看今晚是什么夜
+// 阶段一：守夜——先看今晚是什么夜，再决定做什么
 if (s.trapped) {
-  golem.moveTo(-4, 18)
-  golem.moveTo(6, 22)
+  // 有人被困：先救人，再敲钟，最后去北门
+  golem.moveTo(well)
+  golem.moveTo(door)
   if (s.threat > 0) {
-    golem.moveTo(0, 0)
-    golem.place("bell", 0, 65, 0)
+    golem.moveTo(bell)
+    golem.place("bell", bell)
   }
 } else if (s.threat > 0) {
-  golem.moveTo(0, 0)
-  golem.place("bell", 0, 65, 0)
-  golem.moveTo(14, -6)
+  // 有威胁：先敲钟，再去北门守着
+  golem.moveTo(bell)
+  golem.place("bell", bell)
+  golem.moveTo(gate)
+} else {
+  // 安静夜：不敲钟，走到钟楼下看看，把力气留给点灯
+  golem.moveTo(bell)
+  golem.say("安静夜：钟不响")
 }
 
 // 阶段二：把村口八根灯柱全部点亮
-golem.moveTo(-8, 2)
-golem.place("torch", -8, 65, 2)
-golem.moveTo(8, 2)
-golem.place("torch", 8, 65, 2)
-golem.moveTo(-14, -2)
-golem.place("torch", -14, 65, -2)
-golem.moveTo(14, 2)
-golem.place("torch", 14, 65, 2)
-golem.moveTo(-6, 10)
-golem.place("torch", -6, 65, 10)
-golem.moveTo(6, 10)
-golem.place("torch", 6, 65, 10)
-golem.moveTo(-12, -8)
-golem.place("torch", -12, 65, -8)
-golem.moveTo(12, -8)
-golem.place("torch", 12, 65, -8)
+golem.moveTo(lamp1)
+golem.place("torch", lamp1)
+golem.moveTo(lamp2)
+golem.place("torch", lamp2)
+golem.moveTo(lamp3)
+golem.place("torch", lamp3)
+golem.moveTo(lamp4)
+golem.place("torch", lamp4)
+golem.moveTo(lamp5)
+golem.place("torch", lamp5)
+golem.moveTo(lamp6)
+golem.place("torch", lamp6)
+golem.moveTo(lamp7)
+golem.place("torch", lamp7)
+golem.moveTo(lamp8)
+golem.place("torch", lamp8)
 
 // 阶段三：逐户送火把（散线重的地方，人家门口不敢熄灯）
-golem.moveTo(-1, 4)
-golem.place("torch", -1, 65, 4)
+golem.moveTo(house1)
+golem.place("torch", house1)
 golem.say("第一家：门口有光了")
-golem.moveTo(5, 12)
-golem.place("torch", 5, 65, 12)
+golem.moveTo(house2)
+golem.place("torch", house2)
 golem.say("第二家：门口有光了")
-golem.moveTo(-6, 8)
-golem.place("torch", -6, 65, 8)
+golem.moveTo(house3)
+golem.place("torch", house3)
 golem.say("第三家：门口有光了")
-golem.moveTo(10, 14)
-golem.place("torch", 10, 65, 14)
+golem.moveTo(house4)
+golem.place("torch", house4)
 golem.say("第四家：门口有光了")
 
 // 阶段四：北门被撞开就堵上，然后巡查三处
 if (s.gateOpen) {
-  golem.moveTo(14, -6)
-  golem.place("cobblestone", 14, 65, -6)
+  golem.moveTo(gate)
+  golem.place("cobblestone", gate)
 }
-golem.moveTo(-4, 18)
+golem.moveTo(well)
 golem.say("井边：平安")
-golem.moveTo(14, -6)
+golem.moveTo(gate)
 golem.say("北门：平安")
-golem.moveTo(0, 0)
+golem.moveTo(bell)
 golem.say("钟楼：平安")
 
 // 收岗：回艾拉身边
-golem.moveTo(0, 6)
+golem.moveTo(eira)
 golem.say("三夜平安，天亮收岗")
 `,
   },
   task: {
-    mainTask: "先看上面三张剧本卡，按剧本守一夜：有威胁就敲钟，有人被困先救人，再把八根灯柱和四户人家的门口点亮，最后回艾拉身边报平安。",
-    makeTask: "第四夜三件事一起来：先敲钟，再救人，最后把北门堵上。",
+    mainTask:
+      "先看上面三张剧本卡，按剧本守一夜：有人被困先救人，有威胁先敲钟，安静夜不敲钟；再把八根灯柱和四户人家门口点亮，北门开着就用圆石堵上，最后回艾拉身边报平安。",
+    makeTask: "第四夜三件事一起发生：先救人，再敲钟，最后用圆石把北门堵上。",
     playerBeat: "天亮后你亲手敲钟；灰崽敲的不算守夜钟声。",
-    playerBeatHint: "对着钟楼按右键敲钟，不用找钟本体",
+    playerBeatHint: "对着钟楼的钟按右键",
     successCriteria: [
       {
         id: "read-scenario",
@@ -343,11 +415,15 @@ golem.say("三夜平安，天亮收岗")
       },
     ],
   },
+  // 「名副其实」：本关要求学生真的用分支处理三种夜晚（docs/48 §1.9）。
+  codeRequirements: CODE_REQUIREMENTS,
   // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值。
   progress: [
     {
       id: "l03-read-scenario",
       text: "看剧本：有威胁才敲守夜钟",
+      hint:
+        "先读今晚的剧本：`const s = world.vars.scenario`，`s.trapped` 表示有人被困、`s.threat` 表示威胁大小、`s.gateOpen` 表示北门开着。有威胁才敲钟：`if (s.threat > 0) { golem.moveTo(bell); golem.place(\"bell\", bell) }`；安静的夜敲钟会把全村吵醒。",
       check: g => {
         const s = scenarioOf(g);
         const rang = agentPlaces(g, "bell").length > 0;
@@ -357,6 +433,8 @@ golem.say("三夜平安，天亮收岗")
     {
       id: "l03-night-handled",
       text: "按剧本救人、点灯、堵好北门",
+      hint:
+        "灯柱和人家门口都要点亮：`lamp1`…`lamp8`、`house1`…`house4` 都是关卡给好的名字，先 `golem.moveTo(lamp1)` 再 `golem.place(\"torch\", lamp1)`。有人被困时先去 `well` 再去 `door`，把人带回门口；北门开着（`s.gateOpen`）就用圆石堵上：`golem.place(\"cobblestone\", gate)`。",
       check: g => {
         const s = scenarioOf(g);
         const litLamps = posList(g.var("lamps")).every(p => g.block(p).id === C + "torch");
@@ -371,10 +449,17 @@ golem.say("三夜平安，天亮收岗")
       id: "l03-dawn-bell",
       text: "天亮后，你亲手敲响钟",
       player: true,
+      hint:
+        "天亮后由你亲手敲钟：走到钟楼前，对着钟按右键；灰崽敲的那一下不算守夜钟声。敲完回工作台点「运行」，目标全部打勾就通关。",
       check: g =>
         g.events("block.place").some(e => e.actorType === "player" && samePos(e.pos, pos(g.var("bell")))),
     },
   ],
+  narrative: {
+    opening: ["散线又浓了，夜里墙外有动静。", "先读上面三张剧本卡，按剧本守一夜。", "同一个程序要连过三夜，天亮那一钟由你亲手敲。"],
+    worldState: "村口的钟楼一年没响过了，散线让村民忘了夜里该怎么活。",
+    whyYou: "哪一夜该敲钟、该救谁，只有写程序的人能定；最后那一钟也要活人的手。",
+  },
   phases: ["守夜判断", "补灯与救人", "堵门回村"],
 });
 
@@ -395,21 +480,21 @@ export const L03_CHALLENGE: LevelChallenge = {
   title: "挑战：第五夜",
   goal: "两处威胁同时来，先把人救回来",
   reference: `// 第五夜：先救人（织偶只管跑腿，最后一步才轮到你）
-golem.moveTo(-4, 18)
-golem.moveTo(6, 22)
+golem.moveTo(well)
+golem.moveTo(door)
 
 // 人安全了，钟才响
-golem.moveTo(0, 0)
-golem.place("bell", 0, 65, 0)
+golem.moveTo(bell)
+golem.place("bell", bell)
 
 // 北门堵上，东墙挂灯（散线怕光）
-golem.moveTo(14, -6)
-golem.place("cobblestone", 14, 65, -6)
-golem.moveTo(22, 2)
-golem.place("torch", 22, 65, 2)
+golem.moveTo(gate)
+golem.place("cobblestone", gate)
+golem.moveTo(eastWall)
+golem.place("torch", eastWall)
 
 // 回村口报平安
-golem.moveTo(0, 6)
+golem.moveTo(eira)
 golem.say("第五夜：人先救，钟后响")
 `,
   check: g => {

@@ -171,7 +171,10 @@ async function main() {
     check("playerBeat.armed", beatArmed?.ok === true, beatArmed);
     const beatActivate = await rpc.call("playerBeat.activate", { sessionId: port.session.sessionId });
     check("playerBeat.activate", beatActivate?.ok === true, beatActivate);
-    // 玩家出生点就在桥边（arena 中心留出了不放方块的安全格），真人实体直接右键放合龙石。
+    // 玩家出生点由 content.world.playerSpawn=(14,65,6) 决定，离中央合龙石 6.9 格；
+    // 真人玩家会自己走过去（4 格内可右键），这里先传送到桥边安全格再右键。
+    await rpc.call("player.teleport", { sessionId: port.session.sessionId, name: "HumanLike", pos: [12, 65, 2], yaw: 180, pitch: 35 });
+    await sleep(900);
     await bots.HumanLike.place("minecraft:lodestone", L10_BRIDGE.keystone[0], L10_BRIDGE.keystone[1], L10_BRIDGE.keystone[2]);
     await sleep(500);
     const snapshot = await port.snapshot("L10");

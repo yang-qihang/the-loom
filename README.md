@@ -3,6 +3,7 @@
 > 一款用 Minecraft 教程序语言核心抽象的教学游戏：玩家写 TypeScript 子集驱动「织偶」，在 3 幕、10 关里依次遇到顺序、分支、循环、函数、记录/联合、闭包、高阶函数/管道、接口/组合、异步与并发。
 >
 > **当前状态**：L01–L10 已全部通过真实 Paper e2e；Studio 有完整中文引导、挑战层说明与 UOS 用户操作模拟。**最新桌面包已内置 Node/Java/Paper/插件/世界/真实引擎与 mineflayer 织偶**：用户只需安装正确版本的 Minecraft，桌面应用会自己启动服务端与真实引擎。
+> **2026-11-01 Round 2 已完成**：语义化 API 与命名坐标点、指令手册/位置 HUD、概念揭晓、每关名实相符（AST codeRequirements）、Maple Mono 字体、真实客户端高清截图与 10 关起始点审计；契约与结果见 `docs/48-round2-guidance-api-visual-plan.md`。
 
 ## 一句话玩法
 
@@ -11,6 +12,7 @@
 ## 先看哪份文档
 
 - **[当前事实源：试玩修复方案与结果](docs/46-playtest-fix-plan.md)**：2026-11-01 的进度/玩家节拍/sandbox/reset 修复与验收（新 agent 必读）。
+- **[Round 2 方案（语义 API/引导/字体/截图）](docs/48-round2-guidance-api-visual-plan.md)**：第二轮试玩反馈的契约与验收清单。
 - **[文档审计记录](docs/47-docs-audit-2026-11-01.md)**：各文档判定（更新/保留+标注/删除）、改动清单与遗留风险。
 - **[玩家玩法与启动](docs/42-player-guide.md)**：怎么装 Minecraft、怎么启动真实模式、怎么释放鼠标、怎么同时看代码和游戏。
 - **[环境与依赖边界](docs/43-environment-and-bundling.md)**：安装包内置了什么、用户只需要准备什么。
@@ -34,7 +36,7 @@
 - Node 22 + Java 25 运行时
 - Paper 26.1.2 build 74、LoomCraft 插件、世界/配置
 - 真实引擎、mineflayer/minecraft-protocol 织偶依赖
-- Studio、桌面壳、字体、Mock 演示引擎
+- Studio、桌面壳、嵌包字体（Maple Mono）、Mock 演示引擎
 
 用户不需要自己安装 Node/Java/Paper，也不需要另开终端启动引擎。
 
@@ -103,14 +105,15 @@ npx tsx it/l10-real.ts
 npx tsx it/l10-studio.ts
 ```
 
-当前已验证：
+Round 2 终验（2026-11-01，最终工作树 + 重新打包产物）：
 
-- L01–L10 真实 Paper e2e 全 PASS
-- L10 双织偶真实 19 项、Studio 会话注入 11 项 PASS
-- Studio 主 e2e 6/6
-- UOS 4/4
-- `npm test` 25 files / 235 tests 全绿
-- 纯中文门禁 0 违规
+- L01–L10 真实 Paper e2e 全 PASS（含 L02 collect/deposit 两趟、L04 harvest/plant、L10 双织偶玩家节拍）
+- Studio 主 e2e 6/6、`test:e2e:local` 2/2；指令手册/HUD/概念卡隔离冒烟 42/42；字体/Monaco 22/22 + 桌面壳 8/8
+- `npm test` 25 files / 235 tests 全绿；content 10 files / 162 tests 全绿
+- `bash scripts/verify.sh` pass（仅遗留 Round 1 tracked warning `G-FRESH-READER`）
+- 文案门禁（自然中文 + 必要英文术语白名单）0 违规
+- 真实客户端截图：10 关世界条带 2560×990（含 L10）；起始点审计 `evidence/playtest-fix/start-positions.md`
+- 桌面包：AppImage ≈428MB / RPM ≈435MB（2026-11-01 14:0x 重打包，含 Maple Mono/新引擎/插件/世界素材）
 
 ## 2026-11-01 试玩修复
 
@@ -120,15 +123,28 @@ npx tsx it/l10-studio.ts
 - **第 4 盏灯更宽容**：站地面、手持灯笼、对着灯柱右键即可，**不用看见柱顶**。
 - 老用户的 `~/.loomcraft/runtime/paper/world` 会在新桌面版首次启动时自动替换为干净世界（关卡进度/星级不存于世界，不受影响）。
 
+## 2026-11-01 Round 2（试玩反馈二轮，docs/48）
+
+- **语义化 API**：`golem.collect("egg", perch1)` / `golem.deposit("egg", barrel)` / `golem.count("egg")` / `world.container(barrel).count("egg")`；不再用 `place("air")` 收蛋、`place("egg")` 倒蛋这类反直觉写法（旧签名保留兼容，见 docs/12 §1.2/§6）。
+- **命名坐标点**：关卡声明 `eira`、`barrel`、`perch1`、`lamp1` 等点，运行时注入为全局常量；`golem.moveTo(eira)`、`golem.place("lantern", lamp1)` 不用背数字；`world.points` 可枚举。
+- **指令手册**：工作台顶栏/教练卡/试符台三处入口，可开/关/搜索；列出本关可用 API（签名、一句人话、可照抄示例）与命名点表，数据源 `packages/sdk/src/api-registry.ts`。
+- **位置 HUD 与 REPL**：显示灰崽/关键点坐标；试符台改用**当前关卡**打开（不再跳回第一关），`help` 返回本关 API。
+- **引导与概念揭晓**：每条 progress 带 `hint`（做什么/怎么做/可照抄/坐标从哪来），按节点推送不刷屏；结算/手记按关揭示正式术语（函数调用/变量/分支/循环/…，见 docs/04 §11.5）。
+- **名实相符**：每关新增 `codeRequirements`（AST 判定），starter 不满足、参考解满足，保证抽象真的被用上。
+- **字体与 Monaco**：代码/提示类 UI 统一嵌包 **Maple Mono**（含中文回退）；编辑器右键菜单不透明底色，不再与代码叠字。
+- **截图与起始点**：真实客户端高清重拍各关（玩家出生视角），并逐关验收起始点合理（不穿模/不贴脸/不卡墙）。
+
+> 本轮验收：`docs/48` §3 清单与 §6 实施结果；脚本回归为 `npm test`、`bash scripts/verify.sh`、Studio e2e、L01–L10 真实 Paper e2e。桌面包路径：`apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage`、`.../bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm`。
+
 ## 已知边界
 
 1. **挑战层目前是可阅读说明卡**，不是可玩挑战会话。
 2. **真人多背景盲测未执行**；目前是真实 Paper e2e + Studio e2e + UOS 的 AI 自动化代理。
 3. 自动化只能在隔离 `:98/:99`；不要在 `:0` 上跑测试，也不要让 Prism/Minecraft 继承 `:99`。
-4. **部分关卡真实客户机截图未全部重拍**；视觉证据仍以固定机位截图为准（docs/34）。
+4. **关卡截图已按 Round 2 高清重拍**（真实客户端 2560×1440；world strip 2560×990 ×10 含 L10；起始点审计见 `evidence/playtest-fix/start-positions.md`）。
 5. **独立验收发现的真人体验问题已在 11-01 修复**：L03/L05 显式 playerSpawn（不再落在钟格/墙边）、L02 蛋糕与 L04 南瓜目标格改为塔顶/草人头顶空气格（会真的落块）；仅剩「L03 钟本体在钟楼结构内不可见」为已知美术边界，对着钟楼右键即可完成节拍。
 6. **Fresh Reader Round 4 未清零**（G-FRESH-READER 仍 tracked fail），未清零前不写「完成」。
 
 ## 设计文档
 
-`docs/00–18`、`docs/24` 是设计阶段历史记录（结论保留，当前实现以代码为准）；`docs/46` 是当前事实源。实现以 `content/`、`packages/`、`apps/`、`plugin/` 为准。接手请从 `docs/41-ai-contributor-guide.md` 开始，审计结论见 `docs/47`。
+`docs/00–18`、`docs/24` 是设计阶段历史记录（结论保留，当前实现以代码为准）；`docs/46`、`docs/48` 是当前事实源。实现以 `content/`、`packages/`、`apps/`、`plugin/` 为准。接手请从 `docs/41-ai-contributor-guide.md` 开始，审计结论见 `docs/47`。

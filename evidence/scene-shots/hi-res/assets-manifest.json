@@ -1,0 +1,146 @@
+{
+  "generatedAt": "2026-11-01T05:49:54.859820Z",
+  "cropTop": 225,
+  "outSize": [
+    2560,
+    990
+  ],
+  "files": {
+    "L01": {
+      "source": "evidence/scene-shots/hi-res/birth-L01.png",
+      "out": "apps/studio/public/world/L01.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 646585,
+      "sha256": "9fdc437ba071c41cc2575c30d2d9271aa16abe868d366686177013b3ba22d374"
+    },
+    "L02": {
+      "source": "evidence/scene-shots/hi-res/asset-cand/fixL02-b.png",
+      "out": "apps/studio/public/world/L02.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1111795,
+      "sha256": "6c5c3aac81fcc96a3f746196a4576553862bb1d81bc4d80ed8428ac34b2487b5"
+    },
+    "L03": {
+      "source": "evidence/scene-shots/hi-res/asset-cand/fixL03-c.png",
+      "out": "apps/studio/public/world/L03.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1072121,
+      "sha256": "4c6e0ffdae2a026c50e56f14ad3797fc0c255b9207343958b1a3f053cbe1d2c6"
+    },
+    "L04": {
+      "source": "evidence/scene-shots/hi-res/birth-L04.png",
+      "out": "apps/studio/public/world/L04.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1196115,
+      "sha256": "b3fa6116f009d15d9cc224fbf0e7f7bc128074caa4145d47ddd300a618951728"
+    },
+    "L05": {
+      "source": "evidence/scene-shots/hi-res/asset-cand/fixL05-b.png",
+      "out": "apps/studio/public/world/L05.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1072765,
+      "sha256": "07938e3dae04590b93df6461f34830d1a55b821427eb01e4457ff272d091cb26"
+    },
+    "L06": {
+      "source": "evidence/scene-shots/hi-res/birth-L06.png",
+      "out": "apps/studio/public/world/L06.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1225869,
+      "sha256": "d35a1ee78f6adb944a7917669dbd16e69dffaf05398b13a1ac976194450154a2"
+    },
+    "L07": {
+      "source": "evidence/scene-shots/hi-res/birth-L07.png",
+      "out": "apps/studio/public/world/L07.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1283165,
+      "sha256": "e503f2f9ec904dc395404c0d8bd8d84da1a6184453517fd4936c0cd74fcddba5"
+    },
+    "L08": {
+      "source": "evidence/scene-shots/hi-res/birth-L08.png",
+      "out": "apps/studio/public/world/L08.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1166020,
+      "sha256": "03f79e60611b399726659b2d20776403f51e19e70aae6a5d8988b5e6efe572c6"
+    },
+    "L09": {
+      "source": "evidence/scene-shots/hi-res/asset-cand/assetL09-bell.png",
+      "out": "apps/studio/public/world/L09.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 851529,
+      "sha256": "9bba52830a967f32a31e4c029d1589037191cab9b54f0460b1c0a5c101dfe8f2"
+    },
+    "L10": {
+      "source": "evidence/scene-shots/hi-res/asset-cand/scenicL10-bankL.png",
+      "out": "apps/studio/public/world/L10.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 606514,
+      "sha256": "a7cbe4accbf079a95108856759590ebeb0c38b41079a110c4f1cce7394f59137"
+    },
+    "report/mc-l01.png": {
+      "out": "report/evidence/mc-l01.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 646585,
+      "sha256": "9fdc437ba071c41cc2575c30d2d9271aa16abe868d366686177013b3ba22d374"
+    },
+    "report/mc-l04.png": {
+      "out": "report/evidence/mc-l04.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1196115,
+      "sha256": "b3fa6116f009d15d9cc224fbf0e7f7bc128074caa4145d47ddd300a618951728"
+    },
+    "report/mc-l08.png": {
+      "out": "report/evidence/mc-l08.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 1166020,
+      "sha256": "03f79e60611b399726659b2d20776403f51e19e70aae6a5d8988b5e6efe572c6"
+    },
+    "report/mc-l09.png": {
+      "out": "report/evidence/mc-l09.png",
+      "size": [
+        2560,
+        990
+      ],
+      "bytes": 851529,
+      "sha256": "9bba52830a967f32a31e4c029d1589037191cab9b54f0460b1c0a5c101dfe8f2"
+    }
+  }
+}

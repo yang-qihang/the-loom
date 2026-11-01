@@ -103,6 +103,22 @@ const BANNED_UI_WORDS = new Map([
 ]);
 const LANGUAGE_KEYWORDS = new Set(["const", "let", "var", "while", "else", "if", "for", "switch", "case", "type", "interface", "function", "return", "await", "async", "class", "new", "import", "export", "break", "continue", "of", "in", "true", "false", "null", "undefined"]);
 const KEY_NAMES = new Set(["Ctrl", "Alt", "Shift", "Tab", "Enter", "Esc", "Space", "Cmd", "Backspace"]);
+/**
+ * 计算机术语白名单（docs/48：中文表达自然即可，必要的英文计算机术语保留英文）。
+ * 例：for 循环、let 变量、Promise.all、async/await、interface、closure。
+ * 只允许「术语」本身，不允许把英文当普通叙述词（如 click/cool/awesome）。
+ */
+const TECHNICAL_TERMS = new Set([
+  "for", "while", "if", "else", "switch", "case", "break", "continue", "return", "do", "of", "in",
+  "let", "const", "var", "function", "class", "interface", "type", "enum", "import", "export", "new", "try", "catch", "throw",
+  "array", "object", "string", "number", "boolean", "symbol", "bigint", "null", "undefined", "true", "false",
+  "closure", "promise", "async", "await", "callback", "recursion", "higher-order", "pipe", "pipeline",
+  "map", "filter", "reduce", "foreach", "find", "some", "every", "sort", "flatmap", "join", "slice", "splice",
+  "loop", "iterate", "iterator", "index", "key", "value", "length", "argument", "parameter", "variable",
+  "api", "sdk", "json", "id", "uuid", "error", "debug", "log", "console", "state", "event", "server", "client",
+  "window", "tab", "item", "stack", "queue", "bug", "refactor", "commit", "test", "mock", "build", "script",
+  "import", "module", "package", "version", "file", "path", "node", "npm", "git", "repo", "pr", "merge", "branch",
+]);
 const KEY_COMBO_RE = /(Ctrl|Alt|Shift|Cmd)\s*\+\s*(Enter|Esc|Tab|Space|[A-Z])/;
 const PROPERS = new Set(["Minecraft", "TypeScript"]);
 const BRAND_WORDS = new Set(["THE", "LOOM"]);
@@ -153,6 +169,13 @@ function classifyString(str) {
     if (LANGUAGE_KEYWORDS.has(token)) { tokenExemptions.push({ token, reason: "语言关键字 / 代码引用" }); warnings.push({ token, reason: "叙述里含裸语言关键字（宜用反引号或换世界观说法）" }); continue; }
     if (API_WORDS.has(token)) { tokenExemptions.push({ token, reason: "API/代码标识符" }); warnings.push({ token, reason: "叙述里含裸 API 名（宜用反引号）" }); continue; }
     if (token.includes(".") || /^[a-z]+[A-Z]/.test(token)) { tokenExemptions.push({ token, reason: "代码标识符" }); continue; }
+    // 术语中英对照豁免（用户要求「不回避专业术语」）：允许「变量（variable）」「function（函数）」这种并列写法。
+    const esc = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`[\\u4e00-\\u9fff]{1,12}\\s*[（(]\\s*${esc}\\s*[）)]`).test(work)
+      || new RegExp(`${esc}\\s*[（(][^）)]*[\\u4e00-\\u9fff][^）)]*[）)]`).test(work)) {
+      tokenExemptions.push({ token, reason: "术语中英对照（docs/48 要求不回避专业术语）" });
+      continue;
+    }
     if (BRAND_WORDS.has(token) && /[\u4e00-\u9fff]/.test(str)) { tokenExemptions.push({ token, reason: "品牌名（与中文「织界」并列）" }); continue; }
     if (BANNED_UI_WORDS.has(token)) {
       violations.push({ token, reason: "UI 标签使用英文（docs/20 §3b 禁止）", suggestion: `改为「${BANNED_UI_WORDS.get(token)}」` });
@@ -164,6 +187,7 @@ function classifyString(str) {
       continue;
     }
     if (API_WORDS.has(token.toLowerCase())) { tokenExemptions.push({ token, reason: "API/代码引用（小写）" }); continue; }
+    if (TECHNICAL_TERMS.has(token.toLowerCase())) { tokenExemptions.push({ token, reason: "计算机术语（docs/48：必要英文术语保留英文）" }); continue; }
     violations.push({ token, reason: "叙述串里出现连续拉丁字母（既非代码引用也非已解释专名）", suggestion: "删掉或改成中文动词/名词；必须引用接口时用反引号包起来（如 `golem.moveTo`）" });
   }
   const keyCombo = KEY_COMBO_RE.test(str);
@@ -179,7 +203,11 @@ function runSelfTest() {
     { text: "用 `golem.moveTo` 走到灯下。", expect: 0, why: "反引号代码引用豁免" },
     { text: "第 3 行少了一个右引号，把 \"lantern\" 补全。", expect: 0, why: "行号 + 代码字符串豁免" },
     { text: "我的世界（Minecraft）里有村庄。", expect: 0, why: "专有名词 + 中文解释" },
-    { text: "用 closure 来建模。", expect: 1, why: "叙述夹英文术语" },
+    { text: "用 closure 来建模。", expect: 0, why: "必要英文术语保留（docs/48）" },
+    { text: "用 for 循环把六枚蛋收完，再用 let 记住数量。", expect: 0, why: "for/let 是必用术语" },
+    { text: "用 stuff 来处理这件事。", expect: 1, why: "非术语英文叙述词仍违规" },
+    { text: "你刚才用的是变量（variable）：把会变的值存起来。", expect: 0, why: "术语中英对照（docs/48）" },
+    { text: "你写的是 function（函数），它把一段动作起了名字。", expect: 0, why: "英文术语 + 中文解释" },
     { text: "点击 Run 运行程序。", expect: 1, why: "UI 英文标签 Run" },
     { text: "Mock 验收工具。", expect: 1, why: "UI 英文标签 Mock" },
     { text: "去 Minecraft 里右键。", expect: 1, why: "专有名词无中文解释" },

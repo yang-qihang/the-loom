@@ -1,27 +1,27 @@
 {
  "task": "task-30 / T2-MC real L04 e2e",
  "level": "L04",
- "startedAt": "2026-11-01T04:37:41.378Z",
+ "startedAt": "2026-11-01T05:45:36.592Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem149",
+  "botName": "Golem137",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 1017,
+   "tick": 1300,
    "phase": "ready",
    "prepared": true,
    "levelId": "L03",
-   "sessionId": "5d165000-8343-4e56-a436-bf887c9adcef",
+   "sessionId": "ff206f34-787d-49f3-8581-be62f9673c7d",
    "epoch": 4,
    "groundY": 65,
    "bots": [
-    "Golem96"
+    "Golem83"
    ],
    "npcs": [],
    "regionFrom": [
@@ -42,7 +42,7 @@
    "playerSpawn": [
     0,
     65,
-    0
+    12
    ],
    "center": [
     0,
@@ -56,7 +56,7 @@
     "minecraft:bell": 8
    },
    "playerBeat": {
-    "sessionId": "5d165000-8343-4e56-a436-bf887c9adcef",
+    "sessionId": "ff206f34-787d-49f3-8581-be62f9673c7d",
     "armed": false,
     "active": false,
     "hint": "",
@@ -65,8 +65,8 @@
     "done": false,
     "ok": true
    },
-   "lastResetHash": "sha256:b7df3ecaf01c80babe9dc221de02f877c5277990051071b51abf6326fc823b3e",
-   "lastResetMs": 27
+   "lastResetHash": "sha256:aca21acbdc52a84b17ae3ab954428565b049f46693eb79409cc58fba934b18eb",
+   "lastResetMs": 42
   }
  },
  "checks": {
@@ -81,7 +81,7 @@
   "L04.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 1701,
+    "prepareMs": 2305,
     "scene": {
      "groundY": 65,
      "arena": {
@@ -97,9 +97,7 @@
       ]
      },
      "trackedCount": 1812,
-     "kit": [
-      "minecraft:wheat_sprout"
-     ],
+     "kit": [],
      "agent": {
       "pos": [
        8,
@@ -116,7 +114,7 @@
   "L04.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "95c9bc8f-ed54-4b4a-8032-e6bd9502dd13",
+    "sessionId": "2e252aab-478f-4f18-97d1-5571603be768",
     "epoch": 5
    }
   },
@@ -124,11 +122,11 @@
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "95c9bc8f-ed54-4b4a-8032-e6bd9502dd13",
+     "sessionId": "2e252aab-478f-4f18-97d1-5571603be768",
      "epoch": 5
     },
     "second": {
-     "sessionId": "d2583ce6-924a-4a95-acad-390c226e9404",
+     "sessionId": "081bf633-1135-496c-b6f9-48dea0a67bf5",
      "epoch": 6
     }
    }
@@ -180,7 +178,7 @@
   "L04.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 55597
+    "referenceRunMs": 60739
    }
   },
   "L04.report-equals-mock": {
@@ -257,7 +255,7 @@
   "L04.digest-equals-mock": {
    "ok": true,
    "detail": {
-    "agentPlaces": 124,
+    "agentPlaces": 87,
     "says": 5,
     "blocks": 1812
    }
@@ -265,15 +263,15 @@
   "L04.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 19,
-    "b": 16
+    "a": 40,
+    "b": 21
    }
   },
   "L04.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:726dc8e8390d24e3adeba3c91030ccd90d315e7978ba6ead5000faa850d59214",
-    "b": "sha256:726dc8e8390d24e3adeba3c91030ccd90d315e7978ba6ead5000faa850d59214"
+    "a": "sha256:44b661ac9905a957f3e0babdadfc5a8e0b7221ec964478cbc062ea396e36b467",
+    "b": "sha256:44b661ac9905a957f3e0babdadfc5a8e0b7221ec964478cbc062ea396e36b467"
    }
   },
   "L04.reset-clears-events": {
@@ -355,24 +353,24 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "95c9bc8f-ed54-4b4a-8032-e6bd9502dd13",
+   "sessionId": "2e252aab-478f-4f18-97d1-5571603be768",
    "epoch": 5
   },
   "second": {
-   "sessionId": "d2583ce6-924a-4a95-acad-390c226e9404",
+   "sessionId": "081bf633-1135-496c-b6f9-48dea0a67bf5",
    "epoch": 6
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 19,
-   "hash": "sha256:726dc8e8390d24e3adeba3c91030ccd90d315e7978ba6ead5000faa850d59214",
-   "tick": 2195,
-   "sessionId": "d2583ce6-924a-4a95-acad-390c226e9404",
+   "ms": 40,
+   "hash": "sha256:44b661ac9905a957f3e0babdadfc5a8e0b7221ec964478cbc062ea396e36b467",
+   "tick": 2599,
+   "sessionId": "081bf633-1135-496c-b6f9-48dea0a67bf5",
    "epoch": 6,
    "checkpointSize": 5779,
-   "restoredBlocks": 18,
+   "restoredBlocks": 20,
    "removedEntities": 1,
    "playerKit": {
     "minecraft:pumpkin": 8
@@ -380,10 +378,10 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 16,
-   "hash": "sha256:726dc8e8390d24e3adeba3c91030ccd90d315e7978ba6ead5000faa850d59214",
-   "tick": 2198,
-   "sessionId": "d2583ce6-924a-4a95-acad-390c226e9404",
+   "ms": 21,
+   "hash": "sha256:44b661ac9905a957f3e0babdadfc5a8e0b7221ec964478cbc062ea396e36b467",
+   "tick": 2602,
+   "sessionId": "081bf633-1135-496c-b6f9-48dea0a67bf5",
    "epoch": 6,
    "checkpointSize": 5779,
    "restoredBlocks": 0,
@@ -396,7 +394,7 @@
  "actions": [
   {
    "action": "moveTo(10,-8)",
-   "ms": 529
+   "ms": 565
   },
   {
    "action": "virtualPlace(minecraft:air@10,65,-8)",
@@ -408,15 +406,11 @@
   },
   {
    "action": "moveTo(11,-8)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,-8)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,-8)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(12,-8)",
@@ -424,31 +418,23 @@
   },
   {
    "action": "virtualPlace(minecraft:air@12,65,-8)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,-8)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(13,-8)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,-8)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,-8)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(10,-7)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@10,65,-7)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,-7)",
@@ -456,119 +442,99 @@
   },
   {
    "action": "moveTo(11,-7)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,-7)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,-7)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(12,-7)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:air@12,65,-7)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,-7)",
-   "ms": 50
+   "ms": 53
   },
   {
    "action": "moveTo(13,-7)",
-   "ms": 550
+   "ms": 546
   },
   {
    "action": "virtualPlace(minecraft:air@13,65,-7)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,-7)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(10,-5)",
    "ms": 700
   },
   {
-   "action": "virtualPlace(minecraft:air@10,65,-5)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,-5)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(11,-5)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,-5)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,-5)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(12,-5)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:air@12,65,-5)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,-5)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(13,-5)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,-5)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,-5)",
-   "ms": 50
+   "ms": 53
   },
   {
    "action": "moveTo(10,2)",
-   "ms": 1450
+   "ms": 1447
   },
   {
    "action": "virtualPlace(minecraft:air@10,65,2)",
-   "ms": 50
+   "ms": 47
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,2)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(11,2)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:air@11,65,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,2)",
-   "ms": 50
+   "ms": 53
   },
   {
    "action": "moveTo(12,2)",
-   "ms": 550
-  },
-  {
-   "action": "virtualPlace(minecraft:air@12,65,2)",
-   "ms": 50
+   "ms": 547
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,2)",
@@ -576,11 +542,7 @@
   },
   {
    "action": "moveTo(13,2)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,2)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,2)",
@@ -588,11 +550,7 @@
   },
   {
    "action": "moveTo(14,2)",
-   "ms": 700
-  },
-  {
-   "action": "virtualPlace(minecraft:air@14,65,2)",
-   "ms": 50
+   "ms": 699
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@14,65,2)",
@@ -603,12 +561,8 @@
    "ms": 50
   },
   {
-   "action": "virtualPlace(minecraft:air@15,65,2)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@15,65,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(10,3)",
@@ -616,67 +570,51 @@
   },
   {
    "action": "virtualPlace(minecraft:air@10,65,3)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,3)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(11,3)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,3)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,3)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(12,3)",
    "ms": 51
   },
   {
-   "action": "virtualPlace(minecraft:air@12,65,3)",
-   "ms": 49
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,3)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(13,3)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:air@13,65,3)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,3)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(14,3)",
-   "ms": 550
-  },
-  {
-   "action": "virtualPlace(minecraft:air@14,65,3)",
-   "ms": 50
+   "ms": 549
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@14,65,3)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(15,3)",
-   "ms": 3300
-  },
-  {
-   "action": "virtualPlace(minecraft:air@15,65,3)",
-   "ms": 50
+   "ms": 3352
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@15,65,3)",
@@ -684,46 +622,30 @@
   },
   {
    "action": "moveTo(10,4)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@10,65,4)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,4)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(11,4)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,4)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,4)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(12,4)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@12,65,4)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,4)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(13,4)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,4)",
    "ms": 50
   },
   {
@@ -732,7 +654,7 @@
   },
   {
    "action": "moveTo(14,4)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:air@14,65,4)",
@@ -740,15 +662,11 @@
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@14,65,4)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(15,4)",
-   "ms": 3500
-  },
-  {
-   "action": "virtualPlace(minecraft:air@15,65,4)",
-   "ms": 50
+   "ms": 3499
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@15,65,4)",
@@ -757,10 +675,6 @@
   {
    "action": "moveTo(10,6)",
    "ms": 700
-  },
-  {
-   "action": "virtualPlace(minecraft:air@10,65,6)",
-   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,6)",
@@ -772,7 +686,7 @@
   },
   {
    "action": "virtualPlace(minecraft:air@11,65,6)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,6)",
@@ -780,7 +694,7 @@
   },
   {
    "action": "moveTo(12,6)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:air@12,65,6)",
@@ -808,7 +722,7 @@
   },
   {
    "action": "virtualPlace(minecraft:air@14,65,6)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@14,65,6)",
@@ -831,19 +745,11 @@
    "ms": 700
   },
   {
-   "action": "virtualPlace(minecraft:air@10,65,7)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,7)",
    "ms": 50
   },
   {
    "action": "moveTo(11,7)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,7)",
    "ms": 50
   },
   {
@@ -855,10 +761,6 @@
    "ms": 50
   },
   {
-   "action": "virtualPlace(minecraft:air@12,65,7)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,7)",
    "ms": 50
   },
@@ -867,12 +769,8 @@
    "ms": 50
   },
   {
-   "action": "virtualPlace(minecraft:air@13,65,7)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,7)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(14,7)",
@@ -900,7 +798,7 @@
   },
   {
    "action": "moveTo(10,12)",
-   "ms": 3850
+   "ms": 3901
   },
   {
    "action": "virtualPlace(minecraft:air@10,65,12)",
@@ -915,44 +813,28 @@
    "ms": 50
   },
   {
-   "action": "virtualPlace(minecraft:air@11,65,12)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,12)",
    "ms": 50
   },
   {
    "action": "moveTo(12,12)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@12,65,12)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,12)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(13,12)",
    "ms": 50
   },
   {
-   "action": "virtualPlace(minecraft:air@13,65,12)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,12)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(10,13)",
    "ms": 700
-  },
-  {
-   "action": "virtualPlace(minecraft:air@10,65,13)",
-   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,13)",
@@ -960,35 +842,31 @@
   },
   {
    "action": "moveTo(11,13)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:air@11,65,13)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,13)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(12,13)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:air@12,65,13)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,13)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "moveTo(13,13)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,13)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,13)",
@@ -996,39 +874,31 @@
   },
   {
    "action": "moveTo(10,15)",
-   "ms": 3300
-  },
-  {
-   "action": "virtualPlace(minecraft:air@10,65,15)",
-   "ms": 50
+   "ms": 3501
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,15)",
-   "ms": 50
+   "ms": 53
   },
   {
    "action": "moveTo(11,15)",
-   "ms": 50
+   "ms": 46
   },
   {
    "action": "virtualPlace(minecraft:air@11,65,15)",
-   "ms": 50
+   "ms": 47
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,15)",
-   "ms": 50
+   "ms": 54
   },
   {
    "action": "moveTo(12,15)",
-   "ms": 550
-  },
-  {
-   "action": "virtualPlace(minecraft:air@12,65,15)",
-   "ms": 50
+   "ms": 546
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,15)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(13,15)",
@@ -1036,67 +906,55 @@
   },
   {
    "action": "virtualPlace(minecraft:air@13,65,15)",
-   "ms": 51
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,15)",
-   "ms": 50
+   "ms": 47
   },
   {
    "action": "moveTo(10,16)",
-   "ms": 49
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:air@10,65,16)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,16)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(11,16)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@11,65,16)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,16)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "moveTo(12,16)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@12,65,16)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,16)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(13,16)",
-   "ms": 550
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,16)",
-   "ms": 50
+   "ms": 551
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@13,65,16)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "moveTo(10,17)",
-   "ms": 550
+   "ms": 3349
   },
   {
    "action": "virtualPlace(minecraft:air@10,65,17)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@10,65,17)",
@@ -1107,16 +965,12 @@
    "ms": 50
   },
   {
-   "action": "virtualPlace(minecraft:air@11,65,17)",
-   "ms": 50
-  },
-  {
    "action": "virtualPlace(minecraft:wheat_sprout@11,65,17)",
-   "ms": 50
+   "ms": 46
   },
   {
    "action": "moveTo(12,17)",
-   "ms": 50
+   "ms": 53
   },
   {
    "action": "virtualPlace(minecraft:air@12,65,17)",
@@ -1124,23 +978,19 @@
   },
   {
    "action": "virtualPlace(minecraft:wheat_sprout@12,65,17)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "moveTo(13,17)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:air@13,65,17)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:wheat_sprout@13,65,17)",
    "ms": 51
   },
   {
+   "action": "virtualPlace(minecraft:wheat_sprout@13,65,17)",
+   "ms": 53
+  },
+  {
    "action": "moveTo(-4,14)",
-   "ms": 2899
+   "ms": 5900
   },
   {
    "action": "say(东田：种下了 12 格)",
@@ -1160,7 +1010,7 @@
   },
   {
    "action": "moveTo(10,-6)",
-   "ms": 9709
+   "ms": 8999
   },
   {
    "action": "say(东田水渠：干净)",
@@ -1168,23 +1018,23 @@
   },
   {
    "action": "moveTo(-4,14)",
-   "ms": 5691
+   "ms": 4138
   },
   {
    "action": "reset",
-   "ms": 146
+   "ms": 188
   },
   {
    "action": "reset",
-   "ms": 48
+   "ms": 30
   },
   {
    "action": "reset",
-   "ms": 63
+   "ms": 67
   }
  ],
  "errors": [],
- "prepareMs": 1701,
+ "prepareMs": 2305,
  "scene": {
   "groundY": 65,
   "arena": {
@@ -1200,9 +1050,7 @@
    ]
   },
   "trackedCount": 1812,
-  "kit": [
-   "minecraft:wheat_sprout"
-  ],
+  "kit": [],
   "agent": {
    "pos": [
     8,
@@ -1214,7 +1062,7 @@
    "eira"
   ]
  },
- "referenceRunMs": 55597,
+ "referenceRunMs": 60739,
  "snapshot": {
   "blocks": {
    "-14,64,15": "minecraft:coarse_dirt",
@@ -2007,21 +1855,21 @@
    "10,64,-10": "minecraft:gravel",
    "10,64,-9": "minecraft:hay_block",
    "10,64,-8": "minecraft:hay_block",
-   "11,64,-8": "minecraft:dirt",
+   "11,64,-8": "minecraft:farmland",
    "12,64,-8": "minecraft:hay_block",
-   "13,64,-8": "minecraft:dirt",
-   "10,64,-7": "minecraft:farmland",
-   "11,64,-7": "minecraft:dirt",
+   "13,64,-8": "minecraft:farmland",
+   "10,64,-7": "minecraft:dirt",
+   "11,64,-7": "minecraft:farmland",
    "12,64,-7": "minecraft:hay_block",
    "13,64,-7": "minecraft:hay_block",
    "10,64,-6": "minecraft:prismarine",
    "11,64,-6": "minecraft:prismarine",
    "12,64,-6": "minecraft:prismarine",
    "13,64,-6": "minecraft:prismarine",
-   "10,64,-5": "minecraft:farmland",
-   "11,64,-5": "minecraft:farmland",
+   "10,64,-5": "minecraft:dirt",
+   "11,64,-5": "minecraft:dirt",
    "12,64,-5": "minecraft:hay_block",
-   "13,64,-5": "minecraft:dirt",
+   "13,64,-5": "minecraft:farmland",
    "10,64,-4": "minecraft:hay_block",
    "11,64,-9": "minecraft:hay_block",
    "11,64,-4": "minecraft:hay_block",
@@ -2038,20 +1886,20 @@
    "15,64,-6": "minecraft:stone_bricks",
    "10,64,2": "minecraft:hay_block",
    "11,64,2": "minecraft:hay_block",
-   "12,64,2": "minecraft:farmland",
+   "12,64,2": "minecraft:dirt",
    "13,64,2": "minecraft:dirt",
    "14,64,2": "minecraft:farmland",
    "15,64,2": "minecraft:dirt",
    "10,64,3": "minecraft:hay_block",
-   "11,64,3": "minecraft:dirt",
+   "11,64,3": "minecraft:farmland",
    "12,64,3": "minecraft:dirt",
    "13,64,3": "minecraft:hay_block",
    "14,64,3": "minecraft:farmland",
-   "15,64,3": "minecraft:dirt",
+   "15,64,3": "minecraft:farmland",
    "10,64,4": "minecraft:farmland",
-   "11,64,4": "minecraft:farmland",
-   "12,64,4": "minecraft:farmland",
-   "13,64,4": "minecraft:farmland",
+   "11,64,4": "minecraft:dirt",
+   "12,64,4": "minecraft:dirt",
+   "13,64,4": "minecraft:dirt",
    "14,64,4": "minecraft:hay_block",
    "15,64,4": "minecraft:farmland",
    "10,64,5": "minecraft:prismarine",
@@ -2067,9 +1915,9 @@
    "14,64,6": "minecraft:hay_block",
    "15,64,6": "minecraft:hay_block",
    "10,64,7": "minecraft:farmland",
-   "11,64,7": "minecraft:farmland",
-   "12,64,7": "minecraft:dirt",
-   "13,64,7": "minecraft:farmland",
+   "11,64,7": "minecraft:dirt",
+   "12,64,7": "minecraft:farmland",
+   "13,64,7": "minecraft:dirt",
    "14,64,7": "minecraft:hay_block",
    "15,64,7": "minecraft:hay_block",
    "10,64,1": "minecraft:hay_block",
@@ -2095,12 +1943,12 @@
    "17,64,5": "minecraft:stone_bricks",
    "10,64,12": "minecraft:hay_block",
    "11,64,12": "minecraft:farmland",
-   "12,64,12": "minecraft:dirt",
-   "13,64,12": "minecraft:farmland",
+   "12,64,12": "minecraft:farmland",
+   "13,64,12": "minecraft:dirt",
    "10,64,13": "minecraft:dirt",
    "11,64,13": "minecraft:hay_block",
    "12,64,13": "minecraft:hay_block",
-   "13,64,13": "minecraft:farmland",
+   "13,64,13": "minecraft:dirt",
    "10,64,14": "minecraft:prismarine",
    "11,64,14": "minecraft:prismarine",
    "12,64,14": "minecraft:prismarine",
@@ -2111,7 +1959,7 @@
    "13,64,15": "minecraft:hay_block",
    "10,64,16": "minecraft:hay_block",
    "11,64,16": "minecraft:dirt",
-   "12,64,16": "minecraft:dirt",
+   "12,64,16": "minecraft:farmland",
    "13,64,16": "minecraft:farmland",
    "10,64,17": "minecraft:hay_block",
    "11,64,17": "minecraft:farmland",
@@ -3049,7 +2897,7 @@
    }
   },
   "sayCount": 5,
-  "agentPlaceCount": 124,
+  "agentPlaceCount": 87,
   "playerPlaceCount": 1,
   "eventTypes": [
    "agent.move:agent",
@@ -3058,6 +2906,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-11-01T04:38:40.630Z",
+ "finishedAt": "2026-11-01T05:46:41.960Z",
  "ok": true
 }

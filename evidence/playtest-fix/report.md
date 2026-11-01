@@ -122,3 +122,13 @@ MC_PORT=25566 MC_RPC_PORT=8766 npx tsx it/l1-real.ts
 MC_PORT=25566 MC_RPC_PORT=8766 npx tsx it/l2-real.ts
 # …
 ```
+
+---
+
+## 附：Round 2 视觉素材（2026-11-01，verifier 后续任务）
+
+- `evidence/playtest-fix/start-positions.md`：10 关起始点审计（真实 MC 客户端出生视角；L02/L09 出生点与灰崽 spawn 重合的糊屏缺陷、修复前后对比、L10 朝向说明、L02 时间偏暗观察）。
+- `evidence/scene-shots/hi-res/`：10 关真实客户端原始 2560×1440 截图（`birth-L0X.png` 出生视角 / `hero-*` 场景）、`asset-cand/` 候选机位、`spawn-audit.json`、`audit.json`、`assets-manifest.json`。
+- `apps/studio/public/world/L01–L10.png`：2560×990 真实客户端条带（含此前缺失的 L10），共 ~9.7 MB；`report/evidence/mc-l0*.png` 同步替换。
+- `evidence/ui-hires/`：Studio 高清 UI 截图（2× DPR，地图墙/工作台/手册/REPL/轮到你/结算概念卡/字体与右键菜单验证）+ `ui-verify.json`；`report/evidence/{ui-workbench,report,report-full}.png` 已替换为高清版。
+- 截图流水线：Docker + Xvfb 2560×1440 + Mesa llvmpipe + 真实 Minecraft 26.1.2 客户端（Prism assets/libraries/Java 只读挂载，离线账号），相机与 HUD 用插件 RPC + F1 控制；脚本在 `tmp/shots/`。

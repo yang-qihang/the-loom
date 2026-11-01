@@ -1,6 +1,6 @@
 # 05 — 课程骨架与关卡体系（Curriculum Spine）
 
-> 状态：v1（可执行草案）｜负责人：Lead｜最后更新：2026-10-31
+> 状态：v1（可执行草案；2026-11-01 Round 2 补概念揭晓指引）｜负责人：Lead｜最后更新：2026-11-01
 > 上游：`docs/04-learning-design.md`（教学法依据）、`research/pedagogy-notes.md`（scout）
 > 下游：`content/levels/L01..L10-*.md`（关卡规格）、`docs/06-level-spec-system.md`（规格格式）
 > 规则：本文是关卡内容的唯一权威来源。关卡作者（level smith）**不得**改抽象顺序、新增/删除关卡，只能在 spec 里细化；发现问题写进 spec 的「开放问题」。
@@ -64,6 +64,8 @@
 | X2 | 验证/断言（证明之符，Lab） | 「我觉得对」不算对；要让机器帮你检查 | `assert`、测试用例、不变量 | 所有语言的测试框架 | Lab-T | 自写断言全绿 |
 
 > 口径：Codex 共 **17 页** = A0–A14（15）+ X1/X2（2）；其中**核心教学抽象 14 个**（A1–A14；A0 是执行模型/notional machine）。
+>
+> 概念揭晓（正式术语怎么对玩家说出）的逐关对照表见 `docs/04-learning-design.md` §11.5；每关 `meta.abstractions` 是机器锚点，文案不得引入表外概念。术语呈现统一「中文名（English term）」，必要的英文原词保留（policy 见 docs/20 §3b）。
 
 **明确不在核心路径里的**（见 §9 理由）：继承（只作为反例出现）、monad/函子（Codex 提及，不要求掌握）、底层线程/锁 API、宏作为核心、泛型深水区、GC/内存模型。
 

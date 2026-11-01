@@ -128,12 +128,30 @@ const L07_BASE: LevelDef = defineLevel({
       { type: "villager", role: "npc", id: "eira", name: "艾拉" },
       { type: "allay", role: "prop", id: "allays", name: "悦灵" },
     ],
+    // 命名坐标点（docs/48 §1.1）：沙箱里可直接当全局变量用，如 golem.moveTo(eira)。
+    points: {
+      eira: { pos: [4, 65, 18], name: "艾拉" },
+      cargoBox: { pos: [0, 65, 20], name: "货堆" },
+      home: { pos: [0, 65, 16], name: "营地" },
+      oreBox: { pos: [0, 65, 0], name: "矿石箱（入口格）" },
+      woodBox: { pos: [0, 65, 6], name: "木料箱（入口格）" },
+      foodBox: { pos: [0, 65, 12], name: "食物箱（入口格）" },
+      cage1: { pos: [-10, 65, 0], name: "一号笼门" },
+      cage2: { pos: [-10, 65, 6], name: "二号笼门" },
+      cage3: { pos: [-10, 65, 12], name: "三号笼门" },
+    },
+    // 玩家出生点：货场中轴，朝北正对货箱阵；离灰崽 (0,65,24) 有 22 格，不会怼脸。
+    playerSpawn: [0, 65, 2],
   },
   code: {
     expectedLoc: 70,
     starterCode: `// 数据：world.vars.cargo 与 world.vars.recheck（每件货有 id、kind：ore / wood / food）。
 // boxes 里是箱子格子坐标（ore / wood / food）；recheckBoxes 是复核箱的三个去处。
+// 命名点：eira（艾拉）、cargoBox（货堆）、oreBox / woodBox / foodBox（三只箱子的入口格）、home（营地）。
 // 分拣 = 走到格子，place(货物编号, 格子坐标)；一格一件。
+// 可以照这个骨架写（做法可以当值传给 filter/map）：
+//   const isOre = item => item.kind === "ore"
+//   const 矿货 = cargo.filter(isOre).map(...)   // filter 筛、map 规划格子
 // 现在只把第一件货放进了矿石箱。
 const cargo = world.vars.cargo
 const boxes = world.vars.boxes
@@ -146,7 +164,7 @@ golem.say("先放了一件。")
 // TODO 第二阶段：把货堆分进三只箱子；再用一条流水线把复核箱的错货送回原处。
 // TODO 第三阶段：逐箱点数报给艾拉听，再开笼放悦灵。
 `,
-    referenceSolution: `// 第一阶段：三条分辨货物的规矩（做法当作值，能交给别人反复用）
+    referenceSolution: `// 高阶函数（higher-order function）：判断「是不是某类货」是一段做法，可以当值传给别人。
 const cargo = world.vars.cargo
 const boxes = world.vars.boxes
 
@@ -157,19 +175,13 @@ const isOre = makeRule("ore")
 const isWood = makeRule("wood")
 const isFood = makeRule("food")
 
-let oreCount = 0
-let woodCount = 0
-let foodCount = 0
-let i = 0
-while (i < cargo.length) {
-  if (isOre(cargo[i])) { oreCount = oreCount + 1 }
-  if (isWood(cargo[i])) { woodCount = woodCount + 1 }
-  if (isFood(cargo[i])) { foodCount = foodCount + 1 }
-  i = i + 1
-}
-golem.say("货堆清点：矿石" + oreCount + "件，木料" + woodCount + "件，食物" + foodCount + "件。")
+// 第一阶段：清点（数组方法 filter 直接筛出每一类，数一数就知道几件）。
+const 矿石件数 = cargo.filter(isOre).length
+const 木料件数 = cargo.filter(isWood).length
+const 食物件数 = cargo.filter(isFood).length
+golem.say("货堆清点：矿石" + 矿石件数 + "件，木料" + 木料件数 + "件，食物" + 食物件数 + "件。")
 
-// 第二阶段：送法记住自己的格子（闭包），按规矩把货堆分进三只箱子
+// 闭包（closure）：做法会记住自己创建时的箱子，以及「下一个空格子」。
 const planFor = slots => {
   let n = 0
   return item => {
@@ -181,64 +193,40 @@ const planFor = slots => {
 const planOre = planFor(boxes.ore)
 const planWood = planFor(boxes.wood)
 const planFood = planFor(boxes.food)
-const placements = []
-i = 0
-while (i < cargo.length) {
-  if (isOre(cargo[i])) { placements.push(planOre(cargo[i])) }
-  if (isWood(cargo[i])) { placements.push(planWood(cargo[i])) }
-  if (isFood(cargo[i])) { placements.push(planFood(cargo[i])) }
-  i = i + 1
-}
-let k = 0
-while (k < placements.length) {
-  const cell = placements[k]
+
+// 第二阶段：filter 筛货 + map 规划格子，拼成待放清单（高阶函数流水线）。
+const 矿货 = cargo.filter(isOre).map(planOre)
+const 木货 = cargo.filter(isWood).map(planWood)
+const 食货 = cargo.filter(isFood).map(planFood)
+const 待放 = [...矿货, ...木货, ...食货]
+let 已放 = 0
+for (const cell of 待放) {
   golem.moveTo(cell[1], cell[3] + 2)
   golem.place(cell[0], cell[1], cell[2], cell[3])
-  k = k + 1
+  已放 = 已放 + 1
 }
+golem.say("货堆进箱：" + 已放 + " 件。")
 
-// 第三阶段：流水线重排复核箱——先筛，再规划格子，最后逐件送过去
+// 第三阶段：复核箱走同一条流水线——先 filter 再 map，最后逐件送回。
 const recheck = world.vars.recheck
 const recheckBoxes = world.vars.recheckBoxes
-
-const filter = test => {
-  return items => {
-    const out = []
-    for (let q = 0; q < items.length; q = q + 1) {
-      if (test(items[q])) { out.push(items[q]) }
-    }
-    return out
-  }
-}
-const mapAll = plan => {
-  return items => {
-    const out = []
-    for (let q = 0; q < items.length; q = q + 1) { out.push(plan(items[q])) }
-    return out
-  }
-}
-const pipe = (value, first, second) => second(first(value))
 
 const planRecheckOre = planFor(recheckBoxes.ore)
 const planRecheckWood = planFor(recheckBoxes.wood)
 const planRecheckFood = planFor(recheckBoxes.food)
-const oreStep = pipe(recheck, filter(isOre), mapAll(planRecheckOre))
-const woodStep = pipe(recheck, filter(isWood), mapAll(planRecheckWood))
-const foodStep = pipe(recheck, filter(isFood), mapAll(planRecheckFood))
-const recheckPlacements = []
-let q = 0
-while (q < oreStep.length) { recheckPlacements.push(oreStep[q]); q = q + 1 }
-q = 0
-while (q < woodStep.length) { recheckPlacements.push(woodStep[q]); q = q + 1 }
-q = 0
-while (q < foodStep.length) { recheckPlacements.push(foodStep[q]); q = q + 1 }
-q = 0
-while (q < recheckPlacements.length) {
-  const cell = recheckPlacements[q]
+
+const 复核 = [
+  ...recheck.filter(isOre).map(planRecheckOre),
+  ...recheck.filter(isWood).map(planRecheckWood),
+  ...recheck.filter(isFood).map(planRecheckFood),
+]
+let 已归位 = 0
+for (const cell of 复核) {
   golem.moveTo(cell[1], cell[3] + 2)
   golem.place(cell[0], cell[1], cell[2], cell[3])
-  q = q + 1
+  已归位 = 已归位 + 1
 }
+golem.say("复核箱归位：" + 已归位 + " 件。")
 
 golem.moveTo(world.vars.home[0], world.vars.home[2] + 2)
 golem.say("对上了：三只箱子都归位了。")
@@ -350,6 +338,7 @@ golem.say("对上了：三只箱子都归位了。")
     {
       id: "l07-cargo-boxes",
       text: "三种货各按规矩进自己的箱子",
+      hint: "world.vars.cargo 里每件货有 id 和 kind（ore / wood / food），箱子格子分别在 world.vars.boxes.ore / wood / food。把「怎么判断」写成一条做法（如 const isOre = item => item.kind === \"ore\"），再用 cargo.filter(isOre) 筛出来、map 规划格子，逐件 golem.place(item.id, 格子)。",
       check: g => {
         const cargo = cargoList(g.var("cargo"));
         const boxes = boxesOf(g.var("boxes"));
@@ -361,6 +350,7 @@ golem.say("对上了：三只箱子都归位了。")
     {
       id: "l07-recheck-boxes",
       text: "复核箱的错货也按规矩送回去",
+      hint: "复核箱数据在 world.vars.recheck，去处是 world.vars.recheckBoxes.ore / wood / food。用同一套 filter + map 流水线再走一遍：先筛出某一类，再给每件货分配下一格，逐件送回去；换一种货也不用改流水线结构。",
       check: g => {
         const recheck = cargoList(g.var("recheck"));
         const boxes = boxesOf(g.var("recheckBoxes"));
@@ -372,6 +362,7 @@ golem.say("对上了：三只箱子都归位了。")
     {
       id: "l07-no-stray",
       text: "分拣动作都落在箱子格子里",
+      hint: "所有 place 的坐标都要来自 boxes / recheckBoxes 里的格子，别手写别的坐标。分拣完成后 golem.moveTo(home) 回营地，再用 golem.say 把三只箱子的件数报给艾拉听。",
       check: g => {
         const boxes = boxesOf(g.var("boxes"));
         const recheckBoxes = boxesOf(g.var("recheckBoxes"));
@@ -379,6 +370,11 @@ golem.say("对上了：三只箱子都归位了。")
         return agentPlaces(g).every(e => !!e.pos && allowed.has(e.pos.join(",")));
       },
     },
+  ],
+  // 名副其实（docs/48 §1.9）：本关必须真的用「做法作为值、高阶函数/管道」解决问题。
+  codeRequirements: [
+    { id: "l07-higher-order", text: "用 filter / map 这类高阶函数把「筛选」和「分拣」串成流水线", kind: "higher-order", min: 2 },
+    { id: "l07-function", text: "把三条分辨货物的规矩写成函数（箭头函数也算），并交给别人反复用", kind: "function", min: 3 },
   ],
   phases: ["三条规矩与清点", "箱子与流水线", "逐箱报数与开笼"],
 });

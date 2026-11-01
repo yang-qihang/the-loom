@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import type { WorldSnapshot } from "../../protocol/src/index";
-import type { Golem, World } from "../../sdk/src/index";
-import type { AgentActions, LevelContent, WorldPort } from "../../worldport/src/index";
+import type { Golem, PointLike, World } from "../../sdk/src/index";
+import { resolveTarget, type LevelContent, type RichAgentActions, type WorldPort } from "../../worldport/src/index";
 import { evaluateProgress } from "../../level-spec/src/index";
 import { grade, type CriterionResult } from "../../grading/src/index";
+import { evaluateCodeRequirements } from "../../runner/src/analysis";
 import { runStudentSandboxed, StudentCodeError } from "../../runner/src/sandbox";
 import type { RunSdk, SandboxMultiAgentRuntime } from "../../runner/src/run";
 import { runReplLine, type ReplResult } from "../../runner/src/repl";
@@ -18,6 +19,12 @@ export interface ResultEvent {
   criteria: CriterionResult[];
   hidden: CriterionResult[];
   failures: string[];
+  /**
+   * 「名副其实」代码要求判定（docs/48 §1.9）：对本次学生源码逐条评估的额外可见要求。
+   * 结果已同时追加进 criteria（旧 UI 按 criteria 展示也能看到）；此字段供 Studio 单独
+   * 展示「本关必须用到的抽象」。player-beat 没有新源码，沿用上一次 run 的源码评估。
+   */
+  codeCriteria?: CriterionResult[];
   /**
    * 玩家可见任务进度（Studio 目标面板的唯一真值；docs/46 §1.1）。
    * 与 grading criteria 不同：steps 数量/顺序/文案由关卡 progress 声明，Studio 按 id 更新。
@@ -146,6 +153,8 @@ export class GameSession {
   #runTimeoutMs: number;
   /** 最近一次 verify 评估出的「织偶侧已完成、轮到玩家」；reset 后清零。 */
   #playerBeatReady = false;
+  /** 最近一次 run 的学生源码：player-beat 没有新源码时，代码要求沿用这份（reset 清零）。 */
+  #lastRunSource: string | null = null;
 
   constructor(
     id: string,
@@ -218,6 +227,16 @@ export class GameSession {
     return this.port.snapshot(this.level.def.id);
   }
 
+  /**
+   * 语义状态快照（HUD 容器计数）：命名点 + 织偶背包 + 容器计数。
+   * 端口没有实现语义状态时返回 null（HUD 静默降级）。
+   */
+  semanticState(): ReturnType<NonNullable<WorldPort["semantic"]>> | null {
+    this.#assertAlive();
+    if (typeof this.port.semantic !== "function") return null;
+    return this.port.semantic();
+  }
+
   /** 提交一次运行：立即返回 runId，结果通过事件流（result）发布。 */
   async run(source: string, options: SessionRunOptions = {}): Promise<{ runId: string }> {
     this.#assertAlive();
@@ -250,6 +269,8 @@ export class GameSession {
   async #executeRun(runId: string, source: string, ticket: number): Promise<void> {
     try {
       if (!this.#isCurrent(runId, ticket)) return;
+      // 代码要求（docs/48 §1.9）要按学生源码判定：记下本次源码，player-beat 阶段沿用。
+      this.#lastRunSource = source;
       this.#transition("RUNNING");
       const sdk = this.#makeSdk(runId, ticket);
       await runStudentSandboxed(sdk, source, {
@@ -258,7 +279,7 @@ export class GameSession {
         onLog: line => this.#emit({ type: "log", line }),
       });
       if (!this.#isCurrent(runId, ticket)) return;
-      await this.#verifyAndPublish({ runId, ticket }, "run");
+      await this.#verifyAndPublish({ runId, ticket, studentSource: source }, "run");
     } catch (error) {
       if (!this.#isCurrent(runId, ticket)) return;
       const line = error instanceof StudentCodeError ? error.line : undefined;
@@ -356,12 +377,12 @@ export class GameSession {
     if (!confirmOnly && this.level.playerBeat) {
       await this.level.playerBeat(this.port);
     }
-    const result = await this.#verifyAndPublish({ runId, ticket }, "player-beat");
+    const result = await this.#verifyAndPublish({ runId, ticket, studentSource: this.#lastRunSource }, "player-beat");
     return { state: this.#state, result };
   }
 
   async #verifyAndPublish(
-    { runId, ticket }: { runId: string; ticket: number },
+    { runId, ticket, studentSource }: { runId: string; ticket: number; studentSource?: string | null },
     source: "run" | "player-beat",
   ): Promise<ResultEvent | null> {
     if (this.#disposed || ticket !== this.#ticket) return null;
@@ -373,6 +394,10 @@ export class GameSession {
     const digest = digestSnapshot(snapshot);
     this.#issueSnapshot(runId, { epoch, digest });
     const report = this.gradeWithBinding(snapshot, { runId, epoch, digest });
+    // 「名副其实」代码要求（docs/48 §1.9）：只看学生源码，是世界评分之外的额外可见要求。
+    // 直接调用端口玩家节拍时没有新源码（studentSource 为空）→ 沿用上一次 run 的源码；
+    // 从未 run 过则按「空源码」判定（代码要求不满足，本关不能算通过）。
+    const codeCriteria = evaluateCodeRequirements(this.level.def.codeRequirements, studentSource ?? "");
     // 任务进度真值：与评分共用同一份快照，逐条评估 progress（docs/46 §1.1）。
     const progressSteps = this.level.def.progress ?? [];
     const progressReport = evaluateProgress(this.level.def, snapshot);
@@ -386,15 +411,25 @@ export class GameSession {
       text: step.text,
       passed: step.passed,
     }));
+    // 可见 criteria = 世界评分 criteria + 代码要求；通过/星级按合并后的可见 criteria 重算。
+    // 没有代码要求时与旧行为完全一致（criteria/failures/stars 都不变）。
+    const criteria = codeCriteria.length > 0 ? [...report.criteria, ...codeCriteria] : report.criteria;
+    const hiddenPassed = report.hidden.length > 0 && report.hidden.every(c => c.passed);
+    const playerBeatDone = snapshot.events.some(e => e.type === "block.place" && e.actorType === "player");
+    const visiblePassed = criteria.every(c => c.passed);
+    const stars = (visiblePassed ? 1 : 0) + (hiddenPassed ? 1 : 0) + (playerBeatDone ? 1 : 0);
+    const passed = visiblePassed && hiddenPassed && playerBeatDone;
+    const failures = [...criteria, ...report.hidden].filter(c => !c.passed).map(c => c.text);
     const result: ResultEvent = {
       type: "result",
       runId,
       epoch,
-      passed: report.passed,
-      stars: report.stars,
-      criteria: report.criteria,
+      passed,
+      stars,
+      criteria,
+      ...(codeCriteria.length > 0 ? { codeCriteria } : {}),
       hidden: report.hidden,
-      failures: report.failures,
+      failures,
       progress,
       playerBeatReady,
       observedTick: snapshot.tick,
@@ -409,32 +444,72 @@ export class GameSession {
       // 兼容旧关卡：仍按 grading criteria 发 objective（Studio 按 copy.goals 回退展示）。
       for (const c of report.criteria) this.#emit({ type: "objective", id: c.id, text: c.text, done: c.passed });
     }
-    if (report.passed) {
+    if (passed) {
       this.#transition("PASSED");
     } else {
-      this.#emitHint(report.failures);
+      // 引导（docs/48 §1.4）：每次失败只发 1 条 actionbar；代码要求未过优先，其次第一条未完成
+      // progress 的 hint。Studio 教练卡通过 SSE hint 事件拿到同一段文字。
+      const failedCode = codeCriteria.find(c => !c.passed)?.text.trim() || null;
+      const progressHint = this.#firstIncompleteProgressHint(progressReport);
+      const hintText = failedCode ?? progressHint;
+      this.#emit({
+        type: "hint",
+        level: 1,
+        text: hintText ?? (failures[0] ? `还没完成：${failures[0]}` : "还有目标没完成，检查右侧目标面板"),
+      });
       this.#transition("READY");
+      if (playerBeatReady) {
+        if (failedCode) {
+          // 代码要求没过但织偶部分已完成：先激活玩家节拍（不重复发 playerBeatHint），actionbar 让位给代码引导。
+          await this.#activatePlayerBeat(true);
+          await this.#sendActionbar(failedCode);
+        } else {
+          // 轮到玩家：沿用既有玩家节拍短提示（playerBeatHint）；失败 hint 已通过 SSE 给教练卡。
+          await this.#activatePlayerBeat();
+        }
+      } else if (hintText) {
+        await this.#sendActionbar(hintText);
+      }
     }
-    // 只在织偶部分真正做完后，才激活玩家节拍（插件显示标记 + 允许完成）并给游戏内短提示。
-    if (playerBeatReady && !report.passed) await this.#activatePlayerBeat();
     this.#emit(result);
     return result;
   }
 
-  /** 通知端口「轮到玩家」，并把本关的短提示打到 actionbar；任何一环失败都不阻断评分/事件流。 */
-  async #activatePlayerBeat(): Promise<void> {
+  /** 第一条未完成 progress 步骤的 hint（docs/48 §1.4 的「下一步怎么做」）。 */
+  #firstIncompleteProgressHint(progressReport: ReturnType<typeof evaluateProgress>): string | null {
+    const steps = this.level.def.progress ?? [];
+    for (const [index, step] of progressReport.steps.entries()) {
+      if (step.passed) continue;
+      const hint = steps[index]?.hint?.trim();
+      if (hint) return hint;
+    }
+    return null;
+  }
+
+  /** 把一段中文提示打到游戏内 actionbar；没有真实 MC 界面时静默跳过，不阻断评分。 */
+  async #sendActionbar(text: string): Promise<void> {
+    const trimmed = text.trim();
+    if (trimmed.length === 0) return;
+    try {
+      await this.port.fx({ kind: "actionbar", text: trimmed });
+    } catch {
+      // Mock 世界没有 Minecraft 界面；真实 MC 不可用也不阻断。
+    }
+  }
+
+  /**
+   * 通知端口「轮到玩家」，并把本关的短提示打到 actionbar；任何一环失败都不阻断评分/事件流。
+   * skipActionbar=true 时只激活玩家节拍、不再发 actionbar（本次失败已经发过引导 hint，避免刷屏）。
+   */
+  async #activatePlayerBeat(skipActionbar = false): Promise<void> {
     try {
       await this.port.activatePlayerBeat();
     } catch {
       // 插件不可用/尚未接线：不影响结果发布（Studio 仍会展示「轮到你」，插件也会在 ready 前拦截）。
     }
+    if (skipActionbar) return;
     const hint = this.level.def.task.playerBeatHint ?? this.level.def.task.playerBeat;
-    if (hint.trim().length === 0) return;
-    try {
-      await this.port.fx({ kind: "actionbar", text: hint });
-    } catch {
-      // Mock 世界没有 Minecraft 界面；真实 MC 不可用也不阻断。
-    }
+    await this.#sendActionbar(hint);
   }
 
   /** 中止当前运行并撤销 capability（REQ-STOP-01 / REQ-RUN-01）。 */
@@ -460,6 +535,7 @@ export class GameSession {
     this.#activeRun = null;
     this.#lastResult = null;
     this.#playerBeatReady = false;
+    this.#lastRunSource = null;
     this.#commandIndex.clear();
     this.#issuedSnapshots.clear();
     this.#transition("PREPARING");
@@ -564,41 +640,173 @@ export class GameSession {
     return this.#isCurrent(runId, ticket) && this.#activeRun !== null && !this.#activeRun.aborted;
   }
 
-  /** 学生 SDK 注入：每次写操作校验当前运行的 capability，并把调用写入 log 事件流。 */
-  #makeSdk(runId: string, ticket: number): RunSdk {
+  /**
+   * 语义动作代理（docs/48 §1.2）：基础签名保持旧形状（沙箱 worker 里重建），
+   * 额外提供命名点重载与 collect/deposit/count/harvest/plant；所有调用仍先过 capability 校验。
+   * 参数归一（命名点 / {x,y,z} / [x,y,z]）在这里做；端口若是 Rich 动作表就直接转发。
+   */
+  #makeActionsProxy(
+    actor: string,
+    label: string,
+    valid: () => boolean,
+    cancelledMessage: string,
+    log: (line: string) => void,
+  ): RichAgentActions {
     const port = this.port;
-    const log = (line: string): void => {
-      if (this.#isCapabilityValid(runId, ticket)) this.#emit({ type: "log", line });
+    const guard = (): RichAgentActions => {
+      if (!valid()) throw new Error(cancelledMessage);
+      return port.agent(actor) as unknown as RichAgentActions;
     };
-    const makeActions = (actor: string, label: string): AgentActions => {
-      const guard = (): AgentActions => {
-        if (!this.#isCapabilityValid(runId, ticket)) {
-          throw new Error("RUN_CANCELLED: 本次运行已被停止或重置");
-        }
-        return port.agent(actor);
-      };
-      return {
-        get pos() {
-          return guard().pos;
-        },
-        async moveTo(x: number, z: number): Promise<void> {
+    const pointLabel = (target: PointLike): string => {
+      if (Array.isArray(target)) return `[${target.join(", ")}]`;
+      const named = target as { name?: unknown; x?: unknown; z?: unknown };
+      if (named && typeof named.name === "string" && named.name.length > 0) return named.name;
+      return `${String(named?.x)}, ${String(named?.z)}`;
+    };
+    const actions = {
+      get pos(): [number, number, number] {
+        return guard().pos;
+      },
+      async moveTo(x: number, z?: number): Promise<void> {
+        if (typeof z === "number") {
           const agent = guard();
           log(`${label}.moveTo(${x}, ${z})`);
           await agent.moveTo(x, z);
-        },
-        async place(block: string, x: number, y: number, z: number): Promise<void> {
+          return;
+        }
+        const target = x as unknown as PointLike;
+        const agent = guard();
+        log(`${label}.moveTo(${pointLabel(target)})`);
+        if (typeof agent.moveToPoint === "function") {
+          await agent.moveToPoint(target);
+          return;
+        }
+        const [px, , pz] = resolveTarget(target, agent.pos[1]);
+        await agent.moveTo(px, pz);
+      },
+      async goTo(target: PointLike): Promise<void> {
+        const agent = guard();
+        log(`${label}.goTo(${pointLabel(target)})`);
+        if (typeof agent.goTo === "function") {
+          await agent.goTo(target);
+          return;
+        }
+        const [px, , pz] = resolveTarget(target, agent.pos[1]);
+        await agent.moveTo(px, pz);
+      },
+      async moveToPoint(target: PointLike): Promise<void> {
+        const agent = guard();
+        log(`${label}.moveTo(${pointLabel(target)})`);
+        if (typeof agent.moveToPoint === "function") {
+          await agent.moveToPoint(target);
+          return;
+        }
+        const [px, , pz] = resolveTarget(target, agent.pos[1]);
+        await agent.moveTo(px, pz);
+      },
+      async place(block: string, x: number, y?: number, z?: number): Promise<void> {
+        if (typeof y === "number" && typeof z === "number") {
           const agent = guard();
           log(`${label}.place("${block}", ${x}, ${y}, ${z})`);
           await agent.place(block, x, y, z);
-        },
-        async say(text: string): Promise<void> {
-          const agent = guard();
-          log(`${label}.say(${JSON.stringify(text)})`);
-          await agent.say(text);
-        },
-      };
+          return;
+        }
+        const target = x as unknown as PointLike;
+        const agent = guard();
+        log(`${label}.place("${block}", ${pointLabel(target)})`);
+        if (typeof agent.placePoint === "function") {
+          await agent.placePoint(block, target);
+          return;
+        }
+        const [px, py, pz] = resolveTarget(target, agent.pos[1]);
+        await agent.place(block, px, py, pz);
+      },
+      async placePoint(block: string, target: PointLike): Promise<void> {
+        const agent = guard();
+        log(`${label}.place("${block}", ${pointLabel(target)})`);
+        if (typeof agent.placePoint === "function") {
+          await agent.placePoint(block, target);
+          return;
+        }
+        const [px, py, pz] = resolveTarget(target, agent.pos[1]);
+        await agent.place(block, px, py, pz);
+      },
+      async collect(item: string, target: PointLike): Promise<void> {
+        const agent = guard();
+        log(`${label}.collect("${item}", ${pointLabel(target)})`);
+        if (typeof agent.collect !== "function") {
+          throw new Error(`这一关的织偶还不会 collect（收东西）：检查端口实现，或用旧的 place("air", …) 写法`);
+        }
+        await agent.collect(item, target);
+      },
+      async deposit(item: string, target: PointLike, count = 1): Promise<void> {
+        const n = Math.max(1, Math.floor(Number(count) || 1));
+        const agent = guard();
+        log(`${label}.deposit("${item}", ${pointLabel(target)}, ${n})`);
+        if (typeof agent.deposit !== "function") {
+          throw new Error(`这一关的织偶还不会 deposit（倒东西）：检查端口实现，或用旧的 place(item, …) 写法`);
+        }
+        await agent.deposit(item, target, n);
+      },
+      count(item: string): number {
+        const agent = guard();
+        if (typeof agent.count !== "function") return 0;
+        const value = agent.count(item);
+        log(`${label}.count("${item}") = ${value}`);
+        return value;
+      },
+      async harvest(crop: string, target: PointLike): Promise<void> {
+        const agent = guard();
+        log(`${label}.harvest("${crop}", ${pointLabel(target)})`);
+        if (typeof agent.harvest !== "function") {
+          throw new Error(`这一关的织偶还不会 harvest（收割）：检查端口实现`);
+        }
+        await agent.harvest(crop, target);
+      },
+      async plant(crop: string, target: PointLike): Promise<void> {
+        const agent = guard();
+        log(`${label}.plant("${crop}", ${pointLabel(target)})`);
+        if (typeof agent.plant === "function") {
+          await agent.plant(crop, target);
+          return;
+        }
+        const [px, py, pz] = resolveTarget(target, agent.pos[1]);
+        await agent.place(`${String(crop).includes(":") ? crop : `minecraft:${crop}`}_sprout`, px, py, pz);
+      },
+      async say(text: string): Promise<void> {
+        const agent = guard();
+        log(`${label}.say(${JSON.stringify(text)})`);
+        await agent.say(text);
+      },
     };
-    const golem: Golem = makeActions("golem", "golem") as unknown as Golem;
+    return actions as unknown as RichAgentActions;
+  }
+
+  /** 沙箱语义初值：命名点 + 背包 + 容器（WorldPort.semantic()；缺省时沙箱从空状态开始）。 */
+  #semanticState(): RunSdk["semantic"] {
+    if (typeof this.port.semantic !== "function") return undefined;
+    const state = this.port.semantic();
+    return {
+      points: { ...(this.port.world.points ?? {}), ...state.points },
+      bag: state.bag,
+      containers: state.containers,
+    };
+  }
+
+  /** 学生 SDK 注入：每次写操作校验当前运行的 capability，并把调用写入 log 事件流。 */
+  #makeSdk(runId: string, ticket: number): RunSdk {
+    const log = (line: string): void => {
+      if (this.#isCapabilityValid(runId, ticket)) this.#emit({ type: "log", line });
+    };
+    const makeActions = (actor: string, label: string): RichAgentActions =>
+      this.#makeActionsProxy(
+        actor,
+        label,
+        () => this.#isCapabilityValid(runId, ticket),
+        "RUN_CANCELLED: 本次运行已被停止或重置",
+        log,
+      );
+    const golem = makeActions("golem", "golem") as unknown as Golem;
 
     // L10 等多 agent 关卡：def.world.vars 声明 leftAgent/rightAgent 时，把两只织偶的动作表一起注入沙箱。
     // 沙箱 worker 只能接收结构化配置，函数在 worker 内重建；动作仍经 capability 校验回宿主端口执行。
@@ -615,42 +823,29 @@ export class GameSession {
         materialsTotal: Number(vars.materialsTotal ?? 0),
       };
     }
-    return { golem, world: port.world, ...(multiAgent ? { multiAgent } : {}) };
+    const semantic = this.#semanticState();
+    return {
+      golem,
+      world: this.port.world,
+      ...(semantic ? { semantic } : {}),
+      ...(multiAgent ? { multiAgent } : {}),
+    };
   }
 
-  /** 试符台 SDK：与关卡同一 golem/world，但 capability 只校验 epoch/ticket（无评分运行）。 */
-  #makeReplSdk(ticket: number, collected: string[]): { golem: Golem; world: World } {
-    const port = this.port;
-    const guard = (): AgentActions => {
-      if (this.#disposed || ticket !== this.#ticket) {
-        throw new Error("RUN_CANCELLED: 试符台已停止或重置");
-      }
-      return port.agent("golem");
-    };
+  /** 试符台 SDK：与关卡同一 golem/world（含语义方法），但 capability 只校验 epoch/ticket（无评分运行）。 */
+  #makeReplSdk(ticket: number, collected: string[]): RunSdk {
     const log = (line: string): void => {
       if (!this.#disposed && ticket === this.#ticket) collected.push(line);
     };
-    const golem: Golem = {
-      get pos() {
-        return guard().pos;
-      },
-      async moveTo(x: number, z: number): Promise<void> {
-        const agent = guard();
-        log(`golem.moveTo(${x}, ${z})`);
-        await agent.moveTo(x, z);
-      },
-      async place(block: string, x: number, y: number, z: number): Promise<void> {
-        const agent = guard();
-        log(`golem.place("${block}", ${x}, ${y}, ${z})`);
-        await agent.place(block, x, y, z);
-      },
-      async say(text: string): Promise<void> {
-        const agent = guard();
-        log(`golem.say(${JSON.stringify(text)})`);
-        await agent.say(text);
-      },
-    };
-    return { golem, world: port.world };
+    const golem = this.#makeActionsProxy(
+      "golem",
+      "golem",
+      () => !this.#disposed && ticket === this.#ticket,
+      "RUN_CANCELLED: 试符台已停止或重置",
+      log,
+    ) as unknown as Golem;
+    const semantic = this.#semanticState();
+    return { golem, world: this.port.world, ...(semantic ? { semantic } : {}) };
   }
 
   async #safeSnapshotTick(): Promise<number | undefined> {
@@ -659,15 +854,6 @@ export class GameSession {
     } catch {
       return undefined;
     }
-  }
-
-  #emitHint(failures: string[]): void {
-    const first = failures[0];
-    this.#emit({
-      type: "hint",
-      level: 1,
-      text: first ? `还没完成：${first}` : "还有目标没完成，检查右侧目标面板",
-    });
   }
 
   #emit(event: EngineEvent): void {

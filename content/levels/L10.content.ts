@@ -84,11 +84,23 @@ const L10_BASE: LevelDef = defineLevel({
       { type: "agent", role: "agent", id: RIGHT_AGENT, name: "右织" },
       { type: "villager", role: "npc", id: "eira", name: "艾拉" },
     ],
+    // 命名坐标点（docs/48 §1.1）：沙箱里可直接当全局变量用，如 golem.moveTo(keystone)。
+    points: {
+      eira: { pos: [-4, 65, 2], name: "艾拉" },
+      keystone: { pos: [12, 65, 0], name: "中央合龙石基座" },
+      materialsBox: { pos: [-2, 65, 0], name: "共享材料箱" },
+      leftBank: { pos: [1, 65, 0], name: "左岸桥头" },
+      rightBank: { pos: [26, 65, 0], name: "右岸桥头" },
+      bridgeMiddle: { pos: [12, 66, 0], name: "桥面中央" },
+    },
+    // 玩家出生点：南岸桥头旁，朝北正对桥面与中央合龙石；离左织 (1,66,0)、右织 (26,66,0) 都 ≥13 格，不会怼脸。
+    playerSpawn: [14, 65, 6],
   },
   code: {
     expectedLoc: 74,
     starterCode: `// 两只织偶各有一个邮箱：谁先发、谁先等，决定它们会不会卡死。
 // 桥面 3 格宽；缺口从 x=10 开始，桥面高度 65。两只各补一半，材料箱只有缺口块数。
+// 命名点：eira（艾拉）、keystone（中央合龙石基座）、materialsBox（共享材料箱）、leftBank / rightBank（左右岸桥头）。
 const 桥 = world.vars
 const left = agent("左织")
 const right = agent("右织")
@@ -332,6 +344,7 @@ await world.keystone()
     {
       id: "l10-deck-ready",
       text: "织偶把桥面铺到中央，留出最后一格",
+      hint: "桥面缺口从 x=10 开始、宽 5 格（world.vars.gap / gapStart / deckY），中央 x=12 留给玩家。用 agent(\"左织\") / agent(\"右织\") 取两个执行者，写 async function 各自从两头铺：left.place(\"oak_planks\", x, 桥面高度, 0)，铺到中央基座前就停。",
       check: g => {
         const deck = num(g, "deck");
         const gap = num(g, "gap");
@@ -351,6 +364,7 @@ await world.keystone()
     {
       id: "l10-both-weavers",
       text: "两只织偶各报份额、各铺一半",
+      hint: "共享材料箱在 world.vars.materialsBox（命名点 materialsBox）。先互发消息约定份额：send 要写在 receive 前面（两边都先等对方就会死锁）；再用 left.collect / right.collect 各取一半材料、各铺一半。最后 Promise.all([左织开工(), 右织开工()]) 一起等，别用顺序调用。",
       check: g => {
         const left = String(g.var("leftAgent"));
         const right = String(g.var("rightAgent"));
@@ -377,11 +391,17 @@ await world.keystone()
       id: "l10-keystone",
       text: "中央一格由你亲手放合龙石",
       player: true,
+      hint: "桥面铺到中央后轮到你：先 golem.moveTo(keystone) 走到中央基座旁，手持合龙石对准基座按右键。合龙石是活人的活；代码只负责把桥面铺到位、把最后一格留出来。",
       check: g =>
         g.events("block.place").some(
           e => e.data?.block === "minecraft:lodestone" && (e.actorType === "player" || Boolean(g.var("testMode"))),
         ),
     },
+  ],
+  // 名副其实（docs/48 §1.9）：本关必须真的用多 agent 消息协议 + Promise 并发协调。
+  codeRequirements: [
+    { id: "l10-promise", text: "用 Promise.all 让两只织偶同时开工，而不是顺序 await", kind: "promise-combinator", min: 1 },
+    { id: "l10-async", text: "写 async/await 把 send / receive / collect / place 的等待串成协议", kind: "async", min: 8 },
   ],
   phases: ["单织偶失败与先发后等", "双织偶协议与合龙"],
 });

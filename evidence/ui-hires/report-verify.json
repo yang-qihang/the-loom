@@ -1,0 +1,74 @@
+{
+  "url": "http://127.0.0.1:8092/index.html",
+  "imgReport": {
+    "images": [
+      {
+        "src": "evidence/mc-l01.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/mc-l04.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/mc-l08.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/mc-l09.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/mc-l02.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/mc-l03.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/mc-l10.png",
+        "natural": [
+          2560,
+          990
+        ],
+        "broken": false
+      },
+      {
+        "src": "evidence/ui-workbench.png",
+        "natural": [
+          2880,
+          1920
+        ],
+        "broken": false
+      }
+    ],
+    "broken": [],
+    "refsMissing": 0
+  },
+  "badResponses": []
+}

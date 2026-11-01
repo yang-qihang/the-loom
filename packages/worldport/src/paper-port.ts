@@ -16,7 +16,19 @@
  */
 import type { Vec3, WorldSnapshot } from "../../protocol/src/index";
 import type { LevelDef } from "../../level-spec/src/index";
-import type { AgentActions, Annotation, FxCue, LevelContent, WorldPort } from "./index";
+import type { Container, NamedPoint, PointLike, World } from "../../sdk/src/index";
+import {
+  resolveTarget,
+  toSdkPoints,
+  posKey,
+  type AgentActions,
+  type Annotation,
+  type FxCue,
+  type LevelContent,
+  type RichAgentActions,
+  type SemanticStateSnapshot,
+  type WorldPort,
+} from "./index";
 
 // ---------------------------------------------------------------- injected interfaces
 
@@ -154,6 +166,8 @@ const normBlock = (block: string): string => {
   const lower = String(block ?? "air").toLowerCase();
   return lower.includes(":") ? lower : `minecraft:${lower}`;
 };
+/** 语义 API 里背包/容器用的物品短名（无 `minecraft:` 前缀，和 MockWorld/沙箱缓存同键）。 */
+const itemKey = (block: string): string => normBlock(block).replace("minecraft:", "");
 
 /** Collect every [x,y,z] triple anywhere in the vars tree (positions, arrays of positions). */
 export function collectVec3(node: unknown, out: Vec3[] = []): Vec3[] {
@@ -235,6 +249,12 @@ export class PaperWorldPort implements WorldPort {
   private disposed = false;
   private lastLayout: Record<string, unknown> | null = null;
   lastReset: Record<string, unknown> | null = null;
+  /** 本关命名点（prepare/reset 时从 LevelDef 派生；world.points / 沙箱全局 / HUD 同源）。 */
+  private namedPoints: Record<string, NamedPoint> = {};
+  /** 语义 API 的织偶背包（物品短名 → 数量），由 collect/deposit 维护，prepare/reset 清零。 */
+  private bag = new Map<string, number>();
+  /** 容器计数：容器底座坐标 `x,y,z` → 物品短名 → 数量（world.container 读它）。 */
+  private containers = new Map<string, Map<string, number>>();
 
   /** 录制 content.playerBeat 期间为 true：playerPlace/setTime/setWeather 只入队，不碰真实世界。 */
   private recordingPlayerBeat = false;
@@ -265,14 +285,26 @@ export class PaperWorldPort implements WorldPort {
     return this.rpc;
   }
 
-  get world() {
-    return { vars: this.def.world.vars };
+  get world(): World {
+    return {
+      vars: this.def.world.vars,
+      points: this.namedPoints,
+      container: (target: PointLike) => this.containerView(target),
+    };
+  }
+
+  get points(): Record<string, NamedPoint> {
+    return this.namedPoints;
   }
 
   // -------------------------------------------------------------- lifecycle
 
   async prepare(content: LevelContent): Promise<void> {
     this.def = content.def;
+    // 命名点与语义状态（docs/48 §1.1–1.3）：每次 prepare 从关卡定义重建，背包/容器清零。
+    this.namedPoints = toSdkPoints(content.def);
+    this.bag.clear();
+    this.containers.clear();
     for (const agentBot of new Set(Object.values(this.agents))) await agentBot.connect();
     const botNames = [...new Set(Object.values(this.agents).map((agentBot) => agentBot.name))];
     await this.rpc.call("bots.set", { names: botNames });
@@ -338,7 +370,13 @@ export class PaperWorldPort implements WorldPort {
     return this.rpc.call<Record<string, unknown>>("playerBeat.status", { sessionId: this.sessionId });
   }
 
-  async reset(_content?: LevelContent): Promise<void> {
+  async reset(content?: LevelContent): Promise<void> {
+    if (content) {
+      this.def = content.def;
+      this.namedPoints = toSdkPoints(content.def);
+    }
+    this.bag.clear();
+    this.containers.clear();
     const started = Date.now();
     this.lastReset = (await this.rpc.call<Record<string, unknown>>("world.reset", {
       sessionId: this.sessionId,
@@ -384,6 +422,7 @@ export class PaperWorldPort implements WorldPort {
 
     const playerSpawn =
       hint.playerSpawn ??
+      content.def.world.playerSpawn ??
       ([
         Math.round((arena.from[0] + arena.to[0]) / 2),
         groundY,
@@ -428,47 +467,180 @@ export class PaperWorldPort implements WorldPort {
 
   // -------------------------------------------------------------- agent
 
+  /**
+   * 织偶动作表：基础签名保持兼容（返回类型 AgentActions，旧测试桩/子类可继续覆盖），
+   * 运行时对象额外带语义方法（docs/48 §1.2），调用方按 `as RichAgentActions` 取用。
+   */
   agent(name: string): AgentActions {
     const bot = this.agents[name] ?? this.bot;
     const port = this;
-    return {
+    const walk = async (x: number, z: number): Promise<void> => {
+      const started = Date.now();
+      await bot.moveTo(x, z);
+      // always mark the arrival: the bot adapter may skip walking when already close (L04 perf),
+      // and the grader's "did the golem really reach the spot" check needs a move event.
+      await port.rpc.call("agent.mark", { sessionId: port.sessionId, actor: bot.name, pos: bot.pos });
+      port.actions.push({ action: `moveTo(${x},${z})`, ms: Date.now() - started });
+    };
+    const put = async (block: string, x: number, y: number, z: number): Promise<void> => {
+      const started = Date.now();
+      const requested = normBlock(block);
+      const info = await port.classify(requested);
+      if (requested !== "minecraft:air" && info.isBlock) {
+        try {
+          await bot.place(requested, x, y, z);
+          port.actions.push({ action: `place(${requested}@${x},${y},${z})`, ms: Date.now() - started });
+          return;
+        } catch (error) {
+          port.log(`bot.place fallback → virtual (${requested}): ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+      await port.rpc.call("world.virtualPlace", {
+        sessionId: port.sessionId,
+        pos: [x, y, z],
+        block: requested,
+        actor: bot.name,
+      });
+      port.actions.push({ action: `virtualPlace(${requested}@${x},${y},${z})`, ms: Date.now() - started });
+    };
+    const rich: RichAgentActions = {
       get pos(): Vec3 {
         return bot.pos;
       },
       async moveTo(x: number, z: number): Promise<void> {
-        const started = Date.now();
-        await bot.moveTo(x, z);
-        // always mark the arrival: the bot adapter may skip walking when already close (L04 perf),
-        // and the grader's "did the golem really reach the spot" check needs a move event.
-        await port.rpc.call("agent.mark", { sessionId: port.sessionId, actor: bot.name, pos: bot.pos });
-        port.actions.push({ action: `moveTo(${x},${z})`, ms: Date.now() - started });
+        await walk(x, z);
+      },
+      async moveToPoint(target: PointLike): Promise<void> {
+        const [x, , z] = resolveTarget(target, bot.pos[1]);
+        await walk(x, z);
+      },
+      async goTo(target: PointLike): Promise<void> {
+        const [x, , z] = resolveTarget(target, bot.pos[1]);
+        await walk(x, z);
       },
       async place(block: string, x: number, y: number, z: number): Promise<void> {
-        const started = Date.now();
-        const requested = normBlock(block);
-        const info = await port.classify(requested);
-        if (requested !== "minecraft:air" && info.isBlock) {
-          try {
-            await bot.place(requested, x, y, z);
-            port.actions.push({ action: `place(${requested}@${x},${y},${z})`, ms: Date.now() - started });
-            return;
-          } catch (error) {
-            port.log(`bot.place fallback → virtual (${requested}): ${error instanceof Error ? error.message : String(error)}`);
-          }
+        await put(block, x, y, z);
+      },
+      async placePoint(block: string, target: PointLike): Promise<void> {
+        const [x, y, z] = resolveTarget(target, bot.pos[1]);
+        await put(block, x, y, z);
+      },
+      /**
+       * 收走目标点附近的 item（如 perch1 上的蛋）：先查世界方块，找到后走既有 place("air", pos)
+       * 语义清方块（legacy block.place air 事件与旧 API 完全一致），再放进织偶背包。
+       */
+      async collect(item: string, target: PointLike): Promise<void> {
+        const base = resolveTarget(target, bot.pos[1]);
+        const want = normBlock(item);
+        const found = await port.findBlockNear([want], base, [0, 1, 2, 3]);
+        if (!found) {
+          throw new Error(`(${base[0]}, ${base[2]}) 附近没有可以收走的${itemKey(want)}：先让灰崽走到目标旁边，或检查命名点坐标`);
         }
-        await port.rpc.call("world.virtualPlace", {
-          sessionId: port.sessionId,
-          pos: [x, y, z],
-          block: requested,
-          actor: bot.name,
-        });
-        port.actions.push({ action: `virtualPlace(${requested}@${x},${y},${z})`, ms: Date.now() - started });
+        await put("air", found[0], found[1], found[2]);
+        port.bag.set(itemKey(want), (port.bag.get(itemKey(want)) ?? 0) + 1);
+      },
+      /**
+       * 把背包里的 item 放进目标容器：从目标点基准 y 向上找空气格（与 MockWorld 同规则），
+       * 走既有 place(item, pos) 语义落一块并记 legacy block.place item 事件；容器计数 +count。
+       */
+      async deposit(item: string, target: PointLike, count = 1): Promise<void> {
+        const n = Math.max(1, Math.floor(Number(count) || 1));
+        const want = normBlock(item);
+        const key = itemKey(want);
+        const have = port.bag.get(key) ?? 0;
+        if (have < n) throw new Error(`灰崽身上只有 ${have} 件${key}，不够放下 ${n} 件`);
+        const base = resolveTarget(target, bot.pos[1]);
+        const pos = await port.findAirAbove(base, 5);
+        if (!pos) throw new Error(`(${base[0]}, ${base[2]}) 上方没有空格可以放${key}：换一个容器命名点`);
+        await put(want, pos[0], pos[1], pos[2]);
+        port.bag.set(key, have - n);
+        const containerKey = posKey(base);
+        const contents = port.containers.get(containerKey) ?? new Map<string, number>();
+        contents.set(key, (contents.get(key) ?? 0) + n);
+        port.containers.set(containerKey, contents);
+      },
+      count(item: string): number {
+        return port.bag.get(itemKey(item)) ?? 0;
+      },
+      /** 收割成熟作物：目标格是 crop（或 crop_sprout）才按 collect 语义清格；空格/没熟是宽容 no-op。 */
+      async harvest(crop: string, target: PointLike): Promise<void> {
+        const base = resolveTarget(target, bot.pos[1]);
+        const want = normBlock(crop);
+        const found = await port.findBlockNear([want, `${want}_sprout`], base, [0, 1, 2, 3]);
+        if (!found) return;
+        await put("air", found[0], found[1], found[2]);
+        port.bag.set(itemKey(want), (port.bag.get(itemKey(want)) ?? 0) + 1);
+      },
+      /** 种下作物幼苗：等价 place(`${crop}_sprout`, target)。 */
+      async plant(crop: string, target: PointLike): Promise<void> {
+        const [x, y, z] = resolveTarget(target, bot.pos[1]);
+        await put(`${normBlock(crop)}_sprout`, x, y, z);
       },
       async say(text: string): Promise<void> {
         await bot.say(text);
         port.actions.push({ action: `say(${text})`, ms: 0 });
       },
     };
+    return rich;
+  }
+
+  // -------------------------------------------------------------- semantic helpers
+
+  /** 批量读方块，返回目标列 `base.y + dy` 上第一个匹配 candidates 的坐标（y..y+3，最多 4 层）。 */
+  private async findBlockNear(candidates: string[], base: Vec3, offsets: number[]): Promise<Vec3 | null> {
+    const positions: Vec3[] = offsets.map(dy => [base[0], base[1] + dy, base[2]]);
+    const wanted = new Set(candidates.map(normBlock));
+    const result = await this.rpc.call<{ blocks?: Record<string, string> }>("world.blocks", {
+      sessionId: this.sessionId,
+      positions,
+    });
+    const blocks = result?.blocks ?? {};
+    for (const pos of positions) {
+      const id = blocks[keyOf(pos)];
+      if (id !== undefined && wanted.has(normBlock(id))) return pos;
+    }
+    return null;
+  }
+
+  /** 从 base 向上找第一个空气格（最多 steps 层，与 MockWorld.deposit 的向上找空格规则一致）。 */
+  private async findAirAbove(base: Vec3, steps = 5): Promise<Vec3 | null> {
+    const positions: Vec3[] = [];
+    for (let step = 0; step < steps; step += 1) positions.push([base[0], base[1] + step, base[2]]);
+    const result = await this.rpc.call<{ blocks?: Record<string, string> }>("world.blocks", {
+      sessionId: this.sessionId,
+      positions,
+    });
+    const blocks = result?.blocks ?? {};
+    for (const pos of positions) {
+      const id = blocks[keyOf(pos)];
+      if (id === undefined || normBlock(id) === "minecraft:air") return pos;
+    }
+    return null;
+  }
+
+  /** 容器只读视图（world.container(point)）；容器计数由 deposit 维护，prepare/reset 清零。 */
+  private containerView(target: PointLike): Container {
+    const contents = this.containers.get(posKey(resolveTarget(target))) ?? new Map<string, number>();
+    return {
+      count: (item: string) => contents.get(itemKey(item)) ?? 0,
+      items: () =>
+        [...contents.entries()]
+          .filter(([, count]) => count > 0)
+          .map(([item, count]) => ({ item: `minecraft:${item}`, count })),
+    };
+  }
+
+  /** 语义状态快照：沙箱 worker 的同步缓存初值（背包/容器/命名点）。 */
+  semantic(): SemanticStateSnapshot {
+    const bag: Record<string, number> = {};
+    for (const [item, count] of this.bag) if (count > 0) bag[item] = count;
+    const containers: Record<string, Record<string, number>> = {};
+    for (const [key, contents] of this.containers) {
+      const record: Record<string, number> = {};
+      for (const [item, count] of contents) if (count > 0) record[item] = count;
+      if (Object.keys(record).length > 0) containers[key] = record;
+    }
+    return { points: this.namedPoints, bag, containers };
   }
 
   async teleportAgent(name: string, pos: Vec3): Promise<void> {

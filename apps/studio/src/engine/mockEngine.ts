@@ -1,18 +1,78 @@
 import { grade } from "../../../../packages/grading/src/index";
-import { evaluateProgress, progressView, type ProgressReport } from "../../../../packages/level-spec/src/index";
+import { evaluateProgress, pointsView, progressView, type NamedPoint, type ProgressReport } from "../../../../packages/level-spec/src/index";
 import { L01Content } from "../../../../content/levels/L01.content";
 import { MockWorld } from "../../../../packages/mockworld/src/index";
 import { chrome, fill, levelCards, levelCopy, resolveCopy } from "../copy";
-import type { EngineMode, LevelView, ReplHistoryEntry, ReplOutcome, RunResult, SessionPhase, StudioEngine, StudioEvent } from "../types";
+import type {
+  EngineMode,
+  LevelView,
+  ReplHistoryEntry,
+  ReplOutcome,
+  RunResult,
+  SessionPhase,
+  SnapshotView,
+  StudioEngine,
+  StudioEvent,
+} from "../types";
 import { executeL01, parseL01, type RunnerError, type WorldLogEntry } from "../mock/l01Runner";
 
 /** 本地演示兜底只跑 L01；真值（progress/评分）与内容层共用同一份 LevelDef。 */
 const LEVEL = L01Content.def;
 const LAMPS = (LEVEL.world.vars.lamps as number[][]) ?? [];
+/** 本关命名坐标点（与沙箱注入同源）：`golem.moveTo(eira)` / `golem.place("lantern", lamp1)` 在这里展开成数字。 */
+const NAMED_POINTS: Record<string, NamedPoint> = pointsView(LEVEL);
 const L01_COPY = levelCopy("L01");
 const WORKBENCH = chrome.workbench;
 /** 旧内容（尚未声明 progress）回退 copy.goals 时用的历史目标 id，保持既有 DOM 契约。 */
 const LEGACY_GOAL_IDS = ["lamps", "fourth", "home"];
+
+const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * 把命名点参数展开成数字（本地演示解释器只认数字）：
+ * - `golem.moveTo(eira)` / `golem.goTo(lamp1)` → `golem.moveTo(x, z)`
+ * - `golem.place("lantern", lamp1)` → `golem.place("lantern", x, y, z)`
+ * - 也接受 `{ x, y, z }` 对象字面量参数。
+ * 纯数字写法保持原样；行数不变，错误行号仍对得上学生源码。
+ */
+export function expandNamedPointArgs(source: string): string {
+  const names = Object.keys(NAMED_POINTS)
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp);
+  const pointPattern = names.length > 0 ? names.join("|") : null;
+  return source
+    .split(/\r?\n/)
+    .map((line) => {
+      let next = line;
+      if (pointPattern) {
+        next = next.replace(
+          new RegExp(`(\\bgolem\\s*\\.\\s*(?:moveTo|goTo)\\s*\\(\\s*)(${pointPattern})(\\s*\\))`, "g"),
+          (_match, head: string, name: string, tail: string) => {
+            const point = NAMED_POINTS[name];
+            return point ? `${head}${point.pos[0]}, ${point.pos[2]}${tail}` : _match;
+          },
+        );
+        next = next.replace(
+          new RegExp(`(\\bgolem\\s*\\.\\s*place\\s*\\(\\s*(?:"[^"]*"|'[^']*')\\s*,\\s*)(${pointPattern})(\\s*\\))`, "g"),
+          (_match, head: string, name: string, tail: string) => {
+            const point = NAMED_POINTS[name];
+            return point ? `${head}${point.pos[0]}, ${point.pos[1]}, ${point.pos[2]}${tail}` : _match;
+          },
+        );
+      }
+      // 对象字面量参数：{ x: ..., z: ... } / { x: ..., y: ..., z: ... }
+      next = next.replace(
+        /(\bgolem\s*\.\s*(?:moveTo|goTo)\s*\(\s*)\{\s*x\s*:\s*(-?\d+(?:\.\d+)?)\s*,\s*z\s*:\s*(-?\d+(?:\.\d+)?)\s*\}\s*\)/g,
+        "$1$2, $3)",
+      );
+      next = next.replace(
+        /(\bgolem\s*\.\s*place\s*\(\s*(?:"[^"]*"|'[^']*')\s*,\s*)\{\s*x\s*:\s*(-?\d+(?:\.\d+)?)\s*,\s*y\s*:\s*(-?\d+(?:\.\d+)?)\s*,\s*z\s*:\s*(-?\d+(?:\.\d+)?)\s*\}\s*\)/g,
+        "$1$2, $3, $4)",
+      );
+      return next;
+    })
+    .join("\n");
+}
 
 const samePos = (a: number[] | undefined, b: number[]): boolean =>
   !!a && a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
@@ -72,11 +132,18 @@ export class MockEngine implements StudioEngine {
       starterCode: LEVEL.code.starterCode,
       referenceSolution: LEVEL.code.referenceSolution,
       // 目标面板 id/text 与真引擎一致：优先 progress；旧内容回退 copy.goals。
+      // hint/player 供教练卡「下一步怎么做」与玩家节拍高亮（docs/48 §1.4）。
       objectives:
         progress.length > 0
-          ? progress.map((step) => ({ id: step.id, text: step.text }))
+          ? progress.map((step) => ({
+              id: step.id,
+              text: step.text,
+              ...(step.hint ? { hint: step.hint } : {}),
+              ...(step.player ? { player: true } : {}),
+            }))
           : L01_COPY.goals.map((text, index) => ({ id: LEGACY_GOAL_IDS[index] ?? `goal-${index}`, text })),
       hints: L01_COPY.hints.map((hint) => resolveCopy(hint)),
+      points: NAMED_POINTS,
     };
   }
 
@@ -105,7 +172,9 @@ export class MockEngine implements StudioEngine {
     this.setPhase(session, "running");
     this.emit(session, { type: "log", line: WORKBENCH.runStarted });
 
-    const parsed = parseL01(source);
+    // 内容层参考解用命名点（如 golem.moveTo(eira) / golem.place("lantern", lamp1)）；
+    // 本地演示解释器只认数字参数，先展开再解析（旧的全数字写法原样通过）。
+    const parsed = parseL01(expandNamedPointArgs(source));
     if ("error" in parsed) {
       this.fail(session, parsed.error);
       return;
@@ -174,10 +243,43 @@ export class MockEngine implements StudioEngine {
     this.setPhase(session, "graded");
   }
 
-  async createReplSession(): Promise<string> {
+  async createReplSession(levelId = "L01"): Promise<string> {
+    // 本地演示只有 L01；仍接受 levelId 以兼容「打开 REPL 用当前关卡」的新签名。
+    if (levelId !== "L01") throw new Error(chrome.workbench.loadFailed);
     const id = `mock-repl-${++this.counter}`;
-    this.replSessions.set(id, { pos: [0, 65, 0], history: [] });
+    const state: MockReplState = { pos: [0, 65, 0], history: [], levelId };
+    this.replSessions.set(id, state);
     return id;
+  }
+
+  /** 位置 HUD 用：本地演示的世界快照（与真引擎 /api/session/:id/snapshot 同形）。 */
+  async snapshot(sessionId: string): Promise<SnapshotView | null> {
+    const session = this.sessions.get(sessionId);
+    if (!session) return null;
+    const snapshot = session.world.snapshot("L01");
+    // 容器坐标 → 命名点名字（HUD 读 snapshot.containers.barrel）；物品名用短名，与引擎端点一致。
+    // 同一坐标可能有多个名字（L02 的 barrel / bucket 共用倒蛋位），全部给出。
+    const namesByKey = new Map<string, string[]>();
+    for (const [name, point] of Object.entries(NAMED_POINTS)) {
+      const key = point.pos.join(",");
+      namesByKey.set(key, [...(namesByKey.get(key) ?? []), name]);
+    }
+    const containers: Record<string, Record<string, number>> = {};
+    for (const [key, contents] of session.world.containers) {
+      const items: Record<string, number> = {};
+      for (const [item, count] of contents) if (count > 0) items[item] = count;
+      const names = namesByKey.get(key);
+      if (names && names.length > 0) for (const name of names) containers[name] = items;
+      else containers[key] = items;
+    }
+    return {
+      agents: snapshot.agents,
+      npcs: snapshot.npcs,
+      vars: snapshot.vars,
+      points: NAMED_POINTS,
+      containers,
+      tick: snapshot.tick,
+    };
   }
 
   private recordRepl(state: MockReplState, line: string, outcome: ReplOutcome): ReplOutcome {
@@ -193,7 +295,10 @@ export class MockEngine implements StudioEngine {
     if (text.includes("\n")) {
       return this.recordRepl(state, line, { ok: false, kind: "error", display: "一次只能试一句：把多余的行删掉，再试一次。", log: [] });
     }
-    const move = text.match(/^golem\.moveTo\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/);
+    // 命名点参数（golem.moveTo(eira) / golem.place("lantern", lamp1)）先展开成数字，
+    // 再按原有的数字规则解释；旧的全数字写法行为不变。
+    const expanded = expandNamedPointArgs(text);
+    const move = expanded.match(/^golem\.(?:moveTo|goTo)\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)$/);
     if (move) {
       state.pos = [Number(move[1]), 65, Number(move[2])];
       return this.recordRepl(state, line, { ok: true, kind: "action", display: "灰崽照做了", log: [`灰崽走到（${move[1]}, ${move[2]}）。`] });
@@ -204,7 +309,7 @@ export class MockEngine implements StudioEngine {
     if (/^golem\.say\(.*\)$/.test(text)) {
       return this.recordRepl(state, line, { ok: true, kind: "action", display: "灰崽照做了", log: [] });
     }
-    if (/^golem\.place\(\s*"lantern"\s*,\s*-?\d+\s*,\s*-?\d+\s*,\s*-?\d+\s*\)$/.test(text)) {
+    if (/^golem\.place\(\s*"[^"]+"\s*,\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*\)$/.test(expanded)) {
       return this.recordRepl(state, line, { ok: true, kind: "action", display: "灰崽照做了", log: [] });
     }
     return this.recordRepl(state, line, {
@@ -323,4 +428,6 @@ export class MockEngine implements StudioEngine {
 interface MockReplState {
   pos: [number, number, number];
   history: ReplHistoryEntry[];
+  /** 试符台打开的关卡（本地演示只有 L01，保留字段供「当前关卡」展示/未来复用）。 */
+  levelId: string;
 }

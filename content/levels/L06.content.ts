@@ -201,84 +201,128 @@ const L06_BASE: LevelDef = defineLevel({
       { type: "llama", role: "mount", id: "llama-b", name: "小羊驼" },
       { type: "donkey", role: "prop", id: "donkey", name: "驴" },
     ],
+    // 命名坐标点（docs/48 §1.1）：沙箱里可直接当全局变量用，如 golem.moveTo(trader)。
+    points: {
+      eira: { pos: [16, 65, 22], name: "艾拉" },
+      cargoBox: { pos: [4, 65, 20], name: "混装货箱" },
+      trader: { pos: [10, 65, 20], name: "旅商塔卡" },
+      shrine: { pos: [13, 65, 20], name: "护符盒" },
+      toolsBox: { pos: [0, 65, 0], name: "工具桶（入口格）" },
+      materialsBox: { pos: [0, 65, 6], name: "材料桶（入口格）" },
+      foodBox: { pos: [0, 65, 12], name: "食物桶（入口格）" },
+      chopStation: { pos: [20, 65, 0], name: "锯木工作点" },
+      mineStation: { pos: [20, 65, 6], name: "采矿工作点" },
+      fightStation: { pos: [20, 65, 12], name: "守卫工作点" },
+    },
+    // 玩家出生点：营地北侧主路，朝北正对三只桶；离灰崽 (9,65,26) 有 14 格，不会怼脸。
+    playerSpawn: [8, 65, 12],
   },
   code: {
     expectedLoc: 60,
-    starterCode: `// 账本数据在 world.vars.cargo 里：每件货有 id、kind（"tool" 或 "supply"）和 food。
-// 三只木桶的格子坐标在 world.vars.boxes.tools / materials / food 里；
-// 工作点与需要的工具在 world.vars.jobs 里；货箱在 world.vars.cargoBox。
+    starterCode: `// 账本数据在 world.vars.cargo 里：每件货是一条记录，字段有 id、kind（"tool" 或 "supply"）和 food。
+// 三只木桶的格子坐标在 world.vars.boxes.tools / materials / food 里；工作点在 world.vars.jobs 里。
+// 命名点：trader（旅商塔卡）、cargoBox（混装货箱）、toolsBox / materialsBox / foodBox 是三只桶的入口。
 // 入桶 = 走到格子上，place(货物编号, 格子坐标)；一格一件。
-// 现在只把第一件货（斧头）放进了工具桶。
-const cargo = world.vars.cargo
-const boxes = world.vars.boxes
-const first = cargo[0]
-golem.moveTo(boxes.tools[0][0], boxes.tools[0][2])
-golem.place(first.id, boxes.tools[0][0], boxes.tools[0][1], boxes.tools[0][2])
+type 货物 = { id: string; kind: "tool" | "supply"; food?: boolean }
+type 木桶 = { tools: number[][]; materials: number[][]; food: number[][] }
+const 货物表 = world.vars.cargo as 货物[]
+const 木桶 = world.vars.boxes as 木桶
 
-// TODO 第一阶段：把八件货都认清楚（工具/材料/食物），顺手清点数目。
-// TODO 第二阶段：逐件走到货箱边，再走到对应木桶的格子放下。
-// TODO 第三阶段：给三个工作点配好工具，最后和塔卡对账。
+// 可以照这个骨架写（函数名自己起）：
+//   function 类别Of(货: 货物) { switch (货.kind) { case "tool": return "工具"; case "supply": ... } }
+//   function 放货(货: 货物) { 按类别找桶，把货放到桶里下一个空格子 }
+//   for (const 货 of 货物表) { 放货(货) }
+
+// 现在只把第一件货（斧头）放进了工具桶：
+const 第一件 = 货物表[0]
+golem.moveTo(木桶.tools[0][0], 木桶.tools[0][2])
+golem.place(第一件.id, 木桶.tools[0][0], 木桶.tools[0][1], 木桶.tools[0][2])
 `,
-    referenceSolution: `// 第一阶段：把每件货读成一条记录，先清点
-const cargo = world.vars.cargo
-const boxes = world.vars.boxes
+    referenceSolution: `// 记录（record）：把一件货的 id、kind、food 绑成一条；可辨识联合：kind 只有 tool / supply 两种。
+type 货物 = { id: string; kind: "tool" | "supply"; food?: boolean }
+type 木桶 = { tools: number[][]; materials: number[][]; food: number[][] }
+type 工作 = { id: string; needs: string; station: [number, number, number] }
+type 类别 = "工具" | "材料" | "食物"
 
-function kindOf(item) {
-  if (item.kind === "tool") { return "tool" }
-  if (item.food) { return "food" }
-  return "material"
+const 货物表 = world.vars.cargo as 货物[]
+const 木桶 = world.vars.boxes as 木桶
+const 工作台 = world.vars.jobs as 工作[]
+const 货箱 = world.vars.cargoBox as [number, number, number]
+
+// 穷举兜底：以后多出一种没登记的类别，这里当场报错，不会悄悄分错桶。
+function 漏掉的类别(货的类别: never): never {
+  throw new Error("账本里出现了没登记过的类别：" + String(货的类别))
 }
 
-let toolCount = 0
-let supplyCount = 0
-let i = 0
-while (i < cargo.length) {
-  if (kindOf(cargo[i]) === "tool") { toolCount = toolCount + 1 } else { supplyCount = supplyCount + 1 }
-  i = i + 1
-}
-golem.say("账本上有工具" + toolCount + "件，杂货" + supplyCount + "件。")
-
-// 第二阶段：逐件入桶（先走到货箱边，再走到木桶格子）
-let toolSlot = 0
-let materialSlot = 0
-let foodSlot = 0
-i = 0
-while (i < cargo.length) {
-  const item = cargo[i]
-  const kind = kindOf(item)
-  golem.moveTo(world.vars.cargoBox[0] + 4, world.vars.cargoBox[2])
-  if (kind === "tool") {
-    const slot = boxes.tools[toolSlot]
-    golem.moveTo(9, 3)
-    golem.moveTo(slot[0], slot[2] + 2)
-    golem.place(item.id, slot[0], slot[1], slot[2])
-    toolSlot = toolSlot + 1
-  } else if (kind === "food") {
-    const slot = boxes.food[foodSlot]
-    golem.moveTo(9, 3)
-    golem.moveTo(slot[0], slot[2] + 2)
-    golem.place(item.id, slot[0], slot[1], slot[2])
-    foodSlot = foodSlot + 1
-  } else {
-    const slot = boxes.materials[materialSlot]
-    golem.moveTo(9, 3)
-    golem.moveTo(slot[0], slot[2] + 2)
-    golem.place(item.id, slot[0], slot[1], slot[2])
-    materialSlot = materialSlot + 1
+// 用 switch 把货判成三类；food 是 supply 里的一个特例。
+function 类别Of(货: 货物): 类别 {
+  switch (货.kind) {
+    case "tool":
+      return "工具"
+    case "supply":
+      if (货.food === true) {
+        return "食物"
+      }
+      return "材料"
+    default:
+      return 漏掉的类别(货.kind)
   }
-  i = i + 1
 }
 
-// 第三阶段：给三个工作点配工具，再和塔卡对账
-const jobs = world.vars.jobs
-let j = 0
-while (j < jobs.length) {
-  const job = jobs[j]
-  golem.moveTo(18, 3)
-  golem.moveTo(job.station[0] - 2, job.station[2])
-  golem.place(job.needs, job.station[0], job.station[1], job.station[2])
-  j = j + 1
+// 记录（record）：一只桶的账 = 名字 + 格子 + 下一个空格子 + 已放件数。
+type 桶账 = { 名字: string; 格子: number[][]; 下一个: number; 已放: number }
+const 账本: Record<类别, 桶账> = {
+  工具: { 名字: "工具桶", 格子: 木桶.tools, 下一个: 0, 已放: 0 },
+  材料: { 名字: "材料桶", 格子: 木桶.materials, 下一个: 0, 已放: 0 },
+  食物: { 名字: "食物桶", 格子: 木桶.food, 下一个: 0, 已放: 0 },
 }
+
+// 第一阶段：先按类别清点账本（对象记账，不用背数量）。
+let 工具数 = 0
+let 杂货数 = 0
+for (const 货 of 货物表) {
+  if (类别Of(货) === "工具") {
+    工具数 = 工具数 + 1
+  } else {
+    杂货数 = 杂货数 + 1
+  }
+}
+golem.say("账本：工具 " + 工具数 + " 件，杂货 " + 杂货数 + " 件。")
+
+// 放货只做「记录层面的决定」：这件货该进哪一格，返回 [货物编号, x, y, z]。
+// （移动与摆放留在顶层循环里：自动 await 只会改写顶层的 SDK 调用。）
+function 放货(货: 货物): [string, number, number, number] {
+  const 桶 = 账本[类别Of(货)]
+  if (桶.下一个 >= 桶.格子.length) {
+    throw new Error(桶.名字 + "放不下了")
+  }
+  const 格 = 桶.格子[桶.下一个]
+  桶.下一个 = 桶.下一个 + 1
+  桶.已放 = 桶.已放 + 1
+  return [货.id, 格[0], 格[1], 格[2]]
+}
+
+// 第二阶段：逐件认货、进对应的桶
+for (const 货 of 货物表) {
+  golem.moveTo(货箱[0] + 4, 货箱[2])
+  const 格 = 放货(货)
+  golem.moveTo(9, 3)
+  golem.moveTo(格[1], 格[3] + 2)
+  golem.place(格[0], 格[1], 格[2], 格[3])
+}
+golem.say("八件货都进桶了。")
+
+// 第三阶段：给三个工作点配工具（记录数组顺序扫描）
+let 序号 = 0
+while (序号 < 工作台.length) {
+  const 工 = 工作台[序号]
+  golem.moveTo(18, 3)
+  golem.moveTo(工.station[0] - 2, 工.station[2])
+  golem.place(工.needs, 工.station[0], 工.station[1], 工.station[2])
+  序号 = 序号 + 1
+}
+
+// 第四阶段：回塔卡身边对账
 golem.moveTo(world.vars.trader[0], world.vars.trader[2] - 2)
 golem.say("账清了，塔卡。")
 `,
@@ -391,6 +435,7 @@ golem.say("账清了，塔卡。")
     {
       id: "l06-tools-box",
       text: "工具全进工具桶，一件没混",
+      hint: "world.vars.cargo 里每件货是一条记录 { id, kind, food }，kind 为 \"tool\" 的是工具。工具桶是 world.vars.boxes.tools 里的格子（命名点 toolsBox 是入口）；把工具一件件 golem.place(item.id, 格子) 放进去，一格一件。",
       check: g => {
         const cargo = cargoList(g.var("cargo"));
         const boxes = boxesOf(g.var("boxes"));
@@ -403,6 +448,7 @@ golem.say("账清了，塔卡。")
     {
       id: "l06-supplies",
       text: "材料和食物各进各桶，一件不丢",
+      hint: "kind 为 \"supply\" 的货再看 food：food 为 true 进 boxes.food（食物桶），否则进 boxes.materials（材料桶）。用 switch 先按 kind 分路、再在 supply 分支里看 food，默认分支用 assertNever 兜底，漏一种类别会当场报错而不是悄悄放错。",
       check: g => {
         const cargo = cargoList(g.var("cargo"));
         const boxes = boxesOf(g.var("boxes"));
@@ -421,8 +467,15 @@ golem.say("账清了，塔卡。")
     {
       id: "l06-jobs-tooled",
       text: "每个工作点都配到对的工具",
+      hint: "三个工作点都在 world.vars.jobs 里：job.needs 是要放的工具，job.station 是工作点坐标（命名点 chopStation / mineStation / fightStation）。放完货后走到每个 job.station 旁边，golem.place(job.needs, job.station) 把工具放上去，最后 golem.moveTo(trader) 找塔卡对账。",
       check: g => jobsOf(g.var("jobs")).every(job => blockId(g, pos(job.station)) === C + job.needs),
     },
+  ],
+  // 名副其实（docs/48 §1.9）：本关必须真的用记录（对象）与可辨识联合的分支，不能靠字符串硬记。
+  codeRequirements: [
+    { id: "l06-record", text: "用记录（对象字面量）把货/桶的字段绑在一起，而不是散装字符串", kind: "object", min: 2 },
+    { id: "l06-branch", text: "用 switch/if 按 kind 分路（分支至少 2 处），漏一类要能看出来", kind: "branch", min: 2 },
+    { id: "l06-function", text: "把「这件货该进哪个桶」写成可复用的 function", kind: "function", min: 2 },
   ],
   phases: ["记录与清点", "三桶分拣与配工具", "新工具与对账"],
 });

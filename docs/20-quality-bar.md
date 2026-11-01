@@ -1,6 +1,6 @@
 # 20 — 最终质量门（用户验收标准的可执行版）
 
-> 状态：v1｜负责人：Lead｜最后更新：2026-10-31
+> 状态：v1 + 2026-11-01 文案政策更新（§3b：自然中文 + 必要英文术语）｜负责人：Lead｜最后更新：2026-11-01
 > 用户原话：**美观、精致、逻辑 coherent、层层递进、精彩、震撼；界面易用、文字清晰、没有很重的 AI 味和看不懂的汉语。**
 > 本文把这句话拆成能打勾的门禁；任何一条不过，不叫「完成」。
 > 现行文件（2026-11-01 复核）：质量门定义仍有效；当前 gate 状态见 `qa/README.md` §6（G-FRESH-READER 仍 tracked fail）。
@@ -38,28 +38,31 @@
 7. 中文标点用全角；中英之间加空格；API 名保持英文且用等宽字体。
 8. 每个字符串必须能回答：玩家现在该做什么？下一步点哪里？
 
-## 3b. UI 语言门禁：干净的纯中文
+## 3b. UI 语言门禁：自然中文 + 必要英文术语（2026-11-01 政策更新）
 
-**硬规则：玩家在界面上读到的每一句叙述，必须是地道中文。** 代码本身、必须引用的接口名、按键名只能以「代码引用」形式出现，且不得构成叙述的骨架。
+**硬规则：玩家读到的叙述必须是自然、地道的中文；但必须用的计算机术语保留英文原文，不为「纯中文」硬翻译。**
+
+理由：这些英文术语（`for`、`let`、`Promise.all`、`async/await`、`closure`、`higher-order function`、`interface` 等）是学习者之后查资料、看真实代码、跨语言迁移的锚点；把「闭包」硬翻成「封闭体」、把 `Promise.all` 翻成「承诺全部」反而制造第二套要背的词。目标是「不吓人、能看懂」，不是「界面零英文」。
 
 | 允许 | 不允许 |
 |---|---|
-| 代码编辑器里的英文标识符（`golem.moveTo`） | 叙述句里夹英文术语（"用 moveTo 走到灯下" → "让灰崽走到灯下"） |
-| 极少量专有名词：Minecraft / TypeScript（首次出现给中文解释；在游戏内界面优先写「我的世界」「这门语言」） | 界面标签用英文：Run / Stop / Reset / Level / Objective / Coach / Result / Mock |
-| 按键名（回车、空格、Esc） | "Ctrl + Enter 运行" 这类把英文键名当文案主语的写法；优先「回车运行」 |
-| 代码引用、行号、文件名 | 翻译腔：「让我们来…」「这是一个…的过程」「通过…来实现…」 |
+| 必要英文术语保留原文，首次给中文解释：`for` 循环、`let` 变量、**闭包（closure）**、**高阶函数（higher-order function）**、`Promise.all`、`async/await`、`interface` | 界面标签用英文：Run / Stop / Reset / Level / Objective / Coach / Result / Mock（一律「运行 / 停止 / 重置 / 关卡 / 目标 / 教练 / 结果 / 模拟」） |
+| 术语中英并列：变量（variable）、记录（record）、变体（variant） | 把英文当普通叙述词：`click`、`cool`、`awesome`、`check this` |
+| 代码标识符/API 名用等宽或反引号：`golem.moveTo`、`world.container(barrel).count("egg")` | 整句英文、中英混杂的翻译腔：「这是一个 process，通过它来实现…」 |
+| 按键名（回车、空格、Esc）；Minecraft / TypeScript 首次出现给中文解释 | 为了「纯中文」硬翻术语：closure→「封闭体」、interface→「界面」、Promise→「承诺」 |
+| 世界观比喻 + 正式术语并存：先「灰崽记住了你交给它的做法」，再「这在编程里叫闭包（closure）」 | 用世界观比喻替代正式术语（只给「符文」「织纹秘语」而从不点名概念） |
 
 **改写示例**：
 - ❌「点击 Run 运行程序，查看 Result 面板的 Objective 完成情况。」
 - ✅「按「运行」，看右侧目标有没有全部点亮。」
 - ❌「使用 golem.moveTo 移动到 1 号灯柱，再调用 golem.place 放置灯笼。」
-- ✅「让灰崽走到 1 号灯下，再点亮它。」
-- ❌「本关引入了 closure 与 higher-order function。」
-- ✅「这一关，灰崽会记住你交给它的做事方法，并把它带到别处用。」
+- ✅「让灰崽走到 1 号灯下，再点亮它；代码里就是 `golem.moveTo(lamp1)`、`golem.place("lantern", lamp1)`。」
+- ❌「本关引入了 closure 与 higher-order function。」（无解释、堆词）
+- ✅「这一关教**闭包（closure）**和**高阶函数（higher-order function）**：灰崽会记住你交给它的做事方法，并把它带到别处用。」
 
-**术语处理**：叙述里不出现「变量/函数/闭包/接口/异步」等词；这些词只出现在（a）代码注释（b）织典页（c）UI 的「术语小注」——且首次必须用世界观里的说法解释（见 docs/23 §8）。
+**术语处理**：正式术语（变量/函数/闭包/接口/异步等）**应当出现**，统一用「中文名（English term）」并列；首次出现配一句人话解释，之后直接用该词，不换同义词。术语可以出现在叙述、教练卡、结算、旅途手记、织典和指令手册里；世界观比喻负责入口，正式术语负责迁移，两者不互相替代（见 docs/04 §11.5）。
 
-**检查方式**：`scripts/check-copy.mjs --pure-zh` 扫描 UI 文案层（`apps/studio/src/copy/*.json`、content 的 UI 字段、level-spec 的 check.text / task 文案），对叙述串里的连续拉丁字母报错（代码引用/白名单除外）；人工再按上表复核一遍。
+**检查方式**：`scripts/check-copy.mjs --pure-zh` 扫描 UI 文案层（`apps/studio/src/copy/*.json`、content 的 UI 字段、level-spec 的 check.text / task 文案）。规则：叙述串里的连续拉丁字母必须属于「代码引用 / 白名单术语（`TECHNICAL_TERMS`）/ 已解释专有名词 / 中英并列术语」，否则报错；UI 英文标签仍判 FAIL。自测 `node scripts/check-copy.mjs --self-test` 当前 14/14 通过；人工作文按上表复核一遍。
 
 ## 3b2. 引导不能省（见 docs/25）
 

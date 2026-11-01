@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { chrome } from "../copy";
 import type { StudioProgress } from "../progress";
 import codexData from "../../../../content/codex/codex.json";
+import { ConceptRevealCard } from "./ConceptRevealCard";
 
 interface CodexLanguage {
   lang: string;
@@ -169,6 +170,11 @@ export function CodexScreen({ progress, onBack }: CodexScreenProps) {
                     <h4>{chrome.codex.inGame}</h4>
                     <p>{zh(selected.inGame)}</p>
                   </section>
+                  {/^L\d+$/.test(selected.unlock) ? (
+                    <section className="codex-section" data-testid="codex-concept">
+                      <ConceptRevealCard levelId={selected.unlock} variant="codex" />
+                    </section>
+                  ) : null}
                   <section className="codex-section is-warn">
                     <h4>
                       <span className="codex-warn-badge">{chrome.codex.misconceptionBadge}</span>

@@ -157,12 +157,18 @@
       </div>
       <figure style="margin:18px 0 0">
         <img src="evidence/mc-l01.png" alt="真实 Minecraft 26.1.2 客户端里的 L01 小径/灯柱/村舍截图" style="width:100%;border-radius:14px;border:1px solid var(--line)">
-        <figcaption style="font-size:13px;color:var(--ink-soft);margin-top:8px">真实客户端截图（Xvfb + Prism 26.1.2 + 本服插件）：小径、灯柱、村舍、树木与灰崽都在世界里；不是示意图。</figcaption>
+        <figcaption style="font-size:13px;color:var(--ink-soft);margin-top:8px">真实客户端 2560×990 截图（Docker Xvfb + Prism 26.1.2 + 本服插件，玩家出生视角）：小径、灯柱、村舍、灰崽与艾拉都在世界里；不是示意图。</figcaption>
       </figure>
       <div class="scene-strip" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px">
-        <figure style="margin:0"><img src="evidence/mc-l04.png" alt="L04 麦田/谷仓/风车" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L04 麦田：金麦/水渠/谷仓/风车</figcaption></figure>
-        <figure style="margin:0"><img src="evidence/mc-l08.png" alt="L08 工坊" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L08 工坊：烟囱/熔炉/红石门/工具架</figcaption></figure>
-        <figure style="margin:0"><img src="evidence/mc-l09.png" alt="L09 黄昏营地" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L09 黄昏营地：钟架/酿造台/帆布帐篷</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l04.png" alt="L04 麦田/水渠/村舍" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L04 麦田：金麦/水渠/村舍与远处的艾拉</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l08.png" alt="L08 雨天工坊" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L08 雨天工坊：砖塔/铜管/熔炉/铁轨</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l09.png" alt="L09 入夜前营地钟楼" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L09 入夜前：钟楼/钟架/营地火把</figcaption></figure>
+      </div>
+      <div class="scene-strip" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+        <figure style="margin:0"><img src="evidence/mc-l02.png" alt="L02 清晨谷仓与蛋窝" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L02 谷仓清晨：主路/草垛/蛋窝（新出生点不再与织偶重叠）</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l03.png" alt="L03 初夜营地" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L03 初夜营地：钟楼/火把/围栏</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l10.png" alt="L10 峡谷合龙桥" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L10 峡谷合龙桥：左右岸桥头与中央合龙石基座</figcaption></figure>
+      </div>
       </div>
     </div>
   </section>
@@ -196,8 +202,8 @@
       <div class="box"><b>引擎 · Node</b><small>会话状态机、AST 自动 await（学生无感顺序执行）、worker 沙箱、评分、提示、SSE。</small></div>
       <div class="box"><b>工作室 · 浏览器</b><small>关卡选择、Monaco 编辑器、目标与教练、运行/停止/重置、结果星级。</small></div>
     </div>
-    <figure style="margin:18px 0"><img src="evidence/ui-workbench.png" alt="织界 Studio 工作台：像素皮肤、L04 真实世界条、代码编辑器与目标卡" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:13px;color:var(--ink-soft);margin-top:8px">Studio 工作台（像素皮肤）：左边代码，右边目标/教练；世界截图按当前关卡切换，代码字体与字号保持可读。</figcaption></figure>
-    <p class="sub" style="margin-top:16px">已经实测：Paper 26.1.2 + Java 25 + mineflayer 4.39.0；<b>L01–L10 真实 Paper 无头端到端全绿</b>（L01 21 项、L02–L09 各 13 项、L10 19 项；评分与 Mock 逐项一致）；L10 双织偶 + 合龙石玩家节拍真实通过。桌面 App 已内置 Node/Java/Paper/插件/世界/真实引擎与织偶，用户只需安装 Minecraft 26.1.2；L01–L09 场景已过真实截图质量门。</p>
+    <figure style="margin:18px 0"><img src="evidence/ui-workbench.png" alt="织界 Studio 工作台（2× 高清）：Maple Mono 字体、L01 真实世界条、目标/HUD/教练与指令手册" style="width:100%;border-radius:4px;border:1px solid var(--line)"><figcaption style="font-size:13px;color:var(--ink-soft);margin-top:8px">Studio 工作台（2× DPR 高清截图）：左边代码（Maple Mono，含中文回退），右侧本关目标、位置 HUD 与教练卡；上方世界条是当前关卡真实客户端截图。指令手册随时可开，逐条给出 API 签名/人话语义/可照抄写法与本关坐标点。</figcaption></figure>
+    <p class="sub" style="margin-top:16px">已经实测：Paper 26.1.2 + Java 25 + mineflayer 4.39.0；<b>L01–L10 真实 Paper 无头端到端全绿</b>（L01 21 项、L02–L09 各 13 项、L10 19 项；评分与 Mock 逐项一致）；L10 双织偶 + 合龙石玩家节拍真实通过。桌面 App 已内置 Node/Java/Paper/插件/世界/真实引擎与织偶，用户只需安装 Minecraft 26.1.2；L01–L10 场景已全部重拍为真实客户端 2560×1440 高清截图，并逐关通过起始点审计（evidence/playtest-fix/start-positions.md）。</p>
   </section>
 
   <section>
@@ -222,7 +228,7 @@
       <div class="card"><h3>正在建</h3>
         <p>· 挑战层目前是说明卡，尚未开放为可玩挑战会话<br>
         · 真人多背景盲测未执行，目前是 AI 自动化验收（真实 Paper e2e + Studio e2e + UOS）<br>
-        · 部分关卡真实客户端截图尚未全部重拍<br>
+        · 10 关真实客户端截图已全部重拍（2560×1440，含 L10），逐关起始点审计通过；L10 出生朝向仍是草地夹道（构图问题，已记入边界）<br>
         · Fresh Reader Round 4 尚未清零（门禁仍为 tracked fail）<br>
         · L03/L05 出生点、L02 蛋糕与 L04 南瓜目标格已在 11-01 修复（见 evidence/playtest-fix/report.md §4）</p></div>
     </div>

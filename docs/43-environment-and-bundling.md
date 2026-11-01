@@ -1,6 +1,6 @@
 # 43 — 环境、依赖、打包边界
 
-> 状态：交接事实（当前安装包已内置真实运行时）｜负责人：Lead｜最后更新：2026-11-01｜上游：`README.md`、`apps/desktop/README.md`、`docs/46-playtest-fix-plan.md`
+> 状态：交接事实（当前安装包已内置真实运行时；2026-11-01 Round 2 补字体/截图素材）｜负责人：Lead｜最后更新：2026-11-01｜上游：`README.md`、`apps/desktop/README.md`、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`
 
 ## 1. 用户应自己安装的
 
@@ -19,7 +19,9 @@
 - **Paper 26.1.2 build 74**（含 libraries/cache/versions/world/plugins/配置）
 - 真实引擎 bundle（`runtime/real/engine.mjs`）
 - **mineflayer / minecraft-protocol / pathfinder** 与 `bot/manager.mjs`
-- Mock 演示引擎、字体、图标、窗口/缩放/连接灯逻辑
+- Mock 演示引擎、图标、窗口/缩放/连接灯逻辑
+- **嵌包字体 Maple Mono**（代码/日志/手册代码块统一使用；含中文回退；OFL 许可文件随包，不依赖系统字体）
+- **关卡截图素材**（`apps/studio/public/world/*.png` 玩家出生视角；`report/evidence/*.png` 报告配图；成品尺寸/文件以最终提交素材为准）
 
 ## 3. 用户只需要
 
@@ -73,4 +75,23 @@ npm run desktop:build
 - `apps/desktop/src-tauri/target/release/bundle/appimage/*.AppImage`
 - `apps/desktop/src-tauri/target/release/bundle/rpm/*.rpm`
 
-当前自包含安装包（2026-11-01 重打包）：AppImage ≈400MB / RPM ≈417MB；构建期 `apps/desktop/src-tauri/runtime/real/` 约 1GB，不入 Git，构建前请评估磁盘/CI 缓存。
+当前自包含安装包（2026-11-01 Round 2 重打包）：AppImage ≈428MB / RPM ≈435MB；构建期 `apps/desktop/src-tauri/runtime/real/` 约 1GB，不入 Git，构建前请评估磁盘/CI 缓存。
+
+## 8. Round 2 素材与编辑器集成（2026-11-01）
+
+### 8.1 字体
+
+- 代码编辑器、运行日志、指令手册/试符台的代码块统一 `--mono` 栈指向**嵌包的 Maple Mono**（含中文回退），开启 ligature；不再使用 Iosevka / Departure Mono 作为代码字体。
+- 字体文件与 OFL 许可随 Studio 静态资源（`apps/studio/public/fonts/`）打包，桌面 App 与浏览器吃同一份文件，不依赖系统 fallback。
+- 验收方式（实现侧）：`document.fonts.check("16px \"Maple Mono\"")` 为 true、`.monaco-editor .view-lines` 的 computed font-family 含 Maple Mono；截图人工核对 0/O、1/l/I 不混淆。
+
+### 8.2 截图素材
+
+- 关卡截图按**玩家出生视角**（playerSpawn 第一人称）重新拍摄，用于 Studio 关卡页与报告页；同时作为「每关起始点是否合理」的验收证据（是否卡墙/贴脸 NPC/看墙/掉虚空/看不到目标）。
+- Studio 用 `apps/studio/public/world/L0X.png`（L01–L10）；报告用 `report/evidence/` 下的同名素材。替换时保持 16:9 与一致裁切，避免新旧混用。
+- 具体分辨率、文件清单和最终包体积由 Lead 在素材定稿后确认，文档不预填未验证数字（docs/48 §1.8 只写目标：高清、≥1920×1080）。
+
+### 8.3 打包
+
+- 字体与截图属于 Studio 静态资源，随 `apps/studio` 构建进入 `dist`，再由 `npm run desktop:assets` 复制进桌面包；不需要额外运行时依赖。
+- 重新打包仍走 `bash scripts/package-desktop.sh`（插件 → 真实引擎 → Studio → 自包含 runtime → AppImage/RPM）。

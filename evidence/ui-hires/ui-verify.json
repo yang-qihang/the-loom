@@ -1,0 +1,131 @@
+{
+  "url": "http://127.0.0.1:8091/index.html?engine=http%3A%2F%2F127.0.0.1%3A4317&scale=0.85",
+  "startedAt": "2026-11-01T05:59:34.032Z",
+  "checks": {
+    "mapCards": 10,
+    "mapHeroImg": {
+      "src": "./world/L01.png",
+      "natural": [
+        2560,
+        990
+      ]
+    },
+    "worldStripImg": {
+      "src": "./world/L01.png",
+      "natural": [
+        2560,
+        990
+      ]
+    },
+    "positionHud": "位置\n查坐标点\n\n灰崽\n(0，0)\n\n艾拉\n(0，6)\n1 号灯\n(-12，10)\n2 号灯\n(-12，-2)\n3 号灯\n(2，-2)\n4 号灯\n(2，16)\n桥边小灯\n(2，24)\n\n写 `golem.pos` 也能看到坐标。",
+    "goalListInitial": "○\n灰崽按顺序点亮 1、2、3 号灯\n○\n你亲手点亮 4 号灯\n○\n灰崽回到艾拉身边",
+    "manualLevel": "第一缕光",
+    "manualApiCount": 6,
+    "manualPoints": "名字\t坐标（横、高、前）\n艾拉\t0，11，6\n1 号灯\t-12，14，10\n2 号灯\t-12，14，-2\n3 号灯\t2，14，-2\n4 号灯\t2，14，16\n桥边小灯\t2，14，24",
+    "fonts": {
+      "body": {
+        "fontFamily": "\"Maple Mono\", \"Noto Sans SC\", ui-monospace, sans-serif",
+        "fontWeight": "400",
+        "fontSize": "16px"
+      },
+      "coach": {
+        "fontFamily": "\"Maple Mono\", \"Noto Sans Mono\", ui-monospace, monospace",
+        "fontWeight": "400",
+        "fontSize": "16px"
+      },
+      "editor": {
+        "fontFamily": "\"Maple Mono\", \"Noto Sans Mono\", ui-monospace, monospace, \"Droid Sans Mono\", monospace",
+        "fontWeight": "400",
+        "fontSize": "15px"
+      },
+      "manual": null,
+      "declaredOk": true,
+      "loadedFonts": [
+        "codicon:unloaded",
+        "Maple Mono:loaded",
+        "Maple Mono:loaded",
+        "Maple Mono:loaded",
+        "Maple Mono:loaded",
+        "Zpix:loaded"
+      ]
+    },
+    "replVisible": true,
+    "replLevel": "当前关卡：第一缕光",
+    "replPoints": "本关命名点（可以直接写进代码）\n\neira（0，6）\nlamp1（-12，10）\nlamp2（-12，-2）\nlamp3（2，-2）\nlamp4（2，16）\nlamp5（2，24）",
+    "goalListAfterStarter": "○\n灰崽按顺序点亮 1、2、3 号灯\n○\n你亲手点亮 4 号灯\n○\n灰崽回到艾拉身边",
+    "coachAfterStarter": "还没完成：灰崽按顺序点亮 1、2、3 号灯",
+    "phaseAfterStarter": "未运行",
+    "contextMenuVisible": true,
+    "contextMenuStyle": {
+      "backgroundColor": "rgb(23, 18, 13)",
+      "opacity": "1",
+      "color": "rgb(240, 234, 210)",
+      "zIndex": "10000"
+    },
+    "referenceLength": 262,
+    "editorSet": {
+      "ok": true,
+      "attempt": 0,
+      "length": 261
+    },
+    "playerBeatVisible": true,
+    "waitingCard": "我已在游戏里点亮",
+    "playerBeatGuide": true,
+    "settleVisibleBeforeBeat": false,
+    "settleText": "第一幕 · 动作之核\n\n第一缕光 · 通关\n★\n★\n★\n\n四盏灯全亮，最后一盏是你亲手点的。\n\n你刚才学的概念\n\n这个概念叫函数调用（function call）\n\n它是什么\n函数调用就是「对灰崽说一句咒语」：写 golem 加点的动作，再在括号里写清楚去哪、对谁。\n为什么要用它\n你不用自己跑腿，写一句话灰崽就照做；一句话只做一件事，先写先做、顺序也由你定。\n你刚才做的事\n你刚才写的 golem.moveTo(lamp1) 和 golem.place(\"lantern\", lamp1) 就是两次函数调用：括号里的 lamp1 是告诉它「去哪」。\n去织典读这一页\n\n织典翻到了新的一页：顺序之符。\n\n✓\n灰崽按顺序点亮 1、2、3 号灯\n✓\n你亲手点亮 4 号灯\n✓\n灰崽回到艾拉身边\n重玩本关\n重置本关\n下一关\n返回",
+    "conceptTerm": "函数调用",
+    "conceptCard": "你刚才学的概念\n\n这个概念叫函数调用（function call）\n\n它是什么\n函数调用就是「对灰崽说一句咒语」：写 golem 加点的动作，再在括号里写清楚去哪、对谁。\n为什么要用它\n你不用自己跑腿，写一句话灰崽就照做；一句话只做一件事，先写先做、顺序也由你定。\n你刚才做的事\n你刚才写的 golem.moveTo(lamp1) 和 golem.place(\"lantern\", lamp1) 就是两次函数调用：括号里的 lamp1 是告诉它「去哪」。\n去织典读这一页"
+  },
+  "shots": [
+    {
+      "name": "map-wall",
+      "file": "evidence/ui-hires/map-wall.png",
+      "bytes": 611128
+    },
+    {
+      "name": "workbench",
+      "file": "evidence/ui-hires/workbench.png",
+      "bytes": 612860
+    },
+    {
+      "name": "manual-open",
+      "file": "evidence/ui-hires/manual-open.png",
+      "bytes": 489244
+    },
+    {
+      "name": "repl",
+      "file": "evidence/ui-hires/repl.png",
+      "bytes": 463305
+    },
+    {
+      "name": "workbench-after-starter",
+      "file": "evidence/ui-hires/workbench-after-starter.png",
+      "bytes": 614421
+    },
+    {
+      "name": "monaco-context-menu",
+      "file": "evidence/ui-hires/monaco-context-menu.png",
+      "bytes": 640949
+    },
+    {
+      "name": "workbench-ready",
+      "file": "evidence/ui-hires/workbench-ready.png",
+      "bytes": 544818
+    },
+    {
+      "name": "settle-concept",
+      "file": "evidence/ui-hires/settle-concept.png",
+      "bytes": 628277
+    }
+  ],
+  "badResponses": [
+    {
+      "status": 404,
+      "url": "http://127.0.0.1:8091/assets/world/L01.png"
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "finishedAt": "2026-11-01T05:59:58.092Z"
+}

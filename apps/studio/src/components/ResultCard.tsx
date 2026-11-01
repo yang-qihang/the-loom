@@ -75,6 +75,19 @@ export function ResultCard({ levelId, phase, stateLabel, result, waitingForPlaye
                 </li>
               ))}
             </ul>
+            {result.codeCriteria && result.codeCriteria.length > 0 ? (
+              <div className="code-req" data-testid="code-req">
+                <p className="code-req-title">这一关真的用到的写法</p>
+                <ul className="code-req-list">
+                  {result.codeCriteria.map((item) => (
+                    <li key={item.id} className={item.passed ? "code-req-item is-pass" : "code-req-item"} data-testid={`code-req-${item.id}`}>
+                      <span className="code-req-mark" aria-hidden="true">{item.passed ? "✓" : "○"}</span>
+                      <span><RichText text={item.text} /></span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             {waitingForPlayer ? <p className="awaiting-line">{copy?.playerBeatUI}</p> : null}
           </>
         ) : null}

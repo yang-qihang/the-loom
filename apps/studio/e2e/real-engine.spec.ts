@@ -369,14 +369,12 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
     const el = document.querySelector(".monaco-editor .view-lines") as HTMLElement | null;
     return {
       family: el ? getComputedStyle(el).fontFamily : "",
-      // 代码编辑器在 dbd80fa 换成随包 Iosevka（像素等宽替代方案）；界面标题仍用随包像素字体。
-      iosevka: document.fonts.check('16px "Iosevka"'),
-      zpix: document.fonts.check('16px "Zpix"'),
+      // Round 2（task-10）：代码编辑器统一随包 Maple Mono（含中文的 CN 变体）。
+      maple: document.fonts.check('16px "Maple Mono"'),
     };
   });
-  expect(editorFont.family, "代码编辑器必须使用随包等宽字体栈").toContain("Iosevka");
-  expect(editorFont.iosevka, "Iosevka 随包字体未加载").toBe(true);
-  expect(editorFont.zpix, "Zpix 中文 fallback 未随包加载").toBe(true);
+  expect(editorFont.family, "代码编辑器必须使用随包等宽字体栈（Maple Mono）").toContain("Maple Mono");
+  expect(editorFont.maple, "Maple Mono 随包字体未加载").toBe(true);
   await page.getByTestId("btn-font-larger").click();
   await expect(page.getByTestId("font-size-value")).toHaveText("17");
   const enlarged = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.querySelector(".monaco-editor .view-lines") as HTMLElement).fontSize));

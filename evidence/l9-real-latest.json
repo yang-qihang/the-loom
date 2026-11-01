@@ -1,27 +1,27 @@
 {
  "task": "task-30 / T2-MC real L09 e2e",
  "level": "L09",
- "startedAt": "2026-11-01T04:24:34.889Z",
+ "startedAt": "2026-11-01T05:40:57.661Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem390",
+  "botName": "Golem245",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 12495,
+   "tick": 3833,
    "phase": "ready",
    "prepared": true,
    "levelId": "L08",
-   "sessionId": "0621bf16-add7-476f-8a2e-a805fd8151f0",
-   "epoch": 23,
+   "sessionId": "1ef92802-8b0d-422a-91d9-86d1969d9a0d",
+   "epoch": 8,
    "groundY": 65,
    "bots": [
-    "Golem339"
+    "Golem191"
    ],
    "npcs": [],
    "regionFrom": [
@@ -56,7 +56,7 @@
     "minecraft:lever": 8
    },
    "playerBeat": {
-    "sessionId": "0621bf16-add7-476f-8a2e-a805fd8151f0",
+    "sessionId": "1ef92802-8b0d-422a-91d9-86d1969d9a0d",
     "armed": false,
     "active": false,
     "hint": "",
@@ -65,8 +65,8 @@
     "done": false,
     "ok": true
    },
-   "lastResetHash": "sha256:c449cdce36fb4c4d517e325aef812432ecfc44fe1e7cdc87bce3130bffa40fdd",
-   "lastResetMs": 8
+   "lastResetHash": "sha256:855e49e57507e74a1db8e10651b66207985bd029cc57110ec7cad3eac6354dbf",
+   "lastResetMs": 38
   }
  },
  "checks": {
@@ -81,7 +81,7 @@
   "L09.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 1852,
+    "prepareMs": 2405,
     "scene": {
      "groundY": 65,
      "arena": {
@@ -118,20 +118,20 @@
   "L09.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "5aec0b5b-85d9-431d-8d0f-c9e50d4bc0c7",
-    "epoch": 24
+    "sessionId": "474dba5e-5ea9-463b-bb6b-9d76f1e41222",
+    "epoch": 9
    }
   },
   "L09.epoch-incremented": {
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "5aec0b5b-85d9-431d-8d0f-c9e50d4bc0c7",
-     "epoch": 24
+     "sessionId": "474dba5e-5ea9-463b-bb6b-9d76f1e41222",
+     "epoch": 9
     },
     "second": {
-     "sessionId": "43b59728-98ab-4e6a-bd65-82d5231ad99f",
-     "epoch": 25
+     "sessionId": "cc67ffc9-f077-4cba-83c0-fbe9fb06b56d",
+     "epoch": 10
     }
    }
   },
@@ -194,7 +194,7 @@
   "L09.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 10129
+    "referenceRunMs": 9776
    }
   },
   "L09.report-equals-mock": {
@@ -303,15 +303,15 @@
   "L09.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 15,
-    "b": 12
+    "a": 42,
+    "b": 25
    }
   },
   "L09.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:d28a8d2329d53393f9d055f8058707b189def87b2e6b69d07c139215bbbef7c0",
-    "b": "sha256:d28a8d2329d53393f9d055f8058707b189def87b2e6b69d07c139215bbbef7c0"
+    "a": "sha256:b6a0ce3da8772bb8e7097c9a69682f1f1de48d3593aa4546934f6c1924214e7e",
+    "b": "sha256:b6a0ce3da8772bb8e7097c9a69682f1f1de48d3593aa4546934f6c1924214e7e"
    }
   },
   "L09.reset-clears-events": {
@@ -417,22 +417,22 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "5aec0b5b-85d9-431d-8d0f-c9e50d4bc0c7",
-   "epoch": 24
+   "sessionId": "474dba5e-5ea9-463b-bb6b-9d76f1e41222",
+   "epoch": 9
   },
   "second": {
-   "sessionId": "43b59728-98ab-4e6a-bd65-82d5231ad99f",
-   "epoch": 25
+   "sessionId": "cc67ffc9-f077-4cba-83c0-fbe9fb06b56d",
+   "epoch": 10
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 15,
-   "hash": "sha256:d28a8d2329d53393f9d055f8058707b189def87b2e6b69d07c139215bbbef7c0",
-   "tick": 12771,
-   "sessionId": "43b59728-98ab-4e6a-bd65-82d5231ad99f",
-   "epoch": 25,
+   "ms": 42,
+   "hash": "sha256:b6a0ce3da8772bb8e7097c9a69682f1f1de48d3593aa4546934f6c1924214e7e",
+   "tick": 4117,
+   "sessionId": "cc67ffc9-f077-4cba-83c0-fbe9fb06b56d",
+   "epoch": 10,
    "checkpointSize": 5541,
    "restoredBlocks": 7,
    "removedEntities": 1,
@@ -443,11 +443,11 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 12,
-   "hash": "sha256:d28a8d2329d53393f9d055f8058707b189def87b2e6b69d07c139215bbbef7c0",
-   "tick": 12774,
-   "sessionId": "43b59728-98ab-4e6a-bd65-82d5231ad99f",
-   "epoch": 25,
+   "ms": 25,
+   "hash": "sha256:b6a0ce3da8772bb8e7097c9a69682f1f1de48d3593aa4546934f6c1924214e7e",
+   "tick": 4120,
+   "sessionId": "cc67ffc9-f077-4cba-83c0-fbe9fb06b56d",
+   "epoch": 10,
    "checkpointSize": 5541,
    "restoredBlocks": 0,
    "removedEntities": 1,
@@ -460,15 +460,15 @@
  "actions": [
   {
    "action": "moveTo(0,-4)",
-   "ms": 724
+   "ms": 531
   },
   {
    "action": "virtualPlace(minecraft:water_bottle@-2,65,-5)",
-   "ms": 100
+   "ms": 99
   },
   {
    "action": "virtualPlace(minecraft:water_bottle@2,65,-5)",
-   "ms": 100
+   "ms": 101
   },
   {
    "action": "virtualPlace(minecraft:air@0,65,-6)",
@@ -484,27 +484,27 @@
   },
   {
    "action": "virtualPlace(minecraft:glistering_melon@2,65,-3)",
-   "ms": 99
+   "ms": 95
   },
   {
    "action": "virtualPlace(minecraft:potion@-2,65,-5)",
-   "ms": 100
+   "ms": 99
   },
   {
    "action": "virtualPlace(minecraft:potion@2,65,-5)",
-   "ms": 140
+   "ms": 138
   },
   {
    "action": "moveTo(-2,-8)",
-   "ms": 1260
+   "ms": 1259
   },
   {
    "action": "moveTo(-6,-8)",
-   "ms": 1100
+   "ms": 1101
   },
   {
    "action": "virtualPlace(minecraft:potion@-10,65,-8)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:potion@-10,65,-8)",
@@ -524,7 +524,7 @@
   },
   {
    "action": "moveTo(0,-8)",
-   "ms": 700
+   "ms": 701
   },
   {
    "action": "moveTo(0,-2)",
@@ -532,7 +532,7 @@
   },
   {
    "action": "moveTo(4,2)",
-   "ms": 1450
+   "ms": 1249
   },
   {
    "action": "moveTo(4,6)",
@@ -540,15 +540,15 @@
   },
   {
    "action": "moveTo(8,6)",
-   "ms": 1100
+   "ms": 1102
   },
   {
    "action": "moveTo(8,7)",
-   "ms": 50
+   "ms": 47
   },
   {
    "action": "virtualPlace(minecraft:golden_apple@10,65,7)",
-   "ms": 100
+   "ms": 101
   },
   {
    "action": "say(药水备好了，等织者泼下去)",
@@ -564,19 +564,19 @@
   },
   {
    "action": "reset",
-   "ms": 137
+   "ms": 177
   },
   {
    "action": "reset",
-   "ms": 47
+   "ms": 33
   },
   {
    "action": "reset",
-   "ms": 62
+   "ms": 86
   }
  ],
  "errors": [],
- "prepareMs": 1852,
+ "prepareMs": 2405,
  "scene": {
   "groundY": 65,
   "arena": {
@@ -608,7 +608,7 @@
    "eira"
   ]
  },
- "referenceRunMs": 10129,
+ "referenceRunMs": 9776,
  "snapshot": {
   "blocks": {
    "-20,64,-16": "minecraft:coarse_dirt",
@@ -2885,6 +2885,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-11-01T04:24:49.041Z",
+ "finishedAt": "2026-11-01T05:41:12.265Z",
  "ok": true
 }

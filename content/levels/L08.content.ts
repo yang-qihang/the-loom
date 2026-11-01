@@ -128,10 +128,23 @@ const L08_BASE: LevelDef = defineLevel({
       { type: "villager", role: "npc", id: "eira", name: "艾拉" },
       { type: "villager", role: "npc", id: "worker", name: "织匠" },
     ],
+    // 命名坐标点（docs/48 §1.1）：沙箱里可直接当全局变量用，如 golem.moveTo(lever)。
+    points: {
+      eira: { pos: [-4, 65, 6], name: "艾拉" },
+      lever: { pos: [0, 65, 8], name: "总拉杆（后面的石台）" },
+      furnaceSwitch: { pos: [-6, 65, -6], name: "熔炉组合闸位" },
+      gateSwitch: { pos: [6, 65, -6], name: "红石门合闸位" },
+      bellSwitch: { pos: [2, 65, -10], name: "警钟合闸位" },
+      workshop: { pos: [0, 65, -5], name: "工坊中轴" },
+    },
+    // 玩家出生点：工坊中轴，朝北正对三台机器；离灰崽 (0,65,0) 有 5 格，不会怼脸。
+    playerSpawn: [0, 65, -5],
   },
   code: {
     expectedLoc: 80,
-    starterCode: `interface Machine {
+    starterCode: `// 命名点：lever（总拉杆）、eira（艾拉）、furnaceSwitch / gateSwitch / bellSwitch（三个合闸位）。
+// 接口（interface）是一张「能做什么」的清单：对象只要有 startSteps/stopSteps 两个方法，就满足 Machine。
+interface Machine {
   name: string
   status: string
   startSteps(): Step[]
@@ -479,6 +492,7 @@ golem.say("三台机器扣成一组，全部待机")
     {
       id: "l08-machines-started",
       text: "清单里的机器逐台启动、各报状态",
+      hint: "world.vars.machines 里每台机器有 name、status、switchPos（合闸位）。写 function runAll(ms: Machine[]) 逐台调用 m.startSteps()，按顺序 golem.place(\"redstone_block\", 合闸位)，并 golem.say(\"启动 \" + name + \"：\" + status)；status 为 \"过热\" 的机器当场再停一次。命名点 furnaceSwitch / gateSwitch / bellSwitch 就是三处合闸位。",
       check: g => {
         const specs = specsOf(g);
         const allStarted =
@@ -493,6 +507,7 @@ golem.say("三台机器扣成一组，全部待机")
     {
       id: "l08-stop-reversed",
       text: "停机按反序，最后停第一台",
+      hint: "写 function stopAll(ms: Machine[])：先用 ms.slice().reverse() 得到反序，再逐台调用 m.stopSteps()，把合闸位放回空气（golem.place(\"air\", 合闸位)）。最后 golem.moveTo(lever) 回到总拉杆前，把最后一下留给玩家。",
       check: g => {
         const specs = specsOf(g);
         const tail = offEvents(g).map(e => specIndexAt(g, e.pos)).slice(-specs.length);
@@ -507,8 +522,14 @@ golem.say("三台机器扣成一组，全部待机")
       id: "l08-lever-pulled",
       text: "你亲手把总拉杆推到底",
       player: true,
+      hint: "机器都待机以后轮到你：走到总拉杆前（命名点 lever，world.vars.lever 是同一格），对准拉杆按右键推到底。总拉杆是活人的活，灰崽只能把它推到一半。",
       check: g => g.events("block.place").some(e => e.actorType === "player" && samePos(e.pos, pos(g.var("lever")))),
     },
+  ],
+  // 名副其实（docs/48 §1.9）：本关必须真的用 interface 契约 + 组合，而不是背机器名单。
+  codeRequirements: [
+    { id: "l08-function", text: "用 function 把机器动作拆成 machineOf / combine / runAll / stopAll 这类可复用步骤", kind: "function", min: 3 },
+    { id: "l08-branch", text: "用分支处理「过热就停」这类特殊情况（if 或三元表达式至少 3 处）", kind: "branch", min: 3 },
   ],
   phases: ["统一启动与汇报", "联动机与停机反序"],
 });

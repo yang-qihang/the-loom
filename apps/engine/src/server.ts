@@ -6,7 +6,8 @@ import { pathToFileURL } from "node:url";
 import type { AddressInfo } from "node:net";
 import { MockWorldPort } from "../../../packages/worldport/src/mock-port";
 import type { WorldSnapshot } from "../../../packages/protocol/src/index";
-import { progressView } from "../../../packages/level-spec/src/index";
+import { pointsView, progressView } from "../../../packages/level-spec/src/index";
+import { registryForLevel } from "../../../packages/sdk/src/api-registry";
 import { GameSession, SessionError, type EngineEvent, type ResultEvent } from "../../../packages/session/src/index";
 import { findLevelContent, listLevels } from "./catalog";
 import { createWorldRuntime, WorldUnavailableError, type WorldRuntime } from "./world";
@@ -74,6 +75,8 @@ function ssePayload(event: EngineEvent): unknown {
         // Studio 的 RunResult 形状（docs/46 §2.3）：目标面板/玩家节拍门控直接用这两个真值。
         progress: event.progress,
         playerBeatReady: event.playerBeatReady,
+        // 「名副其实」代码要求（docs/48 §1.9）：已并入 criteria，这里单独透传供 Studio 分区展示。
+        ...(event.codeCriteria ? { codeCriteria: event.codeCriteria } : {}),
       },
     };
   }
@@ -145,6 +148,35 @@ function requireString(body: Record<string, unknown>, key: string): string {
   return value;
 }
 
+/** 端点校验/错误映射之后的最小工具：把会话语义状态里的容器计数映射成 HUD 用的命名点视图。 */
+function sessionContainers(
+  session: GameSession,
+  points: ReturnType<typeof pointsView>,
+): Record<string, Record<string, number>> {
+  const containers: Record<string, Record<string, number>> = {};
+  try {
+    const semantic = session.semanticState();
+    if (!semantic) return containers;
+    // 同一坐标可能对应多个名字（如 L02 的倒蛋位 = barrel / bucket），全部给出，HUD 读 barrel 即可。
+    const namesByKey = new Map<string, string[]>();
+    for (const [name, point] of Object.entries(points)) {
+      const key = point.pos.join(",");
+      namesByKey.set(key, [...(namesByKey.get(key) ?? []), name]);
+    }
+    for (const [key, items] of Object.entries(semantic.containers)) {
+      const names = namesByKey.get(key);
+      if (names && names.length > 0) {
+        for (const name of names) containers[name] = { ...items };
+      } else {
+        containers[key] = { ...items };
+      }
+    }
+  } catch {
+    // 端口已释放/尚未准备：HUD 降级为空，不影响每秒轮询。
+  }
+  return containers;
+}
+
 export function createEngineServer(world?: WorldRuntime): http.Server {
   const runtime = world ?? createWorldRuntime();
   const sessions = new Map<string, GameSession>();
@@ -203,8 +235,35 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
     if (method === "GET" && levelMatch) {
       const content = findLevelContent(decodeURIComponent(levelMatch[1]));
       if (!content) throw new SessionError(`未知关卡 ${levelMatch[1]}`, "NOT_FOUND");
-      // progressView 只含 {id,text,player}：Studio 目标面板/玩家节拍提示的唯一来源（docs/46 §2.3）。
-      sendJson(res, 200, { def: content.def, starterCode: content.def.code.starterCode, progress: progressView(content.def) });
+      // progressView 只含 {id,text,player,hint}：Studio 目标面板/引导的唯一来源（docs/46 §2.3、docs/48 §1.4）。
+      // points 是本关命名坐标点（Studio 指令手册坐标表/REPL 用）。
+      sendJson(res, 200, {
+        def: content.def,
+        starterCode: content.def.code.starterCode,
+        progress: progressView(content.def),
+        points: pointsView(content.def),
+      });
+      return;
+    }
+
+    // 指令手册（docs/48 §1.5）：本关可用 API 列表（按关卡引入顺序）+ 命名坐标点。
+    if (method === "GET" && path === "/api/api-reference") {
+      const levelId = url.searchParams.get("levelId")?.trim();
+      if (!levelId) throw new SessionError("缺少 levelId", "INVALID_ARGUMENT");
+      const content = findLevelContent(levelId);
+      if (!content) throw new SessionError(`未知关卡 ${levelId}`, "NOT_FOUND");
+      const orders = new Map(listLevels().map(level => [level.id, level.order]));
+      const order = (id: string): number => orders.get(id) ?? Number.MAX_SAFE_INTEGER;
+      const apis = registryForLevel(levelId, order);
+      sendJson(res, 200, {
+        levelId,
+        title: content.def.meta.title.zh,
+        // `api` 是 Studio 契约里的字段名（apps/studio/src/types.ts ApiReferenceView），
+        // `apis` 是任务卡里的名字：两个都返回，避免调用方二选一踩空。
+        api: apis,
+        apis,
+        points: pointsView(content.def),
+      });
       return;
     }
 
@@ -243,6 +302,32 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
         mode: session.mode,
         snapshot,
       });
+      return;
+    }
+
+    // 会话快照（docs/48 §1.6）：Studio HUD 每秒轮询显示灰崽/关键点坐标。
+    // 顶层直接展开 WorldSnapshot（agents/npcs/vars/…），同时保留 snapshot 字段兼容；
+    // 两条路径都带 points（HUD「艾拉/木桶在哪」、REPL 命名点说明）与 containers
+    // （HUD「木桶里已倒 N 件」：容器坐标 → 命名点名字，物品名不带前缀）。
+    const sessionSnapshotMatch = /^\/api\/session\/([^/]+)\/snapshot$/.exec(path);
+    if (method === "GET" && sessionSnapshotMatch) {
+      const session = requireSession(decodeURIComponent(sessionSnapshotMatch[1]));
+      const snapshot = await session.snapshot();
+      const points = pointsView(session.level.def);
+      const containers = sessionContainers(session, points);
+      const envelope = {
+        ok: true,
+        sessionId: session.id,
+        state: session.state,
+        epoch: session.epoch,
+        port: session.portKind,
+        mode: session.mode,
+        ...snapshot,
+        points,
+        containers,
+        snapshot: { ...snapshot, points, containers },
+      };
+      sendJson(res, 200, envelope);
       return;
     }
 

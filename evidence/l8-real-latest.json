@@ -1,27 +1,27 @@
 {
  "task": "task-30 / T2-MC real L08 e2e",
  "level": "L08",
- "startedAt": "2026-11-01T04:24:22.468Z",
+ "startedAt": "2026-11-01T05:40:42.320Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem339",
+  "botName": "Golem191",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 12247,
+   "tick": 3526,
    "phase": "ready",
    "prepared": true,
    "levelId": "L07",
-   "sessionId": "b93c08fe-2920-4414-aa1e-8a3cba6cb7dc",
-   "epoch": 21,
+   "sessionId": "bf1a7b1a-f957-4690-a36a-a965cd72f958",
+   "epoch": 6,
    "groundY": 65,
    "bots": [
-    "Golem288"
+    "Golem138"
    ],
    "npcs": [],
    "regionFrom": [
@@ -56,7 +56,7 @@
     "minecraft:oak_trapdoor": 8
    },
    "playerBeat": {
-    "sessionId": "b93c08fe-2920-4414-aa1e-8a3cba6cb7dc",
+    "sessionId": "bf1a7b1a-f957-4690-a36a-a965cd72f958",
     "armed": false,
     "active": false,
     "hint": "",
@@ -65,8 +65,8 @@
     "done": false,
     "ok": true
    },
-   "lastResetHash": "sha256:132151b44967714e55dfbcc5e4fb2126229dc4d9a10893e8540ccd30adc253d7",
-   "lastResetMs": 21
+   "lastResetHash": "sha256:3fa3f9c01f8470004a164519bdf9fb83efa26d1d769ff45384cd0fc99285995d",
+   "lastResetMs": 95
   }
  },
  "checks": {
@@ -81,7 +81,7 @@
   "L08.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 1801,
+    "prepareMs": 3147,
     "scene": {
      "groundY": 65,
      "arena": {
@@ -117,20 +117,20 @@
   "L08.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "173092e0-96cf-459d-916d-5afa39c51e60",
-    "epoch": 22
+    "sessionId": "8ecd42da-7776-4b76-914c-c9050449f484",
+    "epoch": 7
    }
   },
   "L08.epoch-incremented": {
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "173092e0-96cf-459d-916d-5afa39c51e60",
-     "epoch": 22
+     "sessionId": "8ecd42da-7776-4b76-914c-c9050449f484",
+     "epoch": 7
     },
     "second": {
-     "sessionId": "0621bf16-add7-476f-8a2e-a805fd8151f0",
-     "epoch": 23
+     "sessionId": "1ef92802-8b0d-422a-91d9-86d1969d9a0d",
+     "epoch": 8
     }
    }
   },
@@ -189,7 +189,7 @@
   "L08.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 7309
+    "referenceRunMs": 7358
    }
   },
   "L08.report-equals-mock": {
@@ -290,15 +290,15 @@
   "L08.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 7,
-    "b": 7
+    "a": 29,
+    "b": 37
    }
   },
   "L08.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:c449cdce36fb4c4d517e325aef812432ecfc44fe1e7cdc87bce3130bffa40fdd",
-    "b": "sha256:c449cdce36fb4c4d517e325aef812432ecfc44fe1e7cdc87bce3130bffa40fdd"
+    "a": "sha256:855e49e57507e74a1db8e10651b66207985bd029cc57110ec7cad3eac6354dbf",
+    "b": "sha256:855e49e57507e74a1db8e10651b66207985bd029cc57110ec7cad3eac6354dbf"
    }
   },
   "L08.reset-clears-events": {
@@ -396,22 +396,22 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "173092e0-96cf-459d-916d-5afa39c51e60",
-   "epoch": 22
+   "sessionId": "8ecd42da-7776-4b76-914c-c9050449f484",
+   "epoch": 7
   },
   "second": {
-   "sessionId": "0621bf16-add7-476f-8a2e-a805fd8151f0",
-   "epoch": 23
+   "sessionId": "1ef92802-8b0d-422a-91d9-86d1969d9a0d",
+   "epoch": 8
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 7,
-   "hash": "sha256:c449cdce36fb4c4d517e325aef812432ecfc44fe1e7cdc87bce3130bffa40fdd",
-   "tick": 12462,
-   "sessionId": "0621bf16-add7-476f-8a2e-a805fd8151f0",
-   "epoch": 23,
+   "ms": 29,
+   "hash": "sha256:855e49e57507e74a1db8e10651b66207985bd029cc57110ec7cad3eac6354dbf",
+   "tick": 3770,
+   "sessionId": "1ef92802-8b0d-422a-91d9-86d1969d9a0d",
+   "epoch": 8,
    "checkpointSize": 2280,
    "restoredBlocks": 1,
    "removedEntities": 2,
@@ -421,11 +421,11 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 7,
-   "hash": "sha256:c449cdce36fb4c4d517e325aef812432ecfc44fe1e7cdc87bce3130bffa40fdd",
-   "tick": 12465,
-   "sessionId": "0621bf16-add7-476f-8a2e-a805fd8151f0",
-   "epoch": 23,
+   "ms": 37,
+   "hash": "sha256:855e49e57507e74a1db8e10651b66207985bd029cc57110ec7cad3eac6354dbf",
+   "tick": 3773,
+   "sessionId": "1ef92802-8b0d-422a-91d9-86d1969d9a0d",
+   "epoch": 8,
    "checkpointSize": 2280,
    "restoredBlocks": 0,
    "removedEntities": 2,
@@ -437,11 +437,11 @@
  "actions": [
   {
    "action": "moveTo(-2,-6)",
-   "ms": 1273
+   "ms": 1246
   },
   {
    "action": "virtualPlace(minecraft:redstone_block@-6,65,-6)",
-   "ms": 100
+   "ms": 95
   },
   {
    "action": "say(启动 熔炉组：正常)",
@@ -449,11 +449,11 @@
   },
   {
    "action": "moveTo(2,-6)",
-   "ms": 739
+   "ms": 735
   },
   {
    "action": "virtualPlace(minecraft:redstone_block@6,65,-6)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "say(启动 红石门：正常)",
@@ -461,11 +461,11 @@
   },
   {
    "action": "moveTo(2,-6)",
-   "ms": 90
+   "ms": 88
   },
   {
    "action": "virtualPlace(minecraft:redstone_block@2,65,-10)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "say(启动 警钟：正常)",
@@ -485,7 +485,7 @@
   },
   {
    "action": "moveTo(2,-6)",
-   "ms": 90
+   "ms": 89
   },
   {
    "action": "virtualPlace(minecraft:redstone_block@2,65,-10)",
@@ -501,7 +501,7 @@
   },
   {
    "action": "virtualPlace(minecraft:air@2,65,-10)",
-   "ms": 100
+   "ms": 97
   },
   {
    "action": "say(停机 警钟)",
@@ -513,7 +513,7 @@
   },
   {
    "action": "virtualPlace(minecraft:air@-6,65,-6)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "say(停机 熔炉组)",
@@ -521,7 +521,7 @@
   },
   {
    "action": "moveTo(2,-6)",
-   "ms": 89
+   "ms": 87
   },
   {
    "action": "virtualPlace(minecraft:air@2,65,-10)",
@@ -533,11 +533,11 @@
   },
   {
    "action": "moveTo(2,-6)",
-   "ms": 41
+   "ms": 89
   },
   {
    "action": "virtualPlace(minecraft:air@6,65,-6)",
-   "ms": 50
+   "ms": 53
   },
   {
    "action": "say(停机 红石门)",
@@ -545,11 +545,11 @@
   },
   {
    "action": "moveTo(-2,-6)",
-   "ms": 89
+   "ms": 87
   },
   {
    "action": "virtualPlace(minecraft:air@-6,65,-6)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "say(停机 熔炉组)",
@@ -557,7 +557,7 @@
   },
   {
    "action": "moveTo(0,10)",
-   "ms": 2890
+   "ms": 2889
   },
   {
    "action": "say(全部待机，请织者把拉杆推到底)",
@@ -565,19 +565,19 @@
   },
   {
    "action": "reset",
-   "ms": 136
+   "ms": 178
   },
   {
    "action": "reset",
-   "ms": 49
+   "ms": 57
   },
   {
    "action": "reset",
-   "ms": 58
+   "ms": 85
   }
  ],
  "errors": [],
- "prepareMs": 1801,
+ "prepareMs": 3147,
  "scene": {
   "groundY": 65,
   "arena": {
@@ -608,7 +608,7 @@
    "worker"
   ]
  },
- "referenceRunMs": 7309,
+ "referenceRunMs": 7358,
  "snapshot": {
   "blocks": {
    "-12,64,-13": "minecraft:stone_bricks",
@@ -1633,6 +1633,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-11-01T04:24:33.591Z",
+ "finishedAt": "2026-11-01T05:40:54.916Z",
  "ok": true
 }

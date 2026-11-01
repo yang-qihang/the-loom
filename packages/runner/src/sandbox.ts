@@ -2,12 +2,14 @@ import { Worker } from "node:worker_threads";
 import { transformSync } from "esbuild";
 import { transformStudentCode } from "./transform";
 import { assertExplicitAwait, MissingAwaitError } from "./explicit";
+import { resolveTarget, type SemanticAgentActions } from "../../worldport/src/index";
+import type { Golem, NamedPoint, PointLike } from "../../sdk/src/index";
 import type { RunSdk } from "./run";
 
 /**
  * RT-02 沙箱执行器：worker_threads + vm.createContext。
  *
- * 学生代码只在一个「只有 golem / world / console」的 vm 上下文里运行：
+ * 学生代码只在一个「只有 golem / world / console（+ 本关命名点）」的 vm 上下文里运行：
  * 没有 process / require / globalThis / Buffer / fetch / eval；
  * eval / Function 构造被 vm codeGeneration:false 禁用；
  * 主线程负责真正执行 WorldPort 调用（能力校验仍在 session 的 golem 代理上）。
@@ -74,11 +76,34 @@ interface WorkerErrorMessage {
 
 type WorkerMessage = WorkerRpcMessage | WorkerDoneMessage | WorkerErrorMessage;
 
+/** 命名点里不能注入为全局的名字（沙箱既有全局/JS 内建/保留字），与 run.ts 的注入规则保持一致。 */
+export const POINT_RESERVED_NAMES = new Set([
+  "golem", "world", "console", "agent", "eval", "undefined", "NaN", "Infinity",
+  "globalThis", "process", "require", "Buffer", "fetch",
+  "Object", "Array", "String", "Number", "Boolean", "JSON", "Math", "Promise", "Date", "Error",
+  "RegExp", "Map", "Set", "WeakMap", "WeakSet", "Symbol", "Reflect", "Proxy", "Intl", "BigInt",
+  "parseInt", "parseFloat", "isNaN", "isFinite", "decodeURI", "decodeURIComponent",
+  "encodeURI", "encodeURIComponent", "structuredClone", "setTimeout", "clearTimeout",
+]);
+
+/** 把命名点生成为沙箱全局常量（`const eira = …` 的等价物：不可写、不可配置）。 */
+export function pointGlobalSource(points: Record<string, NamedPoint>): string {
+  const lines: string[] = [];
+  for (const name of Object.keys(points)) {
+    if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name) || name.startsWith("__") || POINT_RESERVED_NAMES.has(name)) continue;
+    lines.push(
+      `Object.defineProperty(this, ${JSON.stringify(name)}, { value: this.__caps.points[${JSON.stringify(name)}], writable: false, enumerable: true, configurable: false });`,
+    );
+  }
+  return lines.join("\n");
+}
+
 /**
  * worker 内联脚本（纯 JS）：
- * - vm 上下文只注入 __hostRpc / __vars / __initialPos（bootstrap 后删除并阴影 globalThis）；
- * - golem 方法在自己所属的 vm realm 内定义，避免宿主函数泄漏；
- * - world.vars 在上下文内 deep-freeze；
+ * - vm 上下文只注入 __hostRpc / __vars / __initialPos / __points / __containers / __bag（bootstrap 后删除）；
+ * - golem / world 在 vm realm 内定义（内部背包/容器缓存在闭包里，学生看不到原始状态）；
+ * - 命名点注入为全局只读常量，同时 world.points 可访问；
+ * - world.vars / world.points 在上下文内 deep-freeze；
  * - 运行时错误把 stack 回传主线程，用于映射学生行号。
  */
 const SANDBOX_WORKER_SOURCE = String.raw`
@@ -86,7 +111,7 @@ const SANDBOX_WORKER_SOURCE = String.raw`
 const { parentPort, workerData } = require("node:worker_threads");
 const vm = require("node:vm");
 
-const { code, vars, initialPos, entry, captureValue, multi } = workerData;
+const { code, vars, initialPos, entry, captureValue, multi, points, containers, bag, pointSource } = workerData;
 const pending = new Map();
 let seq = 0;
 
@@ -129,11 +154,20 @@ function safeValue(value) {
 }
 
 try {
-  const sandbox = { __hostRpc: hostRpc, __vars: vars, __initialPos: initialPos, __multi: multi, eval: undefined };
+  const sandbox = {
+    __hostRpc: hostRpc,
+    __vars: vars,
+    __initialPos: initialPos,
+    __multi: multi,
+    __points: points,
+    __containers: containers,
+    __bag: bag,
+    eval: undefined,
+  };
   const context = vm.createContext(sandbox, { codeGeneration: { strings: false, wasm: false } });
   const bootstrap = [
     "const __rpc = __hostRpc;",
-    "const __cfg = { vars: __vars, pos: __initialPos, multi: __multi };",
+    "const __cfg = { vars: __vars, pos: __initialPos, multi: __multi, points: __points, containers: __containers, bag: __bag };",
     "function __deepFreeze(value) {",
     "  if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {",
     "    for (const key of Object.keys(value)) __deepFreeze(value[key]);",
@@ -141,14 +175,95 @@ try {
     "  }",
     "  return value;",
     "}",
-    "var __cachedPos = __cfg.pos.slice();",
-    "var golem = {",
-    "  get pos() { return __cachedPos.slice(); },",
-    "  moveTo(x, z) { return __rpc('moveTo', [x, z]).then(function () { __cachedPos = [x, __cachedPos[1], z]; }); },",
-    "  place(block, x, y, z) { return __rpc('place', [block, x, y, z]); },",
-    "  say(text) { return __rpc('say', [text]); },",
-    "};",
-    "var world = { vars: __deepFreeze(__cfg.vars), supply: function (pos) { return { count: function () { return __cfg.multi ? __cfg.multi.materialsTotal : 0; } }; }, keystone: function () { return __rpc('keystone', []); } };",
+    "function __normItem(item) {",
+    "  const lower = String(item === undefined || item === null ? '' : item).toLowerCase();",
+    "  return lower.indexOf(':') >= 0 ? lower : 'minecraft:' + lower;",
+    "}",
+    "function __itemKey(item) { return __normItem(item).replace('minecraft:', ''); }",
+    "function __posKey(pos) { return Math.floor(pos[0]) + ',' + Math.floor(pos[1]) + ',' + Math.floor(pos[2]); }",
+    "function __resolvePoint(target, fallbackY) {",
+    "  if (Array.isArray(target)) return [Number(target[0]), Number(target[1]), Number(target[2])];",
+    "  if (typeof target === 'string' && __cfg.points && __cfg.points[target]) {",
+    "    const named = __cfg.points[target];",
+    "    return [named.x, named.y, named.z];",
+    "  }",
+    "  if (target !== null && typeof target === 'object' && typeof target.x === 'number' && typeof target.z === 'number') {",
+    "    return [Number(target.x), typeof target.y === 'number' ? Number(target.y) : (typeof fallbackY === 'number' ? fallbackY : 0), Number(target.z)];",
+    "  }",
+    "  throw new Error('不认识的坐标：' + String(target) + '（可以用命名点如 eira、barrel，或 (x, z) 两个数字）');",
+    "}",
+    "this.__caps = (function () {",
+    "  let cachedPos = __cfg.pos.slice();",
+    "  const bagCache = {};",
+    "  Object.keys(__cfg.bag || {}).forEach(function (k) { bagCache[k] = __cfg.bag[k]; });",
+    "  const containerCache = {};",
+    "  Object.keys(__cfg.containers || {}).forEach(function (k) { containerCache[k] = Object.assign({}, __cfg.containers[k]); });",
+    "  const pointCache = __deepFreeze(__cfg.points || {});",
+    "  const golem = {",
+    "    get pos() { return cachedPos.slice(); },",
+    "    moveTo(x, z) {",
+    "      if (typeof x === 'number' && typeof z === 'number') {",
+    "        return __rpc('moveTo', [x, z]).then(function () { cachedPos[0] = x; cachedPos[2] = z; });",
+    "      }",
+    "      const point = __resolvePoint(x, cachedPos[1]);",
+    "      return __rpc('moveToPoint', [x]).then(function () { cachedPos = [point[0], cachedPos[1], point[2]]; });",
+    "    },",
+    "    goTo(point) { return golem.moveTo(point); },",
+    "    place(block, x, y, z) {",
+    "      if (typeof x === 'number' && typeof y === 'number' && typeof z === 'number') return __rpc('place', [block, x, y, z]);",
+    "      return __rpc('placePoint', [block, x]);",
+    "    },",
+    "    collect(item, target) {",
+    "      return __rpc('collect', [item, target]).then(function (serverCount) {",
+    "        const key = __itemKey(item);",
+    "        bagCache[key] = typeof serverCount === 'number' ? serverCount : (bagCache[key] || 0) + 1;",
+    "      });",
+    "    },",
+    "    deposit(item, target, count) {",
+    "      const n = Math.max(1, Math.floor(Number(count) || 1));",
+    "      const base = __resolvePoint(target, cachedPos[1]);",
+    "      return __rpc('deposit', [item, target, n]).then(function (serverCount) {",
+    "        const key = __itemKey(item);",
+    "        bagCache[key] = typeof serverCount === 'number' ? serverCount : Math.max(0, (bagCache[key] || 0) - n);",
+    "        const cKey = __posKey(base);",
+    "        const contents = containerCache[cKey] || (containerCache[cKey] = {});",
+    "        contents[key] = (contents[key] || 0) + n;",
+    "      });",
+    "    },",
+    "    count(item) { return bagCache[__itemKey(item)] || 0; },",
+    "    harvest(crop, target) {",
+    "      return __rpc('harvest', [crop, target]).then(function (serverCount) {",
+    "        const key = __itemKey(crop);",
+    "        if (typeof serverCount === 'number') bagCache[key] = serverCount;",
+    "      });",
+    "    },",
+    "    plant(crop, target) { return __rpc('plant', [crop, target]); },",
+    "    say(text) { return __rpc('say', [text]); },",
+    "  };",
+    "  const world = {",
+    "    vars: __deepFreeze(__vars),",
+    "    points: pointCache,",
+    "    container(target) {",
+    "      const base = __resolvePoint(target, cachedPos[1]);",
+    "      const cKey = __posKey(base);",
+    "      return {",
+    "        count(item) { const contents = containerCache[cKey] || {}; return contents[__itemKey(item)] || 0; },",
+    "        items() {",
+    "          const contents = containerCache[cKey] || {};",
+    "          return Object.keys(contents).filter(function (k) { return contents[k] > 0; })",
+    "            .map(function (k) { return { item: __normItem(k), count: contents[k] }; });",
+    "        },",
+    "      };",
+    "    },",
+    "    supply: function (pos) { return { count: function () { return __cfg.multi ? __cfg.multi.materialsTotal : 0; } }; },",
+    "    keystone: function () { return __rpc('keystone', []); },",
+    "  };",
+    "  return { golem: golem, world: world, points: pointCache };",
+    "})();",
+    "const golem = this.__caps.golem;",
+    "const world = this.__caps.world;",
+    pointSource || "",
+    "delete this.__caps;",
     "var __mailboxes = {};",
     "var __agentPos = {};",
     "function __mailbox(label) { if (!__mailboxes[label]) __mailboxes[label] = []; return __mailboxes[label]; }",
@@ -187,6 +302,9 @@ try {
   delete sandbox.__vars;
   delete sandbox.__initialPos;
   delete sandbox.__multi;
+  delete sandbox.__points;
+  delete sandbox.__containers;
+  delete sandbox.__bag;
   sandbox.globalThis = undefined;
 
   vm.runInContext(code, context, { filename: "loom-student.js" });
@@ -233,6 +351,23 @@ function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/** 端口 agent 的语义方法（端口声明仍是 AgentActions，运行时对象带 Rich 方法）。 */
+type RichGolem = Golem & Partial<SemanticAgentActions>;
+
+function richGolem(sdk: RunSdk): RichGolem {
+  return sdk.golem as RichGolem;
+}
+
+/** 语义动作完成后回传宿主侧权威计数：沙箱用它在本地缓存里同步 `golem.count`。 */
+function serverCount(sdk: RunSdk, item: string): number | undefined {
+  const rich = richGolem(sdk);
+  return typeof rich.count === "function" ? rich.count(item) : undefined;
+}
+
+function semanticUnavailable(method: string): Error {
+  return new Error(`这一关的织偶还不会 ${method}：检查端口实现，或先用 place/collect 的旧写法`);
+}
+
 async function dispatch(sdk: RunSdk, method: string, args: unknown[]): Promise<unknown> {
   switch (method) {
     case "moveTo":
@@ -241,6 +376,57 @@ async function dispatch(sdk: RunSdk, method: string, args: unknown[]): Promise<u
       return sdk.golem.place(String(args[0]), numberAt(args, 1), numberAt(args, 2), numberAt(args, 3));
     case "say":
       return sdk.golem.say(String(args[0]));
+    case "moveToPoint": {
+      const target = args[0] as PointLike;
+      const rich = richGolem(sdk);
+      if (typeof rich.moveToPoint === "function") return rich.moveToPoint(target);
+      const fallbackY = sdk.golem.pos?.[1] ?? 0;
+      const [x, , z] = resolveTarget(target, fallbackY);
+      return sdk.golem.moveTo(x, z);
+    }
+    case "placePoint": {
+      const block = String(args[0]);
+      const target = args[1] as PointLike;
+      const rich = richGolem(sdk);
+      if (typeof rich.placePoint === "function") return rich.placePoint(block, target);
+      const fallbackY = sdk.golem.pos?.[1] ?? 0;
+      const [x, y, z] = resolveTarget(target, fallbackY);
+      return sdk.golem.place(block, x, y, z);
+    }
+    case "collect": {
+      const item = String(args[0]);
+      const target = args[1] as PointLike;
+      const rich = richGolem(sdk);
+      if (typeof rich.collect !== "function") throw semanticUnavailable("collect（收东西）");
+      await rich.collect(item, target);
+      return serverCount(sdk, item);
+    }
+    case "deposit": {
+      const item = String(args[0]);
+      const target = args[1] as PointLike;
+      const n = Math.max(1, Math.floor(Number(args[2]) || 1));
+      const rich = richGolem(sdk);
+      if (typeof rich.deposit !== "function") throw semanticUnavailable("deposit（倒东西）");
+      await rich.deposit(item, target, n);
+      return serverCount(sdk, item);
+    }
+    case "harvest": {
+      const crop = String(args[0]);
+      const target = args[1] as PointLike;
+      const rich = richGolem(sdk);
+      if (typeof rich.harvest !== "function") throw semanticUnavailable("harvest（收割）");
+      await rich.harvest(crop, target);
+      return serverCount(sdk, crop);
+    }
+    case "plant": {
+      const crop = String(args[0]);
+      const target = args[1] as PointLike;
+      const rich = richGolem(sdk);
+      if (typeof rich.plant === "function") return rich.plant(crop, target);
+      const fallbackY = sdk.golem.pos?.[1] ?? 0;
+      const [x, y, z] = resolveTarget(target, fallbackY);
+      return sdk.golem.place(`${String(crop).includes(":") ? String(crop) : `minecraft:${crop}`}_sprout`, x, y, z);
+    }
     case "agentMoveTo": {
       const actions = sdk.multiAgent?.agents[String(args[0])];
       if (!actions) throw new Error(`未知 agent: ${String(args[0])}`);
@@ -288,17 +474,40 @@ function multiWorkerConfig(sdk: RunSdk): SandboxMultiAgentWorkerConfig | null {
   return { labels, materialsTotal: sdk.multiAgent.materialsTotal, positions };
 }
 
+/** 沙箱语义初值：命名点 + 背包 + 容器（session 从 WorldPort.semantic() 取；缺省为空）。 */
+function semanticWorkerData(sdk: RunSdk): {
+  points: Record<string, NamedPoint>;
+  containers: Record<string, Record<string, number>>;
+  bag: Record<string, number>;
+  pointSource: string;
+} {
+  const points = (sdk.semantic?.points ?? sdk.world.points ?? {}) as Record<string, NamedPoint>;
+  const containers = sdk.semantic?.containers ?? {};
+  const bag = sdk.semantic?.bag ?? {};
+  return {
+    points: structuredClone(points) as Record<string, NamedPoint>,
+    containers: structuredClone(containers) as Record<string, Record<string, number>>,
+    bag: structuredClone(bag) as Record<string, number>,
+    pointSource: pointGlobalSource(points),
+  };
+}
+
 export async function executeSandboxCode(sdk: RunSdk, code: string, options: SandboxCodeOptions = {}): Promise<unknown> {
   const timeoutMs = options.timeoutMs ?? 3000;
   const studentLineCount = options.studentLineCount ?? 1;
   const vars: unknown = structuredClone(sdk.world.vars);
   const initialPos: [number, number, number] = [sdk.golem.pos[0], sdk.golem.pos[1], sdk.golem.pos[2]];
+  const semantic = semanticWorkerData(sdk);
   const worker = new Worker(SANDBOX_WORKER_SOURCE, {
     eval: true,
     workerData: {
       code,
       vars,
       initialPos,
+      points: semantic.points,
+      containers: semantic.containers,
+      bag: semantic.bag,
+      pointSource: semantic.pointSource,
       entry: options.entry ?? "__loomMain",
       captureValue: options.captureValue ?? false,
       multi: multiWorkerConfig(sdk),

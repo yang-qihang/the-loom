@@ -1,11 +1,11 @@
 # AGENTS.md — 实施阶段入口（所有实现 agent 必读）
 
 > 本文件面向 T1 起的实现团队（AI agents）。设计阶段文档在 `docs/`，本文件只讲「怎么开工、红线在哪」。
-> 最后更新：2026-11-01｜维护者：Lead
+> 最后更新：2026-11-01（Round 2）｜维护者：Lead
 
 ## 1. 开工前必读（按顺序，≤30 分钟）
 
-0. `STATUS.md` 顶部「2026-11-01 试玩反馈修复」+ `docs/46-playtest-fix-plan.md` — 当前实现事实源（任务进度/玩家节拍/sandbox/reset）；`docs/47-docs-audit-2026-11-01.md` — 文档审计表
+0. `STATUS.md` 顶部「2026-11-01 试玩反馈修复」+ `docs/46-playtest-fix-plan.md` — 上一轮实现事实源（任务进度/玩家节拍/sandbox/reset）；`docs/48-round2-guidance-api-visual-plan.md` — Round 2 契约（语义 API/命名点/引导/字体/截图）；`docs/47-docs-audit-2026-11-01.md` — 文档审计表
 1. `BRIEF.md` — 项目愿景、不可违背的 invariants、决策快照、写作规范
 2. `docs/11-decisions-and-open-questions.md` — D1–D12（不得静默改变）
 3. `docs/07-architecture.md` — 组件、协议、沙箱、WorldDigest（你写的代码属于哪一块）
