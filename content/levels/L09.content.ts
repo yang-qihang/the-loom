@@ -236,7 +236,32 @@ const L09_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 82,
-    starterCode: `type Pos = [number, number, number]
+    starterCode: `/**
+ * L09 · 入夜之前
+ *
+ * 目标：
+ *   1. 把「顺序版」改成 async 并发版：两坛药同时开酿，用 Promise.all 一起等
+ *   2. 把取金苹果藏进酿造的等待里（两坛开火之后、出坛之前）
+ *   3. 交付三瓶药水、把金苹果放到牢笼上，最后回艾拉身边报时
+ *
+ * 位置有两种写法（二选一，不要混用）：
+ *   1. 用名字：golem.moveTo(weakStand) / golem.place("potion", weakStand)
+ *      → 名字是关卡给好的，推荐；完整名单见「指令手册」
+ *   2. 用坐标：golem.moveTo(-2, -5) / golem.place("potion", -2, 65, -5)
+ *      → 分别是 x、z 和 x、y、z
+ *
+ * 数据：world.vars.brewStands 是两座酿造台（stand 台位 / shelf 材料架 / backup 备方）。
+ *   world.vars.materials 是 { 台id: "够" | "缺" }，缺料时走备方。
+ *
+ * 步骤：
+ *   [1] 类型、数据和两个 async 小函数已经给好（下面这些代码）
+ *   [2] 补 安全酿(台)：缺材料时 throw，catch 里改用台.backup
+ *   [3] 补 取苹果() / 交付() / 布置治愈()
+ *   [4] 把最下面的顺序版改成并发版，用 Promise.all 一起等两坛
+ *
+ * 卡住时：打开「指令手册」查本关 API 与命名点；运行失败时看教练卡提示。
+ */
+type Pos = [number, number, number]
 type Stand = {
   id: string
   name: string
@@ -245,8 +270,6 @@ type Stand = {
   ingredient: string
   backup: string
 }
-// 命名点：eira（艾拉）、weakStand / healStand（两座酿造台）、weakShelf / healShelf（材料架）、
-// chest（取金苹果的木桶）、cauldron（炼药锅）、cage（牢笼）、bell（暮钟）。坐标也能在手册里查。
 const vars = world.vars
 const stands = vars.brewStands as Stand[]
 const materials = vars.materials as Record<string, string>
@@ -270,22 +293,21 @@ async function 酿一坛(台: Stand, 用备方: boolean): Promise<void> {
 }
 
 async function 安全酿(台: Stand): Promise<void> {
-  // TODO 1：缺材料时换备方——先判断 materials，缺就 throw，再用 catch 换台.backup 重酿。
+  // [2] 缺材料时 throw，catch 里用台.backup 重酿
 }
 
 async function 取苹果(): Promise<void> {
-  // TODO 2：走到木桶，place("air", 桶位) 把金苹果拿出来。
+  // [3] 走到 chest，用 place("air", chest) 把金苹果拿出来
 }
 
 async function 交付(): Promise<void> {
-  // TODO 3：走到炼药锅，放三瓶药水进去。
+  // [3] 走到 cauldron 放三次 "potion"
 }
 
 async function 布置治愈(): Promise<void> {
-  // TODO 4：走到牢笼，把金苹果放上去，等织者泼药水。
+  // [3] 在 cage 放 golden_apple，等织者泼药水
 }
 
-// 顺序版：一坛等完再一坛，取苹果也没有和酿造重叠。
 await 酿一坛(stands[0], false)
 await 酿一坛(stands[1], false)
 await 取苹果()
@@ -293,7 +315,18 @@ await 交付()
 await 布置治愈()
 await golem.say("天快亮了，钟留给织者敲")
 `,
-    referenceSolution: `type Pos = [number, number, number]
+    referenceSolution: `/**
+ * L09 · 入夜之前（参考解）
+ *
+ * 步骤：
+ *   [1] 把动作拆成 async 小函数
+ *   [2] 两坛同时开酿，用 Promise.all 一起等
+ *   [3] 取苹果藏在等待里
+ *   [4] 交付、治愈、报时
+ *
+ * 注意：缺材料走备方；最后一道钟留给玩家。
+ */
+type Pos = [number, number, number]
 type Stand = {
   id: string
   name: string

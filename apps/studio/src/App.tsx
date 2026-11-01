@@ -7,6 +7,7 @@ import { ActIntroOverlay, JournalOverlay, LevelOpeningOverlay, PrologueOverlay }
 import { ReplScreen } from "./components/ReplScreen";
 import { CodexScreen } from "./components/CodexScreen";
 import { GuidanceManual } from "./components/GuidanceManual";
+import { SolutionViewer } from "./components/SolutionViewer";
 import { levelCards, levelCopy } from "./copy";
 import {
   EMPTY_PROGRESS,
@@ -42,6 +43,11 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
   /** 指令手册打开时用哪个关卡（模态由 App 统一渲染，Esc 优先级最高）。 */
   const [manualLevelId, setManualLevelId] = useState<string | null>(null);
   const [manualLevel, setManualLevel] = useState<LevelView | null>(null);
+  /** 完整解查看（调试）：点顶栏「完整解（调试）」时按关卡取一次 LevelView。 */
+  const [solutionLevelId, setSolutionLevelId] = useState<string | null>(null);
+  const [solutionLevel, setSolutionLevel] = useState<LevelView | null>(null);
+  const [solutionLoading, setSolutionLoading] = useState(false);
+  const [solutionError, setSolutionError] = useState<string | null>(null);
   const [codexOpen, setCodexOpen] = useState(false);
   const [cards, setCards] = useState<LevelCard[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,16 +171,48 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
     };
   }, [engine, manualLevelId]);
 
+  // 完整解：打开时取一次关卡视图（referenceSolution 来自引擎 /api/levels/:id）。
+  useEffect(() => {
+    let disposed = false;
+    if (!solutionLevelId) {
+      setSolutionLevel(null);
+      setSolutionError(null);
+      setSolutionLoading(false);
+      return;
+    }
+    setSolutionLevel(null);
+    setSolutionError(null);
+    setSolutionLoading(true);
+    void engine
+      .loadLevel(solutionLevelId)
+      .then((loaded) => {
+        if (!disposed) setSolutionLevel(loaded);
+      })
+      .catch((cause: unknown) => {
+        if (!disposed) setSolutionError(cause instanceof Error ? cause.message : String(cause));
+      })
+      .finally(() => {
+        if (!disposed) setSolutionLoading(false);
+      });
+    return () => {
+      disposed = true;
+    };
+  }, [engine, solutionLevelId]);
+
   // 浮层打开时锁住页面滚动，避免背景页面滚动穿帮。
   useEffect(() => {
-    document.body.classList.toggle("has-overlay", journalOpen || manualLevelId !== null || replOpen || codexOpen || overlay !== null);
+    document.body.classList.toggle("has-overlay", journalOpen || manualLevelId !== null || replOpen || codexOpen || solutionLevelId !== null || overlay !== null);
     return () => document.body.classList.remove("has-overlay");
-  }, [codexOpen, journalOpen, manualLevelId, overlay, replOpen]);
+  }, [codexOpen, journalOpen, manualLevelId, overlay, replOpen, solutionLevelId]);
 
   // Esc 在任何界面开/关旅途手记；不销毁当前界面（不丢进度）。
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      if (solutionLevelId !== null) {
+        setSolutionLevelId(null);
+        return;
+      }
       if (manualLevelId !== null) {
         setManualLevelId(null);
         return;
@@ -201,7 +239,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [codexOpen, finishAct, finishPrologue, journalOpen, manualLevelId, overlay, progress.prologueSeen, replOpen]);
+  }, [codexOpen, finishAct, finishPrologue, journalOpen, manualLevelId, overlay, progress.prologueSeen, replOpen, solutionLevelId]);
 
   const overlays = (
     <>
@@ -224,6 +262,19 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
             const target = manualLevelId;
             setManualLevelId(null);
             setReplLevelId(target);
+          }}
+        />
+      ) : null}
+      {solutionLevelId !== null ? (
+        <SolutionViewer
+          level={solutionLevel}
+          loading={solutionLoading}
+          error={solutionError}
+          onClose={() => setSolutionLevelId(null)}
+          onOpenManual={() => {
+            const target = solutionLevelId;
+            setSolutionLevelId(null);
+            setManualLevelId(target);
           }}
         />
       ) : null}
@@ -299,6 +350,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
           onOpenCodex={() => setCodexOpen(true)}
           onOpenManual={() => setManualLevelId(screen.levelId)}
           onOpenRepl={() => openRepl(screen.levelId)}
+          onOpenSolution={() => setSolutionLevelId(screen.levelId)}
           onCompleted={() => completeLevel(screen.levelId)}
           nextLevel={nextPlayableLevel}
           onNextLevel={(levelId) => {

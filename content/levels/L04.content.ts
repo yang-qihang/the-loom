@@ -303,11 +303,31 @@ const L04_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 56,
-    starterCode: `// 三块田的数据在 world.vars.fieldA / fieldB / fieldC 里（行数、列数、水渠行、种子数都在里面）。
-// 每一格的活分两步：先收掉上一季的残株（golem.harvest），再种下新麦（golem.plant）。
-// 成熟麦的位置记在 world.vars.matureCellsA / matureCellsB / matureCellsC 里；空格不用收，harvest 不会报错。
-// 田的位置固定：第 r 行第 c 列的格子是 [a.x + c, 65, a.z + r]，先 moveTo 走过去再动手。
-// 现在只种了东田左上角一块固定的 5×5，另外两块田还没碰，也没先收残株。
+    starterCode: `/**
+ * L04 · 麦田的咒语
+ *
+ * 目标：
+ *   1. 三块田先收残株、再种新麦
+ *   2. 水渠那一行跳过
+ *   3. 种子用完就停
+ *   4. 种完回谷仓（barn）
+ *
+ * 格子位置有两种写法，二选一（不要混用）：
+ *   1. 用田数据算（推荐）：golem.moveTo(a.x + c, a.z + r)
+ *      → a.x、a.z 是田的原点，c 是第几列、r 是第几行，不用背数字
+ *   2. 直接写坐标：golem.moveTo(12, -7) / golem.harvest("wheat", [12, 65, -7])
+ *      → moveTo 写 x、z 两个数；harvest、plant 写 x、y、z 三个数（y 是高度）
+ *
+ * 步骤：
+ *   [1] 读东田数据：const a = world.vars.fieldA（下面已给出）
+ *   [2] 两层循环走遍每一行、每一列
+ *   [3] 同一格先 harvest 收残株，再 plant 种新麦
+ *   [4] 中田、西田用同样的写法（fieldB、fieldC）
+ *   [5] 最后回谷仓 barn 报数
+ *
+ * 说明：行数 a.rows、列数 a.cols、水渠行 a.waterRow、种子数 a.seeds 都在田数据里，不用数。
+ */
+// 现在只种了东田左上角固定的 5×5，也没先收残株（第 [2]、[3] 步你来改）
 const a = world.vars.fieldA
 for (let r = 0; r < 5; r++) {
   for (let c = 0; c < 5; c++) {
@@ -316,12 +336,23 @@ for (let r = 0; r < 5; r++) {
   }
 }
 
-// 东田还没种对：行数、列数要读 a.rows、a.cols，水渠那一行跳过，种子用完就停。
-// 中田、西田是同样的活：数据在 world.vars.fieldB 和 world.vars.fieldC 里。
-// 三块田都种完以后，回谷仓（barn 就是谷仓的名字）报一报各种了多少格。
-golem.moveTo(barn)
-`,
-    referenceSolution: `// 阶段一：东田——先收残株，再种新种；种子用完就停
+// 第 [2] 步：行数、列数读 a.rows、a.cols，水渠那一行跳过，种子用完就停
+// 第 [3] 步：在 plant 前面补一句 harvest，先收掉上一季的残株
+// 第 [4] 步：中田、西田同理，数据在 world.vars.fieldB 和 world.vars.fieldC 里
+// 第 [5] 步：回谷仓 barn 报数`,
+    referenceSolution: `/**
+ * L04 · 麦田的咒语（参考解）
+ *
+ * 步骤：
+ *   [1] 东田：先收残株，再种新种；种子用完就停
+ *   [2] 中田：同一段符文再走一遍
+ *   [3] 西田：再来一遍
+ *   [4] 回谷仓报三块田各种了多少格
+ *   [5] 收工前复查东田水渠
+ *
+ * 说明：每个格子先 harvest（收残株）再 plant（种新麦），循环次数跟着田的大小走。
+ */
+// 阶段一：东田——先收残株，再种新种；种子用完就停
 const a = world.vars.fieldA
 let seedsA = a.seeds
 let rA = 0
@@ -379,8 +410,7 @@ golem.say("三块田都收好种好了")
 // 收工前再走一遍东田的水渠，确认渠里没有种子
 golem.moveTo(a.x, a.z + a.waterRow)
 golem.say("东田水渠：干净")
-golem.moveTo(barn)
-`,
+golem.moveTo(barn)`,
   },
   task: {
     mainTask: "先把三块田里上一季的残株收掉，再把能种的格子都种上；水渠整行跳过，种完回谷仓。",

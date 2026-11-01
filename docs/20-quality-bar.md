@@ -145,9 +145,13 @@
 - **Demo Review**：完整 7 分钟彩排 2 次；每次记录「观众抬头/困惑」时间点；彩排不过不允许冻结。
 - 以上任一条不过，`STATUS.md` 不得写「完成」。
 
-## 3b4. 字体策略（全平台统一）
+## 3b4. 字体策略（全平台统一，2026-11-01 第三轮修正）
 
-- **代码/等宽区域**：`Departure Mono`（拉丁、数字、符号，像素等宽）+ `Zpix`（中文 fallback）。两者都随 Studio 以 woff2 打进 `dist/assets`，Monaco、织典代码块、试符台输出共用 `--mono` 栈。
-- **正文/界面**：保持中文无衬线正文，不把正文换成像素字体；代码字号保持 16px，优先可读性。
-- **禁止依赖系统 font fallback 来“看起来一致”**：桌面 App 与浏览器必须吃同一份打包字体；e2e 断言 `.monaco-editor .view-lines` 的 font-family 含两者，且 `document.fonts.check` 为 true。
-- **验收**：真实截图确认英文代码与中文注释都清楚；像素字体不得让 0/O、1/l/I 混淆，不得裁切行高。
+用户第三轮反馈明确：**只替换代码编辑器及其配套浮层，其余 UI 保留上一版的中文像素字体**。当前规则：
+
+- **代码编辑器（Monaco）**：嵌包 **Maple Mono CN**（OFL，`apps/studio/public/fonts/`），16px、开启 ligature；代码/中文注释都用它。
+- **编辑器配套浮层**（右键菜单、补全/suggest、悬停/hover、查找/find、参数提示）：用**清晰可读的普通字体**（Maple Mono → Noto Sans CJK → system-ui 的栈），**不得**用像素字体；背景必须不透明。
+- **其余 Studio / 桌面壳 UI**：保留上一版字体——标题/叙事/卡片标题用 **Zpix（中文像素字）**，正文/说明用 `Departure Mono → Zpix` 栈（英文像素、中文像素回退），代码感标签沿用原 `--mono` 栈。不要把这些 UI 换成 Maple Mono。
+- **不依赖系统 font fallback 假一致**：Zpix / Departure / Maple 都是随包字体（Studio `public/fonts` + `src/assets/fonts`），桌面 App 与浏览器吃同一份。
+- **验收**：Playwright 断言 UI computed font-family 含 Zpix/Departure；`.monaco-editor .view-lines` 含 Maple Mono 且 `document.fonts.check('16px "Maple Mono"')` 为 true；右键菜单 font-family 不为像素字体、背景 alpha=1；截图人工核对中英文代码/注释不混淆、不裁切。
+- 历史背景：Round 2 初版曾把全站字体换成 Maple Mono（改过头），第三轮已按用户要求回退，仅保留编辑器及其浮层。

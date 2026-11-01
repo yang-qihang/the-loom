@@ -219,26 +219,51 @@ const L06_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 60,
-    starterCode: `// 账本数据在 world.vars.cargo 里：每件货是一条记录，字段有 id、kind（"tool" 或 "supply"）和 food。
-// 三只木桶的格子坐标在 world.vars.boxes.tools / materials / food 里；工作点在 world.vars.jobs 里。
-// 命名点：trader（旅商塔卡）、cargoBox（混装货箱）、toolsBox / materialsBox / foodBox 是三只桶的入口。
-// 入桶 = 走到格子上，place(货物编号, 格子坐标)；一格一件。
+    starterCode: `/**
+ * L06 · 商队的账本
+ *
+ * 目标：
+ *   1. 用记录（record，把几个字段绑成一条）给货建模，再用 switch 分类
+ *   2. 把八件货分进工具桶、材料桶、食物桶
+ *   3. 给三个工作点配好工具，回旅商塔卡身边对账
+ *
+ * 位置有两种写法（二选一，不要混用）：
+ *   1. 用名字：golem.moveTo(cargoBox) / golem.place(货.id, 木桶.tools[0])
+ *      → 名字是关卡给好的，推荐；格子在 world.vars.boxes 里
+ *   2. 用坐标：golem.moveTo(4, 20) / golem.place("iron_axe", 0, 65, 0)
+ *      → 分别是 x、z 和 x、y、z
+ *
+ * 数据：world.vars.cargo 每件货是 { id, kind, food }，kind 只有 "tool" 和 "supply"。
+ *   world.vars.boxes 是三只桶的格子；world.vars.jobs 是工作点（needs 工具 / station 坐标）。
+ *
+ * 步骤：
+ *   [1] 先放第一件货（斧头）进工具桶，运行看效果（下面 3 行已写好）
+ *   [2] 写 function 类别Of(货)，用 switch 把货判成「工具 / 材料 / 食物」
+ *   [3] 写 function 放货(货)，算出这件货该进哪一格
+ *   [4] 用 for 循环把八件货各处理一次，再给三个工作点配工具
+ *   [5] golem.moveTo(trader) 找塔卡对账
+ *
+ * 卡住时：打开「指令手册」查本关 API 与命名点；运行失败时看教练卡提示。
+ */
 type 货物 = { id: string; kind: "tool" | "supply"; food?: boolean }
 type 木桶 = { tools: number[][]; materials: number[][]; food: number[][] }
 const 货物表 = world.vars.cargo as 货物[]
 const 木桶 = world.vars.boxes as 木桶
 
-// 可以照这个骨架写（函数名自己起）：
-//   function 类别Of(货: 货物) { switch (货.kind) { case "tool": return "工具"; case "supply": ... } }
-//   function 放货(货: 货物) { 按类别找桶，把货放到桶里下一个空格子 }
-//   for (const 货 of 货物表) { 放货(货) }
-
-// 现在只把第一件货（斧头）放进了工具桶：
 const 第一件 = 货物表[0]
 golem.moveTo(木桶.tools[0][0], 木桶.tools[0][2])
 golem.place(第一件.id, 木桶.tools[0][0], 木桶.tools[0][1], 木桶.tools[0][2])
 `,
-    referenceSolution: `// 记录（record）：把一件货的 id、kind、food 绑成一条；可辨识联合：kind 只有 tool / supply 两种。
+    referenceSolution: `/**
+ * L06 · 商队的账本（参考解）
+ *
+ * 步骤：
+ *   [1] 用记录建模货物，switch 分类，assertNever 兜底
+ *   [2] 用对象账本记住每只桶的下一格
+ *   [3] 逐件放货，再给工作点配工具
+ *   [4] 回塔卡身边对账
+ */
+// 记录（record）：把一件货的 id、kind、food 绑成一条；可辨识联合：kind 只有 tool / supply 两种。
 type 货物 = { id: string; kind: "tool" | "supply"; food?: boolean }
 type 木桶 = { tools: number[][]; materials: number[][]; food: number[][] }
 type 工作 = { id: string; needs: string; station: [number, number, number] }

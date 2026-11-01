@@ -1,0 +1,26 @@
+{
+  "url": "http://127.0.0.1:8091/index.html?engine=http%3A%2F%2F127.0.0.1%3A4317",
+  "checks": {
+    "body": {
+      "fontFamily": "\"Departure Mono\", Zpix, \"Noto Sans SC\", ui-monospace, monospace"
+    },
+    "heading": {
+      "fontFamily": "Zpix, \"Departure Mono\", \"JetBrains Mono\", ui-monospace, monospace"
+    },
+    "cardTitle": {
+      "fontFamily": "Zpix, \"Departure Mono\", \"JetBrains Mono\", ui-monospace, monospace"
+    },
+    "editorNav": true,
+    "editorBody": {
+      "fontFamily": "\"Maple Mono\", \"Noto Sans Mono\", ui-monospace, monospace, \"Droid Sans Mono\", monospace"
+    },
+    "editorView": "\"calt\", \"liga\"",
+    "mapleLoaded": true,
+    "menu": {
+      "fontFamily": "\"Maple Mono\", \"Noto Sans CJK SC\", \"Noto Sans SC\", ui-monospace, monospace",
+      "itemFont": "\"Maple Mono\", \"Noto Sans CJK SC\", \"Noto Sans SC\", ui-monospace, monospace",
+      "backgroundColor": "rgb(23, 18, 13)",
+      "opacity": "1"
+    }
+  }
+}

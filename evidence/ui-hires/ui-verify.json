@@ -1,6 +1,6 @@
 {
   "url": "http://127.0.0.1:8091/index.html?engine=http%3A%2F%2F127.0.0.1%3A4317&scale=0.85",
-  "startedAt": "2026-11-01T05:59:34.032Z",
+  "startedAt": "2026-11-01T06:36:41.745Z",
   "checks": {
     "mapCards": 10,
     "mapHeroImg": {
@@ -24,12 +24,12 @@
     "manualPoints": "名字\t坐标（横、高、前）\n艾拉\t0，11，6\n1 号灯\t-12，14，10\n2 号灯\t-12，14，-2\n3 号灯\t2，14，-2\n4 号灯\t2，14，16\n桥边小灯\t2，14，24",
     "fonts": {
       "body": {
-        "fontFamily": "\"Maple Mono\", \"Noto Sans SC\", ui-monospace, sans-serif",
+        "fontFamily": "\"Departure Mono\", Zpix, \"Noto Sans SC\", ui-monospace, monospace",
         "fontWeight": "400",
         "fontSize": "16px"
       },
       "coach": {
-        "fontFamily": "\"Maple Mono\", \"Noto Sans Mono\", ui-monospace, monospace",
+        "fontFamily": "\"Departure Mono\", Zpix, \"Noto Sans SC\", ui-monospace, monospace",
         "fontWeight": "400",
         "fontSize": "16px"
       },
@@ -42,11 +42,11 @@
       "declaredOk": true,
       "loadedFonts": [
         "codicon:unloaded",
+        "Departure Mono:loaded",
+        "Zpix:loaded",
         "Maple Mono:loaded",
         "Maple Mono:loaded",
-        "Maple Mono:loaded",
-        "Maple Mono:loaded",
-        "Zpix:loaded"
+        "Maple Mono:loaded"
       ]
     },
     "replVisible": true,
@@ -80,52 +80,43 @@
     {
       "name": "map-wall",
       "file": "evidence/ui-hires/map-wall.png",
-      "bytes": 611128
+      "bytes": 537097
     },
     {
       "name": "workbench",
       "file": "evidence/ui-hires/workbench.png",
-      "bytes": 612860
+      "bytes": 547494
     },
     {
       "name": "manual-open",
       "file": "evidence/ui-hires/manual-open.png",
-      "bytes": 489244
+      "bytes": 374296
     },
     {
       "name": "repl",
       "file": "evidence/ui-hires/repl.png",
-      "bytes": 463305
+      "bytes": 382420
     },
     {
       "name": "workbench-after-starter",
       "file": "evidence/ui-hires/workbench-after-starter.png",
-      "bytes": 614421
+      "bytes": 548036
     },
     {
       "name": "monaco-context-menu",
       "file": "evidence/ui-hires/monaco-context-menu.png",
-      "bytes": 640949
+      "bytes": 574786
     },
     {
       "name": "workbench-ready",
       "file": "evidence/ui-hires/workbench-ready.png",
-      "bytes": 544818
+      "bytes": 477809
     },
     {
       "name": "settle-concept",
       "file": "evidence/ui-hires/settle-concept.png",
-      "bytes": 628277
+      "bytes": 528857
     }
   ],
-  "badResponses": [
-    {
-      "status": 404,
-      "url": "http://127.0.0.1:8091/assets/world/L01.png"
-    }
-  ],
-  "consoleErrors": [
-    "Failed to load resource: the server responded with a status of 404 (File not found)"
-  ],
-  "finishedAt": "2026-11-01T05:59:58.092Z"
+  "finishedAt": "2026-11-01T06:37:05.469Z"
 }

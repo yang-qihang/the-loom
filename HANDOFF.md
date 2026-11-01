@@ -8,7 +8,7 @@
 
 - **可玩**：L01–L10 全部可玩；真实 Paper e2e 全 PASS（`it/l1-real.ts`–`it/l10-real.ts`，L01 21 项 / L02–L09 各 13 项 / L10 19 项；L10 额外有 Studio 会话注入 11 项）。
 - **今天修复的 4 类试玩问题**（详见 `docs/46-playtest-fix-plan.md` §5）：① 目标面板由 `LevelDef.progress` 单一真值驱动、逐条打勾；② 严格线性玩家节拍（`playerBeatReady` 门控 + 插件拦截提前右键）；③ 切关/reset 的 sandbox 纯净（清场景/实体/背包，全区域 checkpoint 还原）；④ 第 4 盏灯容错右键（站地面、手持灯笼对柱子右键即可，不用看柱顶）。
-- **桌面**：AppImage ≈428MB / RPM ≈435MB，内置 Node 22 + Java 25 + Paper 26.1.2 + 插件 + 干净世界 + 真实引擎 + mineflayer 织偶；用户只需安装 Minecraft 26.1.2。旧 `~/.loomcraft/runtime/paper/world` 会按世界布局版本 marker 自动换干净世界（进度/星级存 Studio，不存世界）。
+- **桌面**：AppImage ≈429MB / RPM ≈436MB，内置 Node 22 + Java 25 + Paper 26.1.2 + 插件 + 干净世界 + 真实引擎 + mineflayer 织偶；用户只需安装 Minecraft 26.1.2。旧 `~/.loomcraft/runtime/paper/world` 会按世界布局版本 marker 自动换干净世界（进度/星级存 Studio，不存世界）。
 - **质量（Round 1 验收快照；Round 2 收尾后由 Lead 更新）**：`npx tsc --noEmit` 0；`npm test` 235/235（25 files）；Studio `test:e2e` 6/6、`test:e2e:local` 2/2；`bash scripts/verify.sh` exit 0（lg 有 tracked warn）；文案门禁（自然中文 + 术语白名单）0 违规。
 - **Round 2（2026-11-01 第二轮试玩反馈，实施中）**：语义 API（collect/deposit/count/world.container/goTo/place(block,point)）与命名坐标点；指令手册/位置 HUD/REPL 当前关卡；progress hint + 概念揭晓；codeRequirements 名实相符；Maple Mono 与 Monaco 菜单不透明；真实客户端高清截图与起始点验收。契约/验收见 `docs/48`，最终数字/包路径以 Lead 集成后为准。
 - **明确边界**：挑战层是说明卡非可玩会话；真人（非 AI 代理）多背景盲测未执行；Fresh Reader Round 4 未清零（G-FRESH-READER 仍 tracked fail）。L03/L05 出生点已修（README 边界 5）；L03 钟本体在钟楼结构内不可见属美术边界；Round 2 截图/字体验收待最终回归。

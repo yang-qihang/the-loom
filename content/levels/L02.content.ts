@@ -208,25 +208,50 @@ const L02_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 20,
-    starterCode: `// golem 就是灰崽：代码里写 golem，指的就是你身边这只织偶。
-// 这一关的点都有名字，指令手册里能查到坐标：
-//   perch1 到 perch6 是六个能收的蛋窝，barrel 是木桶，eira 是艾拉，cakeTower 是蛋糕塔。
-// 收蛋：先让灰崽走到窝边，再让它把蛋收进小筐：golem.collect("egg", perch1)
-// 小筐一趟最多装 4 枚蛋，收满 4 枚就得先回木桶倒一次。
-// 倒蛋：走到木桶边，让灰崽把筐里的蛋都倒进桶里：golem.deposit("egg", barrel, 4)
-// 报数：最后走回 eira 身边，用 world.container(barrel).count("egg") 现数，再用 say 说给艾拉听。
-// 带玻璃罩的窝是留给母鸡孵小鸡的，一枚都不能碰；只对 perch1 到 perch6 写。
-// 第一枚蛋已经替你写好了，后面的照着写。
-
+    starterCode: `/**
+ * L02 · 会数数的织偶
+ *
+ * 目标：
+ *   1. 让灰崽收 6 枚蛋，分两趟倒进木桶
+ *   2. 别碰 3 个带玻璃罩的窝（hatch1 到 hatch3）
+ *   3. 回艾拉身边，把木桶里的蛋数报给她
+ *
+ * 蛋窝和木桶有两种写法，二选一（不要混用）：
+ *   1. 用名字（推荐）：golem.moveTo(perch1) / golem.collect("egg", perch1)
+ *      → perch1 到 perch6 是六个蛋窝的名字（命名点），barrel 是木桶
+ *   2. 用坐标：golem.moveTo(-16, 10) / golem.collect("egg", [-16, 65, 10])
+ *      → moveTo 写 x、z 两个数；collect 写 x、y、z 三个数（y 是高度）
+ *
+ * 步骤：
+ *   [1] 收第 1 枚蛋（下面已给出）
+ *   [2] 收第 2、3、4 枚蛋：每枚两行，先走，再收
+ *   [3] 筐满 4 枚：走回 barrel，把这一趟的蛋倒进木桶
+ *   [4] 收第 5、6 枚蛋，再倒第二趟
+ *   [5] 回 eira（艾拉）身边报数：用 world.container(barrel).count("egg") 现数
+ *
+ * 说明：golem 就是灰崽；小筐一趟最多装 4 枚蛋。
+ */
+// 第 [1] 步：先走到 1 号蛋窝，再把蛋收进小筐
 golem.moveTo(perch1)
 golem.collect("egg", perch1)
 
-// 第二枚到第四枚：照着上面两行写，只把 perch1 换成 perch2、perch3、perch4。
-// 收满 4 枚以后：golem.moveTo(barrel)，再 golem.deposit("egg", barrel, 4)。
-// 然后回来收 perch5、perch6，再倒一次；最后回 eira 身边报数。
-// 报数的数字要用变量从桶里现算，不能自己写死 6。
-`,
-    referenceSolution: `// 数字先起名字：一趟最多装 4 枚，一共要收 6 枚
+// 第 [2] 步：照着上面两行写，只把 perch1 换成 perch2、perch3、perch4
+// 第 [3] 步：走回木桶，golem.deposit("egg", barrel, 4) 把这一趟倒进去
+// 第 [4] 步：回来收 perch5、perch6，再倒第二趟
+// 第 [5] 步：回 eira 身边，用变量从桶里现数，再用 say 报出来`,
+    referenceSolution: `/**
+ * L02 · 会数数的织偶（参考解）
+ *
+ * 步骤：
+ *   [1] 用 const 给不变的数起名字：一趟 4 枚、一共 6 枚
+ *   [2] 第一趟收 4 枚，用 let carried 记账
+ *   [3] 回木桶倒蛋，用 let banked 记住已经倒了几枚
+ *   [4] 第二趟收剩下的 2 枚，再倒一次
+ *   [5] 回 eira 身边，从木桶里现数并报出来
+ *
+ * 说明：枚数都来自变量和木桶，不靠背。
+ */
+// 数字先起名字：一趟最多装 4 枚，一共要收 6 枚
 const eggsPerTrip = 4
 const need = 6
 
@@ -268,8 +293,7 @@ banked = banked + remaining
 // 回艾拉身边报数：桶里有几枚，现场从桶里数，不靠背
 golem.moveTo(eira)
 const inBarrel = world.container(barrel).count("egg")
-golem.say(\`木桶里有 \${inBarrel} 枚蛋\`)
-`,
+golem.say(\`木桶里有 \${inBarrel} 枚蛋\`)`,
   },
   task: {
     mainTask: "麦穗节要做 6 个蛋糕，一个蛋糕一枚蛋。先让灰崽把 6 枚蛋收进木桶：小筐一趟只装得下 4 枚，所以分两趟收、两趟倒；最后回艾拉身边报数。",

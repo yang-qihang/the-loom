@@ -36,7 +36,7 @@
 - Node 22 + Java 25 运行时
 - Paper 26.1.2 build 74、LoomCraft 插件、世界/配置
 - 真实引擎、mineflayer/minecraft-protocol 织偶依赖
-- Studio、桌面壳、嵌包字体（Maple Mono）、Mock 演示引擎
+- Studio、桌面壳、嵌包字体（编辑器 Maple Mono + UI 像素字体）、Mock 演示引擎
 
 用户不需要自己安装 Node/Java/Paper，也不需要另开终端启动引擎。
 
@@ -113,7 +113,7 @@ Round 2 终验（2026-11-01，最终工作树 + 重新打包产物）：
 - `bash scripts/verify.sh` pass（仅遗留 Round 1 tracked warning `G-FRESH-READER`）
 - 文案门禁（自然中文 + 必要英文术语白名单）0 违规
 - 真实客户端截图：10 关世界条带 2560×990（含 L10）；起始点审计 `evidence/playtest-fix/start-positions.md`
-- 桌面包：AppImage ≈428MB / RPM ≈435MB（2026-11-01 14:0x 重打包，含 Maple Mono/新引擎/插件/世界素材）
+- 桌面包：AppImage ≈429MB / RPM ≈436MB（2026-11-01 14:40 重打包，含编辑器 Maple Mono/像素 UI 字体/新引擎/插件/世界素材/完整解调试按钮）
 
 ## 2026-11-01 试玩修复
 
@@ -131,8 +131,10 @@ Round 2 终验（2026-11-01，最终工作树 + 重新打包产物）：
 - **位置 HUD 与 REPL**：显示灰崽/关键点坐标；试符台改用**当前关卡**打开（不再跳回第一关），`help` 返回本关 API。
 - **引导与概念揭晓**：每条 progress 带 `hint`（做什么/怎么做/可照抄/坐标从哪来），按节点推送不刷屏；结算/手记按关揭示正式术语（函数调用/变量/分支/循环/…，见 docs/04 §11.5）。
 - **名实相符**：每关新增 `codeRequirements`（AST 判定），starter 不满足、参考解满足，保证抽象真的被用上。
-- **字体与 Monaco**：代码/提示类 UI 统一嵌包 **Maple Mono**（含中文回退）；编辑器右键菜单不透明底色，不再与代码叠字。
+- **字体与 Monaco**：代码编辑器及右键菜单/补全/悬停用嵌包 **Maple Mono**（清晰普通字体，菜单不透明、不再与代码叠字）；其余 Studio/桌面壳 UI 保留上一版中文像素字体（Zpix / Departure Mono）。
 - **截图与起始点**：真实客户端高清重拍各关（玩家出生视角），并逐关验收起始点合理（不穿模/不贴脸/不卡墙）。
+- **完整解（调试）**：工作台顶栏/更多菜单与「指令手册」「试符台」同一区域，每关可打开参考解查看/复制；当前是调试功能，游戏成熟后移除。
+- **字体修正（第三轮反馈）**：Maple Mono 只用于代码编辑器及其右键/补全/悬停等浮层；其余 Studio 与桌面壳 UI 恢复上一版中文像素字体（Zpix / Departure Mono）。
 
 > 本轮验收：`docs/48` §3 清单与 §6 实施结果；脚本回归为 `npm test`、`bash scripts/verify.sh`、Studio e2e、L01–L10 真实 Paper e2e。桌面包路径：`apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage`、`.../bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm`。
 

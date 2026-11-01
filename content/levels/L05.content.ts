@@ -242,18 +242,32 @@ const L05_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 60,
-    starterCode: `// 五块地的数据在 world.vars.plots 里：每块地有 x、z（西北角）和 style（屋顶风格）。
-// 命名点 plot1…plot5 指向五块地的西北角，eira 是艾拉；也可以直接读 plots[i].x / plots[i].z。
-// 打算写成骨架（注释先给你结构，函数名可以自己起）：
-//   function buildHut(x, z, style) { ...先算材料，再摆地基/墙/屋顶/门窗... }
-//   for (const plot of world.vars.plots) { buildHut(plot.x, plot.z, plot.style) }
-// 每栋房的摆法（照这个位置一格一格摆）：
-//   地基：从 (x, 63, z) 起的 3×3 圆石；
-//   墙：一圈 8 格（y64），材料按风格：橡木→oak_planks、云杉→spruce_planks、砖→bricks；
-//   屋顶：3×3（y65），材料按风格：橡木→oak_slab、云杉→spruce_slab、砖→stone_brick_slab；
-//   门 (x+1, 64, z+2) 放 oak_door；床 (x+1, 64, z) 放 red_bed；
-//   窗 (x, 64, z+1) 放 glass_pane；火把 (x+2, 64, z+1) 放 torch。
-// 现在只铺了一号地的地基，后面四块地还没动。
+    starterCode: `/**
+ * L05 · 一百座房子
+ *
+ * 目标：
+ *   1. 用函数把「造一栋房」拆开，少写重复代码
+ *   2. 用循环处理每一块地
+ *   3. 五块门牌由你亲手挂到门口
+ *
+ * 位置有两种写法（二选一，不要混用）：
+ *   1. 用名字：golem.moveTo(plot1) / golem.place("cobblestone", plot1)
+ *      → 名字是关卡给好的，推荐；完整名单见「指令手册」
+ *   2. 用坐标：golem.moveTo(0, 0) / golem.place("cobblestone", 0, 63, 0)
+ *      → 分别是 x、z 和 x、y、z
+ *
+ * 每栋房的摆法：地基 3×3 圆石（y63）；墙一圈 8 格（y64）；屋顶 3×3（y65）；
+ *   门 (x+1,64,z+2)、床 (x+1,64,z)、窗 (x,64,z+1)、火把 (x+2,64,z+1)。
+ *   材料按 style（屋顶风格）走：橡木 oak_planks/oak_slab，云杉 spruce_planks/spruce_slab，砖 bricks/stone_brick_slab。
+ *
+ * 步骤：
+ *   [1] 先只铺一号地的地基，运行看效果（下面 10 行已写好）
+ *   [2] 把墙、屋顶、门窗床火把也摆上，再照做二、三号地
+ *   [3] 写成 function buildHut(x, z, style)，再用 for 循环对 plots 各调用一次
+ *   [4] 第四块地是变体，第五块地的位置与风格验收时才定
+ *
+ * 卡住时：打开「指令手册」查本关 API 与命名点；运行失败时看教练卡提示。
+ */
 const p = world.vars.plots[0]
 golem.moveTo(p.x + 1, p.z + 1)
 golem.place("cobblestone", p.x, 63, p.z)
@@ -265,12 +279,17 @@ golem.place("cobblestone", p.x + 2, 63, p.z + 1)
 golem.place("cobblestone", p.x, 63, p.z + 2)
 golem.place("cobblestone", p.x + 1, 63, p.z + 2)
 golem.place("cobblestone", p.x + 2, 63, p.z + 2)
-
-// TODO 第一阶段：把墙、屋顶、门窗床火把也摆上，再照做二、三号地。
-// TODO 第二阶段：第四块地是变体，屋顶材料要跟着 style 走。
-// TODO 第三阶段：第五块地的位置和风格验收时才定，也只能用同一段写法。
 `,
-    referenceSolution: `// 第一阶段：把一栋房的摆法写成一个有名字的函数，前三块地各调用一次
+    referenceSolution: `/**
+ * L05 · 一百座房子（参考解）
+ *
+ * 步骤：
+ *   [1] 把墙、屋顶材料写成分支函数
+ *   [2] 把一栋房的布点写成 hutPlan，返回格子清单
+ *   [3] 用 for 循环对五块地各建一栋
+ *   [4] 回艾拉身边（门牌由玩家亲手挂）
+ */
+// 第一阶段：把一栋房的摆法写成一个有名字的函数，前三块地各调用一次
 const plots = world.vars.plots
 
 function wallOf(style) {

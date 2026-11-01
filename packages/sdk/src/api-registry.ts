@@ -27,14 +27,14 @@ export const API_REGISTRY: ApiDocPoint[] = [
     signature: "golem.moveTo(x, z)",
     summary: "让灰崽走到横坐标为 x、前后坐标为 z 的地面格；只负责走，不放东西。",
     details: "x 向东，z 向南；高度不用写，灰崽会自己走到那一格的地面上。",
-    example: "golem.moveTo(-12, 10)\ngolem.moveTo(eira)",
+    example: "// 两种写法二选一：\n// 1. golem.moveTo(lamp1)      // 命名点（推荐）\n// 2. golem.moveTo(-12, 10)    // 坐标 (x, z)",
     kind: "move",
   },
   {
     sinceLevel: "L01",
     signature: "golem.goTo(target)",
     summary: "moveTo 的同义词：走到一个命名点（如 eira、barrel、lamp1）。",
-    example: "golem.goTo(eira)",
+    example: "// 两种写法二选一：\n// 1. golem.goTo(eira)      // 命名点（推荐）\n// 2. golem.goTo(0, 6)      // 坐标 (x, z)",
     kind: "move",
   },
   {
@@ -49,7 +49,7 @@ export const API_REGISTRY: ApiDocPoint[] = [
     sinceLevel: "L01",
     signature: "golem.place(block, target)",
     summary: "在命名点所在的格子放方块（高度用点自带的高度），不用再背三个数字。",
-    example: 'golem.moveTo(lamp1)\ngolem.place("lantern", lamp1)',
+    example: '// 两种写法二选一：\n// 1. golem.place("lantern", lamp1)          // 命名点（推荐）\n// 2. golem.place("lantern", -12, 14, 10)    // 坐标 (x, y, z)',
     kind: "block",
   },
   {

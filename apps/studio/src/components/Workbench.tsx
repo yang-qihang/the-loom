@@ -39,6 +39,8 @@ interface WorkbenchProps {
   onOpenManual: () => void;
   /** 用当前关卡打开试符台（REPL 不再强制跳回第一关）。 */
   onOpenRepl: () => void;
+  /** 查看本关完整解（调试按钮，和指令手册/试符台同一区域）。 */
+  onOpenSolution: () => void;
   onCompleted: () => void;
   nextLevel: LevelCard | null;
   onNextLevel: (levelId: string) => void;
@@ -66,6 +68,7 @@ export function Workbench({
   onOpenCodex,
   onOpenManual,
   onOpenRepl,
+  onOpenSolution,
   onCompleted,
   nextLevel,
   onNextLevel,
@@ -407,6 +410,7 @@ export function Workbench({
                   <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
                   <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-manual-menu">{chrome.workbench.manualButton}</button>
                   <button type="button" className="btn btn-quiet" onClick={onOpenRepl} data-testid="btn-repl-menu">{chrome.workbench.replButton}</button>
+                  <button type="button" className="btn btn-quiet" onClick={onOpenSolution} data-testid="btn-solution-menu">{chrome.workbench.solutionButton}</button>
                   <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
                   <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
                   <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
@@ -424,6 +428,7 @@ export function Workbench({
               <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
               <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-manual">{chrome.workbench.manualButton}</button>
               <button type="button" className="btn btn-quiet" onClick={onOpenRepl} data-testid="btn-repl-top">{chrome.workbench.replButton}</button>
+              <button type="button" className="btn btn-quiet" onClick={onOpenSolution} data-testid="btn-solution">{chrome.workbench.solutionButton}</button>
               <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} title="世界里的中文浮空字是路标，帮你认第几盏灯、谁是艾拉和灰崽；不想看可以随时关掉。" data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
               <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
               <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>

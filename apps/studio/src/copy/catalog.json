@@ -138,7 +138,18 @@
     "noFinishedGoal": "还没完成任何目标：先点「运行」，按目标卡一条一条来。",
     "progressDoneNext": "✓ 目标完成：{目标}。下一步：{下一步}",
     "progressAllDone": "目标都完成了，点「运行」结算这一关。",
-    "hintFromEngine": "灰崽的提示：{提示}"
+    "hintFromEngine": "灰崽的提示：{提示}",
+    "solutionButton": "完整解（调试）",
+    "solutionTitle": "完整解 · 仅调试",
+    "solutionKicker": "调试工具",
+    "solutionHint": "这是本关的参考解，会直接给出通关写法；建议先自己试，卡住时再对照。可复制粘贴到编辑器里跑。",
+    "solutionCopy": "复制完整解",
+    "solutionCopied": "已复制",
+    "solutionLines": "共 {行数} 行",
+    "solutionManual": "查看指令手册",
+    "solutionClose": "关闭",
+    "solutionLoading": "正在读取完整解……",
+    "solutionEmpty": "这关还没有完整解。"
   },
   "mode": {
     "real": "织机在线",

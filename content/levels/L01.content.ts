@@ -62,7 +62,7 @@ export function lampPlaceCall(i: number): string {
 
 export const L01_COPY: ContentCopy = {
   coordinateRule:
-    "灯柱都有名字：1 号到 4 号灯，代码里直接写名字（lamp1、lamp2……），不用背坐标。旧写法里 place 第二个数字管高低（上下），第三个数字管前后；moveTo 只要横着和前后两个数，写名字更省事。",
+    "灯的位置有两种写法，二选一：名字写法更省事（moveTo(lamp1)、place(\"lantern\", lamp1)，名字见指令手册）；坐标写法里 place 第二个数字管高低（上下），第三个数字管前后，moveTo 只要横着和前后两个数。同一句里不要混用两种写法。",
   golemNote: "golem 就是灰崽：代码里写 golem，指的就是你身边这只织偶。",
   entry: "写完点底部的「运行」，灰崽会照着走；卡住了就打开「指令手册」，灯和艾拉的名字、坐标都能查到。",
   errors: [
@@ -98,8 +98,8 @@ export const L01_COPY: ContentCopy = {
     },
     {
       line: 11,
-      reason: "第 11 行还没回艾拉身边：最后要让灰崽走回去。",
-      fix: "在最后补一句 moveTo，写上艾拉的名字。照抄：",
+      reason: "第 11 行最后一步写错了：4 号灯必须由你亲手点亮，灰崽不用过去。",
+      fix: "灰崽的代码写到回艾拉身边就结束；4 号灯留给你在游戏里走到灯柱前点。照抄：",
       sample: "golem.moveTo(eira)",
     },
   ],
@@ -108,56 +108,80 @@ export const L01_COPY: ContentCopy = {
   hints: [
     "先看小径：灰崽现在离哪一盏灯最近？灯柱上有编号，名字就是 1 号到 4 号灯。",
     "点亮一盏灯要两句：先 golem.moveTo(灯的名字) 走过去，再 golem.place(\"lantern\", 灯的名字) 放灯笼。",
-    "照着第一盏的两行再写一遍，只把名字换成第二盏；三盏都亮了以后，再让灰崽走到 4 号灯下。",
+    "照着第一盏的两行再写一遍，只把名字换成第二盏；三盏灯都亮以后，最后让灰崽回到艾拉身边（4 号灯留给你自己走过去点）。",
   ],
   challenge: {
-    title: "挑战：一步不多走",
-    goal: "灰崽只走四段路：1 号灯、2 号灯、3 号灯、艾拉身边；4 号灯由你自己走过去点亮。",
+    title: "挑战：少走一步",
+    goal: "灰崽只走四段路：1 号灯、2 号灯、3 号灯、艾拉身边；到艾拉身边后报一句「四盏灯都亮了」，4 号灯由你自己点亮。",
   },
 };
 
 /** 学生可见的 starter：全中文注释、没有 TODO，第一次出现 golem 就说明它是灰崽；名字优先于数字。 */
-const starterCode = `// golem 就是灰崽：代码里写 golem，指的就是你身边这只织偶。
-// 点亮一盏灯要两句：先让灰崽走过去（moveTo），再让它把灯笼放上去（place）。
-// 灯柱都有名字：1 号灯到 4 号灯，名字直接写在指令手册里。
-// 旧写法里 place 第二个数字是高度、第三个数字是前后；现在把灯的名字交给 place 就行。
-// 4 号灯只走到灯下就停：最后一盏要由你亲手点亮。
-
-// 第一盏：照下面两行把 1 号灯点亮
+const starterCode = `/**
+ * L01 · 第一缕光
+ *
+ * 目标：
+ *   1. 让灰崽点亮 1、2、3 号灯（每盏两行：先走，再放）
+ *   2. 4 号灯由你亲手点亮（灰崽不用过去）
+ *   3. 最后让灰崽回到 Eira（艾拉）身边
+ *
+ * 灯的位置有两种写法，二选一（不要混用）：
+ *   1. 用名字（推荐）：golem.moveTo(lamp1) / golem.place("lantern", lamp1)
+ *      → lamp1 是关卡提前起好的名字（命名点），不用背数字
+ *   2. 用坐标：golem.moveTo(-12, 10) / golem.place("lantern", -12, 14, 10)
+ *      → moveTo 写 x、z 两个数；place 写 x、y、z 三个数
+ *      → 第二个数字是高度（上下），第三个数字是前后
+ *
+ * 步骤：
+ *   [1] 点亮 lamp1（下面已给出）
+ *   [2] 点亮 lamp2
+ *   [3] 点亮 lamp3
+ *   [4] 回 Eira 身边：golem.moveTo(eira)
+ *
+ * 说明：golem 就是灰崽，代码里写 golem，指的就是你身边这只织偶。
+ */
+// 第 [1] 步：先走到 1 号灯下，再放灯笼
 golem.moveTo(lamp1)
 golem.place("lantern", lamp1)
 
-// 第二盏、第三盏：照着上面两行再写两遍，只把名字换成 2 号灯、3 号灯。
-// 三盏都亮以后，让灰崽走到 4 号灯下，再回艾拉身边；艾拉也有名字，手册里能查到。
-`;
+// 第 [2]、[3] 步：照着上面两行写，先走再放
+// 第 [4] 步：写一句回艾拉身边；4 号灯留给你自己走过去点`;
 
-const referenceSolution = `// 第一盏：走到 1 号灯下，把灯笼放到灯柱顶上
+const referenceSolution = `/**
+ * L01 · 第一缕光（参考解）
+ *
+ * 步骤：
+ *   [1] 点亮 lamp1
+ *   [2] 点亮 lamp2
+ *   [3] 点亮 lamp3
+ *   [4] 回 Eira 身边
+ *
+ * 说明：4 号灯由你亲手点亮，灰崽不用过去。
+ */
+// [1] 点亮 1 号灯
 golem.moveTo(lamp1)
 golem.place("lantern", lamp1)
-// 第二盏
+// [2] 点亮 2 号灯
 golem.moveTo(lamp2)
 golem.place("lantern", lamp2)
-// 第三盏
+// [3] 点亮 3 号灯
 golem.moveTo(lamp3)
 golem.place("lantern", lamp3)
-// 第四盏：只走到灯下，最后一盏由你亲手点亮
-golem.moveTo(lamp4)
-// 回艾拉身边
-golem.moveTo(eira)
-`;
+// [4] 回艾拉身边
+golem.moveTo(eira)`;
 
 /**
  * L01「名副其实」代码要求（docs/48 §1.9）：本关教「函数调用 + 顺序」。
- * - 调用次数：3 盏灯各要「走过去 + 点亮」两句，共 8 次调用；只写 1 盏灯的 starter 不满足。
+ * - 调用次数：3 盏灯各要「走过去 + 点亮」两句，最后回艾拉一句，共 7 次调用；只写 1 盏灯的 starter 不满足。
  * - 顺序：每一次 place 点灯之前，都要先 moveTo 走到那盏灯下（顺序错了灯就点不到）。
  * custom 只做纯字符串/正则判定，不 import 分析器（content 会被 Studio 打包）。
  */
 const CODE_REQUIREMENTS = [
   {
     id: "l01-calls",
-    text: "至少写 8 次 golem 调用：每一盏灯都要「走过去 + 点亮」两句",
+    text: "至少写 7 次 golem 调用：三盏灯各「走过去 + 点亮」，最后回艾拉一句",
     kind: "calls" as const,
-    min: 8,
+    min: 7,
   },
   {
     id: "l01-order",
@@ -180,17 +204,25 @@ const CODE_REQUIREMENTS = [
 ];
 
 /**
- * L01 挑战层（可跳过、不计星）：最短路线。
- * 比主线更紧：灰崽只走四段——1 号灯、2 号灯、3 号灯、艾拉身边；
- * 不回头、不重复、4 号灯不再由它带路（你自己走过去点亮）。
- * 机器判定用事件顺序与坐标：四段走位必须依次落在 1、2、3 号灯与艾拉身边，
- * 三盏灯恰好各由灰崽点亮一次，第 4 盏由你亲手点亮。
+ * L01 挑战层（可跳过、不计星）：少走一步 + 到艾拉身边报一声。
+ * 灰崽只走四段——1 号灯、2 号灯、3 号灯、艾拉身边；不回头、不重复，
+ * 到艾拉身边后要报一句「四盏灯都亮了」；第 4 盏由你亲手点亮。
+ * 机器判定用事件顺序与坐标：四段走位依次落在 1、2、3 号灯与艾拉身边，
+ * 三盏灯恰好各由灰崽点亮一次，第 4 盏由你亲手点亮，收工时站在艾拉身边并报过一声。
  */
 export const L01_CHALLENGE: ChallengeDef = {
   id: "L01-shortest-route",
-  title: "挑战：一步不多走",
-  goal: "灰崽只走四段路：1 号灯、2 号灯、3 号灯、艾拉身边；4 号灯由你自己走过去点亮。",
-  reference: `// 挑战：只走四段——1 号灯、2 号灯、3 号灯、艾拉身边
+  title: "挑战：少走一步",
+  goal: "灰崽只走四段路：1 号灯、2 号灯、3 号灯、艾拉身边；到艾拉身边后报一句「四盏灯都亮了」，4 号灯由你自己点亮。",
+  reference: `/**
+ * 挑战：只走四段，最后报一声
+ *
+ * 步骤：
+ *   [1] 点亮 lamp1
+ *   [2] 点亮 lamp2
+ *   [3] 点亮 lamp3
+ *   [4] 回 eira 身边，报一句「四盏灯都亮了」
+ */
 golem.moveTo(lamp1)
 golem.place("lantern", lamp1)
 golem.moveTo(lamp2)
@@ -198,6 +230,7 @@ golem.place("lantern", lamp2)
 golem.moveTo(lamp3)
 golem.place("lantern", lamp3)
 golem.moveTo(eira)
+golem.say("四盏灯都亮了")
 `,
   check: g => {
     const eira = g.npc("eira").pos;
@@ -225,6 +258,9 @@ golem.moveTo(eira)
     }
     // 第 4 盏由你亲手点亮（织者之印）
     if (!playerLights.some(e => samePos(e.pos, lamps[3]))) return false;
+    // 到艾拉身边后要报一声「四盏灯都亮了」（主线参考解不报到，所以过不了挑战）
+    const reported = g.events("say").some(e => e.actorType === "agent" && String(e.data?.text ?? "").includes("四盏"));
+    if (!reported) return false;
     // 收工时就站在艾拉身边
     return g.withinRadius(g.agent("golem"), { pos: eira }, 4);
   },
@@ -240,7 +276,7 @@ export const L01: LevelDef & { challenge: ChallengeDef } = {
   codeRequirements: CODE_REQUIREMENTS,
   task: {
     ...L01_BASE.task,
-    mainTask: "让灰崽把 1 到 3 号灯点亮，再走到 4 号灯下；最后一盏由你亲手点亮，做完回到艾拉身边。",
+    mainTask: "让灰崽点亮 1 到 3 号灯；4 号灯由你自己走到灯柱前亲手点亮；最后让灰崽回到艾拉身边。",
     makeTask: "回程顺路点亮桥另一侧的第 5 盏小灯，这盏可以不做。",
     playerBeat: "4 号灯由你亲手点亮：走到村道尽头 4 号灯柱前，手持灯笼，对着灯柱按右键放置（站地面即可，不用看见柱顶）。",
     playerBeatHint: "手持灯笼，对着灯柱按右键，不用看顶面",
@@ -276,7 +312,7 @@ export const L01: LevelDef & { challenge: ChallengeDef } = {
       text: "你亲手点亮 4 号灯",
       player: true,
       hint:
-        "最后一步轮到你了：让灰崽走到 4 号灯下，然后由你亲手点。站在灯柱前的地面上，手持灯笼对着灯柱按右键就行，灯笼会自动挂到柱顶，不用抬头找顶面。点亮后回工作台点「运行」，这一条会打勾。",
+        "最后一步轮到你了：4 号灯由你自己走过去点——站到村道尽头的灯柱前，手持灯笼对着灯柱按右键，灯笼会自动挂到柱顶，不用抬头找顶面。点亮后回工作台点「运行」，这一条会打勾。",
       check: g => {
         const fourth = (g.var("lamps") as Pos[])[3];
         if (!fourth) return false;
@@ -292,7 +328,7 @@ export const L01: LevelDef & { challenge: ChallengeDef } = {
     },
   ],
   narrative: {
-    opening: ["小径上四盏灯又灭了。", "先让灰崽点亮 1 到 3 号灯，再走到 4 号灯下。", "最后一盏要由你亲手点：织偶替不了活人的手。"],
+    opening: ["小径上四盏灯又灭了。", "先让灰崽点亮 1 到 3 号灯；4 号灯由你亲手点亮。", "最后一盏要由你亲手点：织偶替不了活人的手。"],
     worldState: "天要黑了，晚归的村民还走在路上，路得亮起来。",
     whyYou: "活人才能写符文，最后一步也要由活人的手完成。",
   },

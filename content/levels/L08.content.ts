@@ -142,8 +142,31 @@ const L08_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 80,
-    starterCode: `// 命名点：lever（总拉杆）、eira（艾拉）、furnaceSwitch / gateSwitch / bellSwitch（三个合闸位）。
-// 接口（interface）是一张「能做什么」的清单：对象只要有 startSteps/stopSteps 两个方法，就满足 Machine。
+    starterCode: `/**
+ * L08 · 同一种心跳
+ *
+ * 目标：
+ *   1. 按 interface Machine 的清单理解机器：能启动、能停、能报状态
+ *   2. 写 combine 把熔炉组和警钟扣成一台联动机
+ *   3. 写 runAll（逐台启动、过热当场停）和 stopAll（按反序停机）
+ *
+ * 位置有两种写法（二选一，不要混用）：
+ *   1. 用名字：golem.moveTo(lever) / golem.place("redstone_block", furnaceSwitch)
+ *      → 名字是关卡给好的，推荐；完整名单见「指令手册」
+ *   2. 用坐标：golem.moveTo(0, 8) / golem.place("redstone_block", -6, 65, -6)
+ *      → 分别是 x、z 和 x、y、z
+ *
+ * 数据：world.vars.machines 每台机器有 name、status（正常 / 过热）、switchPos（合闸位）。
+ *   本关只按 interface Machine 调用，不背机器名字。
+ *
+ * 步骤：
+ *   [1] 接口、数据和一台机器的实现已经给好（下面这些代码）
+ *   [2] 用 combine 把 fleet[0]（熔炉组）和 fleet[2]（警钟）扣成联动机
+ *   [3] 写 runAll / stopAll 返回 Step[] 动作单
+ *   [4] plan 补好后按合闸位逐条执行（执行代码已给好）
+ *
+ * 卡住时：打开「指令手册」查本关 API 与命名点；运行失败时看教练卡提示。
+ */
 interface Machine {
   name: string
   status: string
@@ -180,15 +203,11 @@ function machineOf(spec: MachineSpec): Machine {
 }
 
 const fleet = specs.map(machineOf)
-// TODO 1：用 combine 把熔炉和警钟扣成一台联动机（启动先熔炉后警钟，停机反过来）。
 const combined = fleet[0]
 const all = [...fleet, combined]
-
-// TODO 2：runAll 排「逐台启动 + 过热当场停机」的动作单；stopAll 排「按反序停机」的动作单。
 const plan: Step[] = []
 for (const step of plan) {
   // 站在合闸位旁边，不站到机关格本身
-  // 站回中央通道/开关旁，不站到机器阵列或机关格上
   const standX = step.pos[2] <= -10 ? step.pos[0] : (step.pos[0] > 0 ? step.pos[0] - 4 : step.pos[0] + 4)
   const standZ = step.pos[2] <= -10 ? step.pos[2] + 4 : step.pos[2]
   golem.moveTo(standX, standZ)
@@ -203,7 +222,15 @@ for (const step of plan) {
 golem.moveTo(lever[0], lever[2] + 2)
 golem.say("全部待机，请织者把拉杆推到底")
 `,
-    referenceSolution: `interface Machine {
+    referenceSolution: `/**
+ * L08 · 同一种心跳（参考解）
+ *
+ * 步骤：
+ *   [1] 按 interface Machine 实现 machineOf
+ *   [2] 用 combine / runAll / stopAll 组合动作单
+ *   [3] 逐条执行 plan，最后回总拉杆旁
+ */
+interface Machine {
   name: string
   status: string
   startSteps(): Step[]

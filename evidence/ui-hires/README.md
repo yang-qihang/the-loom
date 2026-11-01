@@ -40,3 +40,8 @@ npx tsx tmp/shots/ui-shots.mjs          # -> evidence/ui-hires/
 python3 -m http.server 8092 -d report --bind 127.0.0.1 &
 npx tsx tmp/shots/report-shots.mjs      # -> report/evidence/report*.png
 ```
+
+
+## 第三轮（2026-11-01 14:36）
+- 字体按用户要求回退：代码编辑器 + 编辑器右键/补全/悬停/查找用 Maple Mono，其余 UI 恢复 Zpix/Departure Mono；截图全部用新构建重拍（`font-policy-verify.json`）。
+- 新增 `solution-viewer.png`：工作台顶栏「完整解（调试）」按钮打开本关参考解（可复制、Esc 关闭）。

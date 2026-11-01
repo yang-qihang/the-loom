@@ -9,11 +9,12 @@
 - **REPL**：试符台用当前关卡打开（不再跳回 L01），显示「当前关卡：X」，`help` 打开本关指令手册，命名点与 `golem.pos` 可读。
 - **概念揭晓**：结算/手记/织典按关揭示正式术语（L01 函数调用、L02 变量、L03 分支、L04 循环、L05 函数、L06 记录、L07 高阶函数、L08 接口、L09 异步、L10 协议），不回避专业术语。
 - **名实相符**：每关 `codeRequirements` + AST 分析器判定；starter 全不满足、参考解全满足；L02 参考解真用变量、L06 真用记录/switch、L07 真用 filter/map 流水线等。
-- **字体/Monaco**：嵌包 Maple Mono CN（OFL），代码与提示类 UI 统一（Zpix 仅装饰大标题）；Monaco 右键菜单不透明并中文化（根因：Monaco 0.57 默认 `useShadowDOM:true` 隔离主题 CSS，已设 `useShadowDOM:false`）。
+- **字体/Monaco（第三轮按用户要求修正）**：代码编辑器与编辑器浮层用嵌包 Maple Mono CN（OFL；菜单/补全/悬停/查找为清晰普通字体、不透明、中文化，根因 Monaco 0.57 `useShadowDOM:true` 已关）；**其余 UI 恢复上一版中文像素字体**（Zpix + Departure Mono），不再全站 Maple。
 - **起始点/截图**：10 关 `world.playerSpawn` 落盘；修复 L02/L09「玩家出生与灰崽重合、镜头糊在模型体内」；真实 Minecraft 26.1.2 客户端高清重拍（2560×990 ×10 关，含 L10）替换 Studio 关卡素材与 report 证据；Studio UI DPR2 高清截图。
 - **文案政策**：自然中文 + 必要英文术语（`for` 循环、`let` 变量、`Promise.all`…），`check-copy --pure-zh --strict` 0 违规。
+- **第三轮补充**：L01 流程按玩家直觉改为 7 行（3×moveTo+place + 回艾拉；4 号灯玩家亲手点，不再要求灰崽走到 4 号灯下）；学生 starter/参考解注释改为「正规工业结构 + 零基础可读」（JSDoc 文件头、编号分节、两种写法编号二选一）；新增「完整解（调试）」按钮（与指令手册/试符台同区域，可查看/复制参考解，成熟后移除）；字体按反馈回退（仅编辑器+编辑器浮层用 Maple，其余 UI 恢复中文像素字）。
 
-**终验**：`tsc` 0；`npm test` 25 files / 235 tests；content 162 tests；`verify.sh` pass（仅 Round 1 遗留 `G-FRESH-READER` tracked warning）；Studio e2e 6/6 + local 2/2；guidance 隔离冒烟 42/42；monaco-font 22/22 + 桌面壳 8/8；真实 Paper e2e L01–L10 全 PASS；重新打包 AppImage（428MB）/ RPM（435MB，2026-11-01 14:13），包内已含新字体/引擎/插件/世界素材。证据：`evidence/playtest-fix/start-positions.md`、`evidence/scene-shots/hi-res/`、`evidence/ui-hires/`、`evidence/monaco-font-verify.json`、`evidence/code-analysis.json`、`apps/studio/public/world/`、`report/`。
+**终验**：`tsc` 0；`npm test` 25 files / 235 tests；content 162 tests；`verify.sh` pass（仅 Round 1 遗留 `G-FRESH-READER` tracked warning）；Studio e2e 6/6 + local 2/2；guidance 隔离冒烟 42/42；字体策略 Playwright 验收（UI 像素字/编辑器 Maple/右键菜单清晰不透明）；真实 Paper e2e L01–L10 全 PASS；重新打包 AppImage（429MB）/ RPM（436MB，2026-11-01 14:40），包内已含新字体/引擎/插件/世界素材。证据：`evidence/playtest-fix/start-positions.md`、`evidence/scene-shots/hi-res/`、`evidence/ui-hires/`、`evidence/ui-hires/font-policy-verify.json`、`evidence/code-analysis.json`、`apps/studio/public/world/`、`report/`。
 
 **已知边界**：真实 Paper 模式同一时刻只重建一个真实世界会话，但试符台使用独立 Mock 会话，不再 dispose/影响当前关卡进度；L10 出生朝向看不到桥（素材用桥面机位并注明）；L03 钟本体在钟楼内不可见（对钟楼右键可完成）；`guard-tests` manifest drift 为 Round 1 前基线。
 

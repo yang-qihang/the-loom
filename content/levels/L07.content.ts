@@ -145,26 +145,48 @@ const L07_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 70,
-    starterCode: `// 数据：world.vars.cargo 与 world.vars.recheck（每件货有 id、kind：ore / wood / food）。
-// boxes 里是箱子格子坐标（ore / wood / food）；recheckBoxes 是复核箱的三个去处。
-// 命名点：eira（艾拉）、cargoBox（货堆）、oreBox / woodBox / foodBox（三只箱子的入口格）、home（营地）。
-// 分拣 = 走到格子，place(货物编号, 格子坐标)；一格一件。
-// 可以照这个骨架写（做法可以当值传给 filter/map）：
-//   const isOre = item => item.kind === "ore"
-//   const 矿货 = cargo.filter(isOre).map(...)   // filter 筛、map 规划格子
-// 现在只把第一件货放进了矿石箱。
+    starterCode: `/**
+ * L07 · 信风与织线
+ *
+ * 目标：
+ *   1. 把三条分辨货物的规矩写成「做法」（函数作为值），交给悦灵反复用
+ *   2. 用 filter + map 流水线把货分进三只箱子
+ *   3. 用同一条流水线把复核箱的错货送回原处
+ *
+ * 位置有两种写法（二选一，不要混用）：
+ *   1. 用名字：golem.moveTo(cargoBox) / golem.place(货.id, boxes.ore[0])
+ *      → 名字是关卡给好的，推荐；格子也能从 world.vars.boxes 里取
+ *   2. 用坐标：golem.moveTo(0, 20) / golem.place("coal", 0, 65, 0)
+ *      → 分别是 x、z 和 x、y、z
+ *
+ * 数据：world.vars.cargo / recheck 每件货有 id、kind（ore / wood / food）。
+ *   world.vars.boxes / recheckBoxes 是三只箱子的格子坐标。
+ *
+ * 步骤：
+ *   [1] 先把第一件货放进矿石箱，运行看效果（下面 3 行已写好）
+ *   [2] 写三条做法 isOre / isWood / isFood，并清点三类各几件
+ *   [3] 用 cargo.filter(...).map(...) 规划待放清单，逐件 moveTo + place
+ *   [4] 复核箱走同一条流水线；最后 golem.moveTo(home) 回营地
+ *
+ * 卡住时：打开「指令手册」查本关 API 与命名点；运行失败时看教练卡提示。
+ */
 const cargo = world.vars.cargo
 const boxes = world.vars.boxes
 const first = cargo[0]
 golem.moveTo(boxes.ore[0][0], boxes.ore[0][2])
 golem.place(first.id, boxes.ore[0][0], boxes.ore[0][1], boxes.ore[0][2])
 golem.say("先放了一件。")
-
-// TODO 第一阶段：写三条分辨货物的小规矩（矿石/木料/食物），先清点货堆。
-// TODO 第二阶段：把货堆分进三只箱子；再用一条流水线把复核箱的错货送回原处。
-// TODO 第三阶段：逐箱点数报给艾拉听，再开笼放悦灵。
 `,
-    referenceSolution: `// 高阶函数（higher-order function）：判断「是不是某类货」是一段做法，可以当值传给别人。
+    referenceSolution: `/**
+ * L07 · 信风与织线（参考解）
+ *
+ * 步骤：
+ *   [1] 用 makeRule 生成三条判断做法（闭包）
+ *   [2] 用 filter + map 拼流水线，逐件放货
+ *   [3] 复核箱走同一条流水线
+ *   [4] 回营地报数
+ */
+// 高阶函数（higher-order function）：判断「是不是某类货」是一段做法，可以当值传给别人。
 const cargo = world.vars.cargo
 const boxes = world.vars.boxes
 

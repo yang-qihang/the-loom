@@ -156,7 +156,8 @@ export function effectiveLines(code: string): number {
 }
 
 function minimumLinesFor(act: number, id: string): number {
-  if (id === "L01") return 8;
+  // L01 是「顺序 + 函数调用」的最小样例：3 盏灯各 2 句 + 回艾拉 1 句 = 7 条有效行。
+  if (id === "L01") return 7;
   if (act === 1) return 25;
   if (act === 2) return 50;
   return 60;

@@ -98,14 +98,35 @@ const L10_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 74,
-    starterCode: `// 两只织偶各有一个邮箱：谁先发、谁先等，决定它们会不会卡死。
-// 桥面 3 格宽；缺口从 x=10 开始，桥面高度 65。两只各补一半，材料箱只有缺口块数。
-// 命名点：eira（艾拉）、keystone（中央合龙石基座）、materialsBox（共享材料箱）、leftBank / rightBank（左右岸桥头）。
+    starterCode: `/**
+ * L10 · 双织者
+ *
+ * 目标：
+ *   1. 让两只织偶用消息说好份额，各拿一半材料
+ *   2. 从两岸同时往中间铺桥，中央一格留给玩家
+ *   3. 先发后等（send 写在 receive 前面），避免互相干等
+ *
+ * 位置有两种写法（二选一，不要混用）：
+ *   1. 用名字：left.moveTo(leftBank) / left.place("oak_planks", keystone)
+ *      → 名字是关卡给好的，推荐；完整名单见「指令手册」
+ *   2. 用坐标：left.moveTo(1, 0) / left.place("oak_planks", 12, 65, 0)
+ *      → 分别是 x、z 和 x、y、z
+ *
+ * 数据：world.vars 里有 deck / gap / gapStart / deckY / materialsBox / leftAgent / rightAgent。
+ *   agent("左织") / agent("右织") 各有一个邮箱：left.send(...) 发，left.receive() 收。
+ *
+ * 步骤：
+ *   [1] 数据与单织偶版已经给好，先运行一次看它失败（下面这段代码）
+ *   [2] 写 async function 左织开工()：先 await right.send(...)，再 await left.receive()
+ *   [3] 写 async function 右织开工()：先 await left.send(...)，再 await right.receive()
+ *   [4] 各取一半材料，从两头往中间铺；最后用 Promise.all 一起等
+ *
+ * 卡住时：打开「指令手册」查本关 API 与命名点；运行失败时看教练卡提示。
+ */
 const 桥 = world.vars
 const left = agent("左织")
 const right = agent("右织")
 
-// 阶段一：单织偶铺桥（先跑一次，看它铺到一半就被峡谷逼回来）
 async function 单织偶铺桥(): Promise<void> {
   for (let i = 0; i < 桥.gap - 1; i++) {
     const x = 桥.gapStart + i
@@ -114,15 +135,17 @@ async function 单织偶铺桥(): Promise<void> {
   }
   await left.say("我一个人铺不完")
 }
-
-// 阶段二：两只织偶。先各自写一个 async 函数：
-// 1) 先把份额发给对方（send 要写在 receive 前面）
-// 2) 收对方回话，核对份额
-// 3) 各取一半材料，从两头往中间铺（左岸走 z=-1，右岸走 z=1）
-// 4) 铺完互报数字，最后用 Promise.all 一起等
-// TODO: 写 左织开工 / 右织开工
 `,
-    referenceSolution: `const 桥 = world.vars
+    referenceSolution: `/**
+ * L10 · 双织者（参考解）
+ *
+ * 步骤：
+ *   [1] 读共享材料，按份额分成两半
+ *   [2] 两只织偶先发后等，核对份额
+ *   [3] 各取一半，从两头往中间铺
+ *   [4] 中央留给玩家放合龙石
+ */
+const 桥 = world.vars
 const left = agent("左织")
 const right = agent("右织")
 const 木板 = "oak_planks"

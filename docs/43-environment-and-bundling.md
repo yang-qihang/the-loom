@@ -20,7 +20,7 @@
 - 真实引擎 bundle（`runtime/real/engine.mjs`）
 - **mineflayer / minecraft-protocol / pathfinder** 与 `bot/manager.mjs`
 - Mock 演示引擎、图标、窗口/缩放/连接灯逻辑
-- **嵌包字体 Maple Mono**（代码/日志/手册代码块统一使用；含中文回退；OFL 许可文件随包，不依赖系统字体）
+- **嵌包字体**：代码编辑器 Maple Mono（含中文回退，OFL 许可随包）；UI 保留 Zpix/Departure Mono 中文像素字体；全部随包，不依赖系统字体
 - **关卡截图素材**（`apps/studio/public/world/*.png` 玩家出生视角；`report/evidence/*.png` 报告配图；成品尺寸/文件以最终提交素材为准）
 
 ## 3. 用户只需要
@@ -75,13 +75,14 @@ npm run desktop:build
 - `apps/desktop/src-tauri/target/release/bundle/appimage/*.AppImage`
 - `apps/desktop/src-tauri/target/release/bundle/rpm/*.rpm`
 
-当前自包含安装包（2026-11-01 Round 2 重打包）：AppImage ≈428MB / RPM ≈435MB；构建期 `apps/desktop/src-tauri/runtime/real/` 约 1GB，不入 Git，构建前请评估磁盘/CI 缓存。
+当前自包含安装包（2026-11-01 Round 2 重打包）：AppImage ≈429MB / RPM ≈436MB；构建期 `apps/desktop/src-tauri/runtime/real/` 约 1GB，不入 Git，构建前请评估磁盘/CI 缓存。
 
 ## 8. Round 2 素材与编辑器集成（2026-11-01）
 
 ### 8.1 字体
 
-- 代码编辑器、运行日志、指令手册/试符台的代码块统一 `--mono` 栈指向**嵌包的 Maple Mono**（含中文回退），开启 ligature；不再使用 Iosevka / Departure Mono 作为代码字体。
+- 代码编辑器使用嵌包 **Maple Mono CN**（开启 ligature）；编辑器右键菜单/补全/悬停/查找用清晰普通字体，不用像素字。
+- Studio 其余 UI 保留上一版中文像素字体（Zpix）+ Departure Mono 栈；不把正文/标题改成 Maple Mono。
 - 字体文件与 OFL 许可随 Studio 静态资源（`apps/studio/public/fonts/`）打包，桌面 App 与浏览器吃同一份文件，不依赖系统 fallback。
 - 验收方式（实现侧）：`document.fonts.check("16px \"Maple Mono\"")` 为 true、`.monaco-editor .view-lines` 的 computed font-family 含 Maple Mono；截图人工核对 0/O、1/l/I 不混淆。
 

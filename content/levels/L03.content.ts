@@ -240,28 +240,55 @@ const L03_BASE: LevelDef = defineLevel({
   },
   code: {
     expectedLoc: 58,
-    starterCode: `// 上面三张卡就是今晚的剧本：安静夜、北门有僵尸、井边有人被困。
-// 铁傀儡不是灰崽：它是村里的守卫；灰崽是你写符文驱动的织偶。
-// 剧本已经读进 s 里：s.trapped 表示有人被困，s.threat 表示威胁大小，s.gateOpen 表示北门开着。
+    starterCode: `/**
+ * L03 · 岔路与钟声
+ *
+ * 目标：
+ *   1. 先看上面三张卡（今晚的剧本是哪种夜）
+ *   2. 按剧本守夜：有威胁才敲钟；有人被困先救人
+ *   3. 点亮八根灯柱和四户人家门口；北门开着就堵上
+ *   4. 回艾拉身边报平安
+ *
+ * 位置有两种写法，二选一（不要混用）：
+ *   1. 用名字（推荐）：golem.moveTo(bell) / golem.place("bell", bell)
+ *      → bell 是钟、well 是井、gate 是北门、door 是村口大门、eira 是艾拉
+ *      → 灯柱是 lamp1 到 lamp8，人家门口是 house1 到 house4
+ *   2. 用坐标：golem.moveTo(0, 0) / golem.place("bell", 0, 65, 0)
+ *      → moveTo 写 x、z 两个数；place 写 x、y、z 三个数（y 是高度）
+ *
+ * 步骤：
+ *   [1] 读剧本：const s = world.vars.scenario（下面已给出）
+ *   [2] 有威胁的夜：先去 bell 敲钟，再去 gate
+ *   [3] 有人被困的夜：先去 well，再把人带到 door
+ *   [4] 安静的夜：不敲钟
+ *   [5] 点亮 lamp1 到 lamp8 和 house1 到 house4
+ *   [6] 回 eira 身边报平安
+ *
+ * 说明：铁傀儡不是灰崽，它是村里的守卫；灰崽是你写符文（也就是你写的指令）驱动的织偶。
+ */
 const s = world.vars.scenario
 
-// 这一关的点都有名字，指令手册里能查到：bell 是钟、well 是井、gate 是北门、door 是村口大门、eira 是艾拉。
-// 八根灯柱叫 lamp1 到 lamp8；四户人家的门口叫 house1 到 house4。
-// 走过去用 golem.moveTo(名字)，放东西用 golem.place(东西, 名字)。
-
-// 今晚有威胁：先走去敲钟，再去北门守着
+// 第 [2] 步：有威胁的夜里先敲钟，再去北门
 if (s.threat > 0) {
   golem.moveTo(bell)
   golem.place("bell", bell)
   golem.moveTo(gate)
 }
 
-// 剩下两段你来补：
-// 有人被困的夜里（s.trapped 为 true），先到 well，再把人带到 door。
-// 既没有威胁、也没有人被困的夜里，不敲钟，把灯柱和人家门口补亮。
-// 最后从北门绕到井边、钟楼看一圈，回艾拉身边报平安。
-`,
-    referenceSolution: `const s = world.vars.scenario
+// 第 [3]、[4] 步：有人被困的夜 / 安静的夜，你来补
+// 第 [5]、[6] 步：点亮灯柱和人家门口，最后回艾拉身边`,
+    referenceSolution: `/**
+ * L03 · 岔路与钟声（参考解）
+ *
+ * 步骤：
+ *   [1] 读剧本，按今晚的情况分三段：有人被困 / 有威胁 / 安静夜
+ *   [2] 点亮八根灯柱和四户人家门口
+ *   [3] 北门被撞开就堵上
+ *   [4] 巡查井边、北门、钟楼，回艾拉身边报平安
+ *
+ * 说明：一个程序连过三夜，靠的是 if / else if / else 三段分支。
+ */
+const s = world.vars.scenario
 
 // 阶段一：守夜——先看今晚是什么夜，再决定做什么
 if (s.trapped) {
@@ -329,8 +356,7 @@ golem.say("钟楼：平安")
 
 // 收岗：回艾拉身边
 golem.moveTo(eira)
-golem.say("三夜平安，天亮收岗")
-`,
+golem.say("三夜平安，天亮收岗")`,
   },
   task: {
     mainTask:

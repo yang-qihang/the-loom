@@ -62,34 +62,9 @@ body.companion .btn { padding: 4px 9px; font-size: 12px; white-space: nowrap; }
 
 
 /* ---- T9 自绘像素标题栏（decorations=false；无系统窗框） ---- */
-/* Round 2：桌面壳与 Studio 用同一份随包字体（dist/studio/fonts 由 build-assets 从
-   apps/studio/public/fonts 复制）。Maple Mono CN 是唯一 UI/代码字体；Zpix 只留给启动遮罩大标题。 */
 @font-face {
-  font-family: "Maple Mono";
-  src: url("./studio/fonts/MapleMono-CN-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Maple Mono";
-  src: url("./studio/fonts/MapleMono-CN-Italic.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Maple Mono";
-  src: url("./studio/fonts/MapleMono-CN-SemiBold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Maple Mono";
-  src: url("./studio/fonts/MapleMono-CN-SemiBold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
+  font-family: "Departure Mono";
+  src: url("./studio/fonts/DepartureMono-Regular.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
@@ -108,7 +83,7 @@ body.companion .btn { padding: 4px 9px; font-size: 12px; white-space: nowrap; }
   --muted: #a9b896;
   --ok: #9fd08a;
   --bad: #e08a7a;
-  font-family: "Maple Mono", "Noto Sans SC", system-ui, sans-serif;
+  font-family: "Departure Mono", "Zpix", "Noto Sans SC", system-ui, monospace;
 }
 body { background: var(--bg); }
 .loom-bar {
@@ -193,6 +168,6 @@ body.companion .loom-bar .win-btn { width: 28px; height: 26px; }
   transition: opacity .18s ease; pointer-events: none;
 }
 .boot-splash.is-hidden { opacity: 0; visibility: hidden; }
-.boot-mark { font-family: "Zpix", "Maple Mono", monospace; font-size: 64px; letter-spacing: 10px; color: #f0d68a; }
-.boot-line { font-family: "Maple Mono", ui-monospace, monospace; font-size: 14px; color: #a9b896; }
+.boot-mark { font-family: "Zpix", "Departure Mono", monospace; font-size: 64px; letter-spacing: 10px; color: #f0d68a; }
+.boot-line { font-family: "Zpix", "Departure Mono", monospace; font-size: 14px; color: #a9b896; }
 .loom-main { background: #0e1710; }

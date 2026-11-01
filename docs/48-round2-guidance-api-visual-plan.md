@@ -177,17 +177,20 @@ levels.json 每关新增：
 | §1.7 概念揭晓 | 结算/手记/织典显示「中文（English term）+ 是什么/为什么/刚才做了什么」；L01–L10 conceptReveal 全部落盘 | `ConceptRevealCard.tsx`、`levels.json`、docs/04 §11.5 |
 | §1.8 起始点 | 10 关 `world.playerSpawn` 落盘；L02/L09 修复「玩家 spawn 与灰崽重合→镜头在模型体内糊屏」；每关真实客户端出生视角截图审计 | `evidence/playtest-fix/start-positions.md`、`birth-L01..L10.png` |
 | §1.9 名实相符 | 每关 `codeRequirements`（声明式 kind/min/custom test）+ AST 分析器 `analyzeStudentCode/evaluateCodeRequirements`；starter 全不满足、参考解全满足；L02 变量、L06 记录/switch、L07 filter/map 流水线等重写为真正使用抽象 | `packages/runner/src/analysis.ts`、`evidence/code-analysis.json`、L01–L10 content |
-| 字体 | 嵌包 **Maple Mono CN**（Regular/Italic/SemiBold，OFL 1.1）；代码/提示类 UI 统一；Zpix 只留装饰大标题；移除 Iosevka/Departure Mono | `apps/studio/public/fonts`、`styles.css`、`CodeEditor.tsx`；Playwright 22/22 + 桌面壳 8/8 |
-| Monaco 菜单 | 真正根因是 Monaco 0.57 默认 `useShadowDOM: true`——菜单在 shadow root 内导致主题/CSS 隔离；设 `useShadowDOM:false` + 不透明主题色 + CSS 兜底；菜单中文化；suggest/hover/find 同修 | `CodeEditor.tsx`、`monaco/setup.ts`、`styles.css`；`evidence/monaco-font-verify.json` |
+| 字体 | 第三轮已按用户要求修正：**仅代码编辑器 + 编辑器右键/补全/悬停/查找** 用嵌包 Maple Mono CN（清晰普通字体，OFL 1.1）；**其余 Studio/桌面壳 UI 恢复上一版中文像素字体**（Zpix + Departure Mono）；移除未使用的 Iosevka | `apps/studio/public/fonts`、`apps/studio/src/assets/fonts`、`styles.css`、`CodeEditor.tsx`；`evidence/ui-hires/font-policy-verify.json` |
+| Monaco 菜单 | 真正根因是 Monaco 0.57 默认 `useShadowDOM: true`——菜单在 shadow root 内导致主题/CSS 隔离；设 `useShadowDOM:false` + 不透明主题色 + CSS 兜底；菜单中文化；suggest/hover/find 同修 | `CodeEditor.tsx`、`monaco/setup.ts`、`styles.css`；`evidence/ui-hires/monaco-context-menu.png`、`evidence/ui-hires/font-policy-verify.json` |
 | 截图 | 真实 Minecraft 26.1.2 客户端（Docker Xvfb + Mesa llvmpipe，2560×1440）逐关出生视角；world strip 2560×990 ×10（含 L10）；report 证据图全部替换；Studio UI DPR2 2880×1920 | `apps/studio/public/world/`、`report/evidence/`、`evidence/scene-shots/hi-res/`、`evidence/ui-hires/` |
 | 文案政策 | 自然中文 + 必要英文术语（`for` 循环、`let` 变量、`Promise.all`…），不硬翻译；`check-copy --pure-zh --strict` 0 违规（术语白名单 + 中英对照豁免） | `scripts/check-copy.mjs`、docs/20 §3b |
+| 第三轮修正：字体范围 | 仅代码编辑器 + 编辑器右键/补全/悬停/查找用嵌包 Maple Mono（清晰普通字体）；其余 Studio/桌面壳 UI 恢复上一版中文像素字体（Zpix / Departure Mono）。用户明确要求「改回来」 | `styles.css`、`CodeEditor.tsx`、docs/20 §3b4；Playwright `evidence/ui-hires/font-policy-verify.json` |
+| 第三轮修正：L01 流程 | 3×(moveTo+place) + 回艾拉 = 7 行/7 次调用；4 号灯玩家亲手点，不再要求灰崽 moveTo(lamp4)；L01 下限 8→7；starter/参考解注释改为工业结构 + 零基础可读 | `content/levels/L01.content.ts`、`packages/level-spec`、`level-spec` 测试 |
+| 第三轮新增：完整解（调试） | 工作台顶栏/更多菜单与「指令手册」「试符台」同区域按钮，可查看/复制本关 `referenceSolution`；Esc/× 关闭；临时调试功能，成熟后移除 | `SolutionViewer.tsx`、`Workbench.tsx`、`App.tsx`；`evidence/ui-hires/solution-viewer.png` |
 
 ### 6.2 终验矩阵（Lead 在最终工作树 + 重新打包产物上执行）
 
 - `npx tsc -p tsconfig.json --noEmit` = 0；`npx tsc -p apps/studio/tsconfig.json --noEmit` = 0
 - `npm test` = 25 files / 235 tests 全绿（冻结测试零改动）；`npx vitest run content/levels` = 10 files / 162 tests 全绿
 - `bash scripts/verify.sh` = pass（l0–l3 pass；lg 仅遗留 `G-FRESH-READER` tracked warning，Round 1 基线）
-- Studio：`test:e2e` 6/6（真实配置）、`test:e2e:local` 2/2；guidance 隔离冒烟 42/42；monaco-font 22/22 + 桌面壳 8/8
+- Studio：`test:e2e` 6/6（真实配置）、`test:e2e:local` 2/2；guidance 隔离冒烟 42/42；字体策略 Playwright（UI 像素字 / 编辑器 Maple / 菜单不透明）
 - 真实 Paper e2e：`it/l1-real.ts`–`it/l10-real.ts` 全 PASS（含 L02 语义两趟、L04 harvest/plant、L10 双织偶玩家节拍）；插件补 `world.blocks`/`world.snapshot` 的 `baseAlias` 还原（虚拟方块 egg/wheat_sprout 以逻辑 id 报告，与 Mock digest 一致）
 - 重新打包：`scripts/package-desktop.sh` 一条命令产出 AppImage + RPM（无 FUSE 环境自动 `APPIMAGE_EXTRACT_AND_RUN` + 手动封包）；包内断言 Maple Mono 存在、无 Iosevka、插件含 `playerGive`、世界 marker 存在
 
