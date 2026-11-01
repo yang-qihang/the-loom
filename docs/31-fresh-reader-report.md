@@ -1,9 +1,10 @@
 # 31 — Fresh Reader 模拟评审（Round 1，G-FRESH-READER）
 
-> 状态：v1（Round 1 评审完成；**G-FRESH-READER: FAIL**）｜评审人：scout-pedagogy（协调 2 个 fresh agent）｜最后更新：2026-10-31
+> 状态：历史评审记录（Round 1；**G-FRESH-READER: FAIL**）。后续已做多轮 UI/文案修复，Round 4 仍未清零｜评审人：scout-pedagogy｜最后更新：2026-11-01
 > 上游：`docs/30-fresh-reader-simulation.md`（角色卡/输入限制/通过标准）、`docs/22-copy-deck.md` v3、`docs/23`、`docs/25`、`docs/20` §3b/§3b2、`apps/studio/evidence/*.png`
 > 下游：文案 owner（Studio/文案线）逐条修；QA 把结果写入 `qa/evidence/qa-gates.json` 的 G-FRESH-READER；修完由**新的** 2 个 fresh agent 复读。
 > 机器证据：`qa/evidence/fresh-reader-round1.json`（33 条去重后的 findings，含原始 persona 计数；本轮未改任何文案/代码）。
+> 负责人：scout-pedagogy（评审人）
 
 ## 0. 结论
 

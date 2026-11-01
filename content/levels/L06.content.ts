@@ -287,6 +287,7 @@ golem.say("账清了，塔卡。")
     mainTask: "把混装货箱的货分进工具、材料、食物三只桶，给每份工作配好工具，最后和塔卡对账。",
     makeTask: "换一批货物与木桶位置，程序不改行数也能分对；验收还会送来一种没见过的工具。",
     playerBeat: "对完账，你把织线插进护符盒（织者之印）。",
+    playerBeatHint: "手持线团，对准护符盒按右键",
     successCriteria: [
       {
         id: "tools-box",
@@ -385,6 +386,44 @@ golem.say("账清了，塔卡。")
     ],
     whyYou: "账本上最后一笔要你和塔卡当面点清；织偶只认字，分不清斧和镐，得靠你写清楚。",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值（护符盒节拍不占目标）。
+  progress: [
+    {
+      id: "l06-tools-box",
+      text: "工具全进工具桶，一件没混",
+      check: g => {
+        const cargo = cargoList(g.var("cargo"));
+        const boxes = boxesOf(g.var("boxes"));
+        const expected = cargo.filter(item => boxKeyOf(item) === "tools").map(item => item.id);
+        const got = boxes.tools.map(p => idOf(g, p)).filter(id => id !== "air");
+        const strays = [...boxes.materials, ...boxes.food].map(p => idOf(g, p)).filter(id => id !== "air");
+        return sameList(got, expected) && expected.every(id => !strays.includes(id));
+      },
+    },
+    {
+      id: "l06-supplies",
+      text: "材料和食物各进各桶，一件不丢",
+      check: g => {
+        const cargo = cargoList(g.var("cargo"));
+        const boxes = boxesOf(g.var("boxes"));
+        const expectedMaterials = cargo.filter(item => boxKeyOf(item) === "materials").map(item => item.id);
+        const expectedFood = cargo.filter(item => boxKeyOf(item) === "food").map(item => item.id);
+        const gotMaterials = boxes.materials.map(p => idOf(g, p)).filter(id => id !== "air");
+        const gotFood = boxes.food.map(p => idOf(g, p)).filter(id => id !== "air");
+        const placed = [...boxes.tools, ...boxes.materials, ...boxes.food].map(p => idOf(g, p)).filter(id => id !== "air");
+        return (
+          sameList(gotMaterials, expectedMaterials) &&
+          sameList(gotFood, expectedFood) &&
+          sameList(placed, cargo.map(item => item.id))
+        );
+      },
+    },
+    {
+      id: "l06-jobs-tooled",
+      text: "每个工作点都配到对的工具",
+      check: g => jobsOf(g.var("jobs")).every(job => blockId(g, pos(job.station)) === C + job.needs),
+    },
+  ],
   phases: ["记录与清点", "三桶分拣与配工具", "新工具与对账"],
 });
 

@@ -4,6 +4,8 @@
 > 上游：`docs/05-curriculum.md`、`content/level-spec.schema.json`、`content/levels/L01-first-light.md`（样板）
 > 下游：所有 `content/levels/*.md`、`packages/level-kit`、`packages/grader`
 > 一句话：**Spec 是 AI 实现关卡的唯一输入。写不清的 spec = 做不出的关卡。**
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
+> 实现差异：2026-11-01 起关卡实现为 `content/levels/LXX.content.ts` 的 `defineLevel()`，目标进度真值新增 `LevelDef.progress`（本文件写作时尚无），见 docs/46 §1.1。
 
 ---
 

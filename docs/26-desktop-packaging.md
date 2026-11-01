@@ -1,8 +1,9 @@
 # 26 — 桌面封装（Tauri 2）：最终交付不让用户开浏览器
 
-> 状态：ADR / T4 计划（Accepted）｜负责人：Lead｜最后更新：2026-10-31
+> 状态：ADR / T4 计划（Accepted；**已落地**，当前事实见 `apps/desktop/README.md`、`docs/43`）｜负责人：Lead｜最后更新：2026-11-01
 > 用户要求：项目是 web-based，但**最后要封装成桌面应用（如 Tauri），不要让用户用浏览器**。
 > 工具链实测（2026-10-31，本机 Fedora 44）：rustc/cargo **1.98.1**、webkit2gtk-4.1 **2.54.2**、gtk+-3.0 **3.24.52**、`@tauri-apps/cli` **2.12.4**、Electron **45.2.1** 可用。
+> 上游：docs/09-execution-plan.md（T4）、docs/07-architecture.md
 
 ---
 
@@ -114,3 +115,10 @@ cd apps/desktop && npm run tauri build
 - 演示：`docs/10` 的「Studio 窗口」改成「App 窗口」；不再出现浏览器。
 - UI：`apps/studio` 需保证资源路径相对（`vite base: './'`）且不依赖 `window.location.origin`。
 - 命令：`npm run dev:studio` 仅开发用；发布走 `apps/desktop`。
+
+## 9. 落地结果（2026-11-01）
+
+- Tauri 2 AppImage + RPM 已产出（2026-11-01 重打包 AppImage ≈400MB / RPM ≈417MB），无浏览器、自绘标题栏、伴玩/置顶/Alt+Z 焦点切换均有实现。
+- 安装包已内置 Node 22 / Java 25 / Paper 26.1.2 / 插件 / 干净世界 / 真实引擎 / mineflayer 织偶；用户只需装 Minecraft 26.1.2。
+- 世界布局版本 marker 迁移：旧可写世界自动替换为包内干净世界（见 `apps/desktop/README.md`）。
+- 构建入口统一为 `bash scripts/package-desktop.sh`。

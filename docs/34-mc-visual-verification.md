@@ -1,8 +1,9 @@
 # 34 — 真实 MC 视觉验收（自动化，不靠人眼盲看）
 
-> 状态：v1｜负责人：Lead｜最后更新：2026-10-31
+> 状态：v1（流程有效；截图覆盖为部分关卡，2026-11-01 起需重拍新增视觉）｜负责人：Lead｜最后更新：2026-11-01
 > 目的：把「MC 场景是否精致」从口头判断变成可复现的自动化证据链：真实客户端进服 → 固定机位/时间 → 截图 → 与场景数据核对。
 > 背景：此前只有协议级 e2e，没有客户端画面；Fresh Reader 因此无法判断「世界长什么样」。本流程已在本机跑通。
+> 上游：docs/02-minecraft-stack.md、docs/35-scene-art-playbook.md、qa/scene-quality.mjs
 
 ## 1. 环境
 
@@ -43,12 +44,12 @@ montage evidence/mc-shots/art-{0..7}.png -tile 4x2 -geometry 480x300+3+3 evidenc
 2. **画面**：真实客户端截图里能辨认 4 个灯柱、小径、村舍、树木、灯笼、灰崽/村民；无黑屏/无「只有虚空」；时间/天气与关卡一致。
 3. **数据**：截图中可见的方块/实体与 `world.snapshot` / 内容 `prepare` 的清单一致（至少抽 5 个：灯柱、灯笼、小径、村舍、树）。
 4. **Fresh Reader**：把真实截图加入材料包，重跑 `docs/30`；若仍说「看不到世界」，记录具体缺口并修。
-5. **回归**：`npm test` 185+、`bash scripts/verify.sh` exit 0、Studio Playwright 5/5。
+5. **回归**：`npm test` 235（25 files）、`bash scripts/verify.sh` exit 0、Studio Playwright 6/6。
 
 ## 5. 已知限制
 
 - Xvfb 下软件渲染偏暗；正式演示用真实显示器/提高 gamma（客户端 options `gamma:1.0`）再拍一组。
-- 本轮只拍了 L01；L02–L09 的真实场景截图需逐关按同一流程补。
+- 截图为部分关卡：L01–L09 曾按本流程过场景质量门，但 2026-11-01 的修复改变了 L01 第 4 盏灯区域（删除石阶、新增发光标记），需重拍；全部关卡的最终截图尚未齐套。
 - 截图是辅助证据，**评分真值仍以服务端快照/事件为准**（docs/07）。
 
 ## 0. 隔离显示（硬规则）
@@ -57,3 +58,9 @@ montage evidence/mc-shots/art-{0..7}.png -tile 4x2 -geometry 480x300+3+3 evidenc
 - **禁止 `DISPLAY=:0`**：那会移动用户真实桌面的鼠标、抢焦点、污染实验。曾发生过一次 desktop agent 在 `:0` 启动测试 App 的泄漏；已 kill 并加入本规则。
 - `models` 测试脚本统一先跑 `source scripts/isolated-x.sh`（会拒绝 :0）；`tools-xclick.py` 读取 `LOOM_TEST_DISPLAY`，拒绝 :0。
 - 在真机上验证时也要先确认 `ps -ef | grep DISPLAY=:0` 为空。
+
+## 6. 2026-11-01 视觉变化（重拍清单）
+
+- L01：删除第 4 盏灯柱旁的两级不对称石砖台阶；`playerBeat.activate` 后目标处出现发光灯笼标记（ItemDisplay，tag `loom-beat-marker`）。旧参考图不再代表当前画面。
+- L02–L10：玩家节拍目标在激活后出现发光标记；场景本体未变，但玩家操作视角（站目标 6 格内、手持道具）与旧脚本不同。
+- 重拍命令与固定机位仍按 §2/§3 与 docs/35 §8；验收判据不变（docs/46 不改变视觉真值口径）。

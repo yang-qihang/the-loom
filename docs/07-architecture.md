@@ -4,6 +4,8 @@
 > 上游：`docs/03-language-decision.md`（执行管线）、`research/language-notes.md`、`research/assurance-notes.md`
 > 下游：`docs/06-level-spec-system.md`（primitive/断言在运行时的语义）、`docs/09-execution-plan.md`（WBS）
 > 一句话：**一个 Node 引擎（编排 + 沙箱 + 评分）+ 一个 Paper 插件（世界权威）+ N 个 Mineflayer 织偶（玩家能力）+ 一个浏览器工作室（UI）；学生只看到两个对象 `golem` 和 `world`。**
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
+> 实现差异：2026-11-01 新增 `WorldPort.activatePlayerBeat()`、插件 `playerBeat.*`/`session.end`、`ResultEvent.progress/playerBeatReady`，见 docs/46 §2。
 
 ---
 

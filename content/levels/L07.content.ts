@@ -248,6 +248,7 @@ golem.say("对上了：三只箱子都归位了。")
     mainTask: "写三条分辨货物的规矩，把货堆分进三只箱子；再用流水线把复核箱的错货送回原处，最后逐箱报数。",
     makeTask: "换一批货物、换箱子位置也要能跑，只来两类货的清单也不许翻车。",
     playerBeat: "分拣完成后，你打开三只笼门放出悦灵（织者之印）。",
+    playerBeatHint: "手持活板门，对三只笼门各按右键",
     successCriteria: [
       {
         id: "cargo-boxes",
@@ -344,6 +345,41 @@ golem.say("对上了：三只箱子都归位了。")
     ],
     whyYou: "笼门只有你的手能开；悦灵认的是你给的规矩，不是一声命令。",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值（开笼门节拍不占目标）。
+  progress: [
+    {
+      id: "l07-cargo-boxes",
+      text: "三种货各按规矩进自己的箱子",
+      check: g => {
+        const cargo = cargoList(g.var("cargo"));
+        const boxes = boxesOf(g.var("boxes"));
+        const placed: string[] = [];
+        for (const key of ["ore", "wood", "food"] as BoxKey[]) placed.push(...boxes[key].map(p => idOf(g, p)).filter(id => id !== "air"));
+        return sameList(placed, cargo.map(item => item.id));
+      },
+    },
+    {
+      id: "l07-recheck-boxes",
+      text: "复核箱的错货也按规矩送回去",
+      check: g => {
+        const recheck = cargoList(g.var("recheck"));
+        const boxes = boxesOf(g.var("recheckBoxes"));
+        const placed: string[] = [];
+        for (const key of ["ore", "wood", "food"] as BoxKey[]) placed.push(...boxes[key].map(p => idOf(g, p)).filter(id => id !== "air"));
+        return sameList(placed, recheck.map(item => item.id));
+      },
+    },
+    {
+      id: "l07-no-stray",
+      text: "分拣动作都落在箱子格子里",
+      check: g => {
+        const boxes = boxesOf(g.var("boxes"));
+        const recheckBoxes = boxesOf(g.var("recheckBoxes"));
+        const allowed = new Set<string>(Object.values(boxes).flat().concat(Object.values(recheckBoxes).flat()).map(p => p.join(",")));
+        return agentPlaces(g).every(e => !!e.pos && allowed.has(e.pos.join(",")));
+      },
+    },
+  ],
   phases: ["三条规矩与清点", "箱子与流水线", "逐箱报数与开笼"],
 });
 

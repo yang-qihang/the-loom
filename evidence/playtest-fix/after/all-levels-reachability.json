@@ -1,0 +1,5598 @@
+{
+  "task": "verifier B-5 全关卡玩家节拍可达性 + 10 关 progress",
+  "phase": "after",
+  "head": "f1e40eb0ec0f720383f6d166601ad64dc05232a2",
+  "startedAt": "2026-11-01T04:24:07.459Z",
+  "environment": {
+    "engine": "http://127.0.0.1:4321",
+    "rpc": "ws://127.0.0.1:8766",
+    "paperPort": 25566,
+    "player": "ReachP27",
+    "engineHealth": {
+      "ok": true,
+      "port": "paper",
+      "mc": {
+        "kind": "paper",
+        "connected": true,
+        "version": "26.1.2",
+        "pluginVersion": "0.1.0",
+        "tick": 12797,
+        "prepared": true,
+        "sessionId": "93985024-6166-4919-b21f-a441d17df1f1",
+        "epoch": 25
+      }
+    },
+    "pluginHealth": {
+      "ok": true,
+      "plugin": "loomcraft-mc",
+      "version": "0.1.0",
+      "mc": "26.1.2",
+      "tick": 12798,
+      "phase": "ready",
+      "prepared": true,
+      "levelId": "L03",
+      "sessionId": "93985024-6166-4919-b21f-a441d17df1f1",
+      "epoch": 25,
+      "groundY": 65,
+      "bots": [
+        "GolemAfter"
+      ],
+      "npcs": [
+        "eira",
+        "guard"
+      ],
+      "regionFrom": [
+        -40,
+        55,
+        -40
+      ],
+      "regionTo": [
+        40,
+        85,
+        40
+      ],
+      "agentSpawn": [
+        0,
+        65,
+        3
+      ],
+      "playerSpawn": [
+        0,
+        65,
+        0
+      ],
+      "center": [
+        0,
+        65,
+        0
+      ],
+      "tracked": 5352,
+      "events": 0,
+      "checkpointSize": 10808,
+      "playerKit": {
+        "minecraft:bell": 8
+      },
+      "playerBeat": {
+        "sessionId": "93985024-6166-4919-b21f-a441d17df1f1",
+        "armed": true,
+        "active": false,
+        "hint": "对准钟楼的钟，按右键敲响",
+        "beats": [
+          {
+            "pos": [
+              0,
+              65,
+              0
+            ],
+            "block": "minecraft:bell",
+            "done": false
+          }
+        ],
+        "items": [
+          "minecraft:bell"
+        ],
+        "done": false,
+        "ok": true
+      },
+      "lastResetHash": "sha256:a95befa4c447701043f68230318bdfe2c65914136040d8a5b41c359dc682e8be",
+      "lastResetMs": 5
+    }
+  },
+  "levels": {
+    "L01": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l01-three-lamps",
+            "text": "灰崽按顺序点亮 1、2、3 号灯"
+          },
+          {
+            "id": "l01-fourth-by-player",
+            "text": "你亲手点亮 4 号灯",
+            "player": true
+          },
+          {
+            "id": "l01-golem-home",
+            "text": "灰崽回到艾拉身边"
+          }
+        ],
+        "playerBeatHint": "手持灯笼，对着灯柱按右键，不用看顶面"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1822,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "a28cd349-c892-4201-b275-d72a85a2efab",
+        "groundY": 11,
+        "playerSpawn": [
+          2,
+          11,
+          4
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            2,
+            11,
+            4
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "villager-0",
+          "villager-1",
+          "villager-2"
+        ],
+        "checkpointSize": 3130
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面",
+        "items": [
+          "minecraft:lantern"
+        ],
+        "beats": [
+          {
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "block": "minecraft:lantern",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:lantern",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            2,
+            14,
+            16
+          ],
+          "block": "minecraft:lantern",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              1,
+              11,
+              16
+            ],
+            [
+              2,
+              11,
+              15
+            ],
+            [
+              2,
+              11,
+              17
+            ],
+            [
+              3,
+              11,
+              16
+            ],
+            [
+              1,
+              11,
+              15
+            ],
+            [
+              1,
+              11,
+              17
+            ]
+          ],
+          "held": "minecraft:lantern",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              1.5,
+              12.620000000000001,
+              16.5
+            ],
+            "distance": 2.1294130646729856,
+            "hand": "lantern",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:lantern",
+          "blockNextTick": "minecraft:lantern",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 12969,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "data": {
+              "block": "minecraft:lantern"
+            }
+          },
+          "expectedBlock": "minecraft:lantern",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "a28cd349-c892-4201-b275-d72a85a2efab",
+            "armed": true,
+            "active": true,
+            "hint": "手持灯笼，对着灯柱按右键，不用看顶面",
+            "beats": [
+              {
+                "pos": [
+                  2,
+                  14,
+                  16
+                ],
+                "block": "minecraft:lantern",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:lantern"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:14.335Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        }
+      ],
+      "totalMs": 8519
+    },
+    "L02": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l02-six-eggs",
+            "text": "让灰崽收 6 枚蛋，分趟倒进木桶"
+          },
+          {
+            "id": "l02-hatch-intact",
+            "text": "别动 3 个带玻璃罩的孵蛋窝"
+          },
+          {
+            "id": "l02-report",
+            "text": "回艾拉身边，把桶里的数报给她"
+          }
+        ],
+        "playerBeatHint": "手持蛋糕，对准蛋糕塔按右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1703,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "14560026-8af9-46f1-8758-a15992d0aa9d",
+        "groundY": 65,
+        "playerSpawn": [
+          0,
+          65,
+          0
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            0,
+            65,
+            0
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "hens"
+        ],
+        "checkpointSize": 5431
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持蛋糕，对准蛋糕塔按右键",
+        "items": [
+          "minecraft:cake"
+        ],
+        "beats": [
+          {
+            "pos": [
+              4,
+              65,
+              -6
+            ],
+            "block": "minecraft:cake",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持蛋糕，对准蛋糕塔按右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:cake",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            4,
+            65,
+            -6
+          ],
+          "block": "minecraft:cake",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:stone_bricks",
+          "standCandidates": [
+            [
+              3,
+              65,
+              -6
+            ],
+            [
+              4,
+              65,
+              -7
+            ],
+            [
+              4,
+              65,
+              -5
+            ],
+            [
+              5,
+              65,
+              -6
+            ],
+            [
+              3,
+              65,
+              -7
+            ],
+            [
+              3,
+              65,
+              -5
+            ]
+          ],
+          "held": "minecraft:cake",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              3.5,
+              66.62,
+              -5.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "cake",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:stone_bricks",
+          "blockNextTick": "minecraft:stone_bricks",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 13137,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              4,
+              65,
+              -6
+            ],
+            "data": {
+              "block": "minecraft:cake"
+            }
+          },
+          "expectedBlock": "minecraft:cake",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "14560026-8af9-46f1-8758-a15992d0aa9d",
+            "armed": true,
+            "active": true,
+            "hint": "手持蛋糕，对准蛋糕塔按右键",
+            "beats": [
+              {
+                "pos": [
+                  4,
+                  65,
+                  -6
+                ],
+                "block": "minecraft:cake",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:cake"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持蛋糕，对准蛋糕塔按右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:14.335Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:24:22.735Z",
+          "via": "packet:action_bar",
+          "text": "手持蛋糕，对准蛋糕塔按右键"
+        }
+      ],
+      "totalMs": 8400
+    },
+    "L03": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l03-read-scenario",
+            "text": "看剧本：有威胁才敲守夜钟"
+          },
+          {
+            "id": "l03-night-handled",
+            "text": "按剧本救人、点灯、堵好北门"
+          },
+          {
+            "id": "l03-dawn-bell",
+            "text": "天亮后，你亲手敲响钟",
+            "player": true
+          }
+        ],
+        "playerBeatHint": "对准钟楼的钟，按右键敲响"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1759,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "36eb1ad6-f3a7-4f16-bcdf-cecea0c2cfb3",
+        "groundY": 65,
+        "playerSpawn": [
+          0,
+          65,
+          0
+        ],
+        "spawnBlock": "bell",
+        "spawnAnalysis": {
+          "pos": [
+            0,
+            65,
+            0
+          ],
+          "block": "bell",
+          "solidNeighbors": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "enclosed": true
+        },
+        "npcs": [
+          "eira",
+          "guard"
+        ],
+        "checkpointSize": 10808
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "对准钟楼的钟，按右键敲响",
+        "items": [
+          "minecraft:bell"
+        ],
+        "beats": [
+          {
+            "pos": [
+              0,
+              65,
+              0
+            ],
+            "block": "minecraft:bell",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "对准钟楼的钟，按右键敲响"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:bell",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            0,
+            65,
+            0
+          ],
+          "block": "minecraft:bell",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:bell",
+          "standCandidates": [
+            [
+              -5,
+              65,
+              0
+            ],
+            [
+              0,
+              65,
+              -5
+            ],
+            [
+              0,
+              65,
+              5
+            ],
+            [
+              5,
+              65,
+              0
+            ],
+            [
+              -5,
+              65,
+              -1
+            ],
+            [
+              -5,
+              65,
+              1
+            ]
+          ],
+          "held": "minecraft:bell",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              -4.5,
+              66.62,
+              0.5
+            ],
+            "distance": 5.123904761019667,
+            "hand": "bell",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:bell",
+          "blockNextTick": "minecraft:bell",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 13306,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              0,
+              65,
+              0
+            ],
+            "data": {
+              "block": "minecraft:bell"
+            }
+          },
+          "expectedBlock": "minecraft:bell",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "36eb1ad6-f3a7-4f16-bcdf-cecea0c2cfb3",
+            "armed": true,
+            "active": true,
+            "hint": "对准钟楼的钟，按右键敲响",
+            "beats": [
+              {
+                "pos": [
+                  0,
+                  65,
+                  0
+                ],
+                "block": "minecraft:bell",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:bell"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "对准钟楼的钟，按右键敲响"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:14.335Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:24:22.735Z",
+          "via": "packet:action_bar",
+          "text": "手持蛋糕，对准蛋糕塔按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:31.185Z",
+          "via": "packet:action_bar",
+          "text": "对准钟楼的钟，按右键敲响"
+        }
+      ],
+      "totalMs": 8450
+    },
+    "L04": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l04-harvest-first",
+            "text": "先收掉上一季留下的残株"
+          },
+          {
+            "id": "l04-planted-full",
+            "text": "把能种的地方都种满"
+          },
+          {
+            "id": "l04-home",
+            "text": "种完以后回到谷仓"
+          }
+        ],
+        "playerBeatHint": "手持南瓜，对着干草捆按右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1653,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "044f9031-8eb1-4b9e-9e0c-14b8d320ecdf",
+        "groundY": 65,
+        "playerSpawn": [
+          12,
+          65,
+          8
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            12,
+            65,
+            8
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira"
+        ],
+        "checkpointSize": 5780
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持南瓜，对着干草捆按右键",
+        "items": [
+          "minecraft:pumpkin"
+        ],
+        "beats": [
+          {
+            "pos": [
+              14,
+              66,
+              26
+            ],
+            "block": "minecraft:pumpkin",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持南瓜，对着干草捆按右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:pumpkin",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            14,
+            66,
+            26
+          ],
+          "block": "minecraft:pumpkin",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:hay_block",
+          "standCandidates": [
+            [
+              14,
+              65,
+              25
+            ],
+            [
+              14,
+              65,
+              27
+            ],
+            [
+              14,
+              65,
+              28
+            ],
+            [
+              12,
+              65,
+              25
+            ],
+            [
+              12,
+              65,
+              27
+            ],
+            [
+              13,
+              65,
+              24
+            ]
+          ],
+          "held": "minecraft:pumpkin",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              14.5,
+              66.62,
+              25.5
+            ],
+            "distance": 1.0071742649611342,
+            "hand": "pumpkin",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:hay_block",
+          "blockNextTick": "minecraft:hay_block",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 13473,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              14,
+              66,
+              26
+            ],
+            "data": {
+              "block": "minecraft:pumpkin"
+            }
+          },
+          "expectedBlock": "minecraft:pumpkin",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "044f9031-8eb1-4b9e-9e0c-14b8d320ecdf",
+            "armed": true,
+            "active": true,
+            "hint": "手持南瓜，对着干草捆按右键",
+            "beats": [
+              {
+                "pos": [
+                  14,
+                  66,
+                  26
+                ],
+                "block": "minecraft:pumpkin",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:pumpkin"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持南瓜，对着干草捆按右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:14.335Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:24:22.735Z",
+          "via": "packet:action_bar",
+          "text": "手持蛋糕，对准蛋糕塔按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:31.185Z",
+          "via": "packet:action_bar",
+          "text": "对准钟楼的钟，按右键敲响"
+        },
+        {
+          "at": "2026-11-01T04:24:39.534Z",
+          "via": "packet:action_bar",
+          "text": "手持南瓜，对着干草捆按右键"
+        }
+      ],
+      "totalMs": 8350
+    },
+    "L05": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l05-houses-built",
+            "text": "五块地各立起一栋能住的房子"
+          },
+          {
+            "id": "l05-styles-follow",
+            "text": "每栋的墙和屋顶按地块样式走"
+          },
+          {
+            "id": "l05-signs-ready",
+            "text": "五块门牌由你亲手挂到门口",
+            "player": true
+          }
+        ],
+        "playerBeatHint": "手持门牌，对五块门口各按右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1904,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3",
+        "groundY": 64,
+        "playerSpawn": [
+          13,
+          64,
+          -2
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            13,
+            64,
+            -2
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            true,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "newcomers",
+          "carpenter",
+          "mason",
+          "apprentice"
+        ],
+        "checkpointSize": 4457
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持门牌，对五块门口各按右键",
+        "items": [
+          "minecraft:oak_sign"
+        ],
+        "beats": [
+          {
+            "pos": [
+              1,
+              64,
+              3
+            ],
+            "block": "minecraft:oak_sign",
+            "done": false
+          },
+          {
+            "pos": [
+              13,
+              64,
+              3
+            ],
+            "block": "minecraft:oak_sign",
+            "done": false
+          },
+          {
+            "pos": [
+              25,
+              64,
+              3
+            ],
+            "block": "minecraft:oak_sign",
+            "done": false
+          },
+          {
+            "pos": [
+              1,
+              64,
+              17
+            ],
+            "block": "minecraft:oak_sign",
+            "done": false
+          },
+          {
+            "pos": [
+              25,
+              64,
+              17
+            ],
+            "block": "minecraft:oak_sign",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持门牌，对五块门口各按右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:oak_sign",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            1,
+            64,
+            3
+          ],
+          "block": "minecraft:oak_sign",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              0,
+              64,
+              3
+            ],
+            [
+              1,
+              64,
+              2
+            ],
+            [
+              1,
+              64,
+              4
+            ],
+            [
+              2,
+              64,
+              3
+            ],
+            [
+              0,
+              64,
+              2
+            ],
+            [
+              0,
+              64,
+              4
+            ]
+          ],
+          "held": "minecraft:oak_sign",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              0.5,
+              65.62,
+              3.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_sign",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:oak_sign",
+          "blockNextTick": "minecraft:oak_sign",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 13645,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              1,
+              64,
+              3
+            ],
+            "data": {
+              "block": "minecraft:oak_sign"
+            }
+          },
+          "expectedBlock": "minecraft:oak_sign",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3",
+            "armed": true,
+            "active": true,
+            "hint": "手持门牌，对五块门口各按右键",
+            "beats": [
+              {
+                "pos": [
+                  1,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  13,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              },
+              {
+                "pos": [
+                  1,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:oak_sign"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 1,
+          "target": [
+            13,
+            64,
+            3
+          ],
+          "block": "minecraft:oak_sign",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              12,
+              64,
+              3
+            ],
+            [
+              13,
+              64,
+              2
+            ],
+            [
+              13,
+              64,
+              4
+            ],
+            [
+              14,
+              64,
+              3
+            ],
+            [
+              12,
+              64,
+              2
+            ],
+            [
+              12,
+              64,
+              4
+            ]
+          ],
+          "held": "minecraft:oak_sign",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              12.5,
+              65.62,
+              3.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_sign",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:oak_sign",
+          "blockNextTick": "minecraft:oak_sign",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 2,
+            "type": "block.place",
+            "tick": 13709,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              13,
+              64,
+              3
+            ],
+            "data": {
+              "block": "minecraft:oak_sign"
+            }
+          },
+          "expectedBlock": "minecraft:oak_sign",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3",
+            "armed": true,
+            "active": true,
+            "hint": "手持门牌，对五块门口各按右键",
+            "beats": [
+              {
+                "pos": [
+                  1,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  13,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              },
+              {
+                "pos": [
+                  1,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:oak_sign"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 2,
+          "target": [
+            25,
+            64,
+            3
+          ],
+          "block": "minecraft:oak_sign",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              24,
+              64,
+              3
+            ],
+            [
+              25,
+              64,
+              2
+            ],
+            [
+              25,
+              64,
+              4
+            ],
+            [
+              26,
+              64,
+              3
+            ],
+            [
+              24,
+              64,
+              2
+            ],
+            [
+              24,
+              64,
+              4
+            ]
+          ],
+          "held": "minecraft:oak_sign",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              24.5,
+              65.62,
+              3.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_sign",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:oak_sign",
+          "blockNextTick": "minecraft:oak_sign",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 3,
+            "type": "block.place",
+            "tick": 13773,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              25,
+              64,
+              3
+            ],
+            "data": {
+              "block": "minecraft:oak_sign"
+            }
+          },
+          "expectedBlock": "minecraft:oak_sign",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3",
+            "armed": true,
+            "active": true,
+            "hint": "手持门牌，对五块门口各按右键",
+            "beats": [
+              {
+                "pos": [
+                  1,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  13,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  1,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:oak_sign"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 3,
+          "target": [
+            1,
+            64,
+            17
+          ],
+          "block": "minecraft:oak_sign",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              0,
+              64,
+              17
+            ],
+            [
+              1,
+              64,
+              16
+            ],
+            [
+              1,
+              64,
+              18
+            ],
+            [
+              2,
+              64,
+              17
+            ],
+            [
+              0,
+              64,
+              16
+            ],
+            [
+              0,
+              64,
+              18
+            ]
+          ],
+          "held": "minecraft:oak_sign",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              0.5,
+              65.62,
+              17.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_sign",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:oak_sign",
+          "blockNextTick": "minecraft:oak_sign",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 4,
+            "type": "block.place",
+            "tick": 13837,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              1,
+              64,
+              17
+            ],
+            "data": {
+              "block": "minecraft:oak_sign"
+            }
+          },
+          "expectedBlock": "minecraft:oak_sign",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3",
+            "armed": true,
+            "active": true,
+            "hint": "手持门牌，对五块门口各按右键",
+            "beats": [
+              {
+                "pos": [
+                  1,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  13,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  1,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:oak_sign"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 4,
+          "target": [
+            25,
+            64,
+            17
+          ],
+          "block": "minecraft:oak_sign",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              24,
+              64,
+              17
+            ],
+            [
+              25,
+              64,
+              16
+            ],
+            [
+              25,
+              64,
+              18
+            ],
+            [
+              26,
+              64,
+              17
+            ],
+            [
+              24,
+              64,
+              16
+            ],
+            [
+              24,
+              64,
+              18
+            ]
+          ],
+          "held": "minecraft:oak_sign",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              24.5,
+              65.62,
+              17.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_sign",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:oak_sign",
+          "blockNextTick": "minecraft:oak_sign",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 5,
+            "type": "block.place",
+            "tick": 13901,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              25,
+              64,
+              17
+            ],
+            "data": {
+              "block": "minecraft:oak_sign"
+            }
+          },
+          "expectedBlock": "minecraft:oak_sign",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3",
+            "armed": true,
+            "active": true,
+            "hint": "手持门牌，对五块门口各按右键",
+            "beats": [
+              {
+                "pos": [
+                  1,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  13,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  3
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  1,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              },
+              {
+                "pos": [
+                  25,
+                  64,
+                  17
+                ],
+                "block": "minecraft:oak_sign",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:oak_sign"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持门牌，对五块门口各按右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:14.335Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:24:22.735Z",
+          "via": "packet:action_bar",
+          "text": "手持蛋糕，对准蛋糕塔按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:31.185Z",
+          "via": "packet:action_bar",
+          "text": "对准钟楼的钟，按右键敲响"
+        },
+        {
+          "at": "2026-11-01T04:24:39.534Z",
+          "via": "packet:action_bar",
+          "text": "手持南瓜，对着干草捆按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:48.135Z",
+          "via": "packet:action_bar",
+          "text": "手持门牌，对五块门口各按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:49.935Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 4 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:53.134Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 3 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:56.336Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:59.534Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        }
+      ],
+      "totalMs": 21400
+    },
+    "L06": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l06-tools-box",
+            "text": "工具全进工具桶，一件没混"
+          },
+          {
+            "id": "l06-supplies",
+            "text": "材料和食物各进各桶，一件不丢"
+          },
+          {
+            "id": "l06-jobs-tooled",
+            "text": "每个工作点都配到对的工具"
+          }
+        ],
+        "playerBeatHint": "手持线团，对准护符盒按右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1903,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "f794d38d-7e1a-4ff2-aaec-24e9d723d8f1",
+        "groundY": 65,
+        "playerSpawn": [
+          8,
+          65,
+          12
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            8,
+            65,
+            12
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "taka",
+          "llama-a",
+          "llama-b",
+          "donkey"
+        ],
+        "checkpointSize": 2053
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持线团，对准护符盒按右键",
+        "items": [
+          "minecraft:string"
+        ],
+        "beats": [
+          {
+            "pos": [
+              13,
+              65,
+              20
+            ],
+            "block": "minecraft:loom_thread",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持线团，对准护符盒按右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:string",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            13,
+            65,
+            20
+          ],
+          "block": "minecraft:loom_thread",
+          "type": "interact",
+          "virtualBlock": true,
+          "blockBefore": "minecraft:chiseled_stone_bricks",
+          "standCandidates": [
+            [
+              12,
+              65,
+              20
+            ],
+            [
+              13,
+              65,
+              19
+            ],
+            [
+              14,
+              65,
+              20
+            ],
+            [
+              12,
+              65,
+              19
+            ],
+            [
+              14,
+              65,
+              21
+            ],
+            [
+              11,
+              65,
+              20
+            ]
+          ],
+          "held": "minecraft:string",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              12.5,
+              66.62,
+              20.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "string",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:chiseled_stone_bricks",
+          "blockNextTick": "minecraft:chiseled_stone_bricks",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 14073,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              13,
+              65,
+              20
+            ],
+            "data": {
+              "block": "minecraft:loom_thread"
+            }
+          },
+          "expectedBlock": "minecraft:loom_thread",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "f794d38d-7e1a-4ff2-aaec-24e9d723d8f1",
+            "armed": true,
+            "active": true,
+            "hint": "手持线团，对准护符盒按右键",
+            "beats": [
+              {
+                "pos": [
+                  13,
+                  65,
+                  20
+                ],
+                "block": "minecraft:loom_thread",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:string"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持线团，对准护符盒按右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:14.335Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:24:22.735Z",
+          "via": "packet:action_bar",
+          "text": "手持蛋糕，对准蛋糕塔按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:31.185Z",
+          "via": "packet:action_bar",
+          "text": "对准钟楼的钟，按右键敲响"
+        },
+        {
+          "at": "2026-11-01T04:24:39.534Z",
+          "via": "packet:action_bar",
+          "text": "手持南瓜，对着干草捆按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:48.135Z",
+          "via": "packet:action_bar",
+          "text": "手持门牌，对五块门口各按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:49.935Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 4 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:53.134Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 3 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:56.336Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:59.534Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:09.534Z",
+          "via": "packet:action_bar",
+          "text": "手持线团，对准护符盒按右键"
+        }
+      ],
+      "totalMs": 8600
+    },
+    "L07": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l07-cargo-boxes",
+            "text": "三种货各按规矩进自己的箱子"
+          },
+          {
+            "id": "l07-recheck-boxes",
+            "text": "复核箱的错货也按规矩送回去"
+          },
+          {
+            "id": "l07-no-stray",
+            "text": "分拣动作都落在箱子格子里"
+          }
+        ],
+        "playerBeatHint": "手持活板门，对三只笼门各按右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1754,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "b779899a-45e9-498d-927e-55656580901f",
+        "groundY": 65,
+        "playerSpawn": [
+          0,
+          65,
+          2
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            0,
+            65,
+            2
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "allays",
+          "allay-2",
+          "allay-3"
+        ],
+        "checkpointSize": 8950
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持活板门，对三只笼门各按右键",
+        "items": [
+          "minecraft:oak_trapdoor"
+        ],
+        "beats": [
+          {
+            "pos": [
+              -10,
+              65,
+              0
+            ],
+            "block": "minecraft:oak_trapdoor",
+            "done": false
+          },
+          {
+            "pos": [
+              -10,
+              65,
+              6
+            ],
+            "block": "minecraft:oak_trapdoor",
+            "done": false
+          },
+          {
+            "pos": [
+              -10,
+              65,
+              12
+            ],
+            "block": "minecraft:oak_trapdoor",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持活板门，对三只笼门各按右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:oak_trapdoor",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            -10,
+            65,
+            0
+          ],
+          "block": "minecraft:oak_trapdoor",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:iron_bars",
+          "standCandidates": [
+            [
+              -11,
+              65,
+              0
+            ],
+            [
+              -10,
+              65,
+              -1
+            ],
+            [
+              -10,
+              65,
+              1
+            ],
+            [
+              -9,
+              65,
+              0
+            ],
+            [
+              -11,
+              65,
+              -1
+            ],
+            [
+              -11,
+              65,
+              1
+            ]
+          ],
+          "held": "minecraft:oak_trapdoor",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              -10.5,
+              66.62,
+              0.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_trapdoor",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:iron_bars",
+          "blockNextTick": "minecraft:iron_bars",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 14242,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              -10,
+              65,
+              0
+            ],
+            "data": {
+              "block": "minecraft:oak_trapdoor"
+            }
+          },
+          "expectedBlock": "minecraft:oak_trapdoor",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "b779899a-45e9-498d-927e-55656580901f",
+            "armed": true,
+            "active": true,
+            "hint": "手持活板门，对三只笼门各按右键",
+            "beats": [
+              {
+                "pos": [
+                  -10,
+                  65,
+                  0
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": true
+              },
+              {
+                "pos": [
+                  -10,
+                  65,
+                  6
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": false
+              },
+              {
+                "pos": [
+                  -10,
+                  65,
+                  12
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:oak_trapdoor"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 1,
+          "target": [
+            -10,
+            65,
+            6
+          ],
+          "block": "minecraft:oak_trapdoor",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:iron_bars",
+          "standCandidates": [
+            [
+              -11,
+              65,
+              6
+            ],
+            [
+              -10,
+              65,
+              5
+            ],
+            [
+              -10,
+              65,
+              7
+            ],
+            [
+              -9,
+              65,
+              6
+            ],
+            [
+              -11,
+              65,
+              5
+            ],
+            [
+              -11,
+              65,
+              7
+            ]
+          ],
+          "held": "minecraft:oak_trapdoor",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              -10.5,
+              66.62,
+              6.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_trapdoor",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:iron_bars",
+          "blockNextTick": "minecraft:iron_bars",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 2,
+            "type": "block.place",
+            "tick": 14306,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              -10,
+              65,
+              6
+            ],
+            "data": {
+              "block": "minecraft:oak_trapdoor"
+            }
+          },
+          "expectedBlock": "minecraft:oak_trapdoor",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "b779899a-45e9-498d-927e-55656580901f",
+            "armed": true,
+            "active": true,
+            "hint": "手持活板门，对三只笼门各按右键",
+            "beats": [
+              {
+                "pos": [
+                  -10,
+                  65,
+                  0
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": true
+              },
+              {
+                "pos": [
+                  -10,
+                  65,
+                  6
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": true
+              },
+              {
+                "pos": [
+                  -10,
+                  65,
+                  12
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:oak_trapdoor"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 2,
+          "target": [
+            -10,
+            65,
+            12
+          ],
+          "block": "minecraft:oak_trapdoor",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:iron_bars",
+          "standCandidates": [
+            [
+              -11,
+              65,
+              12
+            ],
+            [
+              -10,
+              65,
+              11
+            ],
+            [
+              -10,
+              65,
+              13
+            ],
+            [
+              -9,
+              65,
+              12
+            ],
+            [
+              -11,
+              65,
+              11
+            ],
+            [
+              -11,
+              65,
+              13
+            ]
+          ],
+          "held": "minecraft:oak_trapdoor",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              -10.5,
+              66.62,
+              12.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "oak_trapdoor",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:iron_bars",
+          "blockNextTick": "minecraft:iron_bars",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 3,
+            "type": "block.place",
+            "tick": 14370,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              -10,
+              65,
+              12
+            ],
+            "data": {
+              "block": "minecraft:oak_trapdoor"
+            }
+          },
+          "expectedBlock": "minecraft:oak_trapdoor",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "b779899a-45e9-498d-927e-55656580901f",
+            "armed": true,
+            "active": true,
+            "hint": "手持活板门，对三只笼门各按右键",
+            "beats": [
+              {
+                "pos": [
+                  -10,
+                  65,
+                  0
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": true
+              },
+              {
+                "pos": [
+                  -10,
+                  65,
+                  6
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": true
+              },
+              {
+                "pos": [
+                  -10,
+                  65,
+                  12
+                ],
+                "block": "minecraft:oak_trapdoor",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:oak_trapdoor"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持活板门，对三只笼门各按右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:39.534Z",
+          "via": "packet:action_bar",
+          "text": "手持南瓜，对着干草捆按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:48.135Z",
+          "via": "packet:action_bar",
+          "text": "手持门牌，对五块门口各按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:49.935Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 4 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:53.134Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 3 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:56.336Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:59.534Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:09.534Z",
+          "via": "packet:action_bar",
+          "text": "手持线团，对准护符盒按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:17.985Z",
+          "via": "packet:action_bar",
+          "text": "手持活板门，对三只笼门各按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:19.786Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:22.984Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        }
+      ],
+      "totalMs": 14849
+    },
+    "L08": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l08-machines-started",
+            "text": "清单里的机器逐台启动、各报状态"
+          },
+          {
+            "id": "l08-stop-reversed",
+            "text": "停机按反序，最后停第一台"
+          },
+          {
+            "id": "l08-lever-pulled",
+            "text": "你亲手把总拉杆推到底",
+            "player": true
+          }
+        ],
+        "playerBeatHint": "对准总拉杆，按右键推到底"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1802,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "95b0f982-81bb-40ce-b13d-3fb56aa443b1",
+        "groundY": 65,
+        "playerSpawn": [
+          0,
+          65,
+          -5
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            0,
+            65,
+            -5
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "worker"
+        ],
+        "checkpointSize": 2280
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "对准总拉杆，按右键推到底",
+        "items": [
+          "minecraft:lever"
+        ],
+        "beats": [
+          {
+            "pos": [
+              0,
+              65,
+              8
+            ],
+            "block": "minecraft:lever",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "对准总拉杆，按右键推到底"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:lever",
+          "count": 8
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            0,
+            65,
+            8
+          ],
+          "block": "minecraft:lever",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              -1,
+              65,
+              8
+            ],
+            [
+              0,
+              65,
+              7
+            ],
+            [
+              0,
+              65,
+              9
+            ],
+            [
+              1,
+              65,
+              8
+            ],
+            [
+              -1,
+              65,
+              7
+            ],
+            [
+              -1,
+              65,
+              9
+            ]
+          ],
+          "held": "minecraft:lever",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              -0.5,
+              66.62,
+              8.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "lever",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:lever",
+          "blockNextTick": "minecraft:lever",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 14540,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              0,
+              65,
+              8
+            ],
+            "data": {
+              "block": "minecraft:lever"
+            }
+          },
+          "expectedBlock": "minecraft:lever",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "95b0f982-81bb-40ce-b13d-3fb56aa443b1",
+            "armed": true,
+            "active": true,
+            "hint": "对准总拉杆，按右键推到底",
+            "beats": [
+              {
+                "pos": [
+                  0,
+                  65,
+                  8
+                ],
+                "block": "minecraft:lever",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:lever"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "对准总拉杆，按右键推到底"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:48.135Z",
+          "via": "packet:action_bar",
+          "text": "手持门牌，对五块门口各按右键"
+        },
+        {
+          "at": "2026-11-01T04:24:49.935Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 4 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:53.134Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 3 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:56.336Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:59.534Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:09.534Z",
+          "via": "packet:action_bar",
+          "text": "手持线团，对准护符盒按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:17.985Z",
+          "via": "packet:action_bar",
+          "text": "手持活板门，对三只笼门各按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:19.786Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:22.984Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:32.884Z",
+          "via": "packet:action_bar",
+          "text": "对准总拉杆，按右键推到底"
+        }
+      ],
+      "totalMs": 8499
+    },
+    "L09": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l09-two-brews",
+            "text": "两坛药同时开酿，都按时出坛"
+          },
+          {
+            "id": "l09-apple-in-wait",
+            "text": "取金苹果藏在酿造的等待里"
+          },
+          {
+            "id": "l09-deliver-cure",
+            "text": "交付三瓶药水，摆好金苹果"
+          }
+        ],
+        "playerBeatHint": "手持药水泼笼子，再持钟右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 1954,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "d56a6921-f488-4a5d-96e4-16f9089d3ef5",
+        "groundY": 65,
+        "playerSpawn": [
+          0,
+          65,
+          0
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            0,
+            65,
+            0
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "granny",
+          "sick"
+        ],
+        "checkpointSize": 5541
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持药水泼笼子，再持钟右键",
+        "items": [
+          "minecraft:splash_potion",
+          "minecraft:bell"
+        ],
+        "beats": [
+          {
+            "pos": [
+              10,
+              65,
+              7
+            ],
+            "block": "minecraft:potion",
+            "done": false
+          },
+          {
+            "pos": [
+              0,
+              65,
+              14
+            ],
+            "block": "minecraft:bell",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持药水泼笼子，再持钟右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:splash_potion",
+          "count": 8
+        },
+        {
+          "item": "minecraft:bell",
+          "count": 4
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            10,
+            65,
+            7
+          ],
+          "block": "minecraft:potion",
+          "type": "interact",
+          "virtualBlock": true,
+          "blockBefore": "minecraft:iron_bars",
+          "standCandidates": [
+            [
+              8,
+              65,
+              7
+            ],
+            [
+              10,
+              65,
+              5
+            ],
+            [
+              10,
+              65,
+              9
+            ],
+            [
+              8,
+              65,
+              6
+            ],
+            [
+              8,
+              65,
+              8
+            ],
+            [
+              9,
+              65,
+              5
+            ]
+          ],
+          "held": "minecraft:splash_potion",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              8.5,
+              66.62,
+              7.5
+            ],
+            "distance": 2.2922478051031066,
+            "hand": "splash_potion",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:iron_bars",
+          "blockNextTick": "minecraft:iron_bars",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 14713,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              10,
+              65,
+              7
+            ],
+            "data": {
+              "block": "minecraft:potion"
+            }
+          },
+          "expectedBlock": "minecraft:potion",
+          "blockMatchesExpected": false,
+          "statusAfter": {
+            "sessionId": "d56a6921-f488-4a5d-96e4-16f9089d3ef5",
+            "armed": true,
+            "active": true,
+            "hint": "手持药水泼笼子，再持钟右键",
+            "beats": [
+              {
+                "pos": [
+                  10,
+                  65,
+                  7
+                ],
+                "block": "minecraft:potion",
+                "done": true
+              },
+              {
+                "pos": [
+                  0,
+                  65,
+                  14
+                ],
+                "block": "minecraft:bell",
+                "done": false
+              }
+            ],
+            "items": [
+              "minecraft:splash_potion",
+              "minecraft:bell"
+            ],
+            "done": false,
+            "ok": true
+          }
+        },
+        {
+          "index": 1,
+          "target": [
+            0,
+            65,
+            14
+          ],
+          "block": "minecraft:bell",
+          "type": "interact",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:bell",
+          "standCandidates": [
+            [
+              0,
+              65,
+              13
+            ],
+            [
+              0,
+              65,
+              15
+            ],
+            [
+              -1,
+              65,
+              13
+            ],
+            [
+              -1,
+              65,
+              15
+            ],
+            [
+              1,
+              65,
+              13
+            ],
+            [
+              1,
+              65,
+              15
+            ]
+          ],
+          "held": "minecraft:splash_potion",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              0.5,
+              66.62,
+              13.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "splash_potion",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:bell",
+          "blockNextTick": "minecraft:bell",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 2,
+            "type": "block.place",
+            "tick": 14777,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              0,
+              65,
+              14
+            ],
+            "data": {
+              "block": "minecraft:bell"
+            }
+          },
+          "expectedBlock": "minecraft:bell",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "d56a6921-f488-4a5d-96e4-16f9089d3ef5",
+            "armed": true,
+            "active": true,
+            "hint": "手持药水泼笼子，再持钟右键",
+            "beats": [
+              {
+                "pos": [
+                  10,
+                  65,
+                  7
+                ],
+                "block": "minecraft:potion",
+                "done": true
+              },
+              {
+                "pos": [
+                  0,
+                  65,
+                  14
+                ],
+                "block": "minecraft:bell",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:splash_potion",
+              "minecraft:bell"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持药水泼笼子，再持钟右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:53.134Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 3 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:56.336Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:59.534Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:09.534Z",
+          "via": "packet:action_bar",
+          "text": "手持线团，对准护符盒按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:17.985Z",
+          "via": "packet:action_bar",
+          "text": "手持活板门，对三只笼门各按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:19.786Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:22.984Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:32.884Z",
+          "via": "packet:action_bar",
+          "text": "对准总拉杆，按右键推到底"
+        },
+        {
+          "at": "2026-11-01T04:25:41.535Z",
+          "via": "packet:action_bar",
+          "text": "手持药水泼笼子，再持钟右键"
+        },
+        {
+          "at": "2026-11-01T04:25:43.343Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        }
+      ],
+      "totalMs": 11850
+    },
+    "L10": {
+      "progressApi": {
+        "status": 200,
+        "progress": [
+          {
+            "id": "l10-deck-ready",
+            "text": "织偶把桥面铺到中央，留出最后一格"
+          },
+          {
+            "id": "l10-both-weavers",
+            "text": "两只织偶各报份额、各铺一半"
+          },
+          {
+            "id": "l10-keystone",
+            "text": "中央一格由你亲手放合龙石",
+            "player": true
+          }
+        ],
+        "playerBeatHint": "手持合龙石，对准中央基座按右键"
+      },
+      "create": {
+        "status": 201,
+        "createMs": 2101,
+        "state": "READY"
+      },
+      "pluginSession": {
+        "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884",
+        "groundY": 65,
+        "playerSpawn": [
+          14,
+          65,
+          3
+        ],
+        "spawnBlock": "air",
+        "spawnAnalysis": {
+          "pos": [
+            14,
+            65,
+            3
+          ],
+          "block": "air",
+          "solidNeighbors": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "enclosed": false
+        },
+        "npcs": [
+          "eira",
+          "villager-0",
+          "villager-1",
+          "villager-2",
+          "villager-3"
+        ],
+        "checkpointSize": 1142
+      },
+      "playerBeatArm": {
+        "armed": true,
+        "active": false,
+        "hint": "手持合龙石，对准中央基座按右键",
+        "items": [
+          "minecraft:lodestone"
+        ],
+        "beats": [
+          {
+            "pos": [
+              12,
+              65,
+              0
+            ],
+            "block": "minecraft:lodestone",
+            "done": false
+          }
+        ]
+      },
+      "activate": {
+        "ok": true,
+        "active": true,
+        "hint": "手持合龙石，对准中央基座按右键"
+      },
+      "inventory": [
+        {
+          "item": "minecraft:lodestone",
+          "count": 4
+        }
+      ],
+      "beats": [
+        {
+          "index": 0,
+          "target": [
+            12,
+            65,
+            0
+          ],
+          "block": "minecraft:lodestone",
+          "type": "place",
+          "virtualBlock": false,
+          "blockBefore": "minecraft:air",
+          "standCandidates": [
+            [
+              11,
+              65,
+              0
+            ],
+            [
+              13,
+              65,
+              0
+            ],
+            [
+              10,
+              65,
+              0
+            ],
+            [
+              14,
+              65,
+              0
+            ],
+            [
+              11,
+              65,
+              -2
+            ],
+            [
+              11,
+              65,
+              2
+            ]
+          ],
+          "held": "minecraft:lodestone",
+          "attempt": {
+            "attempt": 1,
+            "eye": [
+              11.5,
+              66.62,
+              0.5
+            ],
+            "distance": 1.5014659503298802,
+            "hand": "lodestone",
+            "done": true
+          },
+          "done": true,
+          "blockAfter": "minecraft:lodestone",
+          "blockNextTick": "minecraft:lodestone",
+          "stableNextTick": true,
+          "playerPlaceEvent": {
+            "seq": 1,
+            "type": "block.place",
+            "tick": 14953,
+            "actor": "ReachP27",
+            "actorType": "player",
+            "pos": [
+              12,
+              65,
+              0
+            ],
+            "data": {
+              "block": "minecraft:lodestone"
+            }
+          },
+          "expectedBlock": "minecraft:lodestone",
+          "blockMatchesExpected": true,
+          "statusAfter": {
+            "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884",
+            "armed": true,
+            "active": true,
+            "hint": "手持合龙石，对准中央基座按右键",
+            "beats": [
+              {
+                "pos": [
+                  12,
+                  65,
+                  0
+                ],
+                "block": "minecraft:lodestone",
+                "done": true
+              }
+            ],
+            "items": [
+              "minecraft:lodestone"
+            ],
+            "done": true,
+            "ok": true
+          }
+        }
+      ],
+      "finalStatus": {
+        "done": true,
+        "active": true,
+        "hint": "手持合龙石，对准中央基座按右键"
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:24:56.336Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:24:59.534Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:09.534Z",
+          "via": "packet:action_bar",
+          "text": "手持线团，对准护符盒按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:17.985Z",
+          "via": "packet:action_bar",
+          "text": "手持活板门，对三只笼门各按右键"
+        },
+        {
+          "at": "2026-11-01T04:25:19.786Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 2 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:22.984Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:32.884Z",
+          "via": "packet:action_bar",
+          "text": "对准总拉杆，按右键推到底"
+        },
+        {
+          "at": "2026-11-01T04:25:41.535Z",
+          "via": "packet:action_bar",
+          "text": "手持药水泼笼子，再持钟右键"
+        },
+        {
+          "at": "2026-11-01T04:25:43.343Z",
+          "via": "packet:action_bar",
+          "text": "织者之印 · 已记下（还剩 1 处）"
+        },
+        {
+          "at": "2026-11-01T04:25:53.535Z",
+          "via": "packet:action_bar",
+          "text": "手持合龙石，对准中央基座按右键"
+        }
+      ],
+      "totalMs": 8800
+    }
+  },
+  "checks": {
+    "engine.paper-mode": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "port": "paper"
+      }
+    },
+    "plugin.playerBeat-rpc": {
+      "ok": true,
+      "detail": [
+        "ok",
+        "plugin",
+        "version",
+        "mc",
+        "tick",
+        "phase",
+        "prepared",
+        "levelId",
+        "sessionId",
+        "epoch",
+        "groundY",
+        "bots",
+        "npcs",
+        "regionFrom",
+        "regionTo",
+        "agentSpawn",
+        "playerSpawn",
+        "center",
+        "tracked",
+        "events",
+        "checkpointSize",
+        "playerKit",
+        "playerBeat",
+        "lastResetHash",
+        "lastResetMs"
+      ]
+    },
+    "L01.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l01-three-lamps",
+          "l01-fourth-by-player",
+          "l01-golem-home"
+        ],
+        "players": [
+          false,
+          true,
+          false
+        ]
+      }
+    },
+    "L02.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l02-six-eggs",
+          "l02-hatch-intact",
+          "l02-report"
+        ],
+        "players": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "L03.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l03-read-scenario",
+          "l03-night-handled",
+          "l03-dawn-bell"
+        ],
+        "players": [
+          false,
+          false,
+          true
+        ]
+      }
+    },
+    "L04.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l04-harvest-first",
+          "l04-planted-full",
+          "l04-home"
+        ],
+        "players": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "L05.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l05-houses-built",
+          "l05-styles-follow",
+          "l05-signs-ready"
+        ],
+        "players": [
+          false,
+          false,
+          true
+        ]
+      }
+    },
+    "L06.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l06-tools-box",
+          "l06-supplies",
+          "l06-jobs-tooled"
+        ],
+        "players": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "L07.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l07-cargo-boxes",
+          "l07-recheck-boxes",
+          "l07-no-stray"
+        ],
+        "players": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "L08.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l08-machines-started",
+          "l08-stop-reversed",
+          "l08-lever-pulled"
+        ],
+        "players": [
+          false,
+          false,
+          true
+        ]
+      }
+    },
+    "L09.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l09-two-brews",
+          "l09-apple-in-wait",
+          "l09-deliver-cure"
+        ],
+        "players": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "L10.progress-shape": {
+      "ok": true,
+      "detail": {
+        "length": 3,
+        "ids": [
+          "l10-deck-ready",
+          "l10-both-weavers",
+          "l10-keystone"
+        ],
+        "players": [
+          false,
+          false,
+          true
+        ]
+      }
+    },
+    "L01.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "a28cd349-c892-4201-b275-d72a85a2efab"
+      }
+    },
+    "L01.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          2,
+          11,
+          4
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L01.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L01.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面"
+      }
+    },
+    "L01.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          2,
+          14,
+          16
+        ],
+        "candidates": [
+          [
+            1,
+            11,
+            16
+          ],
+          [
+            2,
+            11,
+            15
+          ],
+          [
+            2,
+            11,
+            17
+          ],
+          [
+            3,
+            11,
+            16
+          ]
+        ]
+      }
+    },
+    "L01.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          2,
+          14,
+          16
+        ],
+        "block": "minecraft:lantern",
+        "type": "place",
+        "held": "minecraft:lantern",
+        "blockAfter": "minecraft:lantern",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            1.5,
+            12.620000000000001,
+            16.5
+          ],
+          "distance": 2.1294130646729856,
+          "hand": "lantern",
+          "done": true
+        }
+      }
+    },
+    "L01.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:lantern",
+        "blockNextTick": "minecraft:lantern"
+      }
+    },
+    "L01.beat0.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:lantern",
+        "actual": "minecraft:lantern"
+      }
+    },
+    "L01.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          2,
+          14,
+          16
+        ],
+        "block": "minecraft:lantern"
+      }
+    },
+    "L02.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "14560026-8af9-46f1-8758-a15992d0aa9d"
+      }
+    },
+    "L02.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          0
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L02.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L02.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持蛋糕，对准蛋糕塔按右键"
+      }
+    },
+    "L02.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          4,
+          65,
+          -6
+        ],
+        "candidates": [
+          [
+            3,
+            65,
+            -6
+          ],
+          [
+            4,
+            65,
+            -7
+          ],
+          [
+            4,
+            65,
+            -5
+          ],
+          [
+            5,
+            65,
+            -6
+          ]
+        ]
+      }
+    },
+    "L02.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          4,
+          65,
+          -6
+        ],
+        "block": "minecraft:cake",
+        "type": "interact",
+        "held": "minecraft:cake",
+        "blockAfter": "minecraft:stone_bricks",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            3.5,
+            66.62,
+            -5.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "cake",
+          "done": true
+        }
+      }
+    },
+    "L02.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:stone_bricks",
+        "blockNextTick": "minecraft:stone_bricks"
+      }
+    },
+    "L02.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          4,
+          65,
+          -6
+        ],
+        "block": "minecraft:cake"
+      }
+    },
+    "L03.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "36eb1ad6-f3a7-4f16-bcdf-cecea0c2cfb3"
+      }
+    },
+    "L03.player-spawn-usable": {
+      "ok": false,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          0
+        ],
+        "block": "bell",
+        "solidNeighbors": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "enclosed": true
+      }
+    },
+    "L03.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L03.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "对准钟楼的钟，按右键敲响"
+      }
+    },
+    "L03.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          0,
+          65,
+          0
+        ],
+        "candidates": [
+          [
+            -5,
+            65,
+            0
+          ],
+          [
+            0,
+            65,
+            -5
+          ],
+          [
+            0,
+            65,
+            5
+          ],
+          [
+            5,
+            65,
+            0
+          ]
+        ]
+      }
+    },
+    "L03.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          0,
+          65,
+          0
+        ],
+        "block": "minecraft:bell",
+        "type": "interact",
+        "held": "minecraft:bell",
+        "blockAfter": "minecraft:bell",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            -4.5,
+            66.62,
+            0.5
+          ],
+          "distance": 5.123904761019667,
+          "hand": "bell",
+          "done": true
+        }
+      }
+    },
+    "L03.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:bell",
+        "blockNextTick": "minecraft:bell"
+      }
+    },
+    "L03.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          0
+        ],
+        "block": "minecraft:bell"
+      }
+    },
+    "L04.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "044f9031-8eb1-4b9e-9e0c-14b8d320ecdf"
+      }
+    },
+    "L04.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          12,
+          65,
+          8
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L04.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L04.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持南瓜，对着干草捆按右键"
+      }
+    },
+    "L04.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          14,
+          66,
+          26
+        ],
+        "candidates": [
+          [
+            14,
+            65,
+            25
+          ],
+          [
+            14,
+            65,
+            27
+          ],
+          [
+            14,
+            65,
+            28
+          ],
+          [
+            12,
+            65,
+            25
+          ]
+        ]
+      }
+    },
+    "L04.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          14,
+          66,
+          26
+        ],
+        "block": "minecraft:pumpkin",
+        "type": "interact",
+        "held": "minecraft:pumpkin",
+        "blockAfter": "minecraft:hay_block",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            14.5,
+            66.62,
+            25.5
+          ],
+          "distance": 1.0071742649611342,
+          "hand": "pumpkin",
+          "done": true
+        }
+      }
+    },
+    "L04.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:hay_block",
+        "blockNextTick": "minecraft:hay_block"
+      }
+    },
+    "L04.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          14,
+          66,
+          26
+        ],
+        "block": "minecraft:pumpkin"
+      }
+    },
+    "L05.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "8f40adba-4f48-459e-8f0e-34cdf746b2b3"
+      }
+    },
+    "L05.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          13,
+          64,
+          -2
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          true,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L05.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 5,
+        "active": false
+      }
+    },
+    "L05.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持门牌，对五块门口各按右键"
+      }
+    },
+    "L05.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          1,
+          64,
+          3
+        ],
+        "candidates": [
+          [
+            0,
+            64,
+            3
+          ],
+          [
+            1,
+            64,
+            2
+          ],
+          [
+            1,
+            64,
+            4
+          ],
+          [
+            2,
+            64,
+            3
+          ]
+        ]
+      }
+    },
+    "L05.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          1,
+          64,
+          3
+        ],
+        "block": "minecraft:oak_sign",
+        "type": "place",
+        "held": "minecraft:oak_sign",
+        "blockAfter": "minecraft:oak_sign",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            0.5,
+            65.62,
+            3.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_sign",
+          "done": true
+        }
+      }
+    },
+    "L05.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:oak_sign",
+        "blockNextTick": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat0.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:oak_sign",
+        "actual": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          1,
+          64,
+          3
+        ],
+        "block": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat1.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          13,
+          64,
+          3
+        ],
+        "candidates": [
+          [
+            12,
+            64,
+            3
+          ],
+          [
+            13,
+            64,
+            2
+          ],
+          [
+            13,
+            64,
+            4
+          ],
+          [
+            14,
+            64,
+            3
+          ]
+        ]
+      }
+    },
+    "L05.beat1.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          13,
+          64,
+          3
+        ],
+        "block": "minecraft:oak_sign",
+        "type": "place",
+        "held": "minecraft:oak_sign",
+        "blockAfter": "minecraft:oak_sign",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            12.5,
+            65.62,
+            3.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_sign",
+          "done": true
+        }
+      }
+    },
+    "L05.beat1.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:oak_sign",
+        "blockNextTick": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat1.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:oak_sign",
+        "actual": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat1.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          13,
+          64,
+          3
+        ],
+        "block": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat2.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          25,
+          64,
+          3
+        ],
+        "candidates": [
+          [
+            24,
+            64,
+            3
+          ],
+          [
+            25,
+            64,
+            2
+          ],
+          [
+            25,
+            64,
+            4
+          ],
+          [
+            26,
+            64,
+            3
+          ]
+        ]
+      }
+    },
+    "L05.beat2.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          25,
+          64,
+          3
+        ],
+        "block": "minecraft:oak_sign",
+        "type": "place",
+        "held": "minecraft:oak_sign",
+        "blockAfter": "minecraft:oak_sign",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            24.5,
+            65.62,
+            3.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_sign",
+          "done": true
+        }
+      }
+    },
+    "L05.beat2.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:oak_sign",
+        "blockNextTick": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat2.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:oak_sign",
+        "actual": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat2.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          25,
+          64,
+          3
+        ],
+        "block": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat3.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          1,
+          64,
+          17
+        ],
+        "candidates": [
+          [
+            0,
+            64,
+            17
+          ],
+          [
+            1,
+            64,
+            16
+          ],
+          [
+            1,
+            64,
+            18
+          ],
+          [
+            2,
+            64,
+            17
+          ]
+        ]
+      }
+    },
+    "L05.beat3.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          1,
+          64,
+          17
+        ],
+        "block": "minecraft:oak_sign",
+        "type": "place",
+        "held": "minecraft:oak_sign",
+        "blockAfter": "minecraft:oak_sign",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            0.5,
+            65.62,
+            17.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_sign",
+          "done": true
+        }
+      }
+    },
+    "L05.beat3.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:oak_sign",
+        "blockNextTick": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat3.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:oak_sign",
+        "actual": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat3.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          1,
+          64,
+          17
+        ],
+        "block": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat4.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          25,
+          64,
+          17
+        ],
+        "candidates": [
+          [
+            24,
+            64,
+            17
+          ],
+          [
+            25,
+            64,
+            16
+          ],
+          [
+            25,
+            64,
+            18
+          ],
+          [
+            26,
+            64,
+            17
+          ]
+        ]
+      }
+    },
+    "L05.beat4.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          25,
+          64,
+          17
+        ],
+        "block": "minecraft:oak_sign",
+        "type": "place",
+        "held": "minecraft:oak_sign",
+        "blockAfter": "minecraft:oak_sign",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            24.5,
+            65.62,
+            17.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_sign",
+          "done": true
+        }
+      }
+    },
+    "L05.beat4.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:oak_sign",
+        "blockNextTick": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat4.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:oak_sign",
+        "actual": "minecraft:oak_sign"
+      }
+    },
+    "L05.beat4.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          25,
+          64,
+          17
+        ],
+        "block": "minecraft:oak_sign"
+      }
+    },
+    "L06.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "f794d38d-7e1a-4ff2-aaec-24e9d723d8f1"
+      }
+    },
+    "L06.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          8,
+          65,
+          12
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L06.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L06.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持线团，对准护符盒按右键"
+      }
+    },
+    "L06.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          13,
+          65,
+          20
+        ],
+        "candidates": [
+          [
+            12,
+            65,
+            20
+          ],
+          [
+            13,
+            65,
+            19
+          ],
+          [
+            14,
+            65,
+            20
+          ],
+          [
+            12,
+            65,
+            19
+          ]
+        ]
+      }
+    },
+    "L06.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          13,
+          65,
+          20
+        ],
+        "block": "minecraft:loom_thread",
+        "type": "interact",
+        "held": "minecraft:string",
+        "blockAfter": "minecraft:chiseled_stone_bricks",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            12.5,
+            66.62,
+            20.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "string",
+          "done": true
+        }
+      }
+    },
+    "L06.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:chiseled_stone_bricks",
+        "blockNextTick": "minecraft:chiseled_stone_bricks"
+      }
+    },
+    "L06.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          13,
+          65,
+          20
+        ],
+        "block": "minecraft:loom_thread"
+      }
+    },
+    "L07.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "b779899a-45e9-498d-927e-55656580901f"
+      }
+    },
+    "L07.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          2
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L07.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 3,
+        "active": false
+      }
+    },
+    "L07.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持活板门，对三只笼门各按右键"
+      }
+    },
+    "L07.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          -10,
+          65,
+          0
+        ],
+        "candidates": [
+          [
+            -11,
+            65,
+            0
+          ],
+          [
+            -10,
+            65,
+            -1
+          ],
+          [
+            -10,
+            65,
+            1
+          ],
+          [
+            -9,
+            65,
+            0
+          ]
+        ]
+      }
+    },
+    "L07.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          -10,
+          65,
+          0
+        ],
+        "block": "minecraft:oak_trapdoor",
+        "type": "interact",
+        "held": "minecraft:oak_trapdoor",
+        "blockAfter": "minecraft:iron_bars",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            -10.5,
+            66.62,
+            0.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_trapdoor",
+          "done": true
+        }
+      }
+    },
+    "L07.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:iron_bars",
+        "blockNextTick": "minecraft:iron_bars"
+      }
+    },
+    "L07.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          -10,
+          65,
+          0
+        ],
+        "block": "minecraft:oak_trapdoor"
+      }
+    },
+    "L07.beat1.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          -10,
+          65,
+          6
+        ],
+        "candidates": [
+          [
+            -11,
+            65,
+            6
+          ],
+          [
+            -10,
+            65,
+            5
+          ],
+          [
+            -10,
+            65,
+            7
+          ],
+          [
+            -9,
+            65,
+            6
+          ]
+        ]
+      }
+    },
+    "L07.beat1.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          -10,
+          65,
+          6
+        ],
+        "block": "minecraft:oak_trapdoor",
+        "type": "interact",
+        "held": "minecraft:oak_trapdoor",
+        "blockAfter": "minecraft:iron_bars",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            -10.5,
+            66.62,
+            6.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_trapdoor",
+          "done": true
+        }
+      }
+    },
+    "L07.beat1.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:iron_bars",
+        "blockNextTick": "minecraft:iron_bars"
+      }
+    },
+    "L07.beat1.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          -10,
+          65,
+          6
+        ],
+        "block": "minecraft:oak_trapdoor"
+      }
+    },
+    "L07.beat2.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          -10,
+          65,
+          12
+        ],
+        "candidates": [
+          [
+            -11,
+            65,
+            12
+          ],
+          [
+            -10,
+            65,
+            11
+          ],
+          [
+            -10,
+            65,
+            13
+          ],
+          [
+            -9,
+            65,
+            12
+          ]
+        ]
+      }
+    },
+    "L07.beat2.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          -10,
+          65,
+          12
+        ],
+        "block": "minecraft:oak_trapdoor",
+        "type": "interact",
+        "held": "minecraft:oak_trapdoor",
+        "blockAfter": "minecraft:iron_bars",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            -10.5,
+            66.62,
+            12.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "oak_trapdoor",
+          "done": true
+        }
+      }
+    },
+    "L07.beat2.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:iron_bars",
+        "blockNextTick": "minecraft:iron_bars"
+      }
+    },
+    "L07.beat2.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          -10,
+          65,
+          12
+        ],
+        "block": "minecraft:oak_trapdoor"
+      }
+    },
+    "L08.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "95b0f982-81bb-40ce-b13d-3fb56aa443b1"
+      }
+    },
+    "L08.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          -5
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L08.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L08.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "对准总拉杆，按右键推到底"
+      }
+    },
+    "L08.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          0,
+          65,
+          8
+        ],
+        "candidates": [
+          [
+            -1,
+            65,
+            8
+          ],
+          [
+            0,
+            65,
+            7
+          ],
+          [
+            0,
+            65,
+            9
+          ],
+          [
+            1,
+            65,
+            8
+          ]
+        ]
+      }
+    },
+    "L08.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          0,
+          65,
+          8
+        ],
+        "block": "minecraft:lever",
+        "type": "place",
+        "held": "minecraft:lever",
+        "blockAfter": "minecraft:lever",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            -0.5,
+            66.62,
+            8.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "lever",
+          "done": true
+        }
+      }
+    },
+    "L08.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:lever",
+        "blockNextTick": "minecraft:lever"
+      }
+    },
+    "L08.beat0.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:lever",
+        "actual": "minecraft:lever"
+      }
+    },
+    "L08.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          8
+        ],
+        "block": "minecraft:lever"
+      }
+    },
+    "L09.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "d56a6921-f488-4a5d-96e4-16f9089d3ef5"
+      }
+    },
+    "L09.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          0
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L09.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 2,
+        "active": false
+      }
+    },
+    "L09.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持药水泼笼子，再持钟右键"
+      }
+    },
+    "L09.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          10,
+          65,
+          7
+        ],
+        "candidates": [
+          [
+            8,
+            65,
+            7
+          ],
+          [
+            10,
+            65,
+            5
+          ],
+          [
+            10,
+            65,
+            9
+          ],
+          [
+            8,
+            65,
+            6
+          ]
+        ]
+      }
+    },
+    "L09.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          10,
+          65,
+          7
+        ],
+        "block": "minecraft:potion",
+        "type": "interact",
+        "held": "minecraft:splash_potion",
+        "blockAfter": "minecraft:iron_bars",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            8.5,
+            66.62,
+            7.5
+          ],
+          "distance": 2.2922478051031066,
+          "hand": "splash_potion",
+          "done": true
+        }
+      }
+    },
+    "L09.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:iron_bars",
+        "blockNextTick": "minecraft:iron_bars"
+      }
+    },
+    "L09.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          10,
+          65,
+          7
+        ],
+        "block": "minecraft:potion"
+      }
+    },
+    "L09.beat1.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          0,
+          65,
+          14
+        ],
+        "candidates": [
+          [
+            0,
+            65,
+            13
+          ],
+          [
+            0,
+            65,
+            15
+          ],
+          [
+            -1,
+            65,
+            13
+          ],
+          [
+            -1,
+            65,
+            15
+          ]
+        ]
+      }
+    },
+    "L09.beat1.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          0,
+          65,
+          14
+        ],
+        "block": "minecraft:bell",
+        "type": "interact",
+        "held": "minecraft:splash_potion",
+        "blockAfter": "minecraft:bell",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            0.5,
+            66.62,
+            13.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "splash_potion",
+          "done": true
+        }
+      }
+    },
+    "L09.beat1.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:bell",
+        "blockNextTick": "minecraft:bell"
+      }
+    },
+    "L09.beat1.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          0,
+          65,
+          14
+        ],
+        "block": "minecraft:bell"
+      }
+    },
+    "L10.session-ready": {
+      "ok": true,
+      "detail": {
+        "prepared": true,
+        "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884"
+      }
+    },
+    "L10.player-spawn-usable": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          14,
+          65,
+          3
+        ],
+        "block": "air",
+        "solidNeighbors": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "enclosed": false
+      }
+    },
+    "L10.playerBeat-armed": {
+      "ok": true,
+      "detail": {
+        "armed": true,
+        "beats": 1,
+        "active": false
+      }
+    },
+    "L10.activate": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "active": true,
+        "hint": "手持合龙石，对准中央基座按右键"
+      }
+    },
+    "L10.beat0.stand-found": {
+      "ok": true,
+      "detail": {
+        "target": [
+          12,
+          65,
+          0
+        ],
+        "candidates": [
+          [
+            11,
+            65,
+            0
+          ],
+          [
+            13,
+            65,
+            0
+          ],
+          [
+            10,
+            65,
+            0
+          ],
+          [
+            14,
+            65,
+            0
+          ]
+        ]
+      }
+    },
+    "L10.beat0.done": {
+      "ok": true,
+      "detail": {
+        "target": [
+          12,
+          65,
+          0
+        ],
+        "block": "minecraft:lodestone",
+        "type": "place",
+        "held": "minecraft:lodestone",
+        "blockAfter": "minecraft:lodestone",
+        "attempts": {
+          "attempt": 1,
+          "eye": [
+            11.5,
+            66.62,
+            0.5
+          ],
+          "distance": 1.5014659503298802,
+          "hand": "lodestone",
+          "done": true
+        }
+      }
+    },
+    "L10.beat0.stable": {
+      "ok": true,
+      "detail": {
+        "blockAfter": "minecraft:lodestone",
+        "blockNextTick": "minecraft:lodestone"
+      }
+    },
+    "L10.beat0.block-placed": {
+      "ok": true,
+      "detail": {
+        "expected": "minecraft:lodestone",
+        "actual": "minecraft:lodestone"
+      }
+    },
+    "L10.beat0.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "pos": [
+          12,
+          65,
+          0
+        ],
+        "block": "minecraft:lodestone"
+      }
+    },
+    "b5.all-levels-player-beat-reachable": {
+      "ok": true,
+      "detail": {
+        "levels": 10,
+        "beats": 17,
+        "doneBeats": 17,
+        "unstableBeats": [],
+        "playerEventMissing": [],
+        "failedLevels": []
+      }
+    }
+  },
+  "errors": [
+    "L03.player-spawn-usable"
+  ],
+  "summary": {
+    "levels": 10,
+    "beats": 17,
+    "doneBeats": 17,
+    "unstableBeats": [],
+    "playerEventMissing": [],
+    "failedLevels": []
+  },
+  "playerActionBars": [
+    {
+      "at": "2026-11-01T04:24:14.335Z",
+      "via": "packet:action_bar",
+      "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+    },
+    {
+      "at": "2026-11-01T04:24:22.735Z",
+      "via": "packet:action_bar",
+      "text": "手持蛋糕，对准蛋糕塔按右键"
+    },
+    {
+      "at": "2026-11-01T04:24:31.185Z",
+      "via": "packet:action_bar",
+      "text": "对准钟楼的钟，按右键敲响"
+    },
+    {
+      "at": "2026-11-01T04:24:39.534Z",
+      "via": "packet:action_bar",
+      "text": "手持南瓜，对着干草捆按右键"
+    },
+    {
+      "at": "2026-11-01T04:24:48.135Z",
+      "via": "packet:action_bar",
+      "text": "手持门牌，对五块门口各按右键"
+    },
+    {
+      "at": "2026-11-01T04:24:49.935Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 4 处）"
+    },
+    {
+      "at": "2026-11-01T04:24:53.134Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 3 处）"
+    },
+    {
+      "at": "2026-11-01T04:24:56.336Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 2 处）"
+    },
+    {
+      "at": "2026-11-01T04:24:59.534Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 1 处）"
+    },
+    {
+      "at": "2026-11-01T04:25:09.534Z",
+      "via": "packet:action_bar",
+      "text": "手持线团，对准护符盒按右键"
+    },
+    {
+      "at": "2026-11-01T04:25:17.985Z",
+      "via": "packet:action_bar",
+      "text": "手持活板门，对三只笼门各按右键"
+    },
+    {
+      "at": "2026-11-01T04:25:19.786Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 2 处）"
+    },
+    {
+      "at": "2026-11-01T04:25:22.984Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 1 处）"
+    },
+    {
+      "at": "2026-11-01T04:25:32.884Z",
+      "via": "packet:action_bar",
+      "text": "对准总拉杆，按右键推到底"
+    },
+    {
+      "at": "2026-11-01T04:25:41.535Z",
+      "via": "packet:action_bar",
+      "text": "手持药水泼笼子，再持钟右键"
+    },
+    {
+      "at": "2026-11-01T04:25:43.343Z",
+      "via": "packet:action_bar",
+      "text": "织者之印 · 已记下（还剩 1 处）"
+    },
+    {
+      "at": "2026-11-01T04:25:53.535Z",
+      "via": "packet:action_bar",
+      "text": "手持合龙石，对准中央基座按右键"
+    }
+  ],
+  "playerMessages": [
+    {
+      "at": "2026-11-01T04:24:08.200Z",
+      "text": "ReachP27 joined the game"
+    },
+    {
+      "at": "2026-11-01T04:24:09.602Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:24:09.645Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:24:18.206Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:24:18.241Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:24:26.586Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:24:26.644Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:24:35.013Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:24:35.047Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:24:43.466Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:24:43.493Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:25:04.782Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:25:04.796Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:25:13.350Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:25:13.393Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:25:28.199Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:25:28.240Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:25:36.872Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:25:36.891Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:25:48.635Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:25:48.696Z",
+      "text": "GolemAfter joined the game"
+    }
+  ],
+  "finishedAt": "2026-11-01T04:25:57.235Z",
+  "ok": false
+}

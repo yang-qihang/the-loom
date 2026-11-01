@@ -3,6 +3,8 @@
 > 状态：v1｜负责人：Lead｜最后更新：2026-10-31
 > 用户原话：**美观、精致、逻辑 coherent、层层递进、精彩、震撼；界面易用、文字清晰、没有很重的 AI 味和看不懂的汉语。**
 > 本文把这句话拆成能打勾的门禁；任何一条不过，不叫「完成」。
+> 现行文件（2026-11-01 复核）：质量门定义仍有效；当前 gate 状态见 `qa/README.md` §6（G-FRESH-READER 仍 tracked fail）。
+> 上游：BRIEF.md §1、docs/19-art-direction.md、docs/22-copy-deck.md
 
 ## 1. 八个验收维度
 

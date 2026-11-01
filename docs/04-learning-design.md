@@ -4,6 +4,7 @@
 > 上游：`research/pedagogy-notes.md`（scout-pedagogy，采信时以该文件来源为准）、`docs/01-prior-art.md`
 > 下游：`docs/05-curriculum.md`（关卡）、`docs/06-level-spec-system.md`（spec 字段）、`docs/10-demo-and-report.md`（评估）
 > 一句话：**每一关都要让玩家先感到「没有这个抽象很痛」，再让他在 Minecraft 里亲眼看见这个抽象把世界变好。**
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

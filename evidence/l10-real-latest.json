@@ -1,6 +1,6 @@
 {
  "level": "L10",
- "startedAt": "2026-10-31T11:30:07.514Z",
+ "startedAt": "2026-11-01T04:25:18.303Z",
  "bots": {
   "left": "LeftWeaver",
   "right": "RightWeaver"
@@ -30,7 +30,13 @@
    "detail": {
     "ok": true,
     "gave": "minecraft:oak_planks",
-    "count": 4
+    "count": 4,
+    "players": 0,
+    "kit": {
+     "minecraft:lodestone": 4,
+     "minecraft:oak_planks": 4
+    },
+    "queued": true
    }
   },
   "give.RightWeaver": {
@@ -38,7 +44,13 @@
    "detail": {
     "ok": true,
     "gave": "minecraft:oak_planks",
-    "count": 4
+    "count": 4,
+    "players": 0,
+    "kit": {
+     "minecraft:lodestone": 4,
+     "minecraft:oak_planks": 4
+    },
+    "queued": true
    }
   },
   "give.HumanLike": {
@@ -46,7 +58,48 @@
    "detail": {
     "ok": true,
     "gave": "minecraft:lodestone",
-    "count": 1
+    "count": 1,
+    "players": 1,
+    "kit": {
+     "minecraft:lodestone": 1,
+     "minecraft:oak_planks": 4
+    }
+   }
+  },
+  "playerBeat.armed": {
+   "ok": true,
+   "detail": {
+    "armed": true,
+    "beats": 1,
+    "items": [
+     "minecraft:lodestone"
+    ],
+    "ok": true
+   }
+  },
+  "playerBeat.activate": {
+   "ok": true,
+   "detail": {
+    "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+    "armed": true,
+    "active": true,
+    "hint": "手持合龙石，对准中央基座按右键",
+    "beats": [
+     {
+      "pos": [
+       12,
+       65,
+       0
+      ],
+      "block": "minecraft:lodestone",
+      "done": false
+     }
+    ],
+    "items": [
+     "minecraft:lodestone"
+    ],
+    "done": false,
+    "ok": true
    }
   },
   "keystone.human-player": {
@@ -54,7 +107,7 @@
    "detail": {
     "seq": 50,
     "type": "block.place",
-    "tick": 6566,
+    "tick": 13525,
     "actor": "HumanLike",
     "actorType": "player",
     "pos": [
@@ -197,19 +250,33 @@
    "detail": {
     "resetA": {
      "ok": true,
-     "ms": 4,
-     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
-     "tick": 6580,
-     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
-     "epoch": 19
+     "ms": 5,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 13539,
+     "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+     "epoch": 27,
+     "checkpointSize": 1146,
+     "restoredBlocks": 1,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
     },
     "resetB": {
      "ok": true,
-     "ms": 3,
-     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
-     "tick": 6586,
-     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
-     "epoch": 19
+     "ms": 5,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 13545,
+     "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+     "epoch": 27,
+     "checkpointSize": 1146,
+     "restoredBlocks": 0,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
     }
    }
   },
@@ -218,19 +285,33 @@
    "detail": {
     "resetA": {
      "ok": true,
-     "ms": 4,
-     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
-     "tick": 6580,
-     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
-     "epoch": 19
+     "ms": 5,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 13539,
+     "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+     "epoch": 27,
+     "checkpointSize": 1146,
+     "restoredBlocks": 1,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
     },
     "resetB": {
      "ok": true,
-     "ms": 3,
-     "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
-     "tick": 6586,
-     "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
-     "epoch": 19
+     "ms": 5,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 13545,
+     "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+     "epoch": 27,
+     "checkpointSize": 1146,
+     "restoredBlocks": 0,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
     }
    }
   },
@@ -315,39 +396,39 @@
  "actions": [
   {
    "action": "moveTo(10,-1)",
-   "ms": 1648
+   "ms": 1788
   },
   {
    "action": "place(minecraft:oak_planks@10,65,0)",
-   "ms": 68
+   "ms": 66
+  },
+  {
+   "action": "moveTo(13,1)",
+   "ms": 2337
+  },
+  {
+   "action": "place(minecraft:oak_planks@13,65,0)",
+   "ms": 49
   },
   {
    "action": "moveTo(11,-1)",
-   "ms": 431
+   "ms": 534
   },
   {
    "action": "place(minecraft:oak_planks@11,65,0)",
-   "ms": 20
+   "ms": 17
+  },
+  {
+   "action": "moveTo(14,1)",
+   "ms": 51
   },
   {
    "action": "say(左岸铺好了)",
    "ms": 0
   },
   {
-   "action": "moveTo(13,1)",
-   "ms": 2248
-  },
-  {
-   "action": "place(minecraft:oak_planks@13,65,0)",
-   "ms": 13
-  },
-  {
-   "action": "moveTo(14,1)",
-   "ms": 88
-  },
-  {
    "action": "place(minecraft:oak_planks@14,65,0)",
-   "ms": 11
+   "ms": 48
   },
   {
    "action": "say(右岸铺好了)",
@@ -359,14 +440,14 @@
   },
   {
    "action": "reset",
-   "ms": 286
+   "ms": 280
   },
   {
    "action": "reset",
-   "ms": 298
+   "ms": 300
   }
  ],
- "prepareMs": 2643,
+ "prepareMs": 3094,
  "plugin": {
   "levelId": "L10",
   "bots": [
@@ -438,7 +519,7 @@
    "text": "2"
   }
  ],
- "referenceRunMs": 2645,
+ "referenceRunMs": 2720,
  "snapshot": {
   "agentPlaceCount": 4,
   "playerPlaceCount": 1,
@@ -476,21 +557,35 @@
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 4,
-   "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
-   "tick": 6580,
-   "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
-   "epoch": 19
+   "ms": 5,
+   "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+   "tick": 13539,
+   "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+   "epoch": 27,
+   "checkpointSize": 1146,
+   "restoredBlocks": 1,
+   "removedEntities": 5,
+   "playerKit": {
+    "minecraft:lodestone": 1,
+    "minecraft:oak_planks": 4
+   }
   },
   "resetB": {
    "ok": true,
-   "ms": 3,
-   "hash": "sha256:81eb8fa5212be4cadf835e8149c9b8d7b918c11769990cb88f1eb1c5e2a90184",
-   "tick": 6586,
-   "sessionId": "754cfe1c-a7bf-47d9-a854-c9e2d8a27fad",
-   "epoch": 19
+   "ms": 5,
+   "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+   "tick": 13545,
+   "sessionId": "fc679a68-3b72-4e4d-ba0e-e435811e8747",
+   "epoch": 27,
+   "checkpointSize": 1146,
+   "restoredBlocks": 0,
+   "removedEntities": 5,
+   "playerKit": {
+    "minecraft:lodestone": 1,
+    "minecraft:oak_planks": 4
+   }
   }
  },
- "finishedAt": "2026-10-31T11:30:16.174Z",
+ "finishedAt": "2026-11-01T04:25:27.743Z",
  "ok": true
 }

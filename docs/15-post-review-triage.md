@@ -3,6 +3,7 @@
 > 状态：v1｜负责人：Lead｜最后更新：2026-10-31 12:45
 > 上游：`docs/14-level-critique.md`（学习设计/盲读/梯度）、`docs/14b-mechanical-validation.md`（机器/契约/格式）、`docs/00b-audit-response.md`
 > 下游：T1 早上的 spec 冻结门禁；各关 spec 的作者修订
+> 历史说明（2026-11-01 文档审计）：本文件是设计阶段的审计/评审记录，保留原始结论与日期；部分处置与当前实现已变化，当前以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

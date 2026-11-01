@@ -3,7 +3,7 @@
 Node 22 HTTP + SSE 服务，桥接 Studio/桌面 App 与 `WorldPort`。两种世界端口由 `LOOM_WORLD` 选择：
 
 - `mock`（默认）：`MockWorldPort`，无 MC 也能全流程验收（CI/日更门禁用这个）。
-- `paper`（T3 已接）：`PaperWorldPort` + `GolemBot`，在真实 Paper 26.1.2 里跑 L01–L04（Studio 选关→运行→3 星→重置）。
+- `paper`（已接入真实 Paper 26.1.2）：`PaperWorldPort` + `GolemBot`，在真实 Paper 里跑 L01–L10（Studio 选关→运行→3 星→重置）；全关卡真实 e2e 见 `it/l1-real.ts`…`it/l10-real.ts`。
   实现：`apps/engine/src/world.ts`（端口工厂/就绪等待/中文错误）+ `packages/worldport/src/paper-port.ts`（MC 线提供）。
 
 ## 命令
@@ -13,7 +13,7 @@ npm run dev:engine          # mock 模式，启动 127.0.0.1:4317
 PORT=4400 npm run dev:engine  # 换端口（HOST 可覆盖绑定地址）
 
 npm run dev:engine:paper     # 真实 MC 模式：自动 mc-up → 等插件 RPC → 起 engine（LOOM_WORLD=paper）
-npm run it:engine-paper      # 真实 MC 集成测试：HTTP/SSE 跑 L01–L04，输出 evidence/engine-paper-latest.json
+npm run it:engine-paper      # 真实 MC 集成测试：HTTP/SSE 默认跑 L01–L04（LOOM_LEVELS 可覆盖），输出 evidence/engine-paper-latest.json
 PORT=4318 npm run dev:engine:paper   # 4317 已被其它 engine/Studio 占用时换端口
 npm test                     # 单测 + 本服务的 HTTP/SSE 集成测试（mock，不依赖 MC）
 curl 127.0.0.1:4317/api/health
@@ -53,12 +53,12 @@ Studio/桌面 App 无需真客户端即可验收；真人演示时同一端点�
 |---|---|---|
 | GET | `/api/health` | `{ ok, port, mc, bot?, version, sessions, uptimeSec }`；`port` = `mock` / `paper`（paper 附带插件与 bot 状态） |
 | GET | `/api/levels` | `{ levels: [{ id, title, act, order, priority }] }` |
-| GET | `/api/levels/:id` | `{ def, starterCode }` |
+| GET | `/api/levels/:id` | `{ def, starterCode, progress: [{id,text,player}] }`（progress 是目标的唯一真值，见 docs/46 §2.3） |
 | POST | `/api/session` | `{ levelId }` → `{ sessionId, state, epoch, port, snapshot }` |
 | POST | `/api/run` | `{ sessionId, source, commandId? }` → `{ runId, state }`（202，结果走 SSE） |
 | POST | `/api/stop` | `{ sessionId }` → `{ ok, state }`（撤销 capability，之后必须 reset） |
 | POST | `/api/reset` | `{ sessionId }` → `{ ok, state, epoch, snapshot }` |
-| POST | `/api/player-beat` | `{ sessionId }` → `{ ok, state, result }`（模拟玩家右键第 4 盏灯并重新评分） |
+| POST | `/api/player-beat` | `{ sessionId, simulate? }` → `{ ok, simulate, state, result }`。默认 `simulate` 由运行时决定：`mock` 自动模拟玩家节拍，`paper` 为 confirm-only（只按真实世界状态评分，不代玩家落块）。等待门控见 `result.playerBeatReady` |
 | POST | `/api/repl` | `{ sessionId, line }` → `{ ok, kind, display, log, error?, line? }`；一次一行、自动 await（docs/27） |
 | GET | `/api/repl/history?sessionId=` | `{ entries: [{ line, kind, display, at }] }`（执行顺序；仅内存） |
 | POST | `/api/repl/reset` | `{ sessionId }` → `{ ok, state, epoch, snapshot }`（重建 L01 场景，不评分） |
@@ -98,7 +98,7 @@ curl -s -X POST 127.0.0.1:4317/api/player-beat -H 'content-type: application/jso
 
 `apps/studio/src/engine/httpEngine.ts` 用 `EventSource.onmessage` 收事件，因此 SSE 发送**默认 message 事件**（不带 `event:` 名）；
 `state` 事件同时带 `phase`（Studio 的 `SessionPhase`：loading/ready/running/graded/error），`result` 事件同时带嵌套 `result` 对象（Studio `StudioEvent` 形状），
-并保留 docs/21 §3 的 `state/passed/stars/criteria/hidden/failures` 扁平字段。
+并保留 docs/21 §3 的 `state/passed/stars/criteria/hidden/failures` 扁平字段。`result` 还带 `progress: [{id,text,passed}]` 与 `playerBeatReady: boolean`；每次 verify 都按 `LevelDef.progress` 的 id 发 `objective` 事件（docs/46 §1.1）。
 
 ## 状态机（docs/07 §3.5 子集）
 
@@ -110,8 +110,9 @@ curl -s -X POST 127.0.0.1:4317/api/player-beat -H 'content-type: application/jso
 
 ## 未完成 / 剩余风险
 
-- 真实 MC 模式当前覆盖 L01–L04（e2e 证据 `evidence/engine-paper-latest.json`）；L05–L08 目录已注册但真 MC 未逐关验收（内容线的 Mock 测试覆盖）。
-- 真实 MC 单世界/单 bot：paper 模式一次只支持一个会话；并行关卡需要多服/多进程。
+- 真实 MC 模式全关卡已验收：`it/l1-real.ts`–`l10-real.ts`（证据 `evidence/l*-real-latest.json`）；`it:engine-paper` 默认仍只跑 L01–L04 的 HTTP/SSE 冒烟（`LOOM_LEVELS` 可指定）。
+- 真实 MC 单世界/单 bot：paper 模式一次只支持一个会话；并行关卡需要多服/多进程（L10 是一只 engine 驱动两只 bot，不是两个会话）。
+- paper 模式的玩家节拍是 confirm-only：引擎不会替玩家完成，必须由插件 `playerBeat.activate` 后的真实右键/交互产生玩家事件。
 - 无 MC 客户端时只做协议/状态级验收；视觉观感仍需真 MC 客户端（Lead 集成阶段）。
 - 试符台历史仅存内存（进程重启丢失）；v1 不跨行保留变量（docs/27 §2/§6）；repl 不订阅 SSE（按契约不需要，Studio 走 HTTP 轮询式返回）。
 - Stop 只能撤销 Mock 层能力；真实 bot/插件侧 capability/epoch 由 MC 线实现（REQ-EPOCH-01 等）。

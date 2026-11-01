@@ -74,7 +74,8 @@ test("U2 happy：试符台/织典 → L01 参考解 → player-beat → 结算 �
   await page.evaluate(() => window.__loomStudio?.fillReference());
   const shots = [await shot(page, "U2-workbench")];
   await page.getByTestId("btn-run").click();
-  await expect(page.getByTestId("result-card")).toContainText("最后一步");
+  await expect(page.getByTestId("btn-player-beat")).toBeVisible();
+  await expect(page.getByTestId("result-card")).toContainText("织者之印");
   await page.evaluate(() => window.__loomStudio?.playerBeat());
   await expect(page.getByTestId("result-headline")).toContainText("灯全亮");
   await expect(page.getByTestId("result-card")).toContainText("灯全亮");
@@ -134,8 +135,8 @@ test("U4 fresh：只读屏幕文字完成 L01 + 五问记录", async ({ page }) 
     ].join("\n");
     await page.evaluate(c => window.__loomStudio?.setCode(c), code);
     await page.getByTestId("btn-run").click();
-    // 真实玩家会先看到「最后一步」提示，再去做玩家节拍；不能运行请求还没结束就抢跑。
-    await expect(page.getByTestId("result-card")).toContainText("最后一步", { timeout: 20_000 });
+    // 真实玩家会先看到「轮到你」提示，再去做玩家节拍；不能运行请求还没结束就抢跑。
+    await expect(page.getByTestId("result-card")).toContainText("织者之印", { timeout: 20_000 });
     await page.evaluate(() => window.__loomStudio?.playerBeat());
     await expect(page.getByTestId("result-card")).toContainText("灯全亮", { timeout: 20_000 });
     passed = true;

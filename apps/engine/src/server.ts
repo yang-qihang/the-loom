@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import type { AddressInfo } from "node:net";
 import { MockWorldPort } from "../../../packages/worldport/src/mock-port";
 import type { WorldSnapshot } from "../../../packages/protocol/src/index";
+import { progressView } from "../../../packages/level-spec/src/index";
 import { GameSession, SessionError, type EngineEvent, type ResultEvent } from "../../../packages/session/src/index";
 import { findLevelContent, listLevels } from "./catalog";
 import { createWorldRuntime, WorldUnavailableError, type WorldRuntime } from "./world";
@@ -70,6 +71,9 @@ function ssePayload(event: EngineEvent): unknown {
         criteria: event.criteria,
         hidden: event.hidden,
         failures: event.failures,
+        // Studio 的 RunResult 形状（docs/46 §2.3）：目标面板/玩家节拍门控直接用这两个真值。
+        progress: event.progress,
+        playerBeatReady: event.playerBeatReady,
       },
     };
   }
@@ -199,7 +203,8 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
     if (method === "GET" && levelMatch) {
       const content = findLevelContent(decodeURIComponent(levelMatch[1]));
       if (!content) throw new SessionError(`未知关卡 ${levelMatch[1]}`, "NOT_FOUND");
-      sendJson(res, 200, { def: content.def, starterCode: content.def.code.starterCode });
+      // progressView 只含 {id,text,player}：Studio 目标面板/玩家节拍提示的唯一来源（docs/46 §2.3）。
+      sendJson(res, 200, { def: content.def, starterCode: content.def.code.starterCode, progress: progressView(content.def) });
       return;
     }
 
@@ -284,8 +289,12 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
     if (method === "POST" && path === "/api/player-beat") {
       const body = await readJson(req);
       const session = requireSession(requireString(body, "sessionId"));
-      const { state, result } = await session.playerBeat(body.simulate === false);
-      sendJson(res, 200, { ok: true, state, result });
+      // 模拟还是真实确认由引擎的运行模式决定（docs/46 §1.3）：
+      // mock 世界没有真人输入 → 默认模拟最后一步；paper 世界永远只按真实世界评分（confirm-only）。
+      // 显式传 simulate 时以调用方为准（测试/调试）。
+      const simulate = body.simulate === undefined ? runtime.mode === "mock" : body.simulate !== false;
+      const { state, result } = await session.playerBeat(!simulate);
+      sendJson(res, 200, { ok: true, simulate, state, result });
       return;
     }
 

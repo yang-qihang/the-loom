@@ -48,6 +48,8 @@ export interface WorldPort {
   clearEntities(ids?: string[]): Promise<void>;
   setTime(ticks: number): Promise<void>;
   setWeather(weather: "clear" | "rain" | "thunder"): Promise<void>;
+  /** 引擎判定「织偶部分已完成」后调用：插件显示玩家节拍标记并允许完成（mock 为空操作）。 */
+  activatePlayerBeat(): Promise<void>;
   /** 给真人玩家发道具；真实流程由玩家右键，道具必须先到手。 */
   playerGive(item: string, count?: number): Promise<void>;
   /** 测试/无人演示：模拟玩家亲手操作（真实流程由真人右键）。 */

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>织界 THE LOOM — 在 Minecraft 里学会程序语言</title>
+<style>
+  :root{
+    --ink:#1d2a24; --ink-soft:#4a5a51; --paper:#f7f1e3; --paper-2:#efe6d2;
+    --green:#2f6b4f; --green-2:#3f8a63; --gold:#c99a3f; --red:#a8483f;
+    --line:#d8cbb2; --shadow:0 18px 60px rgba(29,42,36,.12);
+    --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+    --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.72}
+  a{color:var(--green);text-decoration:none;border-bottom:1px solid rgba(47,107,79,.35)}
+  a:hover{border-color:var(--green)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  header.hero{padding:64px 0 40px;border-bottom:1px solid var(--line);background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(201,154,63,.16), transparent 60%),
+    radial-gradient(900px 420px at 10% 0%, rgba(47,107,79,.12), transparent 55%)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase;margin-bottom:18px}
+  h1{font-size:52px;line-height:1.2;margin:0 0 16px;letter-spacing:.01em}
+  h1 .accent{color:var(--green)}
+  .lede{font-size:19px;color:var(--ink-soft);max-width:760px;margin:0 0 30px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:900px}
+  .stat{background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .stat b{display:block;font-size:30px;letter-spacing:-.01em;color:var(--ink)}
+  .stat span{font-size:13px;color:var(--ink-soft)}
+  main{padding:48px 0 20px}
+  section{margin:0 0 56px}
+  h2{font-size:28px;margin:0 0 8px;letter-spacing:.01em}
+  h2 .num{font-family:var(--mono);font-size:13px;color:var(--gold);margin-right:10px}
+  .sub{color:var(--ink-soft);margin:0 0 22px;max-width:820px}
+  .grid{display:grid;gap:16px}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-2{grid-template-columns:1.2fr .8fr}
+  .card{background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .card h3{margin:0 0 6px;font-size:17px}
+  .rune{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.12em}
+  .card p{margin:8px 0 0;font-size:14px;color:var(--ink-soft)}
+  table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:rgba(47,107,79,.08);font-weight:600;font-size:13px;color:var(--green)}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--ink-soft);margin-right:6px}
+  .tag.p0{color:var(--green);border-color:rgba(47,107,79,.4)}
+  .tag.p1{color:var(--gold);border-color:rgba(201,154,63,.45)}
+  .arch{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .box{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:rgba(255,255,255,.55)}
+  .box b{display:block;margin-bottom:4px}
+  .box small{color:var(--ink-soft)}
+  .quotes{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .quote{border-left:3px solid var(--gold);padding:6px 0 6px 16px;color:var(--ink-soft);font-size:15px}
+  .quote b{color:var(--ink)}
+  .timeline{display:grid;gap:10px}
+  .step{display:grid;grid-template-columns:76px 1fr;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .step time{font-family:var(--mono);font-size:12px;color:var(--gold);padding-top:3px}
+  .step p{margin:0;font-size:14px}
+  .honest{background:rgba(168,72,63,.06);border:1px solid rgba(168,72,63,.22);border-radius:16px;padding:20px 22px}
+  .honest h3{margin:0 0 8px;font-size:17px;color:var(--red)}
+  .honest li{font-size:14px;color:var(--ink-soft);margin:6px 0}
+  footer{border-top:1px solid var(--line);padding:28px 0 60px;color:var(--ink-soft);font-size:13px}
+  .mapwrap{background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:18px;padding:18px}
+  .mapwrap svg{width:100%;height:auto;display:block}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:10px}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .mono{font-family:var(--mono)}
+  .mapwrap svg text{paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+  @media (max-width:860px){
+    h1{font-size:36px}.stats{grid-template-columns:repeat(2,1fr)}
+    .cols-3,.cols-2,.arch,.quotes{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:#fff}header.hero{background:#fff}a{color:inherit;border:none}
+    section{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">MINECRAFT × PROGRAMMING LANGUAGE · 课程设计交付</div>
+    <h1>让世界<br><span class="accent">照着语言</span>运行。</h1>
+    <p class="lede">
+      在 Minecraft 里用 TypeScript 驱动一只「织偶」，修复一座被「散线」冻住的村庄。
+      十关可玩、三幕，从顺序与循环一路走到记录、变体、闭包、高阶函数、管道、接口组合、异步与并发；
+      第十关「双织者」由两只织偶真实并发合龙。每一关只引入一个抽象，并让它在世界里产生看得见的后果。
+    </p>
+    <div class="stats">
+      <div class="stat"><b>15</b><span>程序语言抽象（A0–A14）</span></div>
+      <div class="stat"><b>10</b><span>可玩关卡（L01–L10，全部经真实 Paper 验收）</span></div>
+      <div class="stat"><b>17</b><span>《织典》跨语言对照页</span></div>
+      <div class="stat"><b>235</b><span>自动化测试（真实 Paper L01–L10 全 PASS）</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <h2><span class="num">01</span>这是什么</h2>
+    <p class="sub">不是刷题外壳，也不是积木模拟：学生写的是真实 TypeScript，改的是真实 Minecraft 世界，学的是真实语言设计思想。</p>
+    <div class="grid cols-3">
+      <div class="card"><div class="rune">ACT I · 动作之核</div><h3>让世界动起来</h3><p>顺序、变量、分支、循环。黄昏点灯、鸡舍数蛋、夜巡守村、雨前种田——先有「我能让世界动」的掌控感。</p></div>
+      <div class="card"><div class="rune">ACT II · 结构之核</div><h3>让世界有秩序</h3><p>函数、模块、记录、变体、闭包、高阶函数、管道、接口组合。同一套规则，从一栋房子复用到整座村庄。</p></div>
+      <div class="card"><div class="rune">ACT III · 时间之核</div><h3>让世界重新运转</h3><p>异步、错误、并发与协作。入夜前完成酿造；两只织偶用消息在峡谷两岸合龙一座桥。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>一张地图，十个场所</h2>
+    <p class="sub">所有关卡收缩在同一片「灰岩村 + 周边 300 格」里：村庄中心、西侧农田、东侧工坊、北侧峡谷、村下大织机遗迹。前一关点亮的灯、修好的房子，在下一关仍然在。</p>
+    <div class="mapwrap">
+      <svg viewBox="0 0 920 400" role="img" aria-label="灰岩村地图示意：河流、村庄、农田、工坊、峡谷、村下织机">
+        <defs>
+          <linearGradient id="river" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#9fc6c1"/><stop offset="1" stop-color="#6fa39d"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="920" height="400" fill="#efe6d2"/>
+        <path d="M0,250 C160,210 240,300 360,275 C470,252 540,300 650,285 C760,270 830,300 920,285 L920,400 L0,400 Z" fill="url(#river)" opacity=".55"/>
+        <path d="M0,250 C160,210 240,300 360,275 C470,252 540,300 650,285 C760,270 830,300 920,285" fill="none" stroke="#8fb7b1" stroke-width="2" opacity=".7"/>
+        <rect x="300" y="70" width="300" height="140" rx="10" fill="#d9c7a5" stroke="#b9a37c"/>
+        <text x="450" y="96" text-anchor="middle" font-family="monospace" font-size="12" fill="#6b5940">灰岩村 GRAYSTONE</text>
+        <g fill="#8a6f4a">
+          <rect x="330" y="115" width="34" height="26" rx="3"/><rect x="382" y="115" width="34" height="26" rx="3"/>
+          <rect x="434" y="115" width="34" height="26" rx="3"/><rect x="486" y="115" width="34" height="26" rx="3"/>
+          <rect x="538" y="115" width="34" height="26" rx="3"/>
+        </g>
+        <g fill="#c99a3f"><circle cx="347" cy="160" r="4"/><circle cx="399" cy="160" r="4"/><circle cx="451" cy="160" r="4"/><circle cx="503" cy="160" r="4"/><circle cx="555" cy="160" r="4"/></g>
+        <rect x="120" y="90" width="130" height="100" rx="10" fill="#e6d3a6" stroke="#b9a37c"/>
+        <text x="185" y="114" text-anchor="middle" font-family="monospace" font-size="11" fill="#6b5940">麦田 FARM</text>
+        <g stroke="#8fae62" stroke-width="3">
+          <path d="M140,130 H230 M140,145 H230 M140,160 H230"/>
+        </g>
+        <rect x="680" y="80" width="150" height="110" rx="10" fill="#d8c2a0" stroke="#b9a37c"/>
+        <text x="755" y="104" text-anchor="middle" font-family="monospace" font-size="11" fill="#6b5940">工坊 WORKSHOP</text>
+        <rect x="700" y="120" width="46" height="30" fill="#9a7b52"/><rect x="760" y="120" width="46" height="30" fill="#9a7b52"/>
+        <path d="M0,70 C180,40 260,80 380,55 C500,30 560,70 700,45" fill="none" stroke="#b9a37c" stroke-width="2" stroke-dasharray="6 6"/>
+        <text x="60" y="56" font-family="monospace" font-size="11" fill="#6b5940">北侧峡谷 →</text>
+        <path d="M450,210 L450,300" stroke="#8a6f4a" stroke-width="3"/>
+        <circle cx="450" cy="318" r="20" fill="none" stroke="#c99a3f" stroke-width="3"/>
+        <text x="450" y="360" text-anchor="middle" font-family="monospace" font-size="11" fill="#6b5940">村下大织机遗迹</text>
+        <g font-family="monospace" font-size="11" fill="#2f6b4f">
+          <text x="185" y="215">① 点灯</text><text x="330" y="230">② 鸡舍</text><text x="420" y="230">③ 夜巡</text>
+          <text x="510" y="230">④ 麦田</text><text x="620" y="230">⑤ 造屋</text><text x="700" y="215">⑥ 账本</text>
+          <text x="760" y="230">⑦ 悦灵</text><text x="600" y="290">⑧ 工坊</text><text x="680" y="310">⑨ 入夜</text><text x="300" y="320">⑩ 合龙桥</text>
+        </g>
+      </svg>
+      <div class="legend">
+        <span><i class="dot" style="background:#d9c7a5"></i>村庄</span>
+        <span><i class="dot" style="background:#e6d3a6"></i>农田</span>
+        <span><i class="dot" style="background:#d8c2a0"></i>工坊</span>
+        <span><i class="dot" style="background:#9fc6c1"></i>河流 / 峡谷</span>
+        <span><i class="dot" style="background:#c99a3f"></i>织机 / 符文</span>
+      </div>
+      <figure style="margin:18px 0 0">
+        <img src="evidence/mc-l01.png" alt="真实 Minecraft 26.1.2 客户端里的 L01 小径/灯柱/村舍截图" style="width:100%;border-radius:14px;border:1px solid var(--line)">
+        <figcaption style="font-size:13px;color:var(--ink-soft);margin-top:8px">真实客户端截图（Xvfb + Prism 26.1.2 + 本服插件）：小径、灯柱、村舍、树木与灰崽都在世界里；不是示意图。</figcaption>
+      </figure>
+      <div class="scene-strip" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px">
+        <figure style="margin:0"><img src="evidence/mc-l04.png" alt="L04 麦田/谷仓/风车" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L04 麦田：金麦/水渠/谷仓/风车</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l08.png" alt="L08 工坊" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L08 工坊：烟囱/熔炉/红石门/工具架</figcaption></figure>
+        <figure style="margin:0"><img src="evidence/mc-l09.png" alt="L09 黄昏营地" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:12px;color:var(--ink-soft);margin-top:6px">L09 黄昏营地：钟架/酿造台/帆布帐篷</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>课程梯度：一关一个抽象</h2>
+    <p class="sub">顺序 → 变量 → 分支 → 循环 → 函数 → 记录/变体 → 闭包/高阶/管道 → 接口/组合 → 异步 → 并发。每关都有一个「先让你痛，再给你工具」的动机演示。</p>
+    <table>
+      <thead><tr><th>#</th><th>关卡</th><th>新抽象</th><th>MC 场景</th><th>玩家亲手做的最后一件事</th><th>强度</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td>第一缕光</td><td>顺序 / 调用</td><td>黄昏小径点灯</td><td>点亮第 4 盏灯</td><td><span class="tag p0">P0</span></td></tr>
+        <tr><td>02</td><td>会数数的织偶</td><td>变量 / 绑定</td><td>鸡舍收蛋</td><td>引鸡回窝</td><td><span class="tag p0">P0</span></td></tr>
+        <tr><td>03</td><td>岔路与钟声</td><td>布尔 / 分支</td><td>三夜守村</td><td>天亮敲钟</td><td><span class="tag p0">P0</span></td></tr>
+        <tr><td>04</td><td>麦田的咒语</td><td>循环</td><td>雨前种田</td><td>立稻草人</td><td><span class="tag p0">P0</span></td></tr>
+        <tr><td>05</td><td>一百座房子</td><td>函数 / 模块</td><td>新地块造屋</td><td>写门牌</td><td><span class="tag p0">P0</span></td></tr>
+        <tr><td>06</td><td>商队的账本</td><td>记录 / 变体</td><td>旅商分拣</td><td>完成交易</td><td><span class="tag p1">P1</span></td></tr>
+        <tr><td>07</td><td>信风与织线</td><td>闭包 / 高阶 / 管道</td><td>悦灵分拣</td><td>打开笼子</td><td><span class="tag p1">P1</span></td></tr>
+        <tr><td>08</td><td>同一种心跳</td><td>接口 / 组合</td><td>织机工坊</td><td>拉总开关</td><td><span class="tag p1">P1</span></td></tr>
+        <tr><td>09</td><td>入夜之前</td><td>异步 / 并发</td><td>黄昏营地</td><td>泼药水 + 敲暮钟</td><td><span class="tag p1">可玩</span></td></tr>
+        <tr><td>10</td><td>双织者</td><td>并发 / 消息</td><td>峡谷合龙桥</td><td>放合龙石</td><td><span class="tag p0">可玩</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>技术：一条逻辑接口，两条物理通道</h2>
+    <p class="sub">Mineflayer 只是客户端，控不了别的实体；所以「织偶的动作」走 bot，「世界的逻辑与真值」走 Paper 插件。学生只看到 <span class="mono">golem</span> 与 <span class="mono">world</span>。</p>
+    <div class="arch">
+      <div class="box"><b>玩家能力通道 · Mineflayer</b><small>移动 / 寻路 / 挖掘 / 放置 / 背包 / 多织偶。外观用 setPlayerProfile 注入织偶皮肤。</small></div>
+      <div class="box"><b>世界逻辑通道 · Paper 插件</b><small>场景、NPC、粒子、音效、advancement、重置，以及评分唯一真值（服务端快照 + 事件流）。</small></div>
+      <div class="box"><b>引擎 · Node</b><small>会话状态机、AST 自动 await（学生无感顺序执行）、worker 沙箱、评分、提示、SSE。</small></div>
+      <div class="box"><b>工作室 · 浏览器</b><small>关卡选择、Monaco 编辑器、目标与教练、运行/停止/重置、结果星级。</small></div>
+    </div>
+    <figure style="margin:18px 0"><img src="evidence/ui-workbench.png" alt="织界 Studio 工作台：像素皮肤、L04 真实世界条、代码编辑器与目标卡" style="width:100%;border-radius:4px;border:1px solid var(--line);image-rendering:pixelated"><figcaption style="font-size:13px;color:var(--ink-soft);margin-top:8px">Studio 工作台（像素皮肤）：左边代码，右边目标/教练；世界截图按当前关卡切换，代码字体与字号保持可读。</figcaption></figure>
+    <p class="sub" style="margin-top:16px">已经实测：Paper 26.1.2 + Java 25 + mineflayer 4.39.0；<b>L01–L10 真实 Paper 无头端到端全绿</b>（L01 21 项、L02–L09 各 13 项、L10 19 项；评分与 Mock 逐项一致）；L10 双织偶 + 合龙石玩家节拍真实通过。桌面 App 已内置 Node/Java/Paper/插件/世界/真实引擎与织偶，用户只需安装 Minecraft 26.1.2；L01–L09 场景已过真实截图质量门。</p>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>AI 工作流：证据比生成重要</h2>
+    <p class="sub">4 天、几乎全 AI、人类只在 3 个检查点出现。每一道门禁都要求可复跑的证据，而不是「我觉得做完了」。</p>
+    <div class="grid cols-3">
+      <div class="card"><h3>8 层质量门</h3><p>静态 → 单元 → 契约 → property → 变异 → 真 MC 集成 → E2E → agentic QA（盲测、红队、spec 变异）。</p></div>
+      <div class="card"><h3>2 个 agent 才叫评审</h3><p>写代码与评审必须是不同上下文；测试目录 hash 冻结；评分真值放服务端；红队 12 条攻击。</p></div>
+      <div class="card"><h3>3 个人类检查点</h3><p>设计拍板 → 垂直切片试玩 → 终局彩排。人类总投入 ≤4 小时，其余由 AI 自证。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>证据（不是口号）</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>已经跑通的</h3>
+        <p>· MC 双通道 7/7（bot 放置 → 插件真值 → 插件写方块/召唤 → bot 观测 → 双向聊天 → 命令）<br>
+        · L01–L10 真实 Paper e2e 全 PASS；L10 双织偶真实 19 项、Studio 会话注入 11 项；单轮合龙 6.7–6.9s<br>
+        · 真实玩家操作路径：L01–L10 每关 2–3 条 progress 由引擎真值驱动，17 个 player beat 全可由真人右键完成<br>
+        · 3 bot 同服、actorType 区分真人/织偶、Mannequin 皮肤、ItemDisplay 动画<br>
+        · L01–L10 内容：每关参考解 3 星、starter/作弊失败；235 项自动化测试、Studio e2e 6/6、UOS 4/4<br>· 试符台 REPL、织典 17 页、序章/旅途手记、纯中文门禁、Fresh Reader 盲读</p></div>
+      <div class="card"><h3>正在建</h3>
+        <p>· 挑战层目前是说明卡，尚未开放为可玩挑战会话<br>
+        · 真人多背景盲测未执行，目前是 AI 自动化验收（真实 Paper e2e + Studio e2e + UOS）<br>
+        · 部分关卡真实客户端截图尚未全部重拍<br>
+        · Fresh Reader Round 4 尚未清零（门禁仍为 tracked fail）<br>
+        · L03/L05 出生点、L02 蛋糕与 L04 南瓜目标格已在 11-01 修复（见 evidence/playtest-fix/report.md §4）</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>七分钟演示</h2>
+    <div class="timeline">
+      <div class="step"><time>0:00</time><p>黄昏的灰岩村：灯灭、织偶冻结。艾拉把一枚织机碎片交给你。</p></div>
+      <div class="step"><time>0:40</time><p>L01：写下 4 行字，织偶沿小径依次点灯，村民沿光回家；你亲手点亮最后一盏。</p></div>
+      <div class="step"><time>2:10</time><p>L03：一个程序跑三夜试炼——安静夜不敲钟、北门有僵尸才敲钟。第六夜组合情景也过。</p></div>
+      <div class="step"><time>3:30</time><p>L07：一行 <span class="mono">pipe(filter(isOre), map(toIngot), giveTo("A"))</span>，悦灵像信风一样把货物分进箱子。</p></div>
+      <div class="step"><time>5:00</time><p>L10：两只织偶用消息协调，桥从两岸合龙；你放下合龙石，散线退去，日出，村民过桥。</p></div>
+      <div class="step"><time>6:20</time><p>《织典》：同一组抽象在 C / Lisp / Haskell / Rust / Go 里的样子——「语法是皮，抽象是骨」。</p></div>
+      <div class="step"><time>6:50</time><p>收尾：这不是一个「编程游戏」，而是一门用世界讲清楚的语言课。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">08</span>诚实说明</h2>
+    <div class="honest">
+      <h3>我们知道它还不完美</h3>
+      <ul>
+        <li>这是 4 天课程项目的设计 + 可运行垂直切片（L01–L10 全部可玩并经真实 Paper 验收），不是发行版游戏；挑战层仍是说明卡。</li>
+        <li>桌面 App 已内置 Node/Java/Paper/插件/世界/真实引擎与织偶，用户只需安装 Minecraft 26.1.2；首次启动会把旧世界替换为干净世界（关卡进度/星级存于 Studio，不受影响）。</li>
+        <li>学习效果未做统计显著的实证：Fresh Reader 是模拟读者（非真人），只证明「读得懂」，不等于学习效果。</li>
+        <li>Minecraft 资产不能随项目分发；公开版本需要替换自制美术资产。</li>
+        <li>「能跑通」不等于「好玩」：每个关卡都要过盲读与盲测，通不过就改设计，不怪玩家。</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    织界 THE LOOM · 交付 v1.4 · 2026-11-01 · 文档入口 <a href="../README.md">README</a> ·
+    设计 <a href="../docs/05-curriculum.md">课程</a> /
+    <a href="../docs/07-architecture.md">架构</a> /
+    <a href="../docs/19-art-direction.md">美术</a> /
+    <a href="../docs/20-quality-bar.md">质量门</a> ·
+    实测 <a href="../docs/02-minecraft-stack.md">MC 栈</a> / <a href="../docs/02c-finale-spike.md">终局铺桥</a> / <a href="../docs/46-playtest-fix-plan.md">试玩修复</a>
+  </div>
+</footer>
+</body>
+</html>

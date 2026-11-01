@@ -4,6 +4,7 @@
 > 上游：`research/assurance-notes.md`（scout-assurance，2026-10-31 版本/研究核实）、`docs/09-execution-plan.md`
 > 下游：仓库里的 `AGENTS.md`、`scripts/verify.sh`、`qa/*`、每日 `STATUS.md`
 > 一句话：**4 天、几乎无人监督的 AI 团队，靠的不是更强的模型，而是更密的验证与更小的信任面。**
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

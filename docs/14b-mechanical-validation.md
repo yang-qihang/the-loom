@@ -8,6 +8,9 @@
 > **一句话结论**：13 份 spec 的机器骨架（meta/schema、隐藏测试、advancement、预算）是健康的；但 **8 个 FAIL 中有 5 个是契约缺口**（`g` API、事件 payload、builder 白名单、primitive 白名单），不先修 docs，implementor 会各写一套。
 >
 > **校验脚本做了什么**（一次性只读审计，不落盘）：① 解析 13 份 spec 的全部 YAML 块；② 按 schema 手写 meta 子校验（required/type/pattern/enum/min/max）；③ 用 docs/12 §4 建「每关新符号 + extension/harness」集合，比对 `apiIntroduced`/`apiAllowlist`；④ 按 docs/06 §4 的语法阶梯扫描 `starterCode`/`referenceSolution`；⑤ 比对 docs/06 §5.4 primitive、docs/07 §6 builder、docs/07 §3.3 事件、docs/06 §5.2 `g` API；⑥ 检查预算（叙事/mainTask/hints/时长）与隐藏测试。所有 FAIL/WARN 均已回原文逐行复核。
+> 历史说明（2026-11-01 文档审计）：本文件是设计阶段的审计/评审记录，保留原始结论与日期；部分处置与当前实现已变化，当前以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
+> 负责人：scout-assurance（校验人）
+> 上游：docs/06、docs/07、docs/12、content/levels/*.md
 
 ## 1. 全关卡汇总（★=PASS，△=WARN，✗=FAIL）
 

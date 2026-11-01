@@ -240,7 +240,7 @@ const L04_BASE: LevelDef = defineLevel({
       challengeField: { ...CH.field },
       challengeMature: CH.matureCells.map(m => [...m]),
       barn: [-4, 65, 14],
-      scarecrow: [14, 66, 26],
+      scarecrow: [14, 67, 26], // 稻草人头顶（南瓜头空位）：干草身体在 y65/66，玩家把南瓜放到这格
     },
     entities: [
       { type: "golem", role: "agent", id: "golem", name: "灰崽" },
@@ -331,6 +331,7 @@ golem.moveTo(-4, 14)
     mainTask: "先把三块田里上一季的残株收掉，再把能种的格子都种上；水渠整行跳过，种完回谷仓。",
     makeTask: "种子只够六成时，种到没种子就停下，一粒也别浪费。",
     playerBeat: "雨停后，你把南瓜头放到干草捆上——稻草人立起来（织者之印）。",
+    playerBeatHint: "手持南瓜，对着稻草人按右键",
     successCriteria: [
       {
         id: "harvest-first",
@@ -441,12 +442,23 @@ golem.moveTo(-4, 14)
             id: "no-double-plant",
             text: "每一格最多只种一次",
             check: g => {
+              // 应种格数：种子够时是全部可种格；种子不够时按「一粒也不浪费」算。
+              let expectedCount = 0;
+              for (const key of FIELDS) {
+                const f = fieldOf(g, key);
+                expectedCount += Math.min(f.plantable, f.seeds);
+              }
               const seen = new Set<string>();
               for (const e of agentPlaces(g, "wheat_sprout")) {
                 if (!e.pos) continue;
                 const key = e.pos.join(",");
-                if (seen.has(key)) return false;
-                seen.add(key);
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  continue;
+                }
+                // 已经种满应种格数之后的重放视为「不重置再跑一遍」，不再判重；此前的重复仍是错误。
+                if (seen.size >= expectedCount) continue;
+                return false;
               }
               return true;
             },
@@ -455,6 +467,49 @@ golem.moveTo(-4, 14)
       },
     ],
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值（南瓜节拍不占目标）。
+  progress: [
+    {
+      id: "l04-harvest-first",
+      text: "先收掉上一季留下的残株",
+      check: g => {
+        const airs = agentPlaces(g, "air");
+        const sprouts = agentPlaces(g, "wheat_sprout");
+        return MATURE.every(key =>
+          matureOf(g, key).every(m => {
+            const sprout = sprouts.find(e => samePos(e.pos, m));
+            if (!sprout) return g.block(m).id === C + "wheat";
+            const air = airs.find(e => samePos(e.pos, m));
+            return !!air && (air.seq ?? 0) < (sprout.seq ?? 0) && g.block(m).id === C + "wheat_sprout";
+          }),
+        );
+      },
+    },
+    {
+      id: "l04-planted-full",
+      text: "把能种的地方都种满",
+      check: g => {
+        let plantedAll = 0;
+        let expectedAll = 0;
+        for (const key of FIELDS) {
+          const f = fieldOf(g, key);
+          expectedAll += Math.min(f.plantable, f.seeds);
+          for (let r = 0; r < f.rows; r++) {
+            for (let col = 0; col < f.cols; col++) {
+              if (r === f.waterRow || r === f.waterRow2) continue;
+              if (g.block([f.x + col, 65, f.z + r]).id === C + "wheat_sprout") plantedAll += 1;
+            }
+          }
+        }
+        return plantedAll === expectedAll;
+      },
+    },
+    {
+      id: "l04-home",
+      text: "种完以后回到谷仓",
+      check: g => g.withinRadius(g.agent("golem"), { pos: pos(g.var("barn")) }, 5),
+    },
+  ],
   phases: ["东中西三块田", "回谷仓复查"],
 });
 
@@ -558,7 +613,7 @@ export const L04Content: LevelContent & { challenge: LevelChallenge; copy: Conte
     pushF(barn[0] - 1, G, barn[2], "hay_block");
     const scarecrow = pos(vars.scarecrow);
     pushF(scarecrow[0], G, scarecrow[2], "hay_block");
-    pushF(scarecrow[0], scarecrow[1], scarecrow[2], "hay_block");
+    pushF(scarecrow[0], G + 1, scarecrow[2], "hay_block");
     const functionalKeys = new Set(functional.map(({ pos: [x, y, z] }) => key(x, y, z)));
 
     // ---- 地板层美术（y=64，真机可见、可走；田的视觉全画在这一层）----
@@ -673,10 +728,9 @@ export const L04Content: LevelContent & { challenge: LevelChallenge; copy: Conte
     put(2, G + 6, -4, "minecraft:stone_bricks");
     put(2, G + 4, -3, SCENE_PALETTE.light); // 仓门暖灯
 
-    // 地标 4：稻草人（玩家最后放南瓜头；这里先把干草身体/木臂/草帽摆好）
+    // 地标 4：稻草人（玩家最后把南瓜头放到草人顶上 y=67；干草身体在 y65/66，头顶保持空气）
     put(scarecrow[0] - 1, G + 1, scarecrow[2], "minecraft:oak_fence");
     put(scarecrow[0] + 1, G + 1, scarecrow[2], "minecraft:oak_fence");
-    put(scarecrow[0], G + 2, scarecrow[2], "minecraft:hay_block"); // 草帽；南瓜头由玩家替换
     for (const [sx, sz] of [[scarecrow[0] - 1, scarecrow[2] - 1], [scarecrow[0] + 1, scarecrow[2] - 1], [scarecrow[0] - 1, scarecrow[2] + 1], [scarecrow[0] + 1, scarecrow[2] + 1]] as const) {
       put(sx, G, sz, "minecraft:oak_fence");
     }

@@ -1,0 +1,420 @@
+{
+  "task": "baseline 玩家视角截图：L01 第 4 盏灯柱顶是否可见",
+  "phase": "baseline",
+  "startedAt": "2026-11-01T04:10:34.486Z",
+  "environment": {
+    "engine": "http://127.0.0.1:4321",
+    "paperPort": 25566,
+    "rpc": "ws://127.0.0.1:8766",
+    "viewerPort": 3010,
+    "player": "EyeCam",
+    "viewer": {
+      "name": "prismarine-viewer",
+      "version": "1.33.0"
+    },
+    "engineHealth": {
+      "ok": true,
+      "port": "paper",
+      "mc": {
+        "kind": "paper",
+        "connected": true,
+        "version": "26.1.2",
+        "pluginVersion": "0.1.0",
+        "tick": 17515,
+        "prepared": true,
+        "sessionId": "a70cb662-6a42-41c3-ac6f-9a0ca4170eee",
+        "epoch": 17
+      },
+      "bot": {
+        "name": "GolemBase",
+        "connected": true
+      }
+    },
+    "createdSession": {
+      "sessionId": "sess-mvxbb04t-mpw0i5",
+      "createMs": 1648
+    },
+    "pluginSessionId": "5048685a-9d73-451e-9545-9cdd2f6e8e7a",
+    "pluginHealth": {
+      "ok": true,
+      "plugin": "loomcraft-mc",
+      "version": "0.1.0",
+      "mc": "26.1.2",
+      "tick": 17550,
+      "phase": "ready",
+      "prepared": true,
+      "levelId": "L01",
+      "sessionId": "5048685a-9d73-451e-9545-9cdd2f6e8e7a",
+      "epoch": 18,
+      "groundY": 11,
+      "bots": [
+        "GolemBase"
+      ],
+      "npcs": [
+        "eira",
+        "villager-0",
+        "villager-1",
+        "villager-2"
+      ],
+      "regionFrom": [
+        -33,
+        9,
+        -18
+      ],
+      "regionTo": [
+        19,
+        15,
+        34
+      ],
+      "agentSpawn": [
+        0,
+        11,
+        0
+      ],
+      "playerSpawn": [
+        2,
+        11,
+        4
+      ],
+      "center": [
+        -7,
+        11,
+        8
+      ],
+      "tracked": 1360,
+      "events": 0,
+      "lastResetHash": "sha256:2cb74fc6fdb627d5b113bc2be2032b34debe1ee3977fa342184742210d3ad4bb",
+      "lastResetMs": 11
+    },
+    "viewerStarted": {
+      "port": 3010,
+      "firstPerson": true,
+      "viewDistance": 8,
+      "reportedVersion": "1.21.4"
+    }
+  },
+  "shots": {
+    "l01-ground-view": {
+      "id": "l01-ground-view",
+      "title": "玩家站地面 (2.5, 11, 14.5) 仰视 4 号灯柱顶",
+      "feet": [
+        2,
+        11,
+        14
+      ],
+      "expectedFeet": [
+        2.5,
+        11,
+        14.5
+      ],
+      "target": [
+        2.5,
+        14.5,
+        16.5
+      ],
+      "note": "还原用户「站地面只能仰望」：眼高 12.62 < 柱顶面 14.0，正常应该看不见柱顶面",
+      "teleportResult": {
+        "ok": true,
+        "pos": [
+          2,
+          11,
+          14
+        ]
+      },
+      "actualFeet": [
+        2.5,
+        11,
+        14.5
+      ],
+      "eye": [
+        2.5,
+        12.620000000000001,
+        14.5
+      ],
+      "viewTarget": [
+        2.5,
+        14.5,
+        16.5
+      ],
+      "topFaceY": 14,
+      "topFaceVisibleGeometrically": false,
+      "cursorRaycast": null,
+      "topFaceVisibleByCursorRaycast": false,
+      "columnBlockAt2_13_16": "stone_bricks",
+      "targetBlockAt2_14_16": "air",
+      "viewerScreenshot": "evidence/playtest-fix/vision/baseline-l01-ground-view-viewer-attempt.png",
+      "voxelRender": {
+        "screenshot": "evidence/playtest-fix/vision/baseline-l01-ground-view.png",
+        "overlay": "红框=目标空位(2,14,16)，青框=灯柱顶面(2,13,16.up)，白十字=准星",
+        "region": {
+          "x0": -16,
+          "x1": 20,
+          "y0": 5,
+          "y1": 24,
+          "z0": -10,
+          "z1": 40
+        },
+        "voxelCount": 2443,
+        "width": 1024,
+        "height": 576,
+        "yaw": -3.1415926535894023,
+        "pitch": 0.7539822368615035,
+        "viewDirection": [
+          2.849691224558498e-13,
+          0.6845471059286544,
+          0.7289686274214436
+        ],
+        "hits": {
+          "blocks": 247562,
+          "sky": 342262,
+          "faces": {
+            "west": 68566,
+            "north": 178996
+          },
+          "topBlocks": [
+            [
+              "stone_bricks",
+              177813
+            ],
+            [
+              "dark_oak_planks",
+              38763
+            ],
+            [
+              "flowering_azalea",
+              25193
+            ],
+            [
+              "spruce_planks",
+              5133
+            ],
+            [
+              "lantern",
+              660
+            ]
+          ]
+        }
+      },
+      "topFaceRay": {
+        "block": "stone_bricks",
+        "pos": [
+          2,
+          13,
+          16
+        ],
+        "face": "north",
+        "distance": 1.8224228378727034,
+        "targetTopFaceCenter": [
+          2.5,
+          14,
+          16.5
+        ]
+      },
+      "topFaceAimable": false
+    },
+    "l01-step-view": {
+      "id": "l01-step-view",
+      "title": "玩家站旧石阶 (1.5, 13, 16.5) 平视/俯视柱顶（仅修复前场景有石阶）",
+      "feet": [
+        1,
+        13,
+        16
+      ],
+      "expectedFeet": [
+        1.5,
+        13,
+        16.5
+      ],
+      "target": [
+        2.5,
+        14.5,
+        16.5
+      ],
+      "note": "旧场景的两级石阶视角（修复后石阶删除，该位置应站不住）",
+      "teleportResult": {
+        "ok": true,
+        "pos": [
+          1,
+          13,
+          16
+        ]
+      },
+      "actualFeet": [
+        1.5,
+        13,
+        16.5
+      ],
+      "eye": [
+        1.5,
+        14.620000000000001,
+        16.5
+      ],
+      "viewTarget": [
+        2.5,
+        14.5,
+        16.5
+      ],
+      "topFaceY": 14,
+      "topFaceVisibleGeometrically": true,
+      "cursorRaycast": {
+        "block": "stone_bricks",
+        "pos": [
+          6,
+          14,
+          16
+        ],
+        "face": "west",
+        "intersect": [
+          6,
+          14.255440164557053,
+          16.499999999998682
+        ]
+      },
+      "topFaceVisibleByCursorRaycast": false,
+      "columnBlockAt2_13_16": "stone_bricks",
+      "targetBlockAt2_14_16": "air",
+      "viewerScreenshot": "evidence/playtest-fix/vision/baseline-l01-step-view-viewer-attempt.png",
+      "voxelRender": {
+        "screenshot": "evidence/playtest-fix/vision/baseline-l01-step-view.png",
+        "overlay": "红框=目标空位(2,14,16)，青框=灯柱顶面(2,13,16.up)，白十字=准星",
+        "region": {
+          "x0": -17,
+          "x1": 19,
+          "y0": 7,
+          "y1": 26,
+          "z0": -8,
+          "z1": 42
+        },
+        "voxelCount": 2499,
+        "width": 1024,
+        "height": 576,
+        "yaw": -1.5707963267946035,
+        "pitch": -0.12042771838760125,
+        "viewDirection": [
+          0.9927573419294464,
+          -0.12013683883463966,
+          -2.9103685239825175e-13
+        ],
+        "hits": {
+          "blocks": 456005,
+          "sky": 133819,
+          "faces": {
+            "west": 224651,
+            "south": 15895,
+            "north": 122534,
+            "up": 92925
+          },
+          "topBlocks": [
+            [
+              "stone_bricks",
+              236349
+            ],
+            [
+              "dark_oak_planks",
+              99425
+            ],
+            [
+              "flowering_azalea",
+              41788
+            ],
+            [
+              "spruce_planks",
+              27941
+            ],
+            [
+              "azalea",
+              15513
+            ],
+            [
+              "lantern",
+              14961
+            ],
+            [
+              "moss_block",
+              11039
+            ],
+            [
+              "poppy",
+              7815
+            ]
+          ]
+        }
+      },
+      "topFaceRay": {
+        "block": "stone_bricks",
+        "pos": [
+          2,
+          13,
+          16
+        ],
+        "face": "up",
+        "distance": 1.1766052864066188,
+        "targetTopFaceCenter": [
+          2.5,
+          14,
+          16.5
+        ]
+      },
+      "topFaceAimable": true
+    }
+  },
+  "errors": [],
+  "browserConsole": [
+    {
+      "type": "log",
+      "text": "Using version: 1.21.4"
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity item\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> (http://"
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity item\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> (http://"
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity item\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> (http://"
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity item\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> (http://"
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity text_display\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> "
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity text_display\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> "
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity text_display\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> "
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity text_display\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> "
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity text_display\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> "
+    },
+    {
+      "type": "log",
+      "text": "Error: Unknown entity text_display\n    at new t.exports (http://127.0.0.1:3010/index.js:2:711428)\n    at http://127.0.0.1:3010/index.js:2:707299\n    at Entities.update (http://127.0.0.1:3010/index.js:2:707838)\n    at Viewer.updateEntity (http://127.0.0.1:3010/index.js:2:717058)\n    at u.<anonymous> "
+    }
+  ],
+  "browser": {
+    "canvas": {
+      "width": 1024,
+      "height": 576,
+      "hasWebGL": true,
+      "renderer": "WebKit WebGL"
+    },
+    "dialogs": []
+  },
+  "playerActionBars": [],
+  "playerMessages": [],
+  "finishedAt": "2026-11-01T04:10:58.863Z"
+}

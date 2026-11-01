@@ -1,5 +1,5 @@
 import type { WorldSnapshot, WorldEvent } from "../../protocol/src/index";
-import type { GraderApi, LevelDef, Check } from "../../level-spec/src/index";
+import { makeGraderApi, type GraderApi, type LevelDef, type Check } from "../../level-spec/src/index";
 
 export interface CriterionResult {
   id: string;
@@ -14,29 +14,6 @@ export interface GradeReport {
   criteria: CriterionResult[];
   hidden: CriterionResult[];
   failures: string[];
-}
-
-const key = (p: number[]): string => p.join(",");
-const dist = (a: { pos: number[] }, b: { pos: number[] }): number =>
-  Math.hypot(a.pos[0] - b.pos[0], a.pos[1] - b.pos[1], a.pos[2] - b.pos[2]);
-
-export function makeGraderApi(snapshot: WorldSnapshot): GraderApi {
-  return {
-    var: name => snapshot.vars[name],
-    block: pos => ({ id: snapshot.blocks[key(pos)] ?? "minecraft:air" }),
-    events: type => snapshot.events.filter(e => e.type === type),
-    agent: id => {
-      const a = snapshot.agents[id];
-      if (!a) throw new Error(`未知 agent: ${id}`);
-      return { pos: a.pos };
-    },
-    npc: name => {
-      const n = snapshot.npcs?.[name];
-      if (!n) throw new Error(`未知 npc: ${name}`);
-      return { pos: n.pos };
-    },
-    withinRadius: (a, b, radius) => dist(a, b) <= radius,
-  };
 }
 
 function runChecks(checks: Check[], g: GraderApi): CriterionResult[] {
@@ -72,4 +49,5 @@ export function grade(level: LevelDef, snapshot: WorldSnapshot): GradeReport {
   };
 }
 
+export { makeGraderApi };
 export type { WorldEvent };

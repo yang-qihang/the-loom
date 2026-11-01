@@ -1,6 +1,6 @@
 # plugin/ — LoomCraft Paper 插件（WorldPort RPC）
 
-> 状态：T1 实现｜负责人：scout-minecraft｜最后更新：2026-10-31
+> 状态：已交付（T1 起实现；2026-11-01 试玩修复：sandbox 纯净/彻底 reset/通用玩家节拍）｜负责人：scout-minecraft / plugin-world｜最后更新：2026-11-01
 > 上游：`docs/21-t1-contracts.md` §4、`docs/07-architecture.md` §3、`docs/02-minecraft-stack.md`
 > 锁定栈：Paper **26.1.2 build 74** / Java **25** / Gradle Wrapper **9.8.2** / Java-WebSocket **1.6.0**（shade 进 jar）
 
@@ -23,6 +23,7 @@ ws:
 ## RPC：JSON-RPC 2.0 over WebSocket（`ws://127.0.0.1:8765`）
 
 所有响应带 `tick`；错误返回 `{"jsonrpc":"2.0","id":...,"error":{code,message}}`。
+> 下表是 T1 冻结方法集，保留作历史；2026-11-01 新增/变更见本节末尾「试玩修复（2026-11-01）」表。
 
 | 方法 | 参数 | 说明 |
 |---|---|---|
@@ -80,3 +81,21 @@ ws:
 - 场景区域大小上限：`clearRegion`/`reset` 为逐方块遍历，建议 ≤100k 方块（L01 约 1.2 万，reset 实测 3–7ms）。
 - 无鉴权 token（只绑 127.0.0.1）；公网/容器场景需改成可配置 bind + token（见 docs/02 §5）。
 - 本插件不含评分/TS 解析；评分在 engine/grading 层。
+
+### 试玩修复（2026-11-01，当前接口，docs/46 §2.1）
+
+| 方法 | 参数 | 说明 |
+|---|---|---|
+| `session.begin` | `{levelId,seed}` | 每个会话新 `sessionId`+`epoch`；**清上一 arena 方块与区域实体、全局清非玩家实体、清空非 bot 背包/`pendingPlayerItems`/`playerKit`/事件/标注**；服务端首次 begin 清一次高台沙盒带（y 56–92，x/z ±48） |
+| `session.finalize` | `{layout}` | 按 layout 摆场景、建全区域 checkpoint（非空气块 + 空地）、发本关 `playerKit`、传送玩家到 `playerSpawn` |
+| `session.end` | `{sessionId}` | 引擎 dispose 会话时清理 NPC/标注/发光标记实体 |
+| `playerBeat.arm` | `{sessionId, beats:[{pos,block}], items:[string], hint:string}` | 静默登记玩家节拍目标（引擎在织偶部分完成后才 `activate`） |
+| `playerBeat.activate` | `{sessionId}` | 在目标处显示发光标记 + actionbar 提示，并允许完成；**此前任何会完成目标的操作被取消并提示「先让灰崽完成它那部分」** |
+| `playerBeat.status` | `{sessionId}` | 调试：`armed/active/beats done` |
+| `player.inventory` | `{}` | 调试/验收：所有在线非 bot 玩家背包 |
+| `world.blocks` | `{sessionId, positions:[[x,y,z],...]}` | 调试/验收：批量读方块 |
+| `player.give` | `{name,item,count}` | 语义增强：计入本关 `playerKit`，begin/finalize/reset/onPlayerJoin 都按它重建快捷栏 |
+
+完成判定（全关卡通用，docs/46 §1.3）：玩家把方块真的放到目标坐标 / 右键目标方块本身 / **容错**（手持本关道具、站目标 6 格内、视线与目标方向点积 ≥0.7，对柱子侧面或空气右键）→ 插件落到目标坐标；未 `activate` 前拦截。
+
+`health` / `session.status` 增加 `checkpointSize`、`playerKit`、`playerBeat`。

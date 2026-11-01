@@ -3,6 +3,8 @@
 > 状态：v1｜负责人：Lead｜最后更新：2026-10-31
 > 用途：CP0/Day-0 装好可进我们本地 Paper 服务端的 Minecraft 客户端。
 > 关键结论：**版本必须锁 `26.1.2`**；不要用 `1.21.x`（旧），也不要用 `26.3`（最新正式版，但我们锁的 mineflayer 不支持，且客户端/服务端必须同版本）。
+> 历史说明（2026-11-01 文档审计）：本文件是 Day-0 安装 runbook（仍适用）；玩家当前可直接看 `docs/42-player-guide.md`，桌面安装包已内置服务端运行时。
+> 上游：docs/02-minecraft-stack.md、docs/09-execution-plan.md
 
 ---
 

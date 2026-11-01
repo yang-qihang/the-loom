@@ -284,6 +284,7 @@ golem.say("全部待机，请织者把拉杆推到底")
     mainTask: "让灰崽把四台机器按同一节拍叫醒：逐台启动、逐台汇报、过热就停；再按反序让它们全部待机。",
     makeTask: "换一批机器（含你没见过的）也照样能叫醒：不许背名单、不许写死坐标。",
     playerBeat: "灰崽把总拉杆推到一半，由你把拉杆推到底。",
+    playerBeatHint: "对准总拉杆，按右键推到底",
     successCriteria: [
       {
         id: "all-started",
@@ -473,6 +474,42 @@ golem.say("三台机器扣成一组，全部待机")
     ],
     whyYou: "总拉杆只认活人的手，你是工坊里最后一个织者；灰崽只能替你把机器叫醒，最后那一下得你来。",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值；总拉杆是玩家节拍。
+  progress: [
+    {
+      id: "l08-machines-started",
+      text: "清单里的机器逐台启动、各报状态",
+      check: g => {
+        const specs = specsOf(g);
+        const allStarted =
+          switchPositions(g).every(p => onEvents(g).some(e => samePos(e.pos, p))) && startSays(g).length >= specs.length + 1;
+        const says = g.events("say").filter(e => {
+          const text = String(e.data?.text ?? "");
+          return text.includes("正常") || text.includes("过热");
+        });
+        return allStarted && says.length >= specs.length + 1;
+      },
+    },
+    {
+      id: "l08-stop-reversed",
+      text: "停机按反序，最后停第一台",
+      check: g => {
+        const specs = specsOf(g);
+        const tail = offEvents(g).map(e => specIndexAt(g, e.pos)).slice(-specs.length);
+        return (
+          tail.length === specs.length &&
+          tail.every((v, i) => v === specs.length - 1 - i) &&
+          switchPositions(g).every(p => g.block(p).id === C + "air")
+        );
+      },
+    },
+    {
+      id: "l08-lever-pulled",
+      text: "你亲手把总拉杆推到底",
+      player: true,
+      check: g => g.events("block.place").some(e => e.actorType === "player" && samePos(e.pos, pos(g.var("lever")))),
+    },
+  ],
   phases: ["统一启动与汇报", "联动机与停机反序"],
 });
 

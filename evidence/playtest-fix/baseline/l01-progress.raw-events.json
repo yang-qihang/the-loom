@@ -1,0 +1,316 @@
+{
+  "task": "verifier A-1 基线：L01 目标不更新 + 提示过早",
+  "head": "f1e40eb0ec0f720383f6d166601ad64dc05232a2",
+  "events": [
+    {
+      "t": "2026-11-01T04:02:20.304Z",
+      "type": "state",
+      "state": "CONNECTING",
+      "phase": "loading"
+    },
+    {
+      "t": "2026-11-01T04:02:20.304Z",
+      "type": "state",
+      "state": "PREPARING",
+      "phase": "loading"
+    },
+    {
+      "t": "2026-11-01T04:02:20.304Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:02:20.304Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:02:24.311Z",
+      "type": "state",
+      "state": "COMPILING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:02:24.311Z",
+      "type": "state",
+      "state": "RUNNING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:02:24.343Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:02:52.532Z",
+      "type": "error"
+    },
+    {
+      "t": "2026-11-01T04:02:52.548Z",
+      "type": "result",
+      "runId": "run-1",
+      "source": "run",
+      "passed": false,
+      "stars": 0
+    },
+    {
+      "t": "2026-11-01T04:02:52.549Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:02:52.551Z",
+      "type": "state",
+      "state": "PREPARING",
+      "phase": "loading"
+    },
+    {
+      "t": "2026-11-01T04:02:52.651Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:02:52.651Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:02:55.157Z",
+      "type": "state",
+      "state": "COMPILING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:02:55.157Z",
+      "type": "state",
+      "state": "RUNNING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:02:55.186Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:04.798Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:04.856Z",
+      "type": "state",
+      "state": "VERIFYING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "objective",
+      "id": "four-lamps-lit",
+      "text": "4 盏路灯全部点亮",
+      "done": false
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "objective",
+      "id": "golem-home",
+      "text": "灰崽回到艾拉身边",
+      "done": false
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "objective",
+      "id": "player-lit-fourth",
+      "text": "第 4 盏灯由你亲手点亮",
+      "done": false
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "objective",
+      "id": "no-shortcut",
+      "text": "1→2→3 号灯顺序正确",
+      "done": false
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "hint",
+      "text": "还没完成：4 盏路灯全部点亮"
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:03:04.900Z",
+      "type": "result",
+      "runId": "run-2",
+      "source": "run",
+      "passed": false,
+      "stars": 1
+    },
+    {
+      "t": "2026-11-01T04:03:05.552Z",
+      "type": "state",
+      "state": "PREPARING",
+      "phase": "loading"
+    },
+    {
+      "t": "2026-11-01T04:03:05.751Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:03:05.751Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:06.559Z",
+      "type": "state",
+      "state": "COMPILING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:03:06.559Z",
+      "type": "state",
+      "state": "RUNNING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:03:06.590Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:34.776Z",
+      "type": "error"
+    },
+    {
+      "t": "2026-11-01T04:03:34.798Z",
+      "type": "result",
+      "runId": "run-3",
+      "source": "run",
+      "passed": false,
+      "stars": 0
+    },
+    {
+      "t": "2026-11-01T04:03:34.798Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:03:34.800Z",
+      "type": "state",
+      "state": "PREPARING",
+      "phase": "loading"
+    },
+    {
+      "t": "2026-11-01T04:03:34.899Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:03:34.899Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:37.406Z",
+      "type": "state",
+      "state": "COMPILING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:03:37.406Z",
+      "type": "state",
+      "state": "RUNNING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:03:37.434Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:46.897Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:46.923Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:49.198Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:49.223Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:51.597Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:51.633Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:54.599Z",
+      "type": "log"
+    },
+    {
+      "t": "2026-11-01T04:03:56.099Z",
+      "type": "state",
+      "state": "VERIFYING",
+      "phase": "running"
+    },
+    {
+      "t": "2026-11-01T04:03:56.153Z",
+      "type": "objective",
+      "id": "four-lamps-lit",
+      "text": "4 盏路灯全部点亮",
+      "done": false
+    },
+    {
+      "t": "2026-11-01T04:03:56.153Z",
+      "type": "objective",
+      "id": "golem-home",
+      "text": "灰崽回到艾拉身边",
+      "done": true
+    },
+    {
+      "t": "2026-11-01T04:03:56.153Z",
+      "type": "objective",
+      "id": "player-lit-fourth",
+      "text": "第 4 盏灯由你亲手点亮",
+      "done": false
+    },
+    {
+      "t": "2026-11-01T04:03:56.153Z",
+      "type": "objective",
+      "id": "no-shortcut",
+      "text": "1→2→3 号灯顺序正确",
+      "done": true
+    },
+    {
+      "t": "2026-11-01T04:03:56.153Z",
+      "type": "hint",
+      "text": "还没完成：4 盏路灯全部点亮"
+    },
+    {
+      "t": "2026-11-01T04:03:56.154Z",
+      "type": "state",
+      "state": "READY",
+      "phase": "ready"
+    },
+    {
+      "t": "2026-11-01T04:03:56.154Z",
+      "type": "result",
+      "runId": "run-4",
+      "source": "run",
+      "passed": false,
+      "stars": 1
+    }
+  ]
+}

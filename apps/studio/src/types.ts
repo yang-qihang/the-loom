@@ -38,6 +38,10 @@ export interface RunResult {
   criteria: Criterion[];
   hidden: Criterion[];
   failures: string[];
+  /** 玩家可见任务进度（引擎 progress 真值；旧引擎没有此字段 → 回退 criteria/copy）。 */
+  progress?: Criterion[];
+  /** 织偶/世界侧已完成，轮到玩家亲手完成最后一步（docs/46 §1.1）。 */
+  playerBeatReady?: boolean;
 }
 
 export type StudioEvent =

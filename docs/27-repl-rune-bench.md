@@ -3,6 +3,8 @@
 > 状态：v1（设计冻结）｜负责人：Lead｜最后更新：2026-10-31
 > 用户要求：支持 REPL，让玩家可以 experiment with some single instructions。
 > 定位：世界观里的「试符台」——织者用来试一小句符文、看世界反应的矮桌；**不是关卡，不计星、不算失败**。
+> 实施说明（2026-11-01 文档审计）：试符台已落地（`POST /api/repl` 等，见 `apps/engine/README.md`）；本文件设计目标仍适用。
+> 上游：docs/20-quality-bar.md、docs/21-t1-contracts.md
 
 ## 1. 体验
 

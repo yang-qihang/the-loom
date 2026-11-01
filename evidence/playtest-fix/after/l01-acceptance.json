@@ -1,0 +1,1356 @@
+{
+  "task": "verifier B-1..B-4 修复后验收（L01 进度/线性/纯净/重置）",
+  "phase": "after",
+  "head": "f1e40eb0ec0f720383f6d166601ad64dc05232a2",
+  "startedAt": "2026-11-01T04:26:06.753Z",
+  "environment": {
+    "engine": "http://127.0.0.1:4321",
+    "rpc": "ws://127.0.0.1:8766",
+    "paperPort": 25566,
+    "player": "AfterP26",
+    "engineHealth": {
+      "ok": true,
+      "port": "paper",
+      "sessions": 1,
+      "uptimeSec": 314,
+      "version": "1.0.0-t1",
+      "mc": {
+        "kind": "paper",
+        "connected": true,
+        "version": "26.1.2",
+        "pluginVersion": "0.1.0",
+        "tick": 15183,
+        "prepared": true,
+        "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884",
+        "epoch": 35
+      },
+      "bot": {
+        "name": "GolemAfter",
+        "connected": true
+      }
+    },
+    "plugin": {
+      "kind": "paper",
+      "connected": true,
+      "version": "26.1.2",
+      "pluginVersion": "0.1.0",
+      "tick": 15183,
+      "prepared": true,
+      "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884",
+      "epoch": 35
+    },
+    "pluginHealth": {
+      "ok": true,
+      "plugin": "loomcraft-mc",
+      "version": "0.1.0",
+      "mc": "26.1.2",
+      "tick": 15184,
+      "phase": "ready",
+      "prepared": true,
+      "levelId": "L10",
+      "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884",
+      "epoch": 35,
+      "groundY": 65,
+      "bots": [
+        "GolemAfter"
+      ],
+      "npcs": [
+        "eira",
+        "villager-0",
+        "villager-1",
+        "villager-2",
+        "villager-3"
+      ],
+      "regionFrom": [
+        -8,
+        60,
+        -3
+      ],
+      "regionTo": [
+        36,
+        84,
+        9
+      ],
+      "agentSpawn": [
+        0,
+        65,
+        0
+      ],
+      "playerSpawn": [
+        14,
+        65,
+        3
+      ],
+      "center": [
+        14,
+        65,
+        3
+      ],
+      "tracked": 411,
+      "events": 1,
+      "checkpointSize": 1142,
+      "playerKit": {
+        "minecraft:lodestone": 4
+      },
+      "playerBeat": {
+        "sessionId": "9479d316-666a-4180-a7b1-e97a1a2ac884",
+        "armed": true,
+        "active": true,
+        "hint": "手持合龙石，对准中央基座按右键",
+        "beats": [
+          {
+            "pos": [
+              12,
+              65,
+              0
+            ],
+            "block": "minecraft:lodestone",
+            "done": true
+          }
+        ],
+        "items": [
+          "minecraft:lodestone"
+        ],
+        "done": true,
+        "ok": true
+      },
+      "lastResetHash": "sha256:a95befa4c447701043f68230318bdfe2c65914136040d8a5b41c359dc682e8be",
+      "lastResetMs": 5
+    }
+  },
+  "checks": {
+    "engine.paper-mode": {
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "port": "paper"
+      }
+    },
+    "plugin.new-debug-rpcs": {
+      "ok": true,
+      "detail": [
+        "ok",
+        "plugin",
+        "version",
+        "mc",
+        "tick",
+        "phase",
+        "prepared",
+        "levelId",
+        "sessionId",
+        "epoch",
+        "groundY",
+        "bots",
+        "npcs",
+        "regionFrom",
+        "regionTo",
+        "agentSpawn",
+        "playerSpawn",
+        "center",
+        "tracked",
+        "events",
+        "checkpointSize",
+        "playerKit",
+        "playerBeat",
+        "lastResetHash",
+        "lastResetMs"
+      ]
+    },
+    "b1.level-api.progress-3": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "text": "灰崽按顺序点亮 1、2、3 号灯"
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "text": "你亲手点亮 4 号灯",
+          "player": true
+        },
+        {
+          "id": "l01-golem-home",
+          "text": "灰崽回到艾拉身边"
+        }
+      ]
+    },
+    "b1.level-api.progress-player-flag": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "player": false
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "player": true
+        },
+        {
+          "id": "l01-golem-home",
+          "player": false
+        }
+      ]
+    },
+    "b1.starter.progress0-false": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "passed": false
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "passed": false
+        },
+        {
+          "id": "l01-golem-home",
+          "passed": false
+        }
+      ]
+    },
+    "b1.starter.playerBeatReady-false": {
+      "ok": true,
+      "detail": {
+        "playerBeatReady": false
+      }
+    },
+    "b1.starter.no-waiting-ui": {
+      "ok": true,
+      "detail": {
+        "waitingForPlayer": false
+      }
+    },
+    "b1.starter.no-premature-in-game-hint": {
+      "ok": true,
+      "detail": [
+        {
+          "at": "2026-11-01T04:26:07.461Z",
+          "via": "packet:action_bar",
+          "text": "手持合龙石，对准中央基座按右键"
+        }
+      ]
+    },
+    "b1.pre-ready-playerBeat-no-op": {
+      "ok": true,
+      "detail": {
+        "2,14,16": "minecraft:air"
+      }
+    },
+    "b2.early-rightclick.block-unchanged": {
+      "ok": true,
+      "detail": {
+        "2,14,16": "minecraft:air"
+      }
+    },
+    "b2.early-rightclick.intercepted-actionbar": {
+      "ok": true,
+      "detail": [
+        {
+          "at": "2026-11-01T04:26:25.384Z",
+          "via": "packet:action_bar",
+          "text": "先让灰崽完成它那部分"
+        }
+      ]
+    },
+    "b2.early-rightclick.beat-not-done": {
+      "ok": true,
+      "detail": {
+        "sessionId": "22779879-ffe3-4648-a3a8-46543296184b",
+        "armed": true,
+        "active": false,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面",
+        "beats": [
+          {
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "block": "minecraft:lantern",
+            "done": false
+          }
+        ],
+        "items": [
+          "minecraft:lantern"
+        ],
+        "done": false,
+        "ok": true
+      }
+    },
+    "b1.reference.progress0-true": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "passed": true
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "passed": false
+        },
+        {
+          "id": "l01-golem-home",
+          "passed": true
+        }
+      ]
+    },
+    "b1.reference.progress2-true": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "passed": true
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "passed": false
+        },
+        {
+          "id": "l01-golem-home",
+          "passed": true
+        }
+      ]
+    },
+    "b1.reference.progress1-player-not-done": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "passed": true
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "passed": false
+        },
+        {
+          "id": "l01-golem-home",
+          "passed": true
+        }
+      ]
+    },
+    "b1.reference.playerBeatReady-true": {
+      "ok": true,
+      "detail": {
+        "playerBeatReady": true,
+        "passed": false
+      }
+    },
+    "b1.reference.plugin-activated": {
+      "ok": true,
+      "detail": {
+        "active": true,
+        "armed": true
+      }
+    },
+    "b1.reference.activaction-actionbar-hint": {
+      "ok": true,
+      "detail": [
+        {
+          "at": "2026-11-01T04:26:07.461Z",
+          "via": "packet:action_bar",
+          "text": "手持合龙石，对准中央基座按右键"
+        },
+        {
+          "at": "2026-11-01T04:26:25.384Z",
+          "via": "packet:action_bar",
+          "text": "先让灰崽完成它那部分"
+        },
+        {
+          "at": "2026-11-01T04:26:47.185Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:26:47.235Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        }
+      ]
+    },
+    "b1.player.rightclick-lamp-placed": {
+      "ok": true,
+      "detail": {
+        "2,14,16": "minecraft:lantern"
+      }
+    },
+    "b1.player.beat-done": {
+      "ok": true,
+      "detail": {
+        "done": true,
+        "beats": [
+          {
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "block": "minecraft:lantern",
+            "done": true
+          }
+        ]
+      }
+    },
+    "b1.player.event-actorType-player": {
+      "ok": true,
+      "detail": {
+        "seq": 124,
+        "type": "block.place",
+        "tick": 16029,
+        "actor": "AfterP26",
+        "actorType": "player",
+        "pos": [
+          2,
+          14,
+          16
+        ],
+        "data": {
+          "block": "minecraft:lantern"
+        }
+      }
+    },
+    "b1.confirm.passed": {
+      "ok": true,
+      "detail": {
+        "passed": true,
+        "failures": []
+      }
+    },
+    "b1.confirm.stars-3": {
+      "ok": true,
+      "detail": 3
+    },
+    "b1.confirm.progress-all-true": {
+      "ok": true,
+      "detail": [
+        {
+          "id": "l01-three-lamps",
+          "text": "灰崽按顺序点亮 1、2、3 号灯",
+          "passed": true
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "text": "你亲手点亮 4 号灯",
+          "passed": true
+        },
+        {
+          "id": "l01-golem-home",
+          "text": "灰崽回到艾拉身边",
+          "passed": true
+        }
+      ]
+    },
+    "b3.l01-inventory-only-lantern": {
+      "ok": true,
+      "detail": [
+        {
+          "level": "L01",
+          "cake": 0,
+          "lantern": 8
+        },
+        {
+          "level": "L01",
+          "cake": 0,
+          "lantern": 8
+        }
+      ]
+    },
+    "b3.l02-blocks-gone-in-l01": {
+      "ok": true,
+      "detail": [
+        {
+          "level": "L01",
+          "blocks": {
+            "4,65,-6": "minecraft:air",
+            "0,64,-7": "minecraft:air",
+            "-20,65,-1": "minecraft:air",
+            "3,64,8": "minecraft:air",
+            "-11,65,13": "minecraft:air"
+          }
+        },
+        {
+          "level": "L01",
+          "blocks": {
+            "4,65,-6": "minecraft:air",
+            "0,64,-7": "minecraft:air",
+            "-20,65,-1": "minecraft:air",
+            "3,64,8": "minecraft:air",
+            "-11,65,13": "minecraft:air"
+          }
+        }
+      ]
+    },
+    "b3.npc-count-not-accumulating": {
+      "ok": true,
+      "detail": {
+        "l01NpcCounts": [
+          4,
+          4
+        ],
+        "allNpcCounts": [
+          [
+            "L02",
+            2
+          ],
+          [
+            "L01",
+            4
+          ],
+          [
+            "L03",
+            2
+          ],
+          [
+            "L01",
+            4
+          ]
+        ]
+      }
+    },
+    "b4.dig-restored": {
+      "ok": true,
+      "detail": {
+        "beforeDig": "gravel",
+        "afterDig": "air",
+        "after": "minecraft:gravel"
+      }
+    },
+    "b4.misplaced-cleared": {
+      "ok": true,
+      "detail": {
+        "placed": true,
+        "after": "minecraft:air"
+      }
+    },
+    "b4.player-within-1-of-spawn": {
+      "ok": true,
+      "detail": {
+        "pos": "(2.50, 11.00, 4.50)",
+        "spawn": [
+          2,
+          11,
+          4
+        ]
+      }
+    },
+    "b4.inventory-back-to-kit": {
+      "ok": true,
+      "detail": {
+        "before": [
+          {
+            "item": "minecraft:lantern",
+            "count": 5
+          }
+        ],
+        "after": [
+          {
+            "item": "minecraft:lantern",
+            "count": 8
+          }
+        ]
+      }
+    },
+    "b4.dropped-items-removed": {
+      "ok": true,
+      "detail": {
+        "tossed": 2,
+        "before": 2,
+        "after": 0
+      }
+    },
+    "b4.events-cleared": {
+      "ok": true,
+      "detail": {
+        "events": 0
+      }
+    },
+    "b4.npc-count-stable": {
+      "ok": true,
+      "detail": {
+        "before": 4,
+        "after": 4
+      }
+    },
+    "b4.double-reset-hash-stable": {
+      "ok": true,
+      "detail": {
+        "a": "sha256:a95befa4c447701043f68230318bdfe2c65914136040d8a5b41c359dc682e8be",
+        "b": "sha256:a95befa4c447701043f68230318bdfe2c65914136040d8a5b41c359dc682e8be"
+      }
+    }
+  },
+  "steps": {
+    "levelApi": {
+      "status": 200,
+      "progress": [
+        {
+          "id": "l01-three-lamps",
+          "text": "灰崽按顺序点亮 1、2、3 号灯"
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "text": "你亲手点亮 4 号灯",
+          "player": true
+        },
+        {
+          "id": "l01-golem-home",
+          "text": "灰崽回到艾拉身边"
+        }
+      ],
+      "playerBeatHint": "手持灯笼，对着灯柱按右键，不用看顶面",
+      "progressSerialized": "[{\"id\":\"l01-three-lamps\",\"text\":\"灰崽按顺序点亮 1、2、3 号灯\"},{\"id\":\"l01-fourth-by-player\",\"text\":\"你亲手点亮 4 号灯\",\"player\":true},{\"id\":\"l01-golem-home\",\"text\":\"灰崽回到艾拉身边\"}]"
+    },
+    "createL01": {
+      "createMs": 1796,
+      "sessionId": "sess-mvxbv0yh-tpogyh",
+      "state": "READY",
+      "scene": {
+        "agents": {
+          "golem": {
+            "pos": [
+              0,
+              11,
+              0
+            ]
+          }
+        },
+        "npcs": [
+          "eira",
+          "villager-0",
+          "villager-1",
+          "villager-2"
+        ]
+      }
+    },
+    "starter": {
+      "result": {
+        "passed": false,
+        "stars": 1,
+        "criteria": [
+          {
+            "id": "four-lamps-lit",
+            "text": "4 盏路灯全部点亮",
+            "passed": false
+          },
+          {
+            "id": "golem-home",
+            "text": "灰崽回到艾拉身边",
+            "passed": false
+          },
+          {
+            "id": "player-lit-fourth",
+            "text": "第 4 盏灯由你亲手点亮",
+            "passed": false
+          },
+          {
+            "id": "no-shortcut",
+            "text": "1→2→3 号灯顺序正确",
+            "passed": false
+          }
+        ],
+        "hiddenCount": 2,
+        "failures": [
+          "4 盏路灯全部点亮",
+          "灰崽回到艾拉身边",
+          "第 4 盏灯由你亲手点亮",
+          "1→2→3 号灯顺序正确"
+        ],
+        "source": "run",
+        "hasProgressField": true,
+        "hasPlayerBeatReadyField": true,
+        "progress": [
+          {
+            "id": "l01-three-lamps",
+            "text": "灰崽按顺序点亮 1、2、3 号灯",
+            "passed": false
+          },
+          {
+            "id": "l01-fourth-by-player",
+            "text": "你亲手点亮 4 号灯",
+            "passed": false
+          },
+          {
+            "id": "l01-golem-home",
+            "text": "灰崽回到艾拉身边",
+            "passed": false
+          }
+        ],
+        "playerBeatReady": false
+      },
+      "progress": [
+        {
+          "id": "l01-three-lamps",
+          "passed": false
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "passed": false
+        },
+        {
+          "id": "l01-golem-home",
+          "passed": false
+        }
+      ],
+      "playerBeatReady": false,
+      "attempts": [
+        {
+          "attempt": 1,
+          "runId": "run-1",
+          "criteriaCount": 4,
+          "failures": [
+            "4 盏路灯全部点亮",
+            "灰崽回到艾拉身边",
+            "第 4 盏灯由你亲手点亮",
+            "1→2→3 号灯顺序正确"
+          ],
+          "hasProgress": true
+        }
+      ]
+    },
+    "preReadyPlayerBeat": {
+      "status": 200,
+      "body": {
+        "ok": true,
+        "simulate": false,
+        "state": "READY",
+        "result": {
+          "type": "result",
+          "runId": "beat-2",
+          "epoch": 0,
+          "passed": false,
+          "stars": 1,
+          "criteria": [
+            {
+              "id": "four-lamps-lit",
+              "text": "4 盏路灯全部点亮",
+              "passed": false
+            },
+            {
+              "id": "golem-home",
+              "text": "灰崽回到艾拉身边",
+              "passed": false
+            },
+            {
+              "id": "player-lit-fourth",
+              "text": "第 4 盏灯由你亲手点亮",
+              "passed": false
+            },
+            {
+              "id": "no-shortcut",
+              "text": "1→2→3 号灯顺序正确",
+              "passed": false
+            }
+          ],
+          "hidden": [
+            {
+              "id": "h1",
+              "text": "每次放置前，织偶都到达过灯柱 2 格内",
+              "passed": true
+            },
+            {
+              "id": "h2",
+              "text": "织偶的放置只发生在 4 个灯位或可选第 5 盏上",
+              "passed": true
+            }
+          ],
+          "failures": [
+            "4 盏路灯全部点亮",
+            "灰崽回到艾拉身边",
+            "第 4 盏灯由你亲手点亮",
+            "1→2→3 号灯顺序正确"
+          ],
+          "progress": [
+            {
+              "id": "l01-three-lamps",
+              "text": "灰崽按顺序点亮 1、2、3 号灯",
+              "passed": false
+            },
+            {
+              "id": "l01-fourth-by-player",
+              "text": "你亲手点亮 4 号灯",
+              "passed": false
+            },
+            {
+              "id": "l01-golem-home",
+              "text": "灰崽回到艾拉身边",
+              "passed": false
+            }
+          ],
+          "playerBeatReady": false,
+          "observedTick": 15518,
+          "digest": "sha256:65584a5d23dca7820beb88c96c31331faebdf5dd39a333c5780be54119d6b674",
+          "snapshotDigest": "sha256:65584a5d23dca7820beb88c96c31331faebdf5dd39a333c5780be54119d6b674",
+          "source": "player-beat"
+        }
+      },
+      "note": "Lead 2026-11-01 口径：端点保持可调用不返回 409；线性由 Studio UI 门控 + 插件提前右键拦截保证"
+    },
+    "earlyRightClick": {
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:26:25.384Z",
+          "via": "packet:action_bar",
+          "text": "先让灰崽完成它那部分"
+        }
+      ],
+      "blockAtTarget": {
+        "2,14,16": "minecraft:air"
+      },
+      "playerBeatStatus": {
+        "sessionId": "22779879-ffe3-4648-a3a8-46543296184b",
+        "armed": true,
+        "active": false,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面",
+        "beats": [
+          {
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "block": "minecraft:lantern",
+            "done": false
+          }
+        ],
+        "items": [
+          "minecraft:lantern"
+        ],
+        "done": false,
+        "ok": true
+      },
+      "columnBlock": "stone_bricks"
+    },
+    "reference": {
+      "result": {
+        "passed": false,
+        "stars": 1,
+        "criteria": [
+          {
+            "id": "four-lamps-lit",
+            "text": "4 盏路灯全部点亮",
+            "passed": false
+          },
+          {
+            "id": "golem-home",
+            "text": "灰崽回到艾拉身边",
+            "passed": true
+          },
+          {
+            "id": "player-lit-fourth",
+            "text": "第 4 盏灯由你亲手点亮",
+            "passed": false
+          },
+          {
+            "id": "no-shortcut",
+            "text": "1→2→3 号灯顺序正确",
+            "passed": true
+          }
+        ],
+        "hiddenCount": 2,
+        "failures": [
+          "4 盏路灯全部点亮",
+          "第 4 盏灯由你亲手点亮"
+        ],
+        "source": "run",
+        "hasProgressField": true,
+        "hasPlayerBeatReadyField": true,
+        "progress": [
+          {
+            "id": "l01-three-lamps",
+            "text": "灰崽按顺序点亮 1、2、3 号灯",
+            "passed": true
+          },
+          {
+            "id": "l01-fourth-by-player",
+            "text": "你亲手点亮 4 号灯",
+            "passed": false
+          },
+          {
+            "id": "l01-golem-home",
+            "text": "灰崽回到艾拉身边",
+            "passed": true
+          }
+        ],
+        "playerBeatReady": true
+      },
+      "progress": [
+        {
+          "id": "l01-three-lamps",
+          "passed": true
+        },
+        {
+          "id": "l01-fourth-by-player",
+          "passed": false
+        },
+        {
+          "id": "l01-golem-home",
+          "passed": true
+        }
+      ],
+      "playerBeatReady": true,
+      "attempts": [
+        {
+          "attempt": 1,
+          "runId": "run-3",
+          "criteriaCount": 4,
+          "failures": [
+            "4 盏路灯全部点亮",
+            "第 4 盏灯由你亲手点亮"
+          ],
+          "hasProgress": true
+        }
+      ],
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:26:07.461Z",
+          "via": "packet:action_bar",
+          "text": "手持合龙石，对准中央基座按右键"
+        },
+        {
+          "at": "2026-11-01T04:26:25.384Z",
+          "via": "packet:action_bar",
+          "text": "先让灰崽完成它那部分"
+        },
+        {
+          "at": "2026-11-01T04:26:47.185Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        }
+      ],
+      "playerBeatStatus": {
+        "sessionId": "22779879-ffe3-4648-a3a8-46543296184b",
+        "armed": true,
+        "active": true,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面",
+        "beats": [
+          {
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "block": "minecraft:lantern",
+            "done": false
+          }
+        ],
+        "items": [
+          "minecraft:lantern"
+        ],
+        "done": false,
+        "ok": true
+      }
+    },
+    "readyRightClick": {
+      "eye": [
+        2.5,
+        12.620000000000001,
+        14.5
+      ],
+      "topFaceY": 14,
+      "topFaceVisibleGeometrically": false,
+      "cursorRaycast": null,
+      "blockAtTarget": {
+        "2,14,16": "minecraft:lantern"
+      },
+      "playerBeatStatus": {
+        "sessionId": "22779879-ffe3-4648-a3a8-46543296184b",
+        "armed": true,
+        "active": true,
+        "hint": "手持灯笼，对着灯柱按右键，不用看顶面",
+        "beats": [
+          {
+            "pos": [
+              2,
+              14,
+              16
+            ],
+            "block": "minecraft:lantern",
+            "done": true
+          }
+        ],
+        "items": [
+          "minecraft:lantern"
+        ],
+        "done": true,
+        "ok": true
+      },
+      "actionBars": [
+        {
+          "at": "2026-11-01T04:26:07.461Z",
+          "via": "packet:action_bar",
+          "text": "手持合龙石，对准中央基座按右键"
+        },
+        {
+          "at": "2026-11-01T04:26:25.384Z",
+          "via": "packet:action_bar",
+          "text": "先让灰崽完成它那部分"
+        },
+        {
+          "at": "2026-11-01T04:26:47.185Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        },
+        {
+          "at": "2026-11-01T04:26:47.235Z",
+          "via": "packet:action_bar",
+          "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+        }
+      ],
+      "playerPlaceEvent": {
+        "seq": 124,
+        "type": "block.place",
+        "tick": 16029,
+        "actor": "AfterP26",
+        "actorType": "player",
+        "pos": [
+          2,
+          14,
+          16
+        ],
+        "data": {
+          "block": "minecraft:lantern"
+        }
+      }
+    },
+    "confirm": {
+      "status": 200,
+      "state": "PASSED",
+      "result": {
+        "passed": true,
+        "stars": 3,
+        "criteria": [
+          {
+            "id": "four-lamps-lit",
+            "text": "4 盏路灯全部点亮",
+            "passed": true
+          },
+          {
+            "id": "golem-home",
+            "text": "灰崽回到艾拉身边",
+            "passed": true
+          },
+          {
+            "id": "player-lit-fourth",
+            "text": "第 4 盏灯由你亲手点亮",
+            "passed": true
+          },
+          {
+            "id": "no-shortcut",
+            "text": "1→2→3 号灯顺序正确",
+            "passed": true
+          }
+        ],
+        "hiddenCount": 2,
+        "failures": [],
+        "source": "player-beat",
+        "hasProgressField": true,
+        "hasPlayerBeatReadyField": true,
+        "progress": [
+          {
+            "id": "l01-three-lamps",
+            "text": "灰崽按顺序点亮 1、2、3 号灯",
+            "passed": true
+          },
+          {
+            "id": "l01-fourth-by-player",
+            "text": "你亲手点亮 4 号灯",
+            "passed": true
+          },
+          {
+            "id": "l01-golem-home",
+            "text": "灰崽回到艾拉身边",
+            "passed": true
+          }
+        ],
+        "playerBeatReady": true
+      }
+    },
+    "purityCycles": [
+      {
+        "levelId": "L02",
+        "createMs": 1649,
+        "pluginSessionId": "1bf62294-af14-4a9f-a05c-adf30ec53305",
+        "inventoryItems": [
+          {
+            "item": "minecraft:cake",
+            "count": 8
+          }
+        ],
+        "lantern": 0,
+        "cake": 8,
+        "playerKit": {
+          "minecraft:cake": 8
+        },
+        "l02Blocks": {
+          "4,65,-6": "minecraft:stone_bricks",
+          "0,64,-7": "minecraft:oak_planks",
+          "-20,65,-1": "minecraft:hay_block",
+          "3,64,8": "minecraft:water",
+          "-11,65,13": "minecraft:air"
+        },
+        "l02BlocksAir": false,
+        "npcCount": 2,
+        "botEntities": {
+          "player": 2,
+          "villager": 1,
+          "chicken": 1
+        },
+        "playerPos": "(0.50, 65.00, 0.50)"
+      },
+      {
+        "levelId": "L01",
+        "createMs": 1953,
+        "pluginSessionId": "3e487764-3e8d-4ccb-ad28-99c8dd2c097a",
+        "inventoryItems": [
+          {
+            "item": "minecraft:lantern",
+            "count": 8
+          }
+        ],
+        "lantern": 8,
+        "cake": 0,
+        "playerKit": {
+          "minecraft:lantern": 8
+        },
+        "l02Blocks": {
+          "4,65,-6": "minecraft:air",
+          "0,64,-7": "minecraft:air",
+          "-20,65,-1": "minecraft:air",
+          "3,64,8": "minecraft:air",
+          "-11,65,13": "minecraft:air"
+        },
+        "l02BlocksAir": true,
+        "npcCount": 4,
+        "botEntities": {
+          "player": 2,
+          "villager": 4,
+          "text_display": 6
+        },
+        "playerPos": "(2.50, 11.00, 4.50)"
+      },
+      {
+        "levelId": "L03",
+        "createMs": 1809,
+        "pluginSessionId": "9421b17e-54fc-4ad3-b095-1a3253ba989c",
+        "inventoryItems": [
+          {
+            "item": "minecraft:bell",
+            "count": 8
+          }
+        ],
+        "lantern": 0,
+        "cake": 0,
+        "playerKit": {
+          "minecraft:bell": 8
+        },
+        "l02Blocks": {
+          "4,65,-6": "minecraft:air",
+          "0,64,-7": "minecraft:mossy_stone_bricks",
+          "-20,65,-1": "minecraft:air",
+          "3,64,8": "minecraft:moss_block",
+          "-11,65,13": "minecraft:air"
+        },
+        "l02BlocksAir": false,
+        "npcCount": 2,
+        "botEntities": {
+          "player": 2,
+          "villager": 1,
+          "iron_golem": 1
+        },
+        "playerPos": "(0.50, 65.00, 0.50)"
+      },
+      {
+        "levelId": "L01",
+        "createMs": 2003,
+        "pluginSessionId": "036c871e-e9af-4a2f-8ed1-ce6a65e8bc05",
+        "inventoryItems": [
+          {
+            "item": "minecraft:lantern",
+            "count": 8
+          }
+        ],
+        "lantern": 8,
+        "cake": 0,
+        "playerKit": {
+          "minecraft:lantern": 8
+        },
+        "l02Blocks": {
+          "4,65,-6": "minecraft:air",
+          "0,64,-7": "minecraft:air",
+          "-20,65,-1": "minecraft:air",
+          "3,64,8": "minecraft:air",
+          "-11,65,13": "minecraft:air"
+        },
+        "l02BlocksAir": true,
+        "npcCount": 4,
+        "botEntities": {
+          "player": 2,
+          "villager": 4,
+          "text_display": 6
+        },
+        "playerPos": "(2.50, 11.00, 4.50)"
+      }
+    ],
+    "reset": {
+      "playerSpawn": [
+        2,
+        11,
+        4
+      ],
+      "pluginSessionId": "036c871e-e9af-4a2f-8ed1-ce6a65e8bc05",
+      "engineSession": "sess-mvxbw8ij-kux4a5",
+      "pluginSession": "ea82446d-8abf-4dd6-addd-19971030a052",
+      "before": {
+        "playerPos": "(0.50, 11.00, 24.50)",
+        "inventory": [
+          {
+            "item": "minecraft:lantern",
+            "count": 5
+          }
+        ],
+        "blocks": {
+          "0,10,14": "minecraft:air",
+          "4,11,14": "minecraft:lantern",
+          "4,65,-6": "minecraft:air",
+          "0,64,-7": "minecraft:air",
+          "-20,65,-1": "minecraft:air",
+          "3,64,8": "minecraft:air",
+          "-11,65,13": "minecraft:air"
+        },
+        "itemEntities": 2,
+        "npcCount": 4,
+        "tossed": 2,
+        "placed": true,
+        "dig": {
+          "beforeDig": "gravel",
+          "afterDig": "air"
+        }
+      },
+      "after": {
+        "resetHttpStatus": 200,
+        "resetBody": {
+          "ok": true,
+          "state": "READY",
+          "epoch": 1
+        },
+        "playerPos": "(2.50, 11.00, 4.50)",
+        "inventory": [
+          {
+            "item": "minecraft:lantern",
+            "count": 8
+          }
+        ],
+        "blocks": {
+          "0,10,14": "minecraft:gravel",
+          "4,11,14": "minecraft:air",
+          "4,65,-6": "minecraft:air",
+          "0,64,-7": "minecraft:air",
+          "-20,65,-1": "minecraft:air",
+          "3,64,8": "minecraft:air",
+          "-11,65,13": "minecraft:air"
+        },
+        "itemEntities": 0,
+        "npcCount": 4,
+        "snapshotEvents": 0
+      },
+      "hashes": {
+        "a": "sha256:a95befa4c447701043f68230318bdfe2c65914136040d8a5b41c359dc682e8be",
+        "b": "sha256:a95befa4c447701043f68230318bdfe2c65914136040d8a5b41c359dc682e8be"
+      }
+    }
+  },
+  "errors": [],
+  "paperLog": {
+    "beatActivated": [
+      "> \r  \r[12:25:32 INFO]: [LoomCraft] player beat activated: session=95b0f982-81bb-40ce-b13d-3fb56aa443b1 beats=1",
+      "> \r  \r[12:25:41 INFO]: [LoomCraft] player beat activated: session=d56a6921-f488-4a5d-96e4-16f9089d3ef5 beats=2",
+      "> \r  \r[12:25:53 INFO]: [LoomCraft] player beat activated: session=9479d316-666a-4180-a7b1-e97a1a2ac884 beats=1",
+      "> \r  \r[12:26:47 INFO]: [LoomCraft] player beat activated: session=22779879-ffe3-4648-a3a8-46543296184b beats=1"
+    ],
+    "beatComplete": [
+      "> \r  \r[12:25:34 INFO]: [LoomCraft] player beat complete: beats=1 actor=ReachP27 via=tolerant placed=true",
+      "> \r  \r[12:25:46 INFO]: [LoomCraft] player beat complete: beats=2 actor=ReachP27 via=interact placed=false",
+      "> \r  \r[12:25:55 INFO]: [LoomCraft] player beat complete: beats=1 actor=ReachP27 via=tolerant placed=true",
+      "> \r  \r[12:26:49 INFO]: [LoomCraft] player beat complete: beats=1 actor=AfterP26 via=tolerant placed=true"
+    ],
+    "earlyBlocked": [],
+    "squished": []
+  },
+  "playerMessages": [
+    {
+      "at": "2026-11-01T04:26:07.461Z",
+      "text": "AfterP26 joined the game"
+    },
+    {
+      "at": "2026-11-01T04:26:08.900Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:26:08.945Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:26:50.800Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:26:50.845Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:26:54.334Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:26:54.394Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:26:58.039Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:26:58.091Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:27:01.601Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:27:01.644Z",
+      "text": "GolemAfter joined the game"
+    },
+    {
+      "at": "2026-11-01T04:27:05.350Z",
+      "text": "GolemAfter left the game"
+    },
+    {
+      "at": "2026-11-01T04:27:05.393Z",
+      "text": "GolemAfter joined the game"
+    }
+  ],
+  "playerActionBars": [
+    {
+      "at": "2026-11-01T04:26:07.461Z",
+      "via": "packet:action_bar",
+      "text": "手持合龙石，对准中央基座按右键"
+    },
+    {
+      "at": "2026-11-01T04:26:25.384Z",
+      "via": "packet:action_bar",
+      "text": "先让灰崽完成它那部分"
+    },
+    {
+      "at": "2026-11-01T04:26:47.185Z",
+      "via": "packet:action_bar",
+      "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+    },
+    {
+      "at": "2026-11-01T04:26:47.235Z",
+      "via": "packet:action_bar",
+      "text": "手持灯笼，对着灯柱按右键，不用看顶面"
+    }
+  ],
+  "finishedAt": "2026-11-01T04:27:20.149Z",
+  "ok": true
+}

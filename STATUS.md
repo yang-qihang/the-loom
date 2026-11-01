@@ -1,18 +1,47 @@
 # STATUS — 项目状态（Lead 维护，每个集成点更新）
 
+## 2026-11-01 试玩反馈修复（最新，v1.4）
+
+用户真实试玩反馈的 4 类问题已全部修复，并按「同类问题全关卡一次解决」落地（详见 `docs/46-playtest-fix-plan.md` §5）：
+
+- **任务进度**：`LevelDef.progress` 成为 Studio 目标面板唯一真值；L01 三任务（1→3 号灯 / 亲手点 4 号 / 回艾拉）逐条打勾；L01–L10 每关 2–3 条可机器判定 progress。
+- **线性玩家节拍**：引擎在「织偶部分完成」后发 `playerBeatReady`；Studio 只在此时显示「轮到你」+ 教程；插件 `playerBeat.activate` 之前会拦截提前右键。只点亮 1 盏不再出现第 4 盏提示。
+- **sandbox 纯净**：切关清上一场景/旧实体/玩家背包/待发道具；L01 增加自己的 clearRegion；老用户脏世界自动换干净世界（世界布局版本 marker）。
+- **彻底 reset**：全区域 checkpoint 还原（玩家挖掉/乱放/上一关残留都还原/清除）、区域实体清理、NPC 重生、玩家回 playerSpawn、背包回本关基准、事件清零、两次 hash 稳定。
+- **第 4 盏灯可达**：通用容错右键（手持本关道具、6 格内、视线大致朝向即可，不必看见柱顶面）；激活后目标处发光标记；删掉误导性石阶，文案改为「站地面对着柱子右键」。
+- **全关卡同类修复**：L02–L10 的 player beat 全部走同一套 arm/activate/容错机制；重复运行不重置的事件计数判定改为 first-occurrence/distinct 目标；L10 双织偶 + 合龙石通过真实 e2e。
+
+**验收**：`npx tsc --noEmit` 0；`npm test` 235/235；`npm --prefix apps/studio run test:e2e` 6/6、`test:e2e:local` 2/2；`it/l1-real.ts`–`it/l10-real.ts` 真实 Paper 全 PASS；L01 集成验收 25/25、插件级真实 Paper 验收（脏世界自愈/reset/全关卡节拍）全绿。证据：`evidence/playtest-fix/`、`evidence/l*-real-latest.json`、`tmp/plugin-work/evidence/`、`tmp/progress-evidence/`。
+
+**升级注意**：新桌面包会自动替换 `~/.loomcraft/runtime/paper/world` 为干净世界（旧关卡残留会污染 sandbox）；Studio 的关卡进度/星级不在世界里，不受影响。
+
+
+
+## 2026-11-01 独立验收补充（verifier）
+
+独立 verifier 在隔离端口（Paper 25566 / RPC 8766 / engine 4321）用 mineflayer 玩家复验（证据 `evidence/playtest-fix/report.md`、`after/*.json`）：
+
+- L01 全流程 35 项检查 PASS（进度逐条/门控/提前右键拦截/玩家右键 3 星/reset 哈希稳定/切关纯净）；全关卡 10/10 progress 契约、17/17 player beat 可由真实玩家右键完成。
+- 独立验收发现的真实玩家体验问题已修：L03/L05 显式 `playerSpawn`（`[0,65,12]`/`[13,64,6]`）；L02 蛋糕 `[4,66,-6]`、L04 南瓜 `[14,67,26]` 改为目标方块上方的空气格（会真的落块）。仅剩 L03 钟本体在钟楼结构内不可见（美术边界，对着钟楼右键可完成）。
+- 独立验收未覆盖真人客户端画面（prismarine-viewer 1.33 只支持到 1.21.4，已改用体素光栅化替代截图）。
+
+## 历史快照（2026-10-31 及更早）
+
+> 以下段落保留为历史记录，**不代表当前状态**；当前状态以上方 v1.4 段、`docs/46-playtest-fix-plan.md` 与代码为准。
+
 > 最后更新：2026-10-31 12:25（Asia/Shanghai）｜阶段：**设计交付完成（v1.3：审计 + 两轮独立评审 + 修订 + 关键 spike），等待 CP0 拍板后进入 T1**
 
-## 一句话
+## 一句话（历史，已被上方 v1.4 段取代）
 
-**交付状态（2026-10-31 14:30）**
+**交付状态（2026-10-31 14:30，历史）**
 
-- **可玩**：L01–L09（Mock + Studio；真实 MC 已验收 L01–L04）。L10 为终局设计/预演（多织偶运行时未接）。
+- **可玩**：L01–L09（Mock + Studio；真实 MC 已验收 L01–L04）。L10 当时为终局设计（多织偶运行时当时未接；**2026-11-01 已接，见上方 v1.4 段**）。
 - **真实 MC**：Engine `LOOM_WORLD=paper` 跑通 L01–L04（34/34 check，3 星）；真实评分与 Mock 逐项一致。
-- **桌面**：Tauri 2 自包含安装包（AppImage 356MB / RPM 382MB）；包内带 Node/Java/Paper/插件/世界/真实引擎/织偶。
+- **桌面**：Tauri 2 自包含安装包（AppImage ≈400MB / RPM ≈415MB，2026-11-01 重打包）；包内带 Node/Java/Paper/插件/世界/真实引擎/织偶。
 - **质量**：185 项自动化测试全绿；verify l0–l3+lg exit 0；门禁 8 pass / 1 warn / G-FRESH-READER Round 4 仍 tracked fail（需继续收敛）；Studio 真实 Playwright 5/5（含文字溢出自动断言、等待玩家、错误态、试符台、织典）。
 - **真实 MC 视觉**：客户端已在 Xvfb 真实启动进服；L01 完成村门/风车/池塘/集市/村舍/苔藓小径/灯笼等美术 pass，L02 完成谷仓/鸡舍/水槽/树/干草等美术 pass；真实 L1/L2 e2e PASS；截图 evidence/scene-shots/L01.png、L02.png；场景质量门 `qa/scene-quality.mjs`；流程 docs/34、docs/35。
 - **场景美术（region-aware）**：新增 `scripts/scene-shot.mjs` + 插件 `session.status` 的 region/spawn/center 与 `player.teleport yaw/pitch`，截图不再拍旧竞技场。**L01–L09 全部通过真实截图质量门**（L04 修复 y65 逻辑田不可见 + 天气；L08 修复插件补灰柱/相机在场景外，真机主视角能看到烟囱/熔炉/红石门/工具架；自然材质约 85%，红石灯/羊毛为小面积点缀）；L07 实拍仍空/灰，继续返工；L06 机位需调整；L09/L10 未做。L05 第三次返工：clearRegion 中心从空草地改到工地，playerSpawn=(13,64,-2)，真实机位可见脚手架/工棚/半成品房/木料场；自然材质为主、点缀色 3.88%。已向并行 agent 强调：不得为了凑丰富滥用高饱和彩色，点缀色小面积使用。
-- **桌面最新包**：AppImage 356MB / rpm 382MB，包内带 Node/Java/Paper/插件/世界/真实引擎/织偶；自绘像素标题栏、拖动/最大化/最小化/关闭、A-/A+、系统页、伴玩、四颗连接灯。
+- **桌面最新包**：AppImage ≈400MB / rpm ≈415MB（2026-11-01 重打包），包内带 Node/Java/Paper/插件/世界/真实引擎/织偶；自绘像素标题栏、拖动/最大化/最小化/关闭、A-/A+、系统页、伴玩、四颗连接灯。
 - **游戏内提示**：`POST /api/in-game` 支持 `title`（短句大字）与 `actionbar`（长句小字）；真实客户端截图 20/21 已验证不裁切；Studio 开始/等待/报错/通关/重置都已接入。
 - **真实玩家路径验收**：L01–L10 真实 Paper e2e 全 PASS（各 3 星，L10 双织偶含 Studio 会话注入）；UOS 4/4、纯中文 0 违规；挑战层仍为说明卡，真人键鼠盲测未执行。
 - **世界内中文标注**：插件 `annotations.set/clear/visible` 已实现并打日志（L01 一次生成 6 个、直接测试 2 个 ArmorStand 名牌）；Studio 有「世界标注：开/关」与说明。**受控测试里 2.2x TextDisplay 可见但过大；1.2x 在 L01 实际机位仍不易看到，标注字号/机位未定稿，未宣称可用。**
@@ -26,7 +55,7 @@
 
 设计交付包 v1 完成；M0（MC 技术栈）已实证通过（双通道 7/7）；10 关规格与 4 个 Labs 正在收尾；等待用户确认 8 个前提问题后开始 4 天实施。
 
-## 门禁
+## 门禁（历史）
 
 | 门 | 状态 | 证据 |
 |---|---|---|
@@ -36,7 +65,7 @@
 | Spec 修订波 | ✅ 完成 | L01–L10/EP/Labs 按 docs/14/14b 修复并自查 0 error；待 fresh critic 复评一次（≈1h）后冻结 |
 | CP0 用户拍板 | ⏳ 等待 | 待确认问题见 docs/11 §13 |
 
-## 今日完成
+## 今日完成（历史）
 
 - 5 路研究：行业对标（01）、MC 技术栈与实证（02）、语言/macro/sandbox（research）、学习设计（research，收尾中）、AI 工程保证（research）。
 - 设计文档：BRIEF、03 语言判断、04 学习设计、05 课程骨架、06 关卡 spec 体系、07 架构、08 AI 工作流 + 附录模板、09 4 天执行计划、10 demo/报告/评估、11 决策与开放问题、12 SDK API registry、13 Codex 跨语言（收尾中）。
@@ -45,7 +74,7 @@
 - 技术可行性：docs/02b（无不可做关卡）；docs/02c L10 铺桥 spike **路线 A 10/10 通过、0 掉落**（B 作预录兜底）；docs/06b level-kit 实现规格（3 包，Day1 可照写）。
 - 评审修订波（12:08–12:20）：L01–L10/EP/Labs 的 blocking 已按 docs/14/14b 修复并自查 0 error；待 fresh critic 复评一次即可冻结（docs/15）。
 
-## 下一步（T1 开工时）
+## 下一步（T1 开工时，历史）
 
 1. CP0：用户确认 docs/11 §13 的 8 个问题 + 按 docs/17 安装 **Minecraft Java 26.1.2**（Prism Launcher；**不是 1.21.4/26.3**）。
 2. T1 09:30 前：完成 spec 修订并冻结（docs/15 §5 的 4 项门禁）。
@@ -56,17 +85,17 @@
 
 - 已收到并评审另一份架构方案（`incoming/other-plan/`），结论：**母本用本方案**；吸收 4 项：顺序语义 auto-await（D36）、会话/权限不变量（D37）、参考解 tsc 全绿（D38）、单页 HTML 报告（D39）。详见 [docs/18](docs/18-comparison-other-plan.md)。
 
-## 阻塞 / 需要人类决策
+## 阻塞 / 需要人类决策（历史）
 
 - 见 docs/11 §13（8 项，均有默认假设；未回复时按默认执行）。
 
-## 范围与风险变化
+## 范围与风险变化（历史）
 
 - D4 细化：Act I 用「自然村庄 + 局部平整短路径 + 和平难度」保证 pathfinder 稳定；Act II 起扩展自然地形（M0 实测结论）。
 - 版本锁升级为不可协商项：MC/Paper 26.1.2 build 74 + mineflayer 4.39.0（禁止 26.2/26.3）。
 
 
-## 最终交付快照（2026-10-31）
+## 最终交付快照（2026-10-31，历史）
 
 - **L01–L10 真实 Paper e2e 全部 PASS**；L10 双织偶真实 17 项、Studio 注入 11 项。
 - Studio：L05–L10 完整中文引导；挑战层说明卡；天空/天气/云；UOS 4/4。
@@ -75,8 +104,8 @@
 - **明确边界**：挑战层目前是可阅读说明而非可玩会话；真实人类键鼠盲测尚未执行（自动化代理为 UOS）。
 
 
-## 自包含安装包（2026-10-31 20:52）
+## 自包含安装包（2026-10-31 20:52，历史；当前体积见 v1.4 段）
 
-- `Loomcraft-x86_64.AppImage` 356MB / RPM 382MB，内置 Node 22、Java 25、Paper 26.1.2、插件/世界、真实引擎与 mineflayer 织偶。
+- `Loomcraft-x86_64.AppImage` ≈400MB / RPM ≈415MB（2026-11-01 重打包），内置 Node 22、Java 25、Paper 26.1.2、插件/世界、真实引擎与 mineflayer 织偶。
 - 桌面应用启动时自动起 Paper + 引擎；用户只需安装 Minecraft 26.1.2 并连接 `localhost:25565`。
 - 真实运行时目录由 `bash scripts/build-real-runtime.sh` 生成，体积约 1GB，不入 GitHub；安装包随附。

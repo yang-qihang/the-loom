@@ -5,6 +5,23 @@ import { resolve } from "node:path";
 const EVIDENCE = resolve(process.cwd(), "evidence");
 mkdirSync(EVIDENCE, { recursive: true });
 
+/** real-engine 配置里的引擎地址（playwright.config.ts 的 PORT=4399）。 */
+const ENGINE_BASE = "http://127.0.0.1:4399";
+
+interface ApiProgressStep {
+  id: string;
+  text: string;
+  player: boolean;
+}
+
+/** 目标面板真值来自引擎 progress（docs/46 §2.3）：e2e 断言随内容层文案变化自动适配。 */
+async function apiProgress(levelId: string): Promise<ApiProgressStep[]> {
+  const response = await fetch(`${ENGINE_BASE}/api/levels/${levelId}`);
+  expect(response.ok, `/api/levels/${levelId} 可访问`).toBe(true);
+  const data = (await response.json()) as { progress?: ApiProgressStep[] };
+  return Array.isArray(data.progress) ? data.progress.filter((step) => typeof step?.id === "string") : [];
+}
+
 const PROGRESS = {
   prologueSeen: true,
   actsSeen: [1, 2, 3],
@@ -281,6 +298,13 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   });
   page.on("pageerror", (error) => consoleErrors.push(`pageerror: ${error.message}`));
   await seedProgress(page);
+  const l01Progress = await apiProgress("L01");
+  expect(l01Progress.length, "L01 引擎 progress 必须有 2–3 条").toBeGreaterThanOrEqual(2);
+  const l02Progress = await apiProgress("L02");
+  const l04Progress = await apiProgress("L04");
+  // 内容层还没补 progress 时回退到旧 copy 文案（过渡期兼容）。
+  const l02Goal = l02Progress[0]?.text ?? "让灰崽收 6 枚蛋，分趟倒进木桶";
+  const l04Goal = l04Progress[0]?.text ?? "把能种的地方都种满";
 
   // 1) 地图墙
   await page.goto("/");
@@ -333,24 +357,25 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   // 2) 工作台
   await page.getByTestId("level-card-L01").click();
   await expect(page.getByTestId("code-editor")).toBeVisible();
-  await expect(page.getByTestId("goal-list")).toContainText("让灰崽把 1 到 3 号路灯一盏一盏点亮");
+  // 目标面板文字来自引擎 progress（level-content 定义），不再断言 copy 里的旧文案。
+  await expect(page.getByTestId("goal-list")).toContainText(l01Progress[0]!.text);
   await expect(page.getByTestId("btn-run")).toBeVisible();
   await expect(page.getByTestId("btn-stop")).toBeVisible();
   await expect(page.getByTestId("btn-reset")).toBeVisible();
   await expect(page.getByTestId("btn-hint")).toBeVisible();
-  measurements.push(await assertLayout(page, "工作台"));
+  await measurements.push(await assertLayout(page, "工作台"));
   await page.evaluate(() => document.fonts.ready);
   const editorFont = await page.evaluate(() => {
     const el = document.querySelector(".monaco-editor .view-lines") as HTMLElement | null;
     return {
       family: el ? getComputedStyle(el).fontFamily : "",
-      departure: document.fonts.check('16px "Departure Mono"'),
+      // 代码编辑器在 dbd80fa 换成随包 Iosevka（像素等宽替代方案）；界面标题仍用随包像素字体。
+      iosevka: document.fonts.check('16px "Iosevka"'),
       zpix: document.fonts.check('16px "Zpix"'),
     };
   });
-  expect(editorFont.family, "代码编辑器必须使用随包像素等宽字体栈").toContain("Departure Mono");
-  expect(editorFont.family).toContain("Zpix");
-  expect(editorFont.departure, "Departure Mono 未随包加载").toBe(true);
+  expect(editorFont.family, "代码编辑器必须使用随包等宽字体栈").toContain("Iosevka");
+  expect(editorFont.iosevka, "Iosevka 随包字体未加载").toBe(true);
   expect(editorFont.zpix, "Zpix 中文 fallback 未随包加载").toBe(true);
   await page.getByTestId("btn-font-larger").click();
   await expect(page.getByTestId("font-size-value")).toHaveText("17");
@@ -370,8 +395,12 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   // 4) 缺玩家节拍
   await expect(page.locator(".awaiting-line")).toContainText("织者之印");
   await expect(page.getByTestId("btn-player-beat")).toBeVisible();
-  await page.getByTestId("mc-help").locator("summary").click();
-  await expect(page.getByTestId("mc-help")).toContainText("W、A、S、D");
+  const mcHelp = page.getByTestId("mc-help");
+  // 「第一次玩我的世界」默认展开；只有被收起时才点 summary 展开（避免把已展开的又点关）。
+  if (!(await mcHelp.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await mcHelp.locator("summary").click();
+  }
+  await expect(mcHelp).toContainText("W、A、S、D");
   await expect(page.getByTestId("btn-help-reset")).toBeVisible();
   await page.screenshot({ path: resolve(EVIDENCE, "04-waiting-player.png"), fullPage: true });
 
@@ -386,8 +415,9 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   await page.getByTestId("btn-settle-replay").click();
   await expect(page.getByTestId("settle-overlay")).toBeHidden();
   await expect(page.getByTestId("result-placeholder")).toBeVisible();
-  for (const id of ["lamps", "fourth", "home"]) {
-    await expect(page.getByTestId(`goal-${id}`)).toHaveAttribute("data-done", "false");
+  // 目标 id 由 progress 决定（L01：l01-three-lamps / l01-fourth-by-player / l01-golem-home）。
+  for (const step of l01Progress) {
+    await expect(page.getByTestId(`goal-${step.id}`)).toHaveAttribute("data-done", "false");
   }
 
   // 7) 回车运行
@@ -418,12 +448,12 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   await page.getByTestId("btn-back").click();
   await page.getByTestId("level-card-L02").click();
   await expect(page.getByTestId("code-editor")).toBeVisible();
-  await expect(page.getByTestId("goal-list")).toContainText("让灰崽收 6 枚蛋，分趟倒进木桶");
+  await expect(page.getByTestId("goal-list")).toContainText(l02Goal);
   await page.screenshot({ path: resolve(EVIDENCE, "12-l02-workbench.png"), fullPage: true });
   await page.getByTestId("btn-back").click();
   await page.getByTestId("level-card-L04").click();
   await expect(page.getByTestId("code-editor")).toBeVisible();
-  await expect(page.getByTestId("goal-list")).toContainText("把能种的地方都种满");
+  await expect(page.getByTestId("goal-list")).toContainText(l04Goal);
   await page.screenshot({ path: resolve(EVIDENCE, "13-l04-workbench.png"), fullPage: true });
 
   writeFileSync(

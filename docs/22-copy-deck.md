@@ -1,10 +1,11 @@
 # 22 — UI 文案包 v3.1（纯中文 · 完整句 · 引导）
 
-> 状态：v3.1（T2 文案基线；v2 246 条 + v3 引导全部保留，按 docs/20 §3b2 去电报体）｜负责人：scout-pedagogy（T2-COPY）｜最后更新：2026-10-31
+> 状态：v3.1（T2 文案基线；目标面板自 2026-11-01 起以引擎 `LevelDef.progress` 为唯一真值，copy `goals` 仅作旧引擎回退）｜负责人：scout-pedagogy（T2-COPY）｜最后更新：2026-11-01
 > 上游：`docs/25-onboarding-and-guidance.md`（引导规格与文本预算）、`docs/23-world-bible.md`（世界观名词，已含三夜试炼/麦穗节/加练）、`docs/20-quality-bar.md` §3/§3b、`docs/05`、L01–L04 spec
 > 下游：`apps/studio` 文案层（`apps/studio/src/copy/levels.json`）、插件字幕、level spec 的 `narrative.opening/worldState/whyYou`、`scripts/check-copy.mjs --pure-zh`
 > 硬规则：界面叙述全部纯中文；代码引用只允许反引号包裹 + 同句中文说法；不出现「玩家/用户/您」；运行统一「回车运行」；引导可跳过，但跳过也计入存档、随时可在「旅途手记」回看。
 > 交付：JSON 共 **375 条**（v3 的 328 条主体全部保留，其中 **121 条改写为完整句**；新增 50 条：13 个控件标签 + 13 条控件说明 + 状态/地图墙/试符台/手记/身份名词补全）。序章 8 屏、三幕开场各 3 屏、L01–L04 每关开场 3 句、旅途手记 4 节；`_meta.sentenceStyleRefs = "complete"`；`codeRefs` 标注合法代码引用 5 条。本轮只改文档，**未改代码/关卡，未 git commit**。
+> 2026-11-01 更新：`apps/studio/src/copy/levels.json` 已含 L01–L10 全部关卡文案与引导；目标/进度文案改由引擎 `progress` 提供（docs/46 §2.3），本文件 §2 中的「目标（3 条）」保留作文案基准。375 条为 v3.1 交付口径，后续追加条目以 JSON 文件为准。
 
 ## 0. TL;DR（8 条）
 
@@ -1093,7 +1094,7 @@ type Copy = string | { text: string; codeRefs: string[] };
 
 - 改任何文案 = 改本文件；新增关卡按同结构补 `opening/journalRecap/coach*/hints/errors/challenge/fail/timeout/reset/settle`。
 - 序章/幕开场/手记文案改动需重跑 §5.2 与 §4 盲读。
-- L05–L10 与织典页文案下一轮覆盖。
+- L05–L10 文案已接入（2026-10-31 完成）；织典页文案来源为 `content/codex/codex.json` + `docs/13`。
 
 ## 6. 自检（本文件/JSON）
 

@@ -3,6 +3,8 @@
 > 状态：v1 冻结（docs/28 的 G-FRESH-READER 门禁）｜负责人：Lead｜最后更新：2026-10-31
 > 用户要求：必须有一个「挑剔、没有编程基础、对文学感兴趣、没接触过这个游戏」的模拟玩家，模拟他看到东西时的思考链；只要他对文字困惑（看不懂、像老外写的、AI 味重），就改。
 > 原则：**Fresh Reader 不是测试工程师。** 他不看 spec/代码/设计文档，只看玩家真实能看到的东西；他的困惑就是产品缺陷。
+> 现行文件（2026-11-01 复核）：Fresh Reader 协议仍有效；Round 4 尚未清零（G-FRESH-READER tracked fail）。
+> 上游：docs/28-change-control-quality.md、docs/22-copy-deck.md
 
 ---
 

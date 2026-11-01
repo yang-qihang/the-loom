@@ -3,6 +3,8 @@
 > 状态：v1｜负责人：Lead｜最后更新：2026-10-31
 > 评审对象：用户提供的 `architecture design.zip`（作者：另一 AI/同学；日期 2026-10-30；含 README、report.html、7 份 specs、SDK/levels/schema、QuickJS 实验与 evidence 工具）
 > 目的：判断「哪份更好」，并给出合并动作。结论：**以本方案为母本，吸收对方的 4 项工程强项；不更换基础。**
+> 历史说明（2026-11-01 文档审计）：本文件是对照方案的评审记录，结论仍有效（本方案为母本）；对照方案 zip 在 `incoming/` 只读留档。
+> 上游：incoming/other-plan、BRIEF.md
 
 ---
 

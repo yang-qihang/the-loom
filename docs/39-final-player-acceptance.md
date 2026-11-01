@@ -1,7 +1,7 @@
 # 39 — 挑剔玩家 / 真实玩家终验：验收矩阵
 
 > 状态：v1（可执行验收矩阵；本文件只写文档，不含实现）｜负责人：scout-pedagogy｜最后更新：2026-10-31
-> 上游：`docs/04-learning-design.md`（节拍/提示/盲测）、`docs/25-onboarding-and-guidance.md`（四层引导/文本预算）、`docs/29-user-operation-simulation.md`（U1–U6）、`docs/30-fresh-reader-simulation.md`（Fresh Reader 协议）、`docs/31-fresh-reader-report.md`（Round 1–3）、`docs/32-fresh-reader-fix-tracker.md`、`docs/34-mc-visual-verification.md`（真实客户端/隔离显示）、`docs/37-client-visual-baseline.md`、`STATUS.md`、`docs/12-sdk-api-registry.md`、`apps/studio/src/copy/{levels,catalog}.json`、`apps/studio/src/components/{Workbench,MapWall,SystemScreens,onboarding,ReplScreen}.tsx`
+> 上游：`docs/04-learning-design.md`（节拍/提示/盲测）、`docs/25-onboarding-and-guidance.md`（四层引导/文本预算）、`docs/29-user-operation-simulation.md`（U1–U6）、`docs/30-fresh-reader-simulation.md`（Fresh Reader 协议）、`docs/31-fresh-reader-report.md`（Round 1–3 历史评审）、`docs/47-docs-audit-2026-11-01.md`、`docs/34-mc-visual-verification.md`（真实客户端/隔离显示）、`docs/37-client-visual-baseline.md`、`STATUS.md`、`docs/12-sdk-api-registry.md`、`apps/studio/src/copy/{levels,catalog}.json`、`apps/studio/src/components/{Workbench,MapWall,SystemScreens,onboarding,ReplScreen}.tsx`
 > 下游：T4 彩排、CP 终验、最终报告；本文件给出「谁、按什么步骤、看到什么才算过、证据放哪、当前哪些还过不了」。
 > 硬约束：全部真实客户端输入只允许 `:98`/`:99`（`scripts/isolated-x.sh` 会拒绝 `:0`）；同一 Paper 上的真实 e2e **串行**跑，不并发。
 > 本文件只做验收设计，不改任何代码/内容/测试；§5 的 blocker 均为当前仓库可验证项，不包含已修复项。
@@ -246,10 +246,10 @@ evidence/player-acceptance/<persona-A|B|C|D>/<UTC-时间戳>/
 - 影响：A/B/C/D 全部无法通过 L05–L09；协议 e2e PASS 不能替代。
 - 责任线：**UI/文案（Studio + copy）**。必须先补 L05–L09 的 `LevelCopy`（开场/目标/教练/提示/错误/结算/手记回顾/玩家节拍/挑战），再谈全游戏验收。
 
-### P0-2｜桌面安装包是 Mock-only，发布物上 L02–L10 不可玩
+### P0-2｜桌面安装包是 Mock-only，发布物上 L02–L10 不可玩（历史 finding，2026-11-01 已修复，见 §9）
 
 - 可复现：按 §2.1 启动安装包（或 `npm run dev:studio` 的 Mock 模式）→ 地图墙只有 L01 可玩，L02 起全部「未解锁」。
-- 定位：`apps/studio/src/engine/mockEngine.ts:55-60`（`listLevels` 只返回 L01；`loadLevel` 非 L01 直接抛错）；`STATUS.md` 也写明 App 默认 Mock-only、真实 Paper 用 `dev:engine:paper` 且未收进安装包。
+- 定位：`apps/studio/src/engine/mockEngine.ts:55-60`（`listLevels` 只返回 L01；`loadLevel` 非 L01 直接抛错）；`STATUS.md` 当时也写明 App 默认 Mock-only、真实 Paper 用 `dev:engine:paper` 且未收进安装包（**历史，已修复**）。
 - 影响：用户拿到的发布物跑不完全游戏；「全游戏验收」实际上只在开发者路径成立。
 - 责任线：**桌面/集成**（把 engine paper 模式或等价真实运行时纳入发布物，或明确发布物范围并在 UI 上写清）。
 
@@ -296,7 +296,7 @@ evidence/player-acceptance/<persona-A|B|C|D>/<UTC-时间戳>/
 
 ### P2-1｜Fresh Reader/门禁记录仍是旧版，验收证据链会自相矛盾
 
-- 定位：`qa/evidence/qa-gates.json:327` 的 G-FRESH-READER 仍是 Round 1；`docs/32-fresh-reader-fix-tracker.md:8-40` 全部写「待改」，而实际 UI/文案已经改过多轮。
+- 定位：`qa/evidence/qa-gates.json` 的 G-FRESH-READER 仍是 Round 1 记录（旧修复追踪表已因全部过时由 `docs/47` 审计删除），而实际 UI/文案已经改过多轮。
 - 影响：终验报告引用哪一份都会被问「和代码对得上吗」；不修追踪表就无法把 D 的结论落到门禁。
 - 责任线：**QA/文档**（把 Round 2/3/4 结果与修复状态回填，再跑 Round 4；不要用旧表当证据）。
 
@@ -373,8 +373,8 @@ node qa/scene-quality.mjs evidence/scene-shots   # 场景质量门（传截图�
 ```bash
 bash qa/desktop-smoke.sh                     # 内部用 :98；不得 :0
 bash scripts/acceptance.sh --real --ux --desktop
-# 注意：acceptance.sh 当前只编排 L01–L04 真实 e2e；L05–L09 用 §6.3 的串行循环补，
-# 报告里必须写清「acceptance.sh 覆盖到哪、手动补了哪几关」；L10 记 BLOCKED。
+# 注意：acceptance.sh 当前只编排 L1–L4 真实 e2e；L5–L10 用 §6.3 的串行循环补，
+# 报告里必须写清「acceptance.sh 覆盖到哪、手动补了哪几关」。2026-11-01：L01–L10 均已通过串行 e2e，L10 不再记 BLOCKED。
 ```
 
 ### 6.7 收尾检查
@@ -400,12 +400,19 @@ L10 目前只有设计（`content/levels/L10-two-weavers.md`）与 SDK 约定（
 > 在这五步可复现之前，终验报告里 L10 一律写 `BLOCKED（无运行时）`，不得用设计文档代替证据。
 
 
-## 8. 2026-10-31 最终状态（覆盖 §5 快照）
+## 8. 2026-10-31 最终状态（历史快照；最新见 §9）
 
 - 已修：L05–L10 Studio 中文引导完整；L10 双织偶真实运行时 + Studio 会话注入；L01–L10 真实 Paper e2e 全 PASS。
 - 已修：UOS U3 错误后重置、手记 replay 遮挡；主 Studio e2e 6/6。
 - 仍开放：
   - U4「只读屏幕文字完成 L01」已修并通过：测试先等「最后一步」再 playerBeat；UOS 4/4 PASS。
-  - 桌面安装包仍 Mock-only，发布物不能直接连真实 Paper；
+  - ~~桌面安装包仍 Mock-only~~（**历史；2026-11-01 已改为内置真实运行时**，见 §9）；发布物不能直接连真实 Paper（**已解决**）；
   - 挑战层 UI 入口未接；
   - 真实人类键鼠/多背景玩家验收尚未执行（当前为 AI 自动化 + UOS 4/4 代理）。
+
+## 9. 2026-11-01 试玩修复后的状态（覆盖 §8 剩余项）
+
+- 已修：目标面板改为 `LevelDef.progress` 唯一真值（L01–L10 每关 2–3 条、按 id 更新、逐条打勾）；玩家节拍严格线性（`result.playerBeatReady` 门控 + 插件 `playerBeat.activate` 前拦截提前右键）；切关/reset sandbox 纯净（全区域 checkpoint + 背包/实体清理）；L01 第 4 盏灯容错右键（站地面、手持灯笼对柱子右键即可，不用看柱顶）。证据：`it/l1-real.ts`–`it/l10-real.ts` 全 PASS、`evidence/playtest-fix/report.md`。
+- 已修（§8 旧边界）：桌面安装包已内置 Node/Java/Paper/插件/世界/真实引擎与织偶（不再 Mock-only）；L05–L10 Studio 中文引导完整；L10 双织偶真实运行时 + Studio 会话注入；UOS 4/4、Studio 主 e2e 6/6。
+- 仍开放：挑战层是说明卡、未接可玩会话；真人多背景盲测未执行；部分关卡真实客户端截图未全部重拍；Fresh Reader Round 4 未清零（G-FRESH-READER tracked fail）。
+- verifier 独立验收另发现两项真人体验遗留：L03 玩家出生点在钟楼结构内、L02 蛋糕目标格被塔基占用（`evidence/playtest-fix/report.md` §4）。

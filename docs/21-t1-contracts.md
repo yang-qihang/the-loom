@@ -3,6 +3,8 @@
 > 状态：v1 冻结（T1 开工基线）｜负责人：Lead｜最后更新：2026-10-31
 > 目的：让 MC 插件/织偶、Engine、Studio、内容、QA 五条线可以并行且能拼起来。
 > 规则：本文件的接口先于实现；变更走 ADR。
+> 历史说明（2026-11-01 文档审计）：本文件是 T1 开工契约基线，保留；2026-11-01 的 RPC/进度/玩家节拍变更以 `docs/46-playtest-fix-plan.md` §2 为准。
+> 上游：docs/07-architecture.md、docs/06-level-spec-system.md、docs/12-sdk-api-registry.md
 
 ## 1. T1 目标（唯一验收）
 

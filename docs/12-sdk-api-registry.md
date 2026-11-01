@@ -3,6 +3,8 @@
 > 状态：v1（冻结候选，CP1 后不再改名）｜负责人：Lead｜最后更新：2026-10-31
 > 用途：所有关卡 spec 的 `apiIntroduced` / `apiAllowlist`、`packages/sdk` 的 `.d.ts`、Monaco 补全、validator 的越级检查，都以本文件为准。
 > 规则：**改名 = 改契约**，需要 ADR + Lead 签字；关卡 spec 里出现 registry 之外的名字，validator 直接报错。
+> 历史说明（2026-11-01 文档审计）：本文件是设计期学生 API 命名契约；实现以 `packages/level-spec` 的 `LevelDef` 与内容代码为准，2026-11-01 的进度/玩家节拍接口不在本文件范围（见 docs/46 §2）。
+> 上游：docs/05-curriculum.md、docs/06-level-spec-system.md、content/levels/*.md
 
 ---
 

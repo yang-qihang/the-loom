@@ -3,6 +3,7 @@
 > 状态：v1 交付（供 Lead 写 `docs/08-ai-workflow.md`）｜负责人：scout-assurance｜最后更新：2026-10-31
 > 上游依赖：`BRIEF.md` §1/§2/§4/§6、`task-5`；与 `docs/09-execution-plan.md` §4/§8/§11 的口径对齐（角色数、CP0/CP1/CP2 时间、项目级 DoD 不变，本文补「每道门怎么跑、什么算失败」）。
 > 事实基准日：**2026-10-31**。版本号来自当日 `npm view` / Maven Central `maven-metadata.xml` / GitHub Release 实测；模型能力来自 DeepSeek 官方文档与 Hugging Face model card；判断标注「我的判断」。检索不到可靠来源的，明确写「工程假设」。
+> 历史说明（2026-11-01 文档审计）：本文是设计阶段调研记录，保留原始结论与来源；项目实现已落地，当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## TL;DR（10 条）
 

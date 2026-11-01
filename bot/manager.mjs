@@ -49,6 +49,7 @@ export class GolemBot {
     this.log = opts.log ?? ((line) => console.log(`[bot:${this.name}] ${line}`));
     this.bot = null;
     this._moveSeq = 0;
+    this._nudgeFlip = false;
   }
 
   get connected() {
@@ -193,7 +194,7 @@ export class GolemBot {
     if (cells.length === 0) {
       // 最后一招：目标本身不可站立时，走到它附近（GoalNear），真实玩家也会站到格子边再动手。
       try {
-        await withTimeout(this.bot.pathfinder.goto(new goals.GoalNear(x, this.groundY, z, 3)), 8_000, "MOVE_TIMEOUT", `织偶走到 (${x}, ${z}) 附近超时`);
+        await this._gotoWithRecovery(new goals.GoalNear(x, this.groundY, z, 3), 8_000, `(${x}, ${z}) 附近`);
         await this._sleep(100);
         return this.pos;
       } catch (err) {
@@ -207,12 +208,9 @@ export class GolemBot {
       if (remaining < 1_500) break;
       const attemptMs = Math.min(remaining, 7_000);
       try {
-        await withTimeout(
-          this.bot.pathfinder.goto(new goals.GoalBlock(cell.x, cell.y, cell.z)),
-          attemptMs,
-          "MOVE_TIMEOUT",
-          `织偶走到 (${x}, ${z}) 超时`,
-        );
+        // 逐格 goto 带「卡住恢复」：mineflayer 客户端在头部高度装饰方块拐角会被挤住并原地打转，
+        // 真玩家会贴边滑过去；这里检测到位置长时间不动就停 path、侧移+小跳，再重新寻路。
+        await this._gotoWithRecovery(new goals.GoalBlock(cell.x, cell.y, cell.z), attemptMs, `(${x}, ${z})`);
         await this._sleep(150);
         return this.pos;
       } catch (err) {
@@ -233,13 +231,82 @@ export class GolemBot {
     for (const tolerance of [3, 5]) {
       await stopAndSettle();
       try {
-        await withTimeout(this.bot.pathfinder.goto(new goals.GoalNear(x, this.groundY, z, tolerance)), 10_000, "MOVE_TIMEOUT", `织偶走到 (${x}, ${z}) 附近超时`);
+        await this._gotoWithRecovery(new goals.GoalNear(x, this.groundY, z, tolerance), 10_000, `(${x}, ${z}) 附近`);
         await this._sleep(120);
         return this.pos;
       } catch { /* try larger tolerance */ }
     }
     if (lastErr instanceof GolemError) throw lastErr;
     throw new GolemError("MOVE_FAILED", `织偶无法走到 (${x}, ${z})：${lastErr?.message ?? "no path"}`, lastErr);
+  }
+
+  /**
+   * pathfinder.goto 的「卡住检测 + 轻推恢复」包装。
+   *
+   * mineflayer 客户端在「头部高度」装饰方块（灯柱、栏杆、树干）的拐角会被压住：位置几乎不动，
+   * 服务端持续把玩家拉回同一点，普通 goto 会一直等到超时。真 MC 客户端会沿方块面滑过去；
+   * 这里检测 650ms 没位移就停 path、侧移一小步 + 小跳，然后重新寻路（最多 2 次），
+   * 之后交给调用方的候选格/GoalNear 兜底。
+   */
+  async _gotoWithRecovery(goal, timeoutMs, label) {
+    const deadline = Date.now() + Math.max(1_500, timeoutMs);
+    let nudges = 0;
+    let lastErr = null;
+    while (Date.now() < deadline) {
+      const gotoPromise = this.bot.pathfinder.goto(goal);
+      let settled = false;
+      gotoPromise.then(() => { settled = true; }).catch(() => { settled = true; });
+      const startPos = this.bot.entity.position.clone();
+      let lastPos = startPos.clone();
+      let stillSince = Date.now();
+      let outcome = "running";
+      while (Date.now() < deadline) {
+        await this._sleep(180);
+        if (settled) { outcome = "settled"; break; }
+        const pos = this.bot.entity.position;
+        if (Math.hypot(pos.x - lastPos.x, pos.z - lastPos.z) > 0.12) {
+          lastPos = pos.clone();
+          stillSince = Date.now();
+          continue;
+        }
+        if (Date.now() - stillSince > 650) { outcome = "stuck"; break; }
+      }
+      if (outcome === "settled") {
+        try { await gotoPromise; return; } catch (error) { lastErr = error; }
+      }
+      try { this.bot.pathfinder.stop(); this.bot.pathfinder.setGoal(null); } catch { /* ignore */ }
+      try { await gotoPromise; } catch (error) { lastErr = error; }
+      for (const control of ["forward", "back", "left", "right", "jump", "sprint"]) {
+        try { this.bot.setControlState(control, false); } catch { /* ignore */ }
+      }
+      if (outcome === "stuck" && nudges < 2 && Date.now() < deadline) {
+        nudges += 1;
+        await this._nudgeSideways(label);
+        continue;
+      }
+      break;
+    }
+    if (lastErr instanceof GolemError) throw lastErr;
+    throw new GolemError("MOVE_STUCK", `织偶走到 ${label} 时卡住了`, lastErr ?? undefined);
+  }
+
+  /** 侧移 + 小跳：把贴住方块拐角的角色挪开半步，再交给 pathfinder 重新规划。 */
+  async _nudgeSideways(label) {
+    const bot = this.bot;
+    if (!bot?.entity) return;
+    this._nudgeFlip = !this._nudgeFlip;
+    const side = this._nudgeFlip ? 1 : -1;
+    const baseYaw = bot.entity.yaw;
+    try { await bot.look(baseYaw + (side * Math.PI) / 2, Math.PI / 8, true); } catch { /* ignore */ }
+    bot.setControlState("forward", true);
+    await this._sleep(240);
+    bot.setControlState("jump", true);
+    await this._sleep(120);
+    bot.setControlState("jump", false);
+    bot.setControlState("forward", false);
+    try { await bot.look(baseYaw, 0, true); } catch { /* ignore */ }
+    await this._sleep(120);
+    this.log(`move recovery nudge ${side > 0 ? "right" : "left"} for ${label} at ${fmtPos(bot.entity.position)}`);
   }
 
   /**

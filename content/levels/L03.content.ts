@@ -207,6 +207,7 @@ if (s.trapped) {
     golem.place("bell", 0, 65, 0)
   }
 } else if (s.threat > 0) {
+  golem.moveTo(0, 0)
   golem.place("bell", 0, 65, 0)
   golem.moveTo(14, -6)
 }
@@ -264,6 +265,7 @@ golem.say("三夜平安，天亮收岗")
     mainTask: "先看上面三张剧本卡，按剧本守一夜：有威胁就敲钟，有人被困先救人，再把八根灯柱和四户人家的门口点亮，最后回艾拉身边报平安。",
     makeTask: "第四夜三件事一起来：先敲钟，再救人，最后把北门堵上。",
     playerBeat: "天亮后你亲手敲钟；灰崽敲的不算守夜钟声。",
+    playerBeatHint: "对着钟楼按右键敲钟，不用找钟本体",
     successCriteria: [
       {
         id: "read-scenario",
@@ -341,6 +343,38 @@ golem.say("三夜平安，天亮收岗")
       },
     ],
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值。
+  progress: [
+    {
+      id: "l03-read-scenario",
+      text: "看剧本：有威胁才敲守夜钟",
+      check: g => {
+        const s = scenarioOf(g);
+        const rang = agentPlaces(g, "bell").length > 0;
+        return s.threat > 0 ? rang : !rang;
+      },
+    },
+    {
+      id: "l03-night-handled",
+      text: "按剧本救人、点灯、堵好北门",
+      check: g => {
+        const s = scenarioOf(g);
+        const litLamps = posList(g.var("lamps")).every(p => g.block(p).id === C + "torch");
+        const litHouses = posList(g.var("houses")).every(p => g.block(p).id === C + "torch");
+        const rescueOk = !s.trapped || (nearAny(g, [pos(g.var("well"))]) && nearAny(g, [pos(g.var("door"))]));
+        const gateSealed = g.block(pos(g.var("gate"))).id === C + "cobblestone";
+        const gateOk = !s.gateOpen || gateSealed;
+        return litLamps && litHouses && rescueOk && gateOk;
+      },
+    },
+    {
+      id: "l03-dawn-bell",
+      text: "天亮后，你亲手敲响钟",
+      player: true,
+      check: g =>
+        g.events("block.place").some(e => e.actorType === "player" && samePos(e.pos, pos(g.var("bell")))),
+    },
+  ],
   phases: ["守夜判断", "补灯与救人", "堵门回村"],
 });
 

@@ -1,4 +1,4 @@
-import { LevelMetaSchema, type LevelMeta, type WorldEvent } from "../../protocol/src/index";
+import { LevelMetaSchema, type LevelMeta, type WorldEvent, type WorldSnapshot } from "../../protocol/src/index";
 
 export interface GraderApi {
   var(name: string): unknown;
@@ -20,6 +20,36 @@ export interface Trial {
   name: string;
   setup: Record<string, unknown>;
   assertions: Check[];
+}
+
+/**
+ * 玩家可见的任务进度（Studio 目标面板的每一条）。
+ *
+ * 这是「任务打勾」的唯一真值：引擎每次 verify（run / player-beat）用同一份快照评估，
+ * 发 `objective` 事件；Studio 按 id 更新，不再从 grading criteria 猜 index。
+ *
+ * `player: true` 的步骤必须由玩家在世界里亲手完成（织者之印）；它之前的所有步骤都 done
+ * 之后，玩家节拍才解锁（playerBeatReady）。没有 player 步骤的关卡，全部步骤 done 即解锁。
+ */
+export interface ProgressStep {
+  id: string;
+  /** 玩家可见文字（docs/20：≤20 字/条、每关 ≤3 条）。 */
+  text: string;
+  check: (g: GraderApi) => boolean;
+  player?: boolean;
+}
+
+export interface ProgressResult {
+  id: string;
+  text: string;
+  passed: boolean;
+  player: boolean;
+}
+
+export interface ProgressReport {
+  steps: ProgressResult[];
+  /** 织偶/世界侧已完成，轮到玩家亲手完成最后一步。 */
+  playerBeatReady: boolean;
 }
 
 export interface ChallengeDef {
@@ -48,9 +78,13 @@ export interface LevelDef {
     mainTask: string;
     makeTask: string;
     playerBeat: string;
+    /** 玩家节拍激活时在游戏内 actionbar 显示的短提示（≤24 字）；缺省用 playerBeat。 */
+    playerBeatHint?: string;
     successCriteria: Check[];
     hiddenTests: Trial[];
   };
+  /** 玩家可见的任务进度（≤3 条；Studio 目标面板按此逐条打勾）。 */
+  progress?: ProgressStep[];
   /** 可跳过的挑战层：不计星，但必须有独立判定（docs/20 §3c）。 */
   challenge?: ChallengeDef;
   /** 引导（docs/25）：世界状态 / 三句开场 / 为什么是你。 */
@@ -104,7 +138,67 @@ export function validateLevel(level: LevelDef): string[] {
     if (!level.narrative.worldState.trim() || !level.narrative.whyYou.trim()) issues.push("narrative.worldState/whyYou 不能为空");
   }
   if (level.id !== "L01" && (!level.phases || level.phases.length < 2)) issues.push("phases 至少 2 个（docs/20 §3c）");
+  if (level.progress) {
+    if (level.progress.length < 2 || level.progress.length > 3) issues.push("progress 必须是 2–3 条（docs/20 Q6/Q7：目标 ≤3 条）");
+    const ids = new Set<string>();
+    for (const step of level.progress) {
+      if (!step.id.trim()) issues.push("progress 存在空 id");
+      if (ids.has(step.id)) issues.push(`progress id 重复：${step.id}`);
+      ids.add(step.id);
+      if (!step.text.trim()) issues.push(`progress ${step.id} 文字为空`);
+    }
+    const firstPlayer = level.progress.findIndex(step => step.player === true);
+    if (firstPlayer === 0) issues.push("progress 第一条不能是 player 步骤（玩家节拍必须在织偶阶段之后）");
+  }
   return issues;
+}
+
+/** 从世界快照构造 grader API（评分与进度评估共用，保证同一真值）。 */
+export function makeGraderApi(snapshot: WorldSnapshot): GraderApi {
+  const key = (p: number[]): string => p.join(",");
+  const dist = (a: { pos: number[] }, b: { pos: number[] }): number =>
+    Math.hypot(a.pos[0] - b.pos[0], a.pos[1] - b.pos[1], a.pos[2] - b.pos[2]);
+  return {
+    var: name => snapshot.vars[name],
+    block: pos => ({ id: snapshot.blocks[key(pos)] ?? "minecraft:air" }),
+    events: type => snapshot.events.filter(e => e.type === type),
+    agent: id => {
+      const a = snapshot.agents[id];
+      if (!a) throw new Error(`未知 agent: ${id}`);
+      return { pos: a.pos };
+    },
+    npc: name => {
+      const n = snapshot.npcs?.[name];
+      if (!n) throw new Error(`未知 npc: ${name}`);
+      return { pos: n.pos };
+    },
+    withinRadius: (a, b, radius) => dist(a, b) <= radius,
+  };
+}
+
+/** 求值 progress（每条独立 try/catch；单条抛错按未完成处理，不拖垮整关）。 */
+export function evaluateProgress(level: LevelDef, snapshot: WorldSnapshot): ProgressReport {
+  const steps = level.progress ?? [];
+  const g = makeGraderApi(snapshot);
+  const results: ProgressResult[] = steps.map(step => {
+    let passed = false;
+    try {
+      passed = step.check(g) === true;
+    } catch {
+      passed = false;
+    }
+    return { id: step.id, text: step.text, passed, player: step.player === true };
+  });
+  const firstPlayer = results.findIndex(step => step.player);
+  const playerBeatReady =
+    results.length > 0 &&
+    (firstPlayer === -1 ? results.every(step => step.passed) : results.slice(0, firstPlayer).every(step => step.passed));
+  return { steps: results, playerBeatReady };
+}
+
+/** Studio 渲染目标面板所需的最小视图（函数不能过 JSON）。 */
+export function progressView(level: LevelDef): Array<{ id: string; text: string; player: boolean }> {
+  return (level.progress ?? []).map(step => ({ id: step.id, text: step.text, player: step.player === true }));
 }
 
 const samePos = (a: number[] | undefined, b: number[]): boolean =>
@@ -197,12 +291,20 @@ golem.moveTo(0, 6)
         text: "1→2→3 号灯顺序正确",
         check: g => {
           const lamps = lampsOf(g);
-          const order = g
-            .events("block.place")
-            .filter(e => e.actorType === "agent")
-            .filter(e => lamps.slice(0, 3).some(p => samePos(e.pos, p)))
-            .map(e => lamps.findIndex(p => samePos(e.pos, p)));
-          return order.length >= 3 && order.every((v, i) => i === 0 || v > order[i - 1]) && order[0] === 0;
+          // 只看每盏灯的「第一次」放置：玩家不重置直接再跑一遍时，重复的放置事件不能把顺序判错。
+          const firstOrder: number[] = [];
+          const seen = new Set<number>();
+          for (const event of g.events("block.place")) {
+            if (event.actorType !== "agent") continue;
+            const index = lamps.slice(0, 3).findIndex(p => samePos(event.pos, p));
+            if (index < 0 || seen.has(index)) continue;
+            seen.add(index);
+            firstOrder.push(index);
+          }
+          return (
+            firstOrder.length === 3 &&
+            firstOrder.every((value, i) => (i === 0 ? value === 0 : value > firstOrder[i - 1]))
+          );
         },
       },
     ],

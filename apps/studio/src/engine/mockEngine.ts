@@ -1,13 +1,18 @@
 import { grade } from "../../../../packages/grading/src/index";
-import { L01 } from "../../../../packages/level-spec/src/index";
+import { evaluateProgress, progressView, type ProgressReport } from "../../../../packages/level-spec/src/index";
+import { L01Content } from "../../../../content/levels/L01.content";
 import { MockWorld } from "../../../../packages/mockworld/src/index";
 import { chrome, fill, levelCards, levelCopy, resolveCopy } from "../copy";
 import type { EngineMode, LevelView, ReplHistoryEntry, ReplOutcome, RunResult, SessionPhase, StudioEngine, StudioEvent } from "../types";
 import { executeL01, parseL01, type RunnerError, type WorldLogEntry } from "../mock/l01Runner";
 
-const LAMPS = (L01.world.vars.lamps as number[][]) ?? [];
+/** 本地演示兜底只跑 L01；真值（progress/评分）与内容层共用同一份 LevelDef。 */
+const LEVEL = L01Content.def;
+const LAMPS = (LEVEL.world.vars.lamps as number[][]) ?? [];
 const L01_COPY = levelCopy("L01");
 const WORKBENCH = chrome.workbench;
+/** 旧内容（尚未声明 progress）回退 copy.goals 时用的历史目标 id，保持既有 DOM 契约。 */
+const LEGACY_GOAL_IDS = ["lamps", "fourth", "home"];
 
 const samePos = (a: number[] | undefined, b: number[]): boolean =>
   !!a && a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
@@ -58,14 +63,19 @@ export class MockEngine implements StudioEngine {
 
   async loadLevel(id: string): Promise<LevelView> {
     if (id !== "L01" || !L01_COPY) throw new Error(chrome.workbench.loadFailed);
+    const progress = progressView(LEVEL);
     return {
       id: "L01",
       title: L01_COPY.title,
-      act: L01.meta.act,
-      order: L01.meta.order,
-      starterCode: L01.code.starterCode,
-      referenceSolution: L01.code.referenceSolution,
-      objectives: L01_COPY.goals.map((text, index) => ({ id: ["lamps", "fourth", "home"][index], text })),
+      act: LEVEL.meta.act,
+      order: LEVEL.meta.order,
+      starterCode: LEVEL.code.starterCode,
+      referenceSolution: LEVEL.code.referenceSolution,
+      // 目标面板 id/text 与真引擎一致：优先 progress；旧内容回退 copy.goals。
+      objectives:
+        progress.length > 0
+          ? progress.map((step) => ({ id: step.id, text: step.text }))
+          : L01_COPY.goals.map((text, index) => ({ id: LEGACY_GOAL_IDS[index] ?? `goal-${index}`, text })),
       hints: L01_COPY.hints.map((hint) => resolveCopy(hint)),
     };
   }
@@ -76,7 +86,7 @@ export class MockEngine implements StudioEngine {
     const session: MockSession = {
       id,
       levelId,
-      world: new MockWorld({ ...L01.world.vars }),
+      world: new MockWorld({ ...LEVEL.world.vars }),
       phase: "loading",
       listeners: new Set(),
       cancelled: false,
@@ -113,7 +123,12 @@ export class MockEngine implements StudioEngine {
       }
       this.emitGoals(session);
       this.emit(session, { type: "log", line: WORKBENCH.runFinished });
-      this.setPhase(session, "awaiting-player-beat");
+      const progress = this.progressReport(session);
+      const ready = this.isPlayerBeatReady(progress);
+      // 与真引擎一致：run 结束发布一次失败结果（含 progress/playerBeatReady）。
+      // 只有织偶部分真的做完，才进入「轮到你」；否则回到 ready，Studio 显示还没完成的目标。
+      this.emit(session, { type: "result", result: this.resultOf(session) });
+      this.setPhase(session, ready ? "awaiting-player-beat" : "ready");
     })();
   }
 
@@ -129,7 +144,7 @@ export class MockEngine implements StudioEngine {
     const session = this.get(sessionId);
     session.cancelled = true;
     session.runToken += 1;
-    session.world = new MockWorld({ ...L01.world.vars });
+    session.world = new MockWorld({ ...LEVEL.world.vars });
     this.setPhase(session, "ready");
     this.emitGoals(session);
     this.emit(session, { type: "log", line: WORKBENCH.resetDone });
@@ -147,6 +162,7 @@ export class MockEngine implements StudioEngine {
     // MockWorld 没有真人输入，始终模拟；真实路径由 HttpEngine 传入 simulate=false。
     void simulate;
     const session = this.get(sessionId);
+    // 线性门控：只有 run 结束、且引擎真值判定织偶部分已完成，phase 才会是 awaiting-player-beat。
     if (session.phase !== "awaiting-player-beat") {
       this.emit(session, { type: "log", line: WORKBENCH.playerBeatEarly });
       return;
@@ -154,16 +170,7 @@ export class MockEngine implements StudioEngine {
     session.world.playerPlace("lantern", LAMPS[3] as [number, number, number]);
     this.emit(session, { type: "log", line: fill(WORKBENCH.logPlacePlayer, { 序号: 4 }) });
     this.emitGoals(session);
-
-    const report = grade(L01, session.world.snapshot("L01"));
-    const result: RunResult = {
-      passed: report.passed,
-      stars: report.stars,
-      criteria: report.criteria,
-      hidden: report.hidden,
-      failures: report.failures,
-    };
-    this.emit(session, { type: "result", result });
+    this.emit(session, { type: "result", result: this.resultOf(session) });
     this.setPhase(session, "graded");
   }
 
@@ -257,6 +264,12 @@ export class MockEngine implements StudioEngine {
   }
 
   private goalStates(session: MockSession): GoalState[] {
+    // 真值优先：与真引擎同源的 evaluateProgress（按 progress 声明逐条评估，id/text 稳定）。
+    const report = this.progressReport(session);
+    if (report.steps.length > 0) {
+      return report.steps.map((step) => ({ id: step.id, text: step.text, done: step.passed }));
+    }
+    // ---- 旧内容回退（尚未声明 progress）：沿用 copy.goals 文案 + 等价判定 ----
     const snapshot = session.world.snapshot("L01");
     const goalTexts = L01_COPY?.goals ?? ["", "", ""];
     const litByAgent = (index: number): boolean =>
@@ -274,10 +287,36 @@ export class MockEngine implements StudioEngine {
       !!agent && !!eira && Math.hypot(agent.pos[0] - eira.pos[0], agent.pos[1] - eira.pos[1], agent.pos[2] - eira.pos[2]) <= 4;
 
     return [
-      { id: "lamps", text: goalTexts[0], done: threeLamps },
-      { id: "fourth", text: goalTexts[1], done: fourth },
-      { id: "home", text: goalTexts[2], done: home },
+      { id: LEGACY_GOAL_IDS[0], text: goalTexts[0], done: threeLamps },
+      { id: LEGACY_GOAL_IDS[1], text: goalTexts[1], done: fourth },
+      { id: LEGACY_GOAL_IDS[2], text: goalTexts[2], done: home },
     ];
+  }
+
+  /** 用与真引擎同源的 evaluateProgress 评估当前 MockWorld 快照。 */
+  private progressReport(session: MockSession): ProgressReport {
+    return evaluateProgress(LEVEL, session.world.snapshot("L01"));
+  }
+
+  /** 旧内容没有 progress：保持旧行为（跑完即可进入玩家节拍）。 */
+  private isPlayerBeatReady(report: ProgressReport): boolean {
+    return report.steps.length > 0 ? report.playerBeatReady : true;
+  }
+
+  /** 与真引擎 ResultEvent 对齐的 RunResult（progress/playerBeatReady 供 Studio 目标面板与门控）。 */
+  private resultOf(session: MockSession): RunResult {
+    const snapshot = session.world.snapshot("L01");
+    const graded = grade(LEVEL, snapshot);
+    const progress = evaluateProgress(LEVEL, snapshot);
+    return {
+      passed: graded.passed,
+      stars: graded.stars,
+      criteria: graded.criteria,
+      hidden: graded.hidden,
+      failures: graded.failures,
+      progress: progress.steps.map((step) => ({ id: step.id, text: step.text, passed: step.passed })),
+      playerBeatReady: progress.steps.length > 0 ? progress.playerBeatReady : false,
+    };
   }
 }
 

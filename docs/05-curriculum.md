@@ -4,6 +4,7 @@
 > 上游：`docs/04-learning-design.md`（教学法依据）、`research/pedagogy-notes.md`（scout）
 > 下游：`content/levels/L01..L10-*.md`（关卡规格）、`docs/06-level-spec-system.md`（规格格式）
 > 规则：本文是关卡内容的唯一权威来源。关卡作者（level smith）**不得**改抽象顺序、新增/删除关卡，只能在 spec 里细化；发现问题写进 spec 的「开放问题」。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

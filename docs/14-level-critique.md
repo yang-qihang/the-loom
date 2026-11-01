@@ -5,6 +5,7 @@
 > 下游：`docs/06`（validator/契约修订由 14b 追踪）、各关 spec 修订、`docs/09`（Day1 排序）
 > 评审快照：**2026-10-31 12:08 CST**。13/13 关全部覆盖（L06 于 12:01 重写、L07 于 12:03 落盘、L05/L06/L07/L10/EP/Labs 于 12:04–12:05 修复；本报告按修复后版本重评，早期指出的 c-signs 矛盾、主任务超长、L10 API 超限、EP 回调 harness、LAB-T prereq 已确认修复，不再列为 blocking）。
 > 分工：`docs/14b-mechanical-validation.md` 负责机器/契约/格式（schema、registry、事件、primitive、预算脚本）；本报告只评**学习设计、盲读、梯度、动机与断言可靠性**，不重复 14b 的 FAIL。
+> 历史说明（2026-11-01 文档审计）：本文件是设计阶段的审计/评审记录，保留原始结论与日期；部分处置与当前实现已变化，当前以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## 0. TL;DR（8 条）
 

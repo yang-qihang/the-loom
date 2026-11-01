@@ -98,21 +98,14 @@ export function Workbench({
   }, []);
   const editorRef = useRef<CodeEditorHandle | null>(null);
   const codeRef = useRef("");
-  const objectiveIndexRef = useRef<Map<string, number>>(new Map());
+  /** progress id → 目标面板下标（loadLevel/reset 时由 level.objectives 重建；不再按事件到达顺序猜）。 */
+  const goalIndexRef = useRef<Map<string, number>>(new Map());
   const completedRef = useRef(false);
   const copy = level ? levelCopy(level.id) : null;
   const sky = skyFor(levelId);
   const isNightLevel = levelId === "L03" && !!copy?.trialUI;
-  const waitingForPlayer = !!result && result.criteria.length > 0 && !result.passed && phase !== "running";
-  // 等待玩家时，第三目标（回到艾拉）虽然物理上已完成，但流程上还没结束；先不显示为完成，避免 1/3 自相矛盾。
-  const displayGoals = waitingForPlayer
-    ? goals.map((goal, index) => (index === goals.length - 1 ? { ...goal, done: false } : goal))
-    : goals;
-  const L01_OBJECTIVE_INDEX: Record<string, number> = {
-    "four-lamps-lit": 0,
-    "player-lit-fourth": 1,
-    "golem-home": 2,
-  };
+  // 只有当引擎真值说「织偶部分已完成、轮到玩家」且这一轮还没通过时，才进入玩家节拍。
+  const waitingForPlayer = !!result?.playerBeatReady && !result.passed;
 
   useEffect(() => {
     let disposed = false;
@@ -128,6 +121,7 @@ export function Workbench({
         setLevel(loaded);
         setSessionId(session);
         codeRef.current = loaded.starterCode;
+        goalIndexRef.current = new Map(loaded.objectives.map((goal, index) => [goal.id, index]));
         setGoals(loaded.objectives.map((goal) => ({ id: goal.id, text: goal.text, done: false })));
       } catch (cause) {
         if (disposed) return;
@@ -158,30 +152,25 @@ export function Workbench({
         const line = sanitizeLog(event.line);
         if (line) setLogs((previous) => [...previous.slice(-59), line]);
       } else if (event.type === "objective") {
-        let index: number | undefined;
-        if (levelId === "L01") index = L01_OBJECTIVE_INDEX[event.id];
-        else {
-          index = objectiveIndexRef.current.get(event.id);
-          if (index === undefined) {
-            index = objectiveIndexRef.current.size;
-            objectiveIndexRef.current.set(event.id, index);
-          }
-        }
+        // 目标按 progress id 更新；id 映射来自 loadLevel/reset 时的 level.objectives（不再猜 index）。
+        const index = goalIndexRef.current.get(event.id);
         if (index === undefined) return;
         setGoals((previous) => {
-          if (!previous[index!]) return previous;
+          if (!previous[index]) return previous;
           const next = [...previous];
-          next[index!] = { ...next[index!], done: event.done };
+          next[index] = { ...next[index], done: event.done };
           return next;
         });
       } else if (event.type === "result") {
-        setResult(event.result.criteria.length > 0 ? event.result : null);
+        const hasResult = event.result.criteria.length > 0 || (event.result.progress?.length ?? 0) > 0;
+        setResult(hasResult ? event.result : null);
         if (event.result.passed) {
           void engine.inGame(sessionId, "灯河亮了。");
-        } else if (event.result.criteria.length > 0) {
+        } else if (hasResult && event.result.playerBeatReady) {
+          // 只有引擎说「轮到你」时才在游戏内提示，避免过早引导。
           void engine.inGame(sessionId, copy?.playerBeatUI ?? "轮到你完成最后一步。", "actionbar");
         }
-        if (event.result.criteria.length > 0) {
+        if (hasResult) {
           setLogs((previous) => (previous.length > 1 ? previous : [...previous, chrome.workbench.runFinished]));
         }
         if (event.result.passed) {
@@ -226,8 +215,9 @@ export function Workbench({
     setLogs([]);
     setHintIndex(0);
     setSettleOpen(false);
-    objectiveIndexRef.current.clear();
+    goalIndexRef.current.clear();
     if (level) {
+      goalIndexRef.current = new Map(level.objectives.map((goal, index) => [goal.id, index]));
       setGoals(level.objectives.map((goal) => ({ text: goal.text, done: false, id: goal.id })));
       editorRef.current?.setValue(level.starterCode);
       codeRef.current = level.starterCode;
@@ -257,8 +247,8 @@ export function Workbench({
 
   const playerBeat = useCallback(async () => {
     if (!sessionId) return;
-    // 真实 Paper 只确认玩家在世界里亲手完成的结果，不在后台代放方块。
-    await engine.playerBeat(sessionId, engine.mode === "mock");
+    // 由引擎决定模拟还是真实确认：mock 世界模拟，paper 世界只确认真人亲手完成的结果。
+    await engine.playerBeat(sessionId);
   }, [engine, sessionId]);
 
   const showHint = useCallback(() => {
@@ -327,11 +317,6 @@ export function Workbench({
     };
   }, [level, playerBeat, resetWorkbench, runProgram]);
 
-  const waitingLine = useMemo(() => {
-    if (!copy) return null;
-    return copy.playerBeatUI;
-  }, [copy]);
-
   const coachMessage = useMemo(() => {
     if (loadError) return chrome.workbench.loadFailed;
     if (!copy) return labels.loading;
@@ -339,8 +324,13 @@ export function Workbench({
     if (phase === "running") return copy.coachOpen[1] ?? copy.firstStep;
     if (result?.passed) return copy.coachReact[3] ?? copy.settle.stars;
     if (waitingForPlayer) return `轮到你了：${copy.playerBeatUI}`;
+    if (result) {
+      // 失败但还没轮到玩家：直接说还差哪一条（目标真值来自引擎 progress），不提前教玩家节拍。
+      const pending = goals.filter((goal) => !goal.done);
+      return `还没完成：${pending[0]?.text ?? copy.goals[0]}`;
+    }
     return copy.firstStep;
-  }, [copy, error, loadError, phase, result, waitingForPlayer, waitingLine]);
+  }, [copy, error, goals, loadError, phase, result, waitingForPlayer]);
   const hint = copy && hintIndex > 0 ? resolveCopy(copy.hints[hintIndex - 1]) : null;
 
   return (
@@ -518,16 +508,17 @@ export function Workbench({
             <section className="card goals" aria-label={a11y.goal}>
               <header className="card-head">
                 <h3 data-ui-panel-title>{labels.goalHeader}</h3>
-                <span className="card-tag">
-                  {displayGoals.filter((goal) => goal.done).length} / {displayGoals.length}
-                </span>
+                {/* 收起按钮放在计数左侧：计数胶囊保持在卡片头最右侧（像素皮肤：右侧留白与上下留白一致）。 */}
                 <button type="button" className="btn btn-quiet card-collapse" onClick={() => setGoalsOpen((open) => !open)} aria-expanded={goalsOpen}>
                   {goalsOpen ? "收起" : "展开"}
                 </button>
+                <span className="card-tag">
+                  {goals.filter((goal) => goal.done).length} / {goals.length}
+                </span>
               </header>
               {goalsOpen ? (
                 <div className="card-body">
-                  <GoalList goals={displayGoals} />
+                  <GoalList goals={goals} />
                 </div>
               ) : null}
             </section>

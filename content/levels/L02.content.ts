@@ -31,6 +31,34 @@ const blockOf = (e: { data?: Record<string, unknown> }): string => String(e.data
 const agentPlaces = (g: GraderApi, block: string) =>
   g.events("block.place").filter(e => e.actorType === "agent" && blockOf(e) === C + block);
 
+/**
+ * 分趟倒蛋的「第一轮事件」语义：每个蛋窝只认第一次收走、每次倒蛋只认真的带来新蛋的那次。
+ * 同一会话不重置连续跑两遍时，第二轮重复事件不会把趟数/顺序判错。
+ */
+function tripsOf(g: GraderApi): { perTrip: number[]; tail: number; firstRunClears: number } {
+  const perches = posList(g.var("eggPerches"));
+  const bucket = pos(g.var("bucket"));
+  const seen = new Set<number>();
+  const perTrip: number[] = [];
+  let sinceDelivery = 0;
+  for (const e of g.events("block.place")) {
+    if (e.actorType !== "agent") continue;
+    const block = blockOf(e);
+    if (block === C + "air") {
+      const index = perches.findIndex(p => samePos(e.pos, p));
+      if (index < 0 || seen.has(index)) continue;
+      seen.add(index);
+      sinceDelivery += 1;
+    } else if (block === C + "egg" && samePos(e.pos, bucket)) {
+      if (sinceDelivery > 0) {
+        perTrip.push(sinceDelivery);
+        sinceDelivery = 0;
+      }
+    }
+  }
+  return { perTrip, tail: sinceDelivery, firstRunClears: seen.size };
+}
+
 /** 内容层文案：术语统一为「带玻璃罩的窝 / 木桶 / 小筐」，错误固定「第 N 行 + 原因 + 可照抄写法」（FR-016/017/018/019）。 */
 export const L02_COPY: ContentCopy = {
   coordinateRule: "括号里的两个数是横着第几格、前后第几格；先写 moveTo 让灰崽走到窝边，再写 place 收蛋。",
@@ -107,7 +135,7 @@ const L02_BASE: LevelDef = defineLevel({
       hatchNests: [[-16, 65, 12], [-14, 65, 12], [-12, 65, 12]],
       barrel: [0, 65, -6], // 木桶
       bucket: [1, 65, -6], // 桶边的倒蛋位（倒一次记一次）
-      cakeTower: [4, 65, -6], // 玩家节拍：蛋糕塔
+      cakeTower: [4, 66, -6], // 玩家节拍：塔基上方的空气格（塔基 stone_bricks 在 [4,65,-6]），玩家要把蛋糕放进来
       eira: [0, 65, 6], // 艾拉
       need: 6, // 麦穗节要 6 枚蛋
     },
@@ -172,6 +200,7 @@ golem.say("木桶里有 6 枚蛋")
     mainTask: "麦穗节要做 6 个蛋糕，一个蛋糕一枚蛋。你先把 6 枚蛋收进木桶，蛋糕由艾拉来做。",
     makeTask: "第二间鸡舍：窝换了位置，你只改坐标，别动别的写法。",
     playerBeat: "你喂鸡催下最后一枚蛋，再把最后一只蛋糕放上蛋糕塔。",
+    playerBeatHint: "手持蛋糕，对准蛋糕塔按右键",
     successCriteria: [
       {
         id: "six-collected",
@@ -214,29 +243,11 @@ golem.say("木桶里有 6 枚蛋")
             id: "two-trips",
             text: "倒蛋至少两次，每次不超过 4 枚，合计 6 枚",
             check: g => {
-              const bucket = pos(g.var("bucket"));
               const perches = posList(g.var("eggPerches"));
-              const deliveries = g
-                .events("block.place")
-                .filter(e => e.actorType === "agent" && blockOf(e) === C + "egg" && samePos(e.pos, bucket))
-                .map(e => e.seq ?? 0)
-                .sort((a, b) => a - b);
-              const clears = g
-                .events("block.place")
-                .filter(e => e.actorType === "agent" && blockOf(e) === C + "air")
-                .filter(e => perches.some(p => samePos(e.pos, p)))
-                .map(e => e.seq ?? 0)
-                .sort((a, b) => a - b);
-              if (deliveries.length < 2) return false;
-              const perTrip: number[] = [];
-              let last = -1;
-              for (const d of deliveries) {
-                perTrip.push(clears.filter(s => s > last && s < d).length);
-                last = d;
-              }
-              const tail = clears.filter(s => s > last).length; // 倒完之后不该再收蛋
+              const { perTrip, tail, firstRunClears } = tripsOf(g);
               return (
-                deliveries.length >= 2 &&
+                firstRunClears === perches.length &&
+                perTrip.length >= 2 &&
                 perTrip.every(n => n >= 1 && n <= 4) &&
                 perTrip.reduce((a, b) => a + b, 0) === 6 &&
                 tail === 0
@@ -265,6 +276,44 @@ golem.say("木桶里有 6 枚蛋")
       },
     ],
   },
+  // 玩家可见任务进度：与 grading criteria/hiddenTests 共用同一份世界快照真值。
+  progress: [
+    {
+      id: "l02-six-eggs",
+      text: "让灰崽收 6 枚蛋，分趟倒进木桶",
+      check: g => {
+        const perches = posList(g.var("eggPerches"));
+        const cleared = agentPlaces(g, "air");
+        const { perTrip, tail, firstRunClears } = tripsOf(g);
+        return (
+          perches.every(p => g.block(p).id === C + "air" && cleared.some(e => samePos(e.pos, p))) &&
+          firstRunClears === perches.length &&
+          perTrip.length >= 2 &&
+          perTrip.every(n => n >= 1 && n <= 4) &&
+          perTrip.reduce((a, b) => a + b, 0) === 6 &&
+          tail === 0
+        );
+      },
+    },
+    {
+      id: "l02-hatch-intact",
+      text: "别动 3 个带玻璃罩的孵蛋窝",
+      check: g => posList(g.var("hatchNests")).every(p => g.block(p).id === C + "glass"),
+    },
+    {
+      id: "l02-report",
+      text: "回艾拉身边，把桶里的数报给她",
+      check: g => {
+        const home = g.withinRadius(g.agent("golem"), { pos: pos(g.var("eira")) }, 4);
+        const said = g.events("say").some(e => {
+          const text = String(e.data?.text ?? "");
+          const m = text.match(/桶[里内][^0-9]{0,6}(\d+)/);
+          return m !== null && Number(m[1]) === 6;
+        });
+        return home && said;
+      },
+    },
+  ],
   phases: ["两趟收蛋", "复查鸡舍", "回艾拉报数"],
 });
 
@@ -308,16 +357,18 @@ golem.say("趟完了，桶里 6 枚")`,
   check: g => {
     const perches = posList(g.var("eggPerches"));
     const hatch = posList(g.var("hatchNests"));
-    const bucket = pos(g.var("bucket"));
     const clears = agentPlaces(g, "air");
-    const deliveries = agentPlaces(g, "egg").filter(e => samePos(e.pos, bucket));
+    const trips = tripsOf(g);
     const said = g.events("say").some(e => {
       const text = String(e.data?.text ?? "");
       const m = text.match(/桶[里内][^0-9]{0,6}(\d+)/);
       return m !== null && Number(m[1]) === 6;
     });
     return (
-      deliveries.length === 1 &&
+      // 一趟搬完：第一轮事件里只出现一次倒蛋（不重置重跑的第二轮重复事件不计）。
+      trips.perTrip.length === 1 &&
+      trips.perTrip[0] === perches.length &&
+      trips.tail === 0 &&
       perches.every(p => clears.some(e => samePos(e.pos, p))) &&
       clears.every(e => perches.some(p => samePos(e.pos, p)) && !hatch.some(p => samePos(e.pos, p))) &&
       hatch.every(p => g.block(p).id === C + "glass") &&
@@ -390,10 +441,10 @@ export const L02Content: LevelContent & { challenge: LevelChallenge; copy: Conte
       blocks.push({ pos: [p[0], 64, p[2]], block: "hay_block" });
       blocks.push({ pos: p, block: "glass" });
     }
-    // 谷仓：地板 + 木桶 + 蛋糕塔座
+    // 谷仓：地板 + 木桶 + 蛋糕塔座（塔座 1 格 stone_bricks，塔座上方 cakeTower 保持空气给玩家放蛋糕）
     for (let x = -2; x <= 3; x++) blocks.push({ pos: [x, 64, -7], block: "oak_planks" });
     blocks.push({ pos: barrel, block: "barrel" });
-    blocks.push({ pos: tower, block: "stone_bricks" });
+    blocks.push({ pos: [tower[0], tower[1] - 1, tower[2]], block: "stone_bricks" });
     // 装饰（docs/19：灯笼/营火/花盆/栅栏，≥8 个非功能点）
     blocks.push({ pos: [-6, 65, 6], block: "lantern" });
     blocks.push({ pos: [3, 65, 2], block: "lantern" });

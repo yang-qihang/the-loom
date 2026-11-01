@@ -73,11 +73,13 @@ public final class LoomPlugin extends JavaPlugin {
                 case "session.begin" -> scene.begin(params);
                 case "session.finalize" -> scene.finalizeScene(params);
                 case "session.prepare" -> scene.prepare(params);
+                case "session.end" -> scene.endSession(params);
                 case "world.classify" -> scene.classify(params);
                 case "world.block" -> scene.blockAt(params);
+                case "world.blocks" -> scene.worldBlocks(params);
                 case "world.regionCount" -> scene.regionCount(params);
                 case "world.virtualPlace" -> scene.virtualPlace(params);
-                case "world.reset" -> scene.reset();
+                case "world.reset" -> scene.reset(params);
                 case "world.snapshot" -> scene.snapshot(params);
                 case "world.setBlocks" -> scene.setBlocks(params);
                 case "world.clearRegion" -> scene.clearRegion(params);
@@ -87,7 +89,11 @@ public final class LoomPlugin extends JavaPlugin {
                 case "entity.clear" -> scene.clearEntities(stringList(params.get("ids")));
                 case "player.teleport" -> scene.teleportPlayer(params);
                 case "player.give" -> scene.givePlayer(params);
+                case "player.inventory" -> scene.playerInventory(params);
                 case "player.place", "session.playerBeat" -> scene.playerPlace(params);
+                case "playerBeat.arm" -> scene.armPlayerBeat(params);
+                case "playerBeat.activate" -> scene.activatePlayerBeat(params);
+                case "playerBeat.status" -> scene.playerBeatStatus(params);
                 case "bots.set" -> scene.setBots(stringList(params.get("names")));
                 case "events.drain" -> scene.drainEvents(params);
                 case "agent.mark" -> scene.markAgentMove(params);

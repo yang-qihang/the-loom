@@ -1,6 +1,6 @@
 # 37 — Minecraft 客户端视觉基线（让中文和天空更好看）
 
-> 状态：可用｜最后更新：2026-10-31
+> 状态：可用｜负责人：Lead｜最后更新：2026-11-01｜上游：`docs/34-mc-visual-verification.md`、`scripts/mc-client-baseline.sh`
 
 游戏本身不启动 Minecraft 客户端，所以提供一次性/可重复的客户端基线脚本：
 

@@ -4,6 +4,9 @@ import { EngineUnavailableError } from "../types";
 
 const DEFAULT_BASE = "http://127.0.0.1:4317";
 
+/** 旧引擎（无 /api/levels/:id progress）回退 copy.goals 时用的历史目标 id，保持既有 DOM 契约。 */
+const LEGACY_GOAL_IDS = ["lamps", "fourth", "home"];
+
 /** 桌面壳可通过 `?engine=` 把真实 Paper 引擎地址传进来；缺省仍是本地 4317。 */
 function runtimeBase(): string {
   if (typeof window !== "undefined") {
@@ -41,6 +44,8 @@ interface RawEvent {
   criteria?: Criterion[];
   hidden?: Criterion[];
   failures?: string[];
+  progress?: Criterion[];
+  playerBeatReady?: boolean;
 }
 
 const criteriaOf = (value: unknown): Criterion[] =>
@@ -59,6 +64,7 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
   }
   if (raw.type === "result") {
     const payload = raw.result ?? raw;
+    const playerBeatReady = typeof payload.playerBeatReady === "boolean" ? payload.playerBeatReady : undefined;
     return {
       type: "result",
       result: {
@@ -67,6 +73,9 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
         criteria: criteriaOf(payload.criteria),
         hidden: criteriaOf(payload.hidden),
         failures: Array.isArray(payload.failures) ? payload.failures.map(String) : [],
+        // 旧引擎没有 progress/playerBeatReady：空数组/undefined 时 Studio 走兼容回退。
+        progress: criteriaOf(payload.progress),
+        ...(playerBeatReady !== undefined ? { playerBeatReady } : {}),
       },
     };
   }
@@ -112,9 +121,20 @@ export class HttpEngine implements StudioEngine {
         code?: { starterCode?: string; referenceSolution?: string };
       };
       starterCode?: string;
+      /** docs/46 §2.3：引擎给出的玩家可见任务进度（唯一真值）。 */
+      progress?: Array<{ id?: string; text?: string; player?: boolean }>;
     }>(`/api/levels/${id}`);
     const copy = levelCopy(id);
     const def = data.def ?? {};
+    const progress = (data.progress ?? []).filter(
+      (step): step is { id: string; text: string } => !!step && typeof step.id === "string" && step.id.length > 0,
+    );
+    // 目标面板 id/text 优先用引擎 progress；旧引擎没有 progress 时回退 copy.goals（兼容）。
+    const objectives = progress.length > 0
+      ? progress.map((step) => ({ id: step.id, text: String(step.text ?? "") }))
+      : copy
+        ? copy.goals.map((text, index) => ({ id: LEGACY_GOAL_IDS[index] ?? `goal-${index}`, text }))
+        : [];
     return {
       id,
       title: copy?.title ?? def.meta?.title?.zh ?? id,
@@ -122,7 +142,7 @@ export class HttpEngine implements StudioEngine {
       order: def.meta?.order ?? (Number(id.slice(1)) || 1),
       starterCode: data.starterCode ?? def.code?.starterCode ?? "",
       referenceSolution: def.code?.referenceSolution ?? "",
-      objectives: copy ? copy.goals.map((text, index) => ({ id: ["lamps", "fourth", "home"][index] ?? `goal-${index}`, text })) : [],
+      objectives,
       hints: copy ? copy.hints.map((hint) => resolveCopy(hint)) : [],
     };
   }
@@ -187,8 +207,11 @@ export class HttpEngine implements StudioEngine {
     await this.request("/api/reset", { method: "POST", body: JSON.stringify({ sessionId }) });
   }
 
-  async playerBeat(sessionId: string, simulate = true): Promise<void> {
-    await this.request("/api/player-beat", { method: "POST", body: JSON.stringify({ sessionId, simulate }) });
+  async playerBeat(sessionId: string, simulate?: boolean): Promise<void> {
+    // 不传 simulate → 由引擎按其世界模式决定（mock 模拟 / paper 只确认真实世界）；显式传才带上。
+    const body: Record<string, unknown> = { sessionId };
+    if (typeof simulate === "boolean") body.simulate = simulate;
+    await this.request("/api/player-beat", { method: "POST", body: JSON.stringify(body) });
   }
 
   async inGame(sessionId: string, text: string, kind: "title" | "actionbar" = "title"): Promise<void> {

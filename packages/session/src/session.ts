@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { WorldSnapshot } from "../../protocol/src/index";
 import type { Golem, World } from "../../sdk/src/index";
 import type { AgentActions, LevelContent, WorldPort } from "../../worldport/src/index";
+import { evaluateProgress } from "../../level-spec/src/index";
 import { grade, type CriterionResult } from "../../grading/src/index";
 import { runStudentSandboxed, StudentCodeError } from "../../runner/src/sandbox";
 import type { RunSdk, SandboxMultiAgentRuntime } from "../../runner/src/run";
@@ -17,6 +18,14 @@ export interface ResultEvent {
   criteria: CriterionResult[];
   hidden: CriterionResult[];
   failures: string[];
+  /**
+   * 玩家可见任务进度（Studio 目标面板的唯一真值；docs/46 §1.1）。
+   * 与 grading criteria 不同：steps 数量/顺序/文案由关卡 progress 声明，Studio 按 id 更新。
+   * 旧关卡（尚未声明 progress）为空数组，Studio 回退到 copy.goals。
+   */
+  progress: CriterionResult[];
+  /** 织偶/世界侧已完成，轮到玩家亲手完成最后一步（仅当关卡声明了 progress 才可能为 true）。 */
+  playerBeatReady: boolean;
   observedTick: number;
   /** 快照内容哈希（WorldDigest）。 */
   digest: string;
@@ -135,6 +144,8 @@ export class GameSession {
   #replHistory: ReplHistoryEntry[] = [];
   #replTimeoutMs: number;
   #runTimeoutMs: number;
+  /** 最近一次 verify 评估出的「织偶侧已完成、轮到玩家」；reset 后清零。 */
+  #playerBeatReady = false;
 
   constructor(
     id: string,
@@ -262,6 +273,8 @@ export class GameSession {
         criteria: [],
         hidden: [],
         failures: [messageOf(error)],
+        progress: [],
+        playerBeatReady: false,
         observedTick,
         digest: "",
         snapshotDigest: "",
@@ -323,7 +336,13 @@ export class GameSession {
     }
   }
 
-  /** 玩家节拍：默认模拟最后一步（Mock/无人测试）；confirmOnly=true 时只按真实世界状态评分。 */
+  /**
+   * 玩家节拍：默认模拟最后一步（Mock/无人测试）；confirmOnly=true 时只按真实世界状态评分。
+   *
+   * 线性门控（docs/46 §1.3）：引擎层保持可调用（未 ready 时照常执行并得到普通失败结果，
+   * 不抛异常），「轮到玩家」只在 result.playerBeatReady 为 true 时由 Studio 展示、由插件
+   * 在 playerBeat.activate 之前拦截提前的右键。这里只在 ready 后才激活游戏内提示。
+   */
   async playerBeat(confirmOnly = false): Promise<{ state: SessionState; result: ResultEvent | null }> {
     this.#assertAlive();
     if (this.mode === "repl") {
@@ -354,6 +373,19 @@ export class GameSession {
     const digest = digestSnapshot(snapshot);
     this.#issueSnapshot(runId, { epoch, digest });
     const report = this.gradeWithBinding(snapshot, { runId, epoch, digest });
+    // 任务进度真值：与评分共用同一份快照，逐条评估 progress（docs/46 §1.1）。
+    const progressSteps = this.level.def.progress ?? [];
+    const progressReport = evaluateProgress(this.level.def, snapshot);
+    const hasProgress = progressSteps.length > 0;
+    // 旧关卡没有 progress：result.playerBeatReady 必须为 false（Studio 不能凭它弹「轮到你」），
+    // 但引擎没有可用的解锁信号，行为保持旧版（玩家节拍调用不被额外限制）。
+    const playerBeatReady = hasProgress ? progressReport.playerBeatReady : false;
+    this.#playerBeatReady = hasProgress ? playerBeatReady : true;
+    const progress: CriterionResult[] = progressReport.steps.map(step => ({
+      id: step.id,
+      text: step.text,
+      passed: step.passed,
+    }));
     const result: ResultEvent = {
       type: "result",
       runId,
@@ -363,21 +395,46 @@ export class GameSession {
       criteria: report.criteria,
       hidden: report.hidden,
       failures: report.failures,
+      progress,
+      playerBeatReady,
       observedTick: snapshot.tick,
       digest,
       snapshotDigest: digest,
       source,
     };
     this.#lastResult = result;
-    for (const c of report.criteria) this.#emit({ type: "objective", id: c.id, text: c.text, done: c.passed });
+    if (hasProgress) {
+      for (const step of progressReport.steps) this.#emit({ type: "objective", id: step.id, text: step.text, done: step.passed });
+    } else {
+      // 兼容旧关卡：仍按 grading criteria 发 objective（Studio 按 copy.goals 回退展示）。
+      for (const c of report.criteria) this.#emit({ type: "objective", id: c.id, text: c.text, done: c.passed });
+    }
     if (report.passed) {
       this.#transition("PASSED");
     } else {
       this.#emitHint(report.failures);
       this.#transition("READY");
     }
+    // 只在织偶部分真正做完后，才激活玩家节拍（插件显示标记 + 允许完成）并给游戏内短提示。
+    if (playerBeatReady && !report.passed) await this.#activatePlayerBeat();
     this.#emit(result);
     return result;
+  }
+
+  /** 通知端口「轮到玩家」，并把本关的短提示打到 actionbar；任何一环失败都不阻断评分/事件流。 */
+  async #activatePlayerBeat(): Promise<void> {
+    try {
+      await this.port.activatePlayerBeat();
+    } catch {
+      // 插件不可用/尚未接线：不影响结果发布（Studio 仍会展示「轮到你」，插件也会在 ready 前拦截）。
+    }
+    const hint = this.level.def.task.playerBeatHint ?? this.level.def.task.playerBeat;
+    if (hint.trim().length === 0) return;
+    try {
+      await this.port.fx({ kind: "actionbar", text: hint });
+    } catch {
+      // Mock 世界没有 Minecraft 界面；真实 MC 不可用也不阻断。
+    }
   }
 
   /** 中止当前运行并撤销 capability（REQ-STOP-01 / REQ-RUN-01）。 */
@@ -402,6 +459,7 @@ export class GameSession {
     this.#ticket += 1;
     this.#activeRun = null;
     this.#lastResult = null;
+    this.#playerBeatReady = false;
     this.#commandIndex.clear();
     this.#issuedSnapshots.clear();
     this.#transition("PREPARING");

@@ -369,12 +369,29 @@ fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
     };
     let source_paper = real.join("paper");
     let paper_dir = loom_dir().join("runtime").join("paper");
+    // 世界布局版本：场景/重置语义升级后，老用户可写世界可能残留上一版的关卡方块与实体。
+    // 这里用包内 marker 与可写目录 marker 对比，不一致就换一份干净世界（进度/星级不存于世界）。
+    let bundled_world_version = fs::read_to_string(source_paper.join("world").join(".loom-world-version"))
+        .map(|value| value.trim().to_string())
+        .unwrap_or_default();
+    let current_world_version = fs::read_to_string(paper_dir.join("world").join(".loom-world-version"))
+        .map(|value| value.trim().to_string())
+        .unwrap_or_default();
+    let missing_runtime = !paper_dir.join("paper.jar").exists() || !paper_dir.join("world").exists();
+    let stale_world = !bundled_world_version.is_empty() && current_world_version != bundled_world_version;
     // AppImage 的挂载点只读；Paper 需要写 world/session.lock、日志、server.properties。
-    if !paper_dir.join("paper.jar").exists() || !paper_dir.join("world").exists() {
+    if missing_runtime || stale_world {
         if paper_dir.exists() {
             let _ = fs::remove_dir_all(&paper_dir);
         }
-        state.log("lifecycle", "首次启动：复制内置 Paper 世界到可写目录");
+        state.log(
+            "lifecycle",
+            if missing_runtime {
+                "首次启动：复制内置 Paper 世界到可写目录"
+            } else {
+                "世界布局升级：换成包内干净世界（旧关卡残留会污染 sandbox）"
+            },
+        );
         copy_dir_all(&source_paper, &paper_dir)?;
         for world in ["world", "world_nether", "world_the_end"] {
             let _ = fs::remove_file(paper_dir.join(world).join("session.lock"));

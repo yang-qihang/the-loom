@@ -4,6 +4,7 @@
 > 上游：`docs/05-curriculum.md` §8、`docs/06-level-spec-system.md` §5.4、`docs/07-architecture.md` §2/§3/§6、`docs/12-sdk-api-registry.md`、`content/levels/L01/L02/L08/L10`（v1 稿）、`docs/02-minecraft-stack.md`、`spikes/mc-bot-paper/`
 > 审查基准：L01/L02/L08/L10 对 v1 spec 原文审；L03–L07/L09 对 docs/05 §8 brief 审（最终 spec 落地后需按 §8 清单复核）。
 > 证据等级：**实测**＝本机 spike 跑过（`spikes/mc-bot-paper/`）；**API**＝Paper 26.1.2 Javadoc/Docs 确认存在但未运行；**无**＝确认无现成能力。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## 0. TL;DR（8 条）
 

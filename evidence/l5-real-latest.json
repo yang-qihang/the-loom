@@ -1,31 +1,29 @@
 {
  "task": "task-30 / T2-MC real L05 e2e",
  "level": "L05",
- "startedAt": "2026-10-31T11:27:09.628Z",
+ "startedAt": "2026-11-01T04:22:01.572Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem1271",
+  "botName": "Golem185",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 2862,
+   "tick": 9429,
    "phase": "ready",
    "prepared": true,
    "levelId": "L04",
-   "sessionId": "db841596-946e-4433-9514-ba35c41c513c",
-   "epoch": 8,
+   "sessionId": "08759913-b525-4bf0-a367-08b66a6018c8",
+   "epoch": 15,
    "groundY": 65,
    "bots": [
-    "Golem1048"
+    "Golem132"
    ],
-   "npcs": [
-    "eira"
-   ],
+   "npcs": [],
    "regionFrom": [
     -16,
     55,
@@ -53,8 +51,22 @@
    ],
    "tracked": 1812,
    "events": 0,
-   "lastResetHash": "sha256:1b782b27dfe603cea26f4927d4c8087420ec8a7299baeb04544af2665c6fd189",
-   "lastResetMs": 7
+   "checkpointSize": 5780,
+   "playerKit": {
+    "minecraft:pumpkin": 8
+   },
+   "playerBeat": {
+    "sessionId": "08759913-b525-4bf0-a367-08b66a6018c8",
+    "armed": false,
+    "active": false,
+    "hint": "",
+    "beats": [],
+    "items": [],
+    "done": false,
+    "ok": true
+   },
+   "lastResetHash": "sha256:d1957d5db7c8fab255b8ed3138c2fec988102369b6c050a0d1e709fc310d41a5",
+   "lastResetMs": 16
   }
  },
  "checks": {
@@ -69,7 +81,7 @@
   "L05.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 1859,
+    "prepareMs": 1951,
     "scene": {
      "groundY": 64,
      "arena": {
@@ -108,20 +120,20 @@
   "L05.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "c182c46f-9c05-42ba-bd73-e8725f717030",
-    "epoch": 9
+    "sessionId": "15a1a021-5cba-4590-ac0f-8f2051248e71",
+    "epoch": 16
    }
   },
   "L05.epoch-incremented": {
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "c182c46f-9c05-42ba-bd73-e8725f717030",
-     "epoch": 9
+     "sessionId": "15a1a021-5cba-4590-ac0f-8f2051248e71",
+     "epoch": 16
     },
     "second": {
-     "sessionId": "242ca39f-70f4-419e-8cad-412c73af9918",
-     "epoch": 10
+     "sessionId": "dd711deb-768b-4e47-8136-c4c9c847e97c",
+     "epoch": 17
     }
    }
   },
@@ -180,7 +192,7 @@
   "L05.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 28902
+    "referenceRunMs": 29557
    }
   },
   "L05.report-equals-mock": {
@@ -281,15 +293,15 @@
   "L05.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 12,
-    "b": 7
+    "a": 29,
+    "b": 12
    }
   },
   "L05.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:4f4766c2f4fc4617768bc293851c27fb36f3ba03889d38dc6a1ded9045534213",
-    "b": "sha256:4f4766c2f4fc4617768bc293851c27fb36f3ba03889d38dc6a1ded9045534213"
+    "a": "sha256:4ae76f3d5d3f8bd9a5dcf5fbd9318b57bdd68bae1db2adcc60c2cc7c74d34729",
+    "b": "sha256:4ae76f3d5d3f8bd9a5dcf5fbd9318b57bdd68bae1db2adcc60c2cc7c74d34729"
    }
   },
   "L05.reset-clears-events": {
@@ -387,88 +399,100 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "c182c46f-9c05-42ba-bd73-e8725f717030",
-   "epoch": 9
+   "sessionId": "15a1a021-5cba-4590-ac0f-8f2051248e71",
+   "epoch": 16
   },
   "second": {
-   "sessionId": "242ca39f-70f4-419e-8cad-412c73af9918",
-   "epoch": 10
+   "sessionId": "dd711deb-768b-4e47-8136-c4c9c847e97c",
+   "epoch": 17
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 12,
-   "hash": "sha256:4f4766c2f4fc4617768bc293851c27fb36f3ba03889d38dc6a1ded9045534213",
-   "tick": 3513,
-   "sessionId": "242ca39f-70f4-419e-8cad-412c73af9918",
-   "epoch": 10
+   "ms": 29,
+   "hash": "sha256:4ae76f3d5d3f8bd9a5dcf5fbd9318b57bdd68bae1db2adcc60c2cc7c74d34729",
+   "tick": 10100,
+   "sessionId": "dd711deb-768b-4e47-8136-c4c9c847e97c",
+   "epoch": 17,
+   "checkpointSize": 4457,
+   "restoredBlocks": 135,
+   "removedEntities": 4,
+   "playerKit": {
+    "minecraft:oak_sign": 8
+   }
   },
   "resetB": {
    "ok": true,
-   "ms": 7,
-   "hash": "sha256:4f4766c2f4fc4617768bc293851c27fb36f3ba03889d38dc6a1ded9045534213",
-   "tick": 3516,
-   "sessionId": "242ca39f-70f4-419e-8cad-412c73af9918",
-   "epoch": 10
+   "ms": 12,
+   "hash": "sha256:4ae76f3d5d3f8bd9a5dcf5fbd9318b57bdd68bae1db2adcc60c2cc7c74d34729",
+   "tick": 10104,
+   "sessionId": "dd711deb-768b-4e47-8136-c4c9c847e97c",
+   "epoch": 17,
+   "checkpointSize": 4457,
+   "restoredBlocks": 0,
+   "removedEntities": 5,
+   "playerKit": {
+    "minecraft:oak_sign": 8
+   }
   }
  },
  "actions": [
   {
    "action": "moveTo(1,6)",
-   "ms": 3323
+   "ms": 3424
   },
   {
    "action": "moveTo(1,3)",
-   "ms": 651
+   "ms": 702
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@0,63,0)",
-   "ms": 99
-  },
-  {
-   "action": "virtualPlace(minecraft:oak_slab@0,65,0)",
    "ms": 101
   },
   {
+   "action": "virtualPlace(minecraft:oak_slab@0,65,0)",
+   "ms": 97
+  },
+  {
    "action": "virtualPlace(minecraft:cobblestone@0,63,1)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@0,65,1)",
-   "ms": 50
+   "ms": 56
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@0,63,2)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@0,65,2)",
-   "ms": 51
+   "ms": 46
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@1,63,0)",
-   "ms": 49
-  },
-  {
-   "action": "virtualPlace(minecraft:oak_slab@1,65,0)",
    "ms": 51
   },
   {
-   "action": "virtualPlace(minecraft:cobblestone@1,63,1)",
+   "action": "virtualPlace(minecraft:oak_slab@1,65,0)",
    "ms": 49
   },
   {
+   "action": "virtualPlace(minecraft:cobblestone@1,63,1)",
+   "ms": 48
+  },
+  {
    "action": "virtualPlace(minecraft:oak_slab@1,65,1)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@1,63,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@1,65,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@2,63,0)",
@@ -480,7 +504,7 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@2,63,1)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@2,65,1)",
@@ -488,19 +512,19 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@2,63,2)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@2,65,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@0,64,0)",
-   "ms": 101
+   "ms": 100
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@1,64,0)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@2,64,0)",
@@ -520,11 +544,11 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@1,64,2)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@2,64,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_door@1,64,2)",
@@ -532,35 +556,35 @@
   },
   {
    "action": "virtualPlace(minecraft:red_bed@1,64,0)",
-   "ms": 100
+   "ms": 101
   },
   {
    "action": "virtualPlace(minecraft:glass_pane@0,64,1)",
-   "ms": 100
+   "ms": 99
   },
   {
    "action": "virtualPlace(minecraft:torch@2,64,1)",
-   "ms": 100
+   "ms": 101
   },
   {
    "action": "moveTo(13,6)",
-   "ms": 2100
+   "ms": 2149
   },
   {
    "action": "moveTo(13,3)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@12,63,0)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@12,65,0)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@12,63,1)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@12,65,1)",
@@ -572,15 +596,15 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@12,65,2)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@13,63,0)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@13,65,0)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@13,63,1)",
@@ -588,7 +612,7 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@13,65,1)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@13,63,2)",
@@ -600,11 +624,11 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@14,63,0)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@14,65,0)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@14,63,1)",
@@ -628,15 +652,15 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@13,64,0)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@14,64,0)",
-   "ms": 49
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@12,64,1)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@14,64,1)",
@@ -668,23 +692,23 @@
   },
   {
    "action": "virtualPlace(minecraft:torch@14,64,1)",
-   "ms": 50
-  },
-  {
-   "action": "moveTo(25,6)",
-   "ms": 2450
-  },
-  {
-   "action": "moveTo(25,3)",
    "ms": 51
   },
   {
+   "action": "moveTo(25,6)",
+   "ms": 2499
+  },
+  {
+   "action": "moveTo(25,3)",
+   "ms": 50
+  },
+  {
    "action": "virtualPlace(minecraft:cobblestone@24,63,0)",
-   "ms": 49
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@24,65,0)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@24,63,1)",
@@ -692,27 +716,27 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@24,65,1)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@24,63,2)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@24,65,2)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@25,63,0)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@25,65,0)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@25,63,1)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@25,65,1)",
@@ -720,15 +744,15 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@25,63,2)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:oak_slab@25,65,2)",
    "ms": 51
   },
   {
-   "action": "virtualPlace(minecraft:cobblestone@26,63,0)",
+   "action": "virtualPlace(minecraft:oak_slab@25,65,2)",
    "ms": 49
+  },
+  {
+   "action": "virtualPlace(minecraft:cobblestone@26,63,0)",
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_slab@26,65,0)",
@@ -760,11 +784,11 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@26,64,0)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@24,64,1)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@26,64,1)",
@@ -776,15 +800,15 @@
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@25,64,2)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:oak_planks@26,64,2)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:oak_door@25,64,2)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:red_bed@25,64,0)",
@@ -796,7 +820,7 @@
   },
   {
    "action": "virtualPlace(minecraft:torch@26,64,1)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "say(前三栋立起来了。)",
@@ -804,43 +828,43 @@
   },
   {
    "action": "moveTo(13,6)",
-   "ms": 1939
+   "ms": 1988
   },
   {
    "action": "moveTo(13,18)",
-   "ms": 2300
-  },
-  {
-   "action": "moveTo(13,20)",
-   "ms": 650
-  },
-  {
-   "action": "moveTo(1,20)",
    "ms": 2350
   },
   {
+   "action": "moveTo(13,20)",
+   "ms": 700
+  },
+  {
+   "action": "moveTo(1,20)",
+   "ms": 2499
+  },
+  {
    "action": "moveTo(1,17)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@0,63,14)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@0,65,14)",
-   "ms": 100
+   "ms": 101
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@0,63,15)",
-   "ms": 50
+   "ms": 52
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@0,65,15)",
-   "ms": 50
+   "ms": 48
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@0,63,16)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@0,65,16)",
@@ -848,11 +872,11 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@1,63,14)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@1,65,14)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@1,63,15)",
@@ -864,11 +888,11 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@1,63,16)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@1,65,16)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@2,63,14)",
@@ -876,7 +900,7 @@
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@2,65,14)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@2,63,15)",
@@ -888,7 +912,7 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@2,63,16)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:spruce_slab@2,65,16)",
@@ -896,11 +920,11 @@
   },
   {
    "action": "virtualPlace(minecraft:spruce_planks@0,64,14)",
-   "ms": 101
+   "ms": 99
   },
   {
    "action": "virtualPlace(minecraft:spruce_planks@1,64,14)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:spruce_planks@2,64,14)",
@@ -908,19 +932,19 @@
   },
   {
    "action": "virtualPlace(minecraft:spruce_planks@0,64,15)",
-   "ms": 50
-  },
-  {
-   "action": "virtualPlace(minecraft:spruce_planks@2,64,15)",
    "ms": 51
   },
   {
+   "action": "virtualPlace(minecraft:spruce_planks@2,64,15)",
+   "ms": 50
+  },
+  {
    "action": "virtualPlace(minecraft:spruce_planks@0,64,16)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:spruce_planks@1,64,16)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:spruce_planks@2,64,16)",
@@ -936,7 +960,7 @@
   },
   {
    "action": "virtualPlace(minecraft:glass_pane@0,64,15)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:torch@2,64,15)",
@@ -948,11 +972,11 @@
   },
   {
    "action": "moveTo(25,20)",
-   "ms": 4040
+   "ms": 4139
   },
   {
    "action": "moveTo(25,17)",
-   "ms": 650
+   "ms": 700
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@24,63,14)",
@@ -988,7 +1012,7 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@25,63,15)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:stone_brick_slab@25,65,15)",
@@ -996,7 +1020,7 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@25,63,16)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:stone_brick_slab@25,65,16)",
@@ -1020,19 +1044,19 @@
   },
   {
    "action": "virtualPlace(minecraft:cobblestone@26,63,16)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:stone_brick_slab@26,65,16)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:bricks@24,64,14)",
-   "ms": 100
+   "ms": 101
   },
   {
    "action": "virtualPlace(minecraft:bricks@25,64,14)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:bricks@26,64,14)",
@@ -1040,11 +1064,11 @@
   },
   {
    "action": "virtualPlace(minecraft:bricks@24,64,15)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:bricks@26,64,15)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:bricks@24,64,16)",
@@ -1056,11 +1080,11 @@
   },
   {
    "action": "virtualPlace(minecraft:bricks@26,64,16)",
-   "ms": 50
+   "ms": 51
   },
   {
    "action": "virtualPlace(minecraft:oak_door@25,64,16)",
-   "ms": 50
+   "ms": 49
   },
   {
    "action": "virtualPlace(minecraft:red_bed@25,64,14)",
@@ -1080,19 +1104,19 @@
   },
   {
    "action": "reset",
-   "ms": 119
+   "ms": 176
   },
   {
    "action": "reset",
-   "ms": 44
+   "ms": 61
   },
   {
    "action": "reset",
-   "ms": 53
+   "ms": 59
   }
  ],
  "errors": [],
- "prepareMs": 1859,
+ "prepareMs": 1951,
  "scene": {
   "groundY": 64,
   "arena": {
@@ -1126,7 +1150,7 @@
    "apprentice"
   ]
  },
- "referenceRunMs": 28902,
+ "referenceRunMs": 29557,
  "snapshot": {
   "blocks": {
    "-16,63,-24": "minecraft:moss_block",
@@ -4465,6 +4489,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-10-31T11:27:42.481Z",
+ "finishedAt": "2026-11-01T04:22:35.542Z",
  "ok": true
 }

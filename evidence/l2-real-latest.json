@@ -1,63 +1,64 @@
 {
  "task": "task-30 / T2-MC real L02 e2e",
  "level": "L02",
- "startedAt": "2026-10-31T11:25:23.387Z",
+ "startedAt": "2026-11-01T04:36:52.850Z",
  "environment": {
   "node": "v22.23.1",
   "host": "127.0.0.1",
   "mcPort": 25565,
   "rpcPort": 8765,
-  "botName": "Golem0812",
+  "botName": "Golem41",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 737,
-   "phase": "ready",
-   "prepared": true,
+   "tick": 49,
+   "phase": "idle",
+   "prepared": false,
    "levelId": "L01",
-   "sessionId": "4607c042-430c-4cbe-a25c-5c8aca0bb018",
-   "epoch": 2,
+   "sessionId": "",
+   "epoch": 0,
    "groundY": 11,
-   "bots": [
-    "Golem0511"
-   ],
-   "npcs": [
-    "eira",
-    "villager-0",
-    "villager-1",
-    "villager-2"
-   ],
+   "bots": [],
+   "npcs": [],
    "regionFrom": [
-    -33,
-    9,
-    -18
+    -20,
+    8,
+    -10
    ],
    "regionTo": [
-    19,
-    15,
-    34
+    8,
+    18,
+    28
    ],
    "agentSpawn": [
     0,
     11,
     0
    ],
-   "playerSpawn": [
-    2,
-    11,
-    4
-   ],
+   "playerSpawn": null,
    "center": [
-    -7,
+    -6,
     11,
-    8
+    9
    ],
-   "tracked": 1358,
+   "tracked": 0,
    "events": 0,
-   "lastResetHash": "sha256:db2707dedd0a1d3f7d40a6bdd10cf0fe26435785ab3f9a3e45e3fb8e79891fe4",
-   "lastResetMs": 5
+   "checkpointSize": 0,
+   "playerKit": {},
+   "playerBeat": {
+    "sessionId": "",
+    "armed": false,
+    "active": false,
+    "hint": "",
+    "beats": [],
+    "items": [],
+    "done": false,
+    "ok": true
+   },
+   "lastResetHash": "",
+   "lastResetMs": 0
   }
  },
  "checks": {
@@ -72,7 +73,7 @@
   "L02.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 1766,
+    "prepareMs": 2754,
     "scene": {
      "groundY": 65,
      "arena": {
@@ -87,7 +88,7 @@
        32
       ]
      },
-     "trackedCount": 1915,
+     "trackedCount": 1916,
      "kit": [
       "minecraft:egg"
      ],
@@ -108,20 +109,20 @@
   "L02.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "9a93e2b0-fa2b-488c-b0bf-80b77acce565",
-    "epoch": 3
+    "sessionId": "7c679a84-63c7-450f-9dfe-72c3a500f7c2",
+    "epoch": 1
    }
   },
   "L02.epoch-incremented": {
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "9a93e2b0-fa2b-488c-b0bf-80b77acce565",
-     "epoch": 3
+     "sessionId": "7c679a84-63c7-450f-9dfe-72c3a500f7c2",
+     "epoch": 1
     },
     "second": {
-     "sessionId": "0e7bbd38-9403-4945-afc2-378b1fde07ad",
-     "epoch": 4
+     "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+     "epoch": 2
     }
    }
   },
@@ -168,7 +169,7 @@
   "L02.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 23497
+    "referenceRunMs": 24257
    }
   },
   "L02.report-equals-mock": {
@@ -239,21 +240,21 @@
    "detail": {
     "agentPlaces": 8,
     "says": 5,
-    "blocks": 1914
+    "blocks": 1915
    }
   },
   "L02.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 11,
-    "b": 7
+    "a": 34,
+    "b": 33
    }
   },
   "L02.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:f1cbb5d53118134f0b17a00a0a22434e1cda4fa4efd1a7b7a705918310b3d6cd",
-    "b": "sha256:f1cbb5d53118134f0b17a00a0a22434e1cda4fa4efd1a7b7a705918310b3d6cd"
+    "a": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733",
+    "b": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733"
    }
   },
   "L02.reset-clears-events": {
@@ -327,36 +328,48 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "9a93e2b0-fa2b-488c-b0bf-80b77acce565",
-   "epoch": 3
+   "sessionId": "7c679a84-63c7-450f-9dfe-72c3a500f7c2",
+   "epoch": 1
   },
   "second": {
-   "sessionId": "0e7bbd38-9403-4945-afc2-378b1fde07ad",
-   "epoch": 4
+   "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+   "epoch": 2
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 11,
-   "hash": "sha256:f1cbb5d53118134f0b17a00a0a22434e1cda4fa4efd1a7b7a705918310b3d6cd",
-   "tick": 1273,
-   "sessionId": "0e7bbd38-9403-4945-afc2-378b1fde07ad",
-   "epoch": 4
+   "ms": 34,
+   "hash": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733",
+   "tick": 620,
+   "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+   "epoch": 2,
+   "checkpointSize": 5431,
+   "restoredBlocks": 8,
+   "removedEntities": 2,
+   "playerKit": {
+    "minecraft:cake": 8
+   }
   },
   "resetB": {
    "ok": true,
-   "ms": 7,
-   "hash": "sha256:f1cbb5d53118134f0b17a00a0a22434e1cda4fa4efd1a7b7a705918310b3d6cd",
-   "tick": 1276,
-   "sessionId": "0e7bbd38-9403-4945-afc2-378b1fde07ad",
-   "epoch": 4
+   "ms": 33,
+   "hash": "sha256:747cb1fc7dfd3492885b278daa5b136d68f273cf63e1dac1d8e1706783287733",
+   "tick": 623,
+   "sessionId": "164d37bd-7edc-4923-93cb-d8ac59b39c12",
+   "epoch": 2,
+   "checkpointSize": 5431,
+   "restoredBlocks": 0,
+   "removedEntities": 2,
+   "playerKit": {
+    "minecraft:cake": 8
+   }
   }
  },
  "actions": [
   {
    "action": "moveTo(-16,10)",
-   "ms": 3574
+   "ms": 3583
   },
   {
    "action": "virtualPlace(minecraft:air@-16,65,10)",
@@ -364,7 +377,7 @@
   },
   {
    "action": "moveTo(-14,10)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:air@-14,65,10)",
@@ -372,15 +385,15 @@
   },
   {
    "action": "moveTo(-12,10)",
-   "ms": 601
+   "ms": 700
   },
   {
    "action": "virtualPlace(minecraft:air@-12,65,10)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "moveTo(-10,10)",
-   "ms": 600
+   "ms": 700
   },
   {
    "action": "virtualPlace(minecraft:air@-10,65,10)",
@@ -388,15 +401,15 @@
   },
   {
    "action": "moveTo(1,-6)",
-   "ms": 3499
+   "ms": 3599
   },
   {
    "action": "virtualPlace(minecraft:egg@1,65,-6)",
-   "ms": 101
+   "ms": 102
   },
   {
    "action": "moveTo(-8,10)",
-   "ms": 3299
+   "ms": 3398
   },
   {
    "action": "virtualPlace(minecraft:air@-8,65,10)",
@@ -404,23 +417,23 @@
   },
   {
    "action": "moveTo(-6,10)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "virtualPlace(minecraft:air@-6,65,10)",
-   "ms": 49
+   "ms": 50
   },
   {
    "action": "moveTo(1,-6)",
-   "ms": 3300
+   "ms": 3400
   },
   {
    "action": "virtualPlace(minecraft:egg@1,65,-6)",
-   "ms": 51
+   "ms": 50
   },
   {
    "action": "moveTo(-16,12)",
-   "ms": 4149
+   "ms": 4150
   },
   {
    "action": "say(孵蛋窝一：玻璃罩还在)",
@@ -428,7 +441,7 @@
   },
   {
    "action": "moveTo(-14,12)",
-   "ms": 89
+   "ms": 88
   },
   {
    "action": "say(孵蛋窝二：玻璃罩还在)",
@@ -436,7 +449,7 @@
   },
   {
    "action": "moveTo(-12,12)",
-   "ms": 590
+   "ms": 739
   },
   {
    "action": "say(孵蛋窝三：玻璃罩还在)",
@@ -444,7 +457,7 @@
   },
   {
    "action": "moveTo(-14,12)",
-   "ms": 89
+   "ms": 90
   },
   {
    "action": "say(三个孵蛋窝都还在)",
@@ -452,7 +465,7 @@
   },
   {
    "action": "moveTo(0,6)",
-   "ms": 2741
+   "ms": 2890
   },
   {
    "action": "say(木桶里有 6 枚蛋)",
@@ -460,19 +473,19 @@
   },
   {
    "action": "reset",
-   "ms": 138
+   "ms": 155
   },
   {
    "action": "reset",
-   "ms": 45
+   "ms": 50
   },
   {
    "action": "reset",
-   "ms": 55
+   "ms": 71
   }
  ],
  "errors": [],
- "prepareMs": 1766,
+ "prepareMs": 2754,
  "scene": {
   "groundY": 65,
   "arena": {
@@ -487,7 +500,7 @@
     32
    ]
   },
-  "trackedCount": 1915,
+  "trackedCount": 1916,
   "kit": [
    "minecraft:egg"
   ],
@@ -503,7 +516,7 @@
    "hens"
   ]
  },
- "referenceRunMs": 23497,
+ "referenceRunMs": 24257,
  "snapshot": {
   "blocks": {
    "-24,64,-18": "minecraft:moss_block",
@@ -2412,7 +2425,7 @@
    "-14,65,12": "minecraft:glass",
    "-12,65,12": "minecraft:glass",
    "0,65,-6": "minecraft:barrel",
-   "4,65,-6": "minecraft:cake",
+   "4,65,-6": "minecraft:stone_bricks",
    "-6,65,6": "minecraft:lantern",
    "3,65,2": "minecraft:lantern",
    "2,65,6": "minecraft:campfire",
@@ -2420,6 +2433,7 @@
    "1,65,-6": "minecraft:egg",
    "0,65,2": "minecraft:hay_block",
    "2,65,8": "minecraft:oak_fence",
+   "4,66,-6": "minecraft:cake",
    "0,65,6": "minecraft:air"
   },
   "agents": {
@@ -2457,6 +2471,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-10-31T11:25:50.482Z",
+ "finishedAt": "2026-11-01T04:37:21.883Z",
  "ok": true
 }

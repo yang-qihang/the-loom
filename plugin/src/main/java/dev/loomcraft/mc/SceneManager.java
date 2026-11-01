@@ -13,16 +13,21 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.entity.Display.Billboard;
 import org.bukkit.util.Transformation;
+import org.bukkit.util.Vector;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -93,8 +98,45 @@ public final class SceneManager implements Listener {
     private int[] rawAgentSpawn = null;
     private int[] playerSpawn = null;
     private final List<String> kit = new ArrayList<>();
-    /** 内容层在玩家还没进服时发的道具，等玩家加入后补发。 */
-    private final Map<Material, Integer> pendingPlayerItems = new LinkedHashMap<>();
+    /**
+     * 本会话通过 {@code player.give} 发给真人玩家的道具清单（item id -> 数量）。
+     * begin/finalize/reset/onPlayerJoin 都按这份清单重建快捷栏：每关打开都是纯净背包，
+     * 切关/重进不会残留上一关道具，也不再需要 pendingPlayerItems 补发旧道具。
+     */
+    private final Map<String, Integer> playerKit = new LinkedHashMap<>();
+
+    /** 会话产物实体统一打 tag，begin/session.end 时按 tag 全局清理（覆盖进程重启残留）。 */
+    private static final String TAG_SESSION_ENTITY = "loom-session-entity";
+    private static final String TAG_ANNOTATION = "loom-annotation";
+    private static final String TAG_BEAT_MARKER = "loom-beat-marker";
+    /** 服务端本次启动后是否已做过一次高台沙盒带清扫。 */
+    private boolean startupCleanupDone = false;
+
+    /** finalize 时建立的 arena 全区域 checkpoint："x,y,z" -> 物理方块 id（只记非空气）。 */
+    private final Map<String, String> checkpoint = new TreeMap<>();
+
+    /** 玩家节拍（织者之印）的一条目标。 */
+    private static final class BeatSpec {
+        final int[] pos;
+        final String block;
+        boolean done = false;
+
+        BeatSpec(int[] pos, String block) {
+            this.pos = pos;
+            this.block = block;
+        }
+    }
+
+    /** 录制的玩家节拍：arm 静默登记，activate 后允许完成。 */
+    private final List<BeatSpec> beats = new ArrayList<>();
+    private final List<Entity> beatMarkers = new ArrayList<>();
+    /** 允许触发容错交互的手持道具（本关 player.give 记录）。 */
+    private final Set<String> beatItems = new LinkedHashSet<>();
+    /** 全部 beat 完成后应用的特效（time/weather）。 */
+    private final List<Map<String, Object>> beatEffects = new ArrayList<>();
+    private String beatHint = "";
+    private boolean beatArmed = false;
+    private boolean beatActive = false;
 
     private static final class NpcSpec {
         String id;
@@ -171,6 +213,9 @@ public final class SceneManager implements Listener {
         m.put("center", java.util.List.of(cx, (double) groundY, cz));
         m.put("tracked", tracked.size());
         m.put("events", events.size());
+        m.put("checkpointSize", checkpoint.size());
+        m.put("playerKit", new LinkedHashMap<>(playerKit));
+        m.put("playerBeat", playerBeatStatus(null));
         m.put("lastResetHash", lastResetHash);
         m.put("lastResetMs", lastResetMs);
         return m;
@@ -179,6 +224,16 @@ public final class SceneManager implements Listener {
     // ------------------------------------------------------------------ session phases
 
     public Map<String, Object> begin(Map<String, Object> params) {
+        long t0 = System.nanoTime();
+        // 服务端本次启动后的第一次 begin：专用沙盒世界里上一轮进程的残留（无 tag 的旧 NPC/标记/掉落物、
+        // 高台沙盒带里的关卡方块）全部清掉，老用户的脏世界不用换世界也能自愈。
+        if (!startupCleanupDone) {
+            startupCleanup();
+            startupCleanupDone = true;
+        }
+        // 清上一会话的物理场景 + 会话产物实体，再清内存状态：切关不把上一关世界带进下一关。
+        clearBox(regionFrom, regionTo);
+        removeAllNonPlayerEntities(false);
         clearAnnotations();
         sessionId = UUID.randomUUID().toString();
         epoch += 1;
@@ -207,9 +262,37 @@ public final class SceneManager implements Listener {
         agentName = "灰崽";
         playerSpawn = null;
         kit.clear();
+        playerKit.clear();
+        checkpoint.clear();
+        clearBeatState(true);
+        // 每关打开都是纯净快捷栏：内容层 afterPrepare 的 player.give 会重新发本关道具。
+        clearPlayerInventories();
         Map<String, Object> res = status();
         res.put("ok", true);
+        res.put("cleanupMs", (System.nanoTime() - t0) / 1_000_000L);
         return res;
+    }
+
+    /** 专用沙盒世界的启动清扫（每次服务端进程只做一次）。 */
+    private void startupCleanup() {
+        // 先扫高台沙盒带（y 56–92、x/z ±48）：这个循环会把带内 chunk 载入，
+        // 否则未加载 chunk 里上一轮进程留下的旧 NPC/标记实体扫不到。
+        int blocks = 0;
+        World world = world();
+        for (int x = -48; x <= 48; x++) {
+            for (int y = 56; y <= 92; y++) {
+                for (int z = -48; z <= 48; z++) {
+                    Block b = world.getBlockAt(x, y, z);
+                    if (!b.getType().isAir()) {
+                        b.setType(Material.AIR, false);
+                        blocks++;
+                    }
+                }
+            }
+        }
+        // chunk 载入后，专用沙盒世界里所有非玩家实体（旧 NPC/TextDisplay/掉落物）全是上一轮残留，清掉。
+        int entities = removeAllNonPlayerEntities(false);
+        plugin.getLogger().info("startup sandbox cleanup: entities=" + entities + " blocks=" + blocks);
     }
 
     /** Recorded content-painter calls, useful for layout derivation / debugging. */
@@ -295,9 +378,16 @@ public final class SceneManager implements Listener {
             applyWorldState();
             teleportActorsToSpawns();
             giveBotsKit();
+            // 玩家快捷栏也重建：每关 finalize 后只保留本关 playerKit。
+            clearPlayerInventories();
+            givePlayerKits();
+            // arena 全区域 checkpoint：reset 时按它全量还原（玩家挖掉的/乱放的都是这里记录的原始状态）。
+            buildCheckpoint();
             phase = "ready";
             prepared = true;
             clearEvents();
+            // 兼容接口契约里的 layout.playerBeat（正常流程由 paper-port 之后单独 playerBeat.arm）。
+            if (layout.get("playerBeat") instanceof Map<?, ?> beatSpec) armBeat(Json.map(beatSpec));
         } finally {
             building = false;
         }
@@ -453,6 +543,9 @@ public final class SceneManager implements Listener {
             applyWorldState();
             teleportActorsToSpawns();
             giveBotsKit();
+            clearPlayerInventories();
+            givePlayerKits();
+            buildCheckpoint();
             clearEvents();
             phase = "ready";
             prepared = true;
@@ -802,6 +895,7 @@ public final class SceneManager implements Listener {
         entity.customName(Component.text(name));
         entity.setCustomNameVisible(true);
         entity.setPersistent(true);
+        entity.addScoreboardTag(TAG_SESSION_ENTITY);
         if (entity instanceof Mob mob) {
             mob.setAI(false);
             mob.setSilent(true);
@@ -855,24 +949,71 @@ public final class SceneManager implements Listener {
         String requestedName = Json.str(params.get("name"), null);
         Material mat = Material.matchMaterial(norm(Json.str(params.get("item"), "minecraft:lantern")));
         if (mat == null) return err("bad_item");
-        int count = Json.num(params.get("count"), 1);
+        int count = Math.max(1, Json.num(params.get("count"), 1));
+        // 记录进本关 playerKit：begin/finalize/reset/onPlayerJoin 都按它重建快捷栏，
+        // 所以这里不再依赖 pendingPlayerItems——没人在线时也直接入册，玩家进服时补发。
+        playerKit.put(mat.getKey().toString(), count);
         int given = 0;
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (bots.contains(p.getName())) continue;
             if (requestedName != null && !requestedName.equals(p.getName())) continue;
-            p.getInventory().addItem(new ItemStack(mat, count));
-            p.getInventory().setItem(0, new ItemStack(mat, count));
-            p.sendMessage(Component.text("已把「" + mat.name().toLowerCase() + "」放进快捷栏第 1 格。"));
+            clearPlayerInventory(p);
+            givePlayerKit(p);
             given += 1;
         }
-        if (given == 0) pendingPlayerItems.merge(mat, count, Integer::sum);
         Map<String, Object> res = Json.obj();
         res.put("ok", true);
         res.put("gave", mat.getKey().toString());
         res.put("count", count);
         res.put("players", given);
+        res.put("kit", new LinkedHashMap<>(playerKit));
         if (given == 0) res.put("queued", true);
         return res;
+    }
+
+    /** 清空所有在线非 bot 玩家的背包（保留快捷栏纯净）。 */
+    private void clearPlayerInventories() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!bots.contains(p.getName())) clearPlayerInventory(p);
+        }
+    }
+
+    private static void clearPlayerInventory(Player p) {
+        p.getInventory().clear();
+        p.getInventory().setItemInOffHand(null);
+    }
+
+    /** 按本关 playerKit 给所有在线非 bot 玩家补道具。 */
+    private void givePlayerKits() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (!bots.contains(p.getName())) givePlayerKit(p);
+        }
+    }
+
+    private void givePlayerKit(Player p) {
+        int slot = 0;
+        for (Map.Entry<String, Integer> entry : playerKit.entrySet()) {
+            Material mat = Material.matchMaterial(entry.getKey());
+            if (mat == null || mat == Material.AIR) continue;
+            ItemStack stack = new ItemStack(mat, Math.max(1, entry.getValue()));
+            if (slot == 0) p.getInventory().setItem(0, stack);
+            else p.getInventory().addItem(stack);
+            slot += 1;
+        }
+        if (slot > 0) p.getInventory().setHeldItemSlot(0);
+    }
+
+    /** reset/begin 后把非 bot 玩家放回基准位置。 */
+    private void resetPlayersToSpawn() {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (bots.contains(p.getName())) continue;
+            clearPlayerInventory(p);
+            givePlayerKit(p);
+            p.setGameMode(GameMode.SURVIVAL);
+            if (playerSpawn != null) {
+                p.teleport(new Location(world(), playerSpawn[0] + 0.5, playerSpawn[1], playerSpawn[2] + 0.5));
+            }
+        }
     }
 
     public Map<String, Object> setBots(List<String> names) {
@@ -902,23 +1043,319 @@ public final class SceneManager implements Listener {
         return res;
     }
 
+    // ------------------------------------------------------------------ player beat（织者之印）
+
+    /**
+     * 静默登记玩家节拍：只记录目标与允许道具，不显示标记、不允许完成。
+     * paper-port 在 prepare 里以 recording 模式执行 content.playerBeat 后调用。
+     */
+    public Map<String, Object> armPlayerBeat(Map<String, Object> params) {
+        checkSession(params);
+        Map<String, Object> res = armBeat(params);
+        res.put("ok", true);
+        return res;
+    }
+
+    private Map<String, Object> armBeat(Map<String, Object> params) {
+        clearBeatState(true);
+        for (Object o : Json.list(params.get("beats"))) {
+            Map<String, Object> beat = Json.map(o);
+            int[] pos = Json.vec3(beat.get("pos"));
+            String block = norm(Json.str(beat.get("block"), "minecraft:air"));
+            if (block.equals("minecraft:air")) continue;
+            beats.add(new BeatSpec(pos, block));
+            tracked.add(key(pos));
+        }
+        for (Object o : Json.list(params.get("items"))) {
+            String item = Json.str(o, null);
+            if (item != null && !item.isBlank()) beatItems.add(norm(item));
+        }
+        beatEffects.clear();
+        for (Object o : Json.list(params.get("effects"))) {
+            Map<String, Object> effect = Json.map(o);
+            if (!effect.isEmpty()) beatEffects.add(effect);
+        }
+        beatHint = Json.str(params.get("hint"), "");
+        beatArmed = !beats.isEmpty();
+        beatActive = false;
+        // arm 在 afterPrepare 之后：此时场景才算最终（多 agent 起点等），刷新 checkpoint。
+        if (prepared) buildCheckpoint();
+        Map<String, Object> res = Json.obj();
+        res.put("armed", beatArmed);
+        res.put("beats", beats.size());
+        res.put("items", new ArrayList<>(beatItems));
+        return res;
+    }
+
+    /** 引擎判定 playerBeatReady 后调用：显示发光标记 + actionbar 提示，并允许完成。 */
+    public Map<String, Object> activatePlayerBeat(Map<String, Object> params) {
+        checkSession(params);
+        if (!beatArmed || beats.isEmpty()) {
+            Map<String, Object> res = err("player_beat_not_armed");
+            res.put("ok", false);
+            return res;
+        }
+        clearBeatMarkers();
+        beatActive = true;
+        for (int i = 0; i < beats.size(); i++) {
+            if (!beats.get(i).done) spawnBeatMarker(i, beats.get(i));
+        }
+        String hint = beatHint.isBlank() ? "轮到你了：对准发光标记按右键" : beatHint;
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (bots.contains(p.getName())) continue;
+            p.sendActionBar(Component.text(hint));
+            p.playSound(p.getLocation(), "minecraft:block.note_block.chime", 1.0f, 1.2f);
+        }
+        Map<String, Object> res = beatStatusMap();
+        res.put("ok", true);
+        res.put("hint", hint);
+        plugin.getLogger().info("player beat activated: session=" + sessionId + " beats=" + beats.size());
+        return res;
+    }
+
+    /** 调试/验收：armed/active/每条 beat 的完成状态。 */
+    public Map<String, Object> playerBeatStatus(Map<String, Object> params) {
+        checkSession(params);
+        Map<String, Object> res = beatStatusMap();
+        res.put("ok", true);
+        return res;
+    }
+
+    private Map<String, Object> beatStatusMap() {
+        Map<String, Object> m = Json.obj();
+        m.put("sessionId", sessionId);
+        m.put("armed", beatArmed);
+        m.put("active", beatActive);
+        m.put("hint", beatHint);
+        List<Object> list = new ArrayList<>();
+        boolean allDone = !beats.isEmpty();
+        for (BeatSpec beat : beats) {
+            Map<String, Object> entry = Json.obj();
+            entry.put("pos", Json.vecList(beat.pos));
+            entry.put("block", beat.block);
+            entry.put("done", beat.done);
+            list.add(entry);
+            if (!beat.done) allDone = false;
+        }
+        m.put("beats", list);
+        m.put("items", new ArrayList<>(beatItems));
+        m.put("done", allDone);
+        return m;
+    }
+
+    /** 引擎 dispose 会话时调用：清 NPC/标注/标记实体（方块留给下一次 begin 清）。 */
+    public Map<String, Object> endSession(Map<String, Object> params) {
+        checkSession(params);
+        for (Entity e : npcEntities.values()) {
+            if (e.isValid()) e.remove();
+        }
+        npcEntities.clear();
+        clearBeatState(true);
+        int purged = removeAllNonPlayerEntities(false);
+        Map<String, Object> res = Json.obj();
+        res.put("ok", true);
+        res.put("purged", purged);
+        return res;
+    }
+
+    // ------------------------------------------------------------------ player beat helpers
+
+    private int beatIndexAt(int[] pos) {
+        String k = key(pos);
+        for (int i = 0; i < beats.size(); i++) {
+            if (key(beats.get(i).pos).equals(k)) return i;
+        }
+        return -1;
+    }
+
+    /** 容错交互：手持本关道具 + 目标 6 格内 + 视线与目标方向点积 ≥ 0.7。 */
+    private boolean toleranceMatch(Player p, BeatSpec beat) {
+        ItemStack hand = p.getInventory().getItemInMainHand();
+        if (hand == null || hand.getType().isAir()) return false;
+        String held = hand.getType().getKey().toString();
+        if (!beatItems.contains(held) && !held.equals(beat.block)) return false;
+        Location eye = p.getEyeLocation();
+        Vector toTarget = new Vector(
+                beat.pos[0] + 0.5 - eye.getX(),
+                beat.pos[1] + 0.5 - eye.getY(),
+                beat.pos[2] + 0.5 - eye.getZ());
+        double distance = toTarget.length();
+        if (distance > 6.0 || distance < 0.01) return false;
+        return eye.getDirection().dot(toTarget.normalize()) >= 0.7;
+    }
+
+    /** 完成一条 beat：必要时把方块放到目标坐标，发 block.place（actorType=player），给反馈。 */
+    private void completeBeat(int index, Player p, String how) {
+        BeatSpec beat = beats.get(index);
+        if (beat.done) return;
+        beat.done = true;
+        removeBeatMarker(index);
+        String block = beat.block;
+        boolean placed = false;
+        Block target = world().getBlockAt(beat.pos[0], beat.pos[1], beat.pos[2]);
+        // 只有「真实方块 + 目标当前是空气」才由插件落块；交互型目标（钟/拉杆/笼门/护符盒）保持原方块。
+        // 虚拟物品（loom_thread/potion）不是方块：只发事件+特效，不动世界。
+        if (isBlockMaterial(block) && target.getType().isAir()) {
+            target.setType(physicalMaterial(block), false);
+            String physicalId = target.getType().getKey().toString();
+            if (!block.equals(physicalId)) alias.put(key(beat.pos), block);
+            else alias.remove(key(beat.pos));
+            placed = true;
+        }
+        tracked.add(key(beat.pos));
+        placedPositions.add(key(beat.pos));
+        emit("block.place", p.getName(), "player", beat.pos, Map.of("block", block));
+        Location at = new Location(world(), beat.pos[0] + 0.5, beat.pos[1] + 0.6, beat.pos[2] + 0.5);
+        world().playSound(at, "minecraft:block.note_block.chime", 1.2f, 1.4f);
+        world().spawnParticle(org.bukkit.Particle.END_ROD, at, 18, 0.3, 0.4, 0.3, 0.01);
+        int remaining = 0;
+        for (BeatSpec other : beats) if (!other.done) remaining++;
+        if (remaining > 0) {
+            p.sendActionBar(Component.text("织者之印 · 已记下（还剩 " + remaining + " 处）"));
+            return;
+        }
+        applyBeatEffects();
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (bots.contains(other.getName())) continue;
+            other.showTitle(net.kyori.adventure.title.Title.title(
+                    Component.text("最后一步完成"), Component.text("织者之印 · 已写入世界")));
+            other.playSound(other.getLocation(), "minecraft:ui.toast.challenge_complete", 1.0f, 1.0f);
+        }
+        plugin.getLogger().info("player beat complete: beats=" + beats.size() + " actor=" + p.getName()
+                + " via=" + how + " placed=" + placed);
+    }
+
+    private void applyBeatEffects() {
+        World world = world();
+        for (Map<String, Object> effect : beatEffects) {
+            String kind = Json.str(effect.get("kind"), "");
+            if (kind.equals("time")) {
+                world.setTime(Json.num(effect.get("ticks"), timeTicks));
+            } else if (kind.equals("weather")) {
+                String value = Json.str(effect.get("weather"), "clear");
+                world.setStorm(value.equals("rain") || value.equals("thunder"));
+                world.setThundering(value.equals("thunder"));
+            }
+        }
+    }
+
+    private void spawnBeatMarker(int index, BeatSpec beat) {
+        World world = world();
+        boolean targetAir = world.getBlockAt(beat.pos[0], beat.pos[1], beat.pos[2]).getType().isAir();
+        Location loc = new Location(world, beat.pos[0] + 0.5, beat.pos[1] + (targetAir ? 0.25 : 1.25), beat.pos[2] + 0.5);
+        ItemDisplay display = world.spawn(loc, ItemDisplay.class);
+        Material icon = Material.matchMaterial(beat.block);
+        if (icon == null || icon == Material.AIR) icon = Material.STRING;
+        display.setItemStack(new ItemStack(icon));
+        display.setBillboard(Billboard.CENTER);
+        display.setGlowing(true);
+        display.setViewRange(64f);
+        display.setPersistent(false);
+        display.setTransformation(new Transformation(new Vector3f(0f, 0f, 0f), new AxisAngle4f(0f, 0f, 0f, 1f),
+                new Vector3f(1.5f, 1.5f, 1.5f), new AxisAngle4f(0f, 0f, 0f, 1f)));
+        display.addScoreboardTag(TAG_BEAT_MARKER);
+        while (beatMarkers.size() <= index) beatMarkers.add(null);
+        beatMarkers.set(index, display);
+    }
+
+    private void removeBeatMarker(int index) {
+        if (index < beatMarkers.size()) {
+            Entity marker = beatMarkers.get(index);
+            if (marker != null && marker.isValid()) marker.remove();
+            beatMarkers.set(index, null);
+        }
+    }
+
+    private void clearBeatMarkers() {
+        for (Entity marker : beatMarkers) {
+            if (marker != null && marker.isValid()) marker.remove();
+        }
+        beatMarkers.clear();
+        for (World w : Bukkit.getWorlds()) {
+            for (Entity e : w.getEntities()) {
+                if (!(e instanceof Player) && e.getScoreboardTags().contains(TAG_BEAT_MARKER)) e.remove();
+            }
+        }
+    }
+
+    private void clearBeatState(boolean clearArmed) {
+        clearBeatMarkers();
+        for (BeatSpec beat : beats) beat.done = false;
+        beatActive = false;
+        if (clearArmed) {
+            beats.clear();
+            beatItems.clear();
+            beatEffects.clear();
+            beatHint = "";
+            beatArmed = false;
+        }
+    }
+
+    /** 方块/物品判定：虚拟物品（loom_thread/potion）不是方块。 */
+    private static boolean isBlockMaterial(String requested) {
+        Material mat = Material.matchMaterial(requested);
+        return mat != null && mat.isBlock();
+    }
+
+    // ------------------------------------------------------------------ debug / acceptance RPC
+
+    /** 调试/验收：所有在线非 bot 玩家的背包物品名 + 数量。 */
+    public Map<String, Object> playerInventory(Map<String, Object> params) {
+        List<Object> players = new ArrayList<>();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (bots.contains(p.getName())) continue;
+            List<Object> items = new ArrayList<>();
+            for (ItemStack stack : p.getInventory().getContents()) {
+                if (stack == null || stack.getType().isAir()) continue;
+                Map<String, Object> item = Json.obj();
+                item.put("item", stack.getType().getKey().toString());
+                item.put("count", stack.getAmount());
+                items.add(item);
+            }
+            Map<String, Object> entry = Json.obj();
+            entry.put("name", p.getName());
+            entry.put("items", items);
+            players.add(entry);
+        }
+        Map<String, Object> res = Json.obj();
+        res.put("ok", true);
+        res.put("players", players);
+        res.put("playerKit", new LinkedHashMap<>(playerKit));
+        return res;
+    }
+
+    /** 调试/验收：批量读方块 id（先查虚拟方块别名，再读物理方块）。 */
+    public Map<String, Object> worldBlocks(Map<String, Object> params) {
+        checkSession(params);
+        World world = world();
+        Map<String, Object> blocks = new LinkedHashMap<>();
+        for (Object o : Json.list(params.get("positions"))) {
+            int[] pos = Json.vec3(o);
+            String k = key(pos);
+            String id = alias.get(k);
+            if (id == null) id = world.getBlockAt(pos[0], pos[1], pos[2]).getType().getKey().toString();
+            blocks.put(k, id);
+        }
+        Map<String, Object> res = Json.obj();
+        res.put("ok", true);
+        res.put("blocks", blocks);
+        return res;
+    }
+
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (!prepared) return;
         Player p = event.getPlayer();
         if (bots.contains(p.getName())) return;
+        // 进服先清空背包再发本关 playerKit：不补发跨关旧道具，也不发“第 4 盏灯在哪”这类提前提示
+        // （提前提示只允许由 playerBeat.activate 在引擎判定 ready 后触发）。
+        clearPlayerInventory(p);
+        givePlayerKit(p);
         if (playerSpawn != null) {
             p.teleport(new Location(world(), playerSpawn[0] + 0.5, playerSpawn[1], playerSpawn[2] + 0.5));
         }
-        for (Map.Entry<Material, Integer> entry : pendingPlayerItems.entrySet()) {
-            p.getInventory().addItem(new ItemStack(entry.getKey(), entry.getValue()));
-            p.getInventory().setItem(0, new ItemStack(entry.getKey(), entry.getValue()));
-            p.sendMessage(Component.text("已把「" + entry.getKey().name().toLowerCase() + "」放进快捷栏第 1 格。"));
-        }
-        if (!pendingPlayerItems.isEmpty()) {
-            p.sendMessage(Component.text("第 4 盏灯在村道尽头：x=2, z=16。手持灯笼，准星对准灯柱顶端，按鼠标右键。"));
-            pendingPlayerItems.clear();
-        }
+        if (beatActive && !beatHint.isBlank()) p.sendActionBar(Component.text(beatHint));
     }
 
     @EventHandler
@@ -928,12 +1365,70 @@ public final class SceneManager implements Listener {
         boolean isBot = bots.contains(p.getName());
         Block b = event.getBlockPlaced();
         int[] pos = {b.getX(), b.getY(), b.getZ()};
+        // 玩家节拍：真的把方块放到目标坐标就算完成；未 activate 前取消并提示（严格线性）。
+        if (!isBot && beatArmed) {
+            int hit = beatIndexAt(pos);
+            if (hit >= 0 && !beats.get(hit).done) {
+                if (!beatActive) {
+                    event.setCancelled(true);
+                    p.sendActionBar(Component.text("先让灰崽完成它那部分"));
+                    return;
+                }
+                placedPositions.add(key(pos));
+                tracked.add(key(pos));
+                alias.remove(key(pos));
+                completeBeat(hit, p, "place");
+                return;
+            }
+        }
         String k = key(pos);
         placedPositions.add(k);
         tracked.add(k);
         alias.remove(k);
         emit("block.place", p.getName(), isBot ? "agent" : "player", pos,
                 Map.of("block", b.getType().getKey().toString()));
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (building || !prepared || !beatArmed || beats.isEmpty()) return;
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+        Player p = event.getPlayer();
+        if (bots.contains(p.getName())) return;
+        Block clicked = event.getClickedBlock();
+        int[] clickedPos = clicked == null ? null
+                : new int[]{clicked.getX(), clicked.getY(), clicked.getZ()};
+        int hit = -1;
+        boolean onTarget = false;
+        if (clickedPos != null) {
+            hit = beatIndexAt(clickedPos);
+            onTarget = hit >= 0 && !beats.get(hit).done;
+        }
+        if (!onTarget) {
+            hit = -1;
+            for (int i = 0; i < beats.size(); i++) {
+                if (beats.get(i).done) continue;
+                if (toleranceMatch(p, beats.get(i))) {
+                    hit = i;
+                    break;
+                }
+            }
+        }
+        if (hit < 0 || beats.get(hit).done) return;
+        cancelInteraction(event);
+        if (!beatActive) {
+            // 严格线性：织偶那部分没完成前，会完成玩家节拍的操作一律拦下。
+            p.sendActionBar(Component.text("先让灰崽完成它那部分"));
+            return;
+        }
+        completeBeat(hit, p, onTarget ? "interact" : "tolerant");
+    }
+
+    private static void cancelInteraction(PlayerInteractEvent event) {
+        event.setCancelled(true);
+        event.setUseInteractedBlock(Event.Result.DENY);
+        event.setUseItemInHand(Event.Result.DENY);
     }
 
     @EventHandler
@@ -1009,6 +1504,16 @@ public final class SceneManager implements Listener {
     // ------------------------------------------------------------------ reset
 
     public Map<String, Object> reset() {
+        return reset(null);
+    }
+
+    /**
+     * 彻底 reset：按 checkpoint 全区域还原方块（玩家挖掉的、乱放的、上一关残留都还原/清掉），
+     * 移除区域内的非会话实体，按登记重生 NPC，非 bot 玩家清背包→发 playerKit→回 playerSpawn，
+     * 恢复时间/天气/gamerules，返回稳定 hash。
+     */
+    public Map<String, Object> reset(Map<String, Object> params) {
+        checkSession(params);
         long t0 = System.nanoTime();
         if (!prepared) {
             Map<String, Object> err = Json.obj();
@@ -1016,35 +1521,27 @@ public final class SceneManager implements Listener {
             err.put("error", "not_prepared");
             return err;
         }
-        teleportActorsToSpawns();
+        int removedEntities;
+        int restoredBlocks;
         building = true;
         try {
             World world = world();
-            Set<String> positions = new TreeSet<>();
-            positions.addAll(baseBlocks.keySet());
-            positions.addAll(placedPositions);
-            positions.addAll(alias.keySet());
-            positions.addAll(baseAlias.keySet());
-            for (String k : positions) {
-                int[] p = parseKey(k);
-                Block b = world.getBlockAt(p[0], p[1], p[2]);
-                String expected = baseBlocks.get(k);
-                if (expected != null) {
-                    Material want = Material.matchMaterial(expected);
-                    if (want != null && b.getType() != want) b.setType(want, false);
-                } else if (b.getType() != Material.AIR) {
-                    b.setType(Material.AIR, false);
-                }
+            // 玩家节拍回到未激活：checkpoint 会还原目标方块状态，引擎之后会重新 activate。
+            clearBeatState(false);
+            removedEntities = removeAllNonPlayerEntities(true);
+            for (Entity e : npcEntities.values()) {
+                if (e.isValid()) e.remove();
             }
+            npcEntities.clear();
+            restoredBlocks = restoreCheckpoint();
+            spawnDeferredNpcs();
             alias.clear();
             alias.putAll(baseAlias);
-            for (Entity e : npcEntities.values()) e.remove();
-            npcEntities.clear();
-            spawnDeferredNpcs();
+            placedPositions.clear();
             applyWorldState();
             teleportActorsToSpawns();
             giveBotsKit();
-            placedPositions.clear();
+            resetPlayersToSpawn();
             clearEvents();
         } finally {
             building = false;
@@ -1058,7 +1555,84 @@ public final class SceneManager implements Listener {
         res.put("tick", Bukkit.getCurrentTick());
         res.put("sessionId", sessionId);
         res.put("epoch", epoch);
+        res.put("checkpointSize", checkpoint.size());
+        res.put("restoredBlocks", restoredBlocks);
+        res.put("removedEntities", removedEntities);
+        res.put("playerKit", new LinkedHashMap<>(playerKit));
         return res;
+    }
+
+    /** 构造 arena 全区域 checkpoint（只记非空气的物理方块 + 区域外由内容层登记的方块）。 */
+    private void buildCheckpoint() {
+        checkpoint.clear();
+        World world = world();
+        int minX = Math.min(regionFrom[0], regionTo[0]), maxX = Math.max(regionFrom[0], regionTo[0]);
+        int minY = Math.min(regionFrom[1], regionTo[1]), maxY = Math.max(regionFrom[1], regionTo[1]);
+        int minZ = Math.min(regionFrom[2], regionTo[2]), maxZ = Math.max(regionFrom[2], regionTo[2]);
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block b = world.getBlockAt(x, y, z);
+                    if (!b.getType().isAir()) checkpoint.put(key(x, y, z), b.getType().getKey().toString());
+                }
+            }
+        }
+        // 内容层摆到 arena 外面（例如高过区域上界的屋顶）的登记方块也纳入 checkpoint。
+        for (Map.Entry<String, String> entry : baseBlocks.entrySet()) {
+            if (checkpoint.containsKey(entry.getKey())) continue;
+            Material mat = physicalMaterial(norm(entry.getValue()));
+            if (mat != Material.AIR) checkpoint.put(entry.getKey(), mat.getKey().toString());
+        }
+    }
+
+    /** 按 checkpoint 还原全区域：登记过的恢复原方块，没登记的（玩家乱放/挖掉后留空）恢复为空气。 */
+    private int restoreCheckpoint() {
+        World world = world();
+        int changed = 0;
+        for (Map.Entry<String, String> entry : checkpoint.entrySet()) {
+            int[] p = parseKey(entry.getKey());
+            Material want = Material.matchMaterial(entry.getValue());
+            if (want == null) continue;
+            Block b = world.getBlockAt(p[0], p[1], p[2]);
+            if (b.getType() != want) {
+                b.setType(want, false);
+                changed++;
+            }
+        }
+        int minX = Math.min(regionFrom[0], regionTo[0]), maxX = Math.max(regionFrom[0], regionTo[0]);
+        int minY = Math.min(regionFrom[1], regionTo[1]), maxY = Math.max(regionFrom[1], regionTo[1]);
+        int minZ = Math.min(regionFrom[2], regionTo[2]), maxZ = Math.max(regionFrom[2], regionTo[2]);
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    String k = key(x, y, z);
+                    if (checkpoint.containsKey(k)) continue;
+                    Block b = world.getBlockAt(x, y, z);
+                    if (!b.getType().isAir()) {
+                        b.setType(Material.AIR, false);
+                        changed++;
+                    }
+                }
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * 专用沙盒世界：移除所有非玩家实体（旧 NPC/标注/玩家节拍标记/掉落物/误刷怪）。
+     * keepAnnotations=true 时保留当前会话的浮空标注（reset 不该让场景标签消失）。
+     */
+    private int removeAllNonPlayerEntities(boolean keepAnnotations) {
+        int removed = 0;
+        for (World w : Bukkit.getWorlds()) {
+            for (Entity e : w.getEntities()) {
+                if (e instanceof Player) continue;
+                if (keepAnnotations && e.getScoreboardTags().contains(TAG_ANNOTATION)) continue;
+                e.remove();
+                removed++;
+            }
+        }
+        return removed;
     }
 
     // ------------------------------------------------------------------ snapshot
@@ -1116,6 +1690,8 @@ public final class SceneManager implements Listener {
         canonical.put("vars", vars);
         canonical.put("blocks", new TreeMap<>(baseBlocks));
         canonical.put("aliases", new TreeMap<>(baseAlias));
+        // 稳定 checkpoint 摘要：两次 reset 必须得到同一 hash（e2e 的 reset-hash-stable 检查）。
+        canonical.put("checkpoint", new TreeMap<>(checkpoint));
         Map<String, Object> agents = new LinkedHashMap<>();
         Map<String, Object> golem = new LinkedHashMap<>();
         golem.put("pos", Json.vecList(agentSpawn));

@@ -1952,15 +1952,12 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   .world-strip-toggle { position: static; }
 }
 
-/* 目标卡标题栏：标题居中，计数靠右，收起按钮不抢计数位置。 */
+/* 目标卡标题栏：标题居中，计数靠右，收起按钮不抢计数位置（e2e 像素皮肤门禁：面板标题必须水平居中）。 */
 .goals .card-head { justify-content: flex-end; padding-right: 10px; }
 .goals .card-head h3 { z-index: 0; }
 .goals .card-tag { margin-left: auto; position: relative; z-index: 1; }
 .goals .card-collapse { margin-left: 8px; flex: 0 0 auto; }
 
-/* 窄布局：本关目标标题不再绝对居中，计数与收起按钮各就各位，避免灰块压字。 */
-.goals .card-head h3 { position: static; transform: none; margin-right: auto; }
-.goals .card-head { justify-content: flex-start; }
 /* 窄布局：代码编辑器尽量占满首屏，其余卡片在下面滚动。 */
 @media (max-width: 1100px) {
   .wb-body { display: flex; flex-direction: column; }

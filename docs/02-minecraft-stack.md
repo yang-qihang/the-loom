@@ -3,6 +3,7 @@
 > 状态：v1（含实证 spike，7/7 通过）｜负责人：scout-minecraft｜最后更新：2026-10-31
 > 上游依赖：`BRIEF.md` §1 invariants、§2 D2/D3/D4、§6 环境自测
 > 事实口径：本文所有版本号、API 能力、下载地址均在 **2026-10-31** 联网核实（Mojang 清单、PaperMC Fill API、npm registry、GitHub API、Paper Javadoc/Docs）；spike 在本机实测。事实与判断分列，判断标「判断」。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## TL;DR（10 条）
 

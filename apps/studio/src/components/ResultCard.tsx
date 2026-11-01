@@ -13,18 +13,14 @@ interface ResultCardProps {
   goals: GoalState[];
 }
 
-const L01_MAP: Record<string, number> = { "four-lamps-lit": 0, "player-lit-fourth": 1, "golem-home": 2 };
-
-/** 只显示来自文案规范的三条目标；引擎的判定文本不直接进界面。 */
-function goalRows(levelId: string, result: RunResult, goals: GoalState[]) {
-  if (levelId === "L01") {
-    const rows: Array<{ id: string; text: string; passed: boolean }> = [];
-    for (const [id, index] of Object.entries(L01_MAP).sort((a, b) => a[1] - b[1])) {
-      const criterion = result.criteria.find((item) => item.id === id);
-      if (!criterion) continue;
-      rows.push({ id, text: goals[index]?.text ?? "", passed: criterion.passed });
-    }
-    return rows;
+/**
+ * 结果行：优先用引擎 progress 真值（docs/46 §1.1；id/text/passed 与目标面板同源）。
+ * 旧引擎没有 progress 时回退「copy 目标文案 + 按位置对齐 criteria」的兼容展示。
+ */
+function goalRows(result: RunResult, goals: GoalState[]) {
+  const progress = (result.progress ?? []).filter((item) => !!item && typeof item.id === "string");
+  if (progress.length > 0) {
+    return progress.map((item) => ({ id: item.id, text: item.text, passed: item.passed }));
   }
   return goals.map((goal, index) => {
     const criterion = result.criteria[index];
@@ -34,7 +30,7 @@ function goalRows(levelId: string, result: RunResult, goals: GoalState[]) {
 
 export function ResultCard({ levelId, phase, stateLabel, result, waitingForPlayer, goals }: ResultCardProps) {
   const copy = levelCopy(levelId);
-  const rows = result ? goalRows(levelId, result, goals) : [];
+  const rows = result ? goalRows(result, goals) : [];
 
   return (
     <section className="card result" aria-label={chrome.aria.result} data-testid="result-card">

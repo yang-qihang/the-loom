@@ -4,6 +4,9 @@
 > 审计快照：**2026-10-31 11:55–12:05**。审计期间工作区持续写入/修复（L03/L04/L05/LAB-T/docs/13 落盘；L02 升 v2；schema/docs/06/docs/12/AGENTS 有并发修正）。本报告以最终快照为准，行号可能漂移，定位请用「节号 + 关键词」。已交付关卡 11 份；L06/L07/LAB-M/LAB-C 未交付，按约定不算错。
 > 范围：`BRIEF.md`、`AGENTS.md`、`docs/01–13`（含 `docs/02b-level-feasibility.md`、`docs/08-appendix-templates.md`、`docs/13-codex-cross-language.md`）、`content/level-spec.schema.json`、`content/levels/*.md`、`spikes/`、`research/`。
 > 方法：逐文件通读 + 跨文档脚本比对（版本串/meta/API/数字/围栏/本地引用）+ 关键声明本机复验；只报问题与修法。
+> 历史说明（2026-11-01 文档审计）：本文件是设计阶段的审计/评审记录，保留原始结论与日期；部分处置与当前实现已变化，当前以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
+> 负责人：scout-assurance（审计人）
+> 上游：BRIEF.md、docs/01–13、content/levels/*.md（审计范围）
 
 ## 1. TL;DR（最严重 10 条）
 

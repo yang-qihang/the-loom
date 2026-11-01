@@ -1,0 +1,431 @@
+{
+  "task": "task-49 / T3 Engine + PaperWorldPort",
+  "startedAt": "2026-10-31T06:07:59.700Z",
+  "environment": {
+    "node": "v22.23.1",
+    "loWorld": "paper",
+    "rpcUrl": "ws://127.0.0.1:8765",
+    "mc": "127.0.0.1:25565",
+    "engine": {
+      "url": "http://127.0.0.1:38841",
+      "worldMode": "paper",
+      "startMs": 1699
+    }
+  },
+  "checks": {
+    "server.ready": {
+      "ok": true,
+      "detail": {
+        "ms": 208
+      }
+    },
+    "engine.started": {
+      "ok": true,
+      "detail": {
+        "url": "http://127.0.0.1:38841",
+        "worldMode": "paper",
+        "startMs": 1699
+      }
+    },
+    "health.status-200": {
+      "ok": true,
+      "detail": 200
+    },
+    "health.port-paper": {
+      "ok": true,
+      "detail": "paper"
+    },
+    "health.mc-connected": {
+      "ok": true,
+      "detail": {
+        "kind": "paper",
+        "connected": true,
+        "version": "26.1.2",
+        "pluginVersion": "0.1.0",
+        "tick": 18829,
+        "prepared": true,
+        "sessionId": "ed733673-4c8e-41b9-8188-43f52a1e620a",
+        "epoch": 26
+      }
+    },
+    "health.mc-version": {
+      "ok": true,
+      "detail": "26.1.2"
+    },
+    "health.bot-connected": {
+      "ok": true,
+      "detail": {
+        "name": "Golem",
+        "connected": true
+      }
+    },
+    "L01.session-created": {
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "port": "paper+bot",
+        "epoch": 0
+      }
+    },
+    "L01.level-detail": {
+      "ok": true,
+      "detail": null
+    },
+    "L01.run-result": {
+      "ok": true,
+      "detail": {
+        "stars": 1,
+        "passed": false,
+        "failures": [
+          "4 盏路灯全部点亮",
+          "第 4 盏灯由你亲手点亮"
+        ],
+        "digest": "sha256:d4abd3fd70d604af299247df5572d96a415b9103b433aa0df3c418b2311fc101"
+      }
+    },
+    "L01.player-beat-3stars": {
+      "ok": true,
+      "detail": {
+        "stars": 3,
+        "passed": true,
+        "failures": []
+      }
+    },
+    "L01.player-beat-no-failures": {
+      "ok": true,
+      "detail": []
+    },
+    "L01.reset-ready": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "state": "READY",
+        "epoch": 1
+      }
+    },
+    "L02.session-created": {
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "port": "paper+bot",
+        "epoch": 0
+      }
+    },
+    "L02.level-detail": {
+      "ok": true,
+      "detail": null
+    },
+    "L02.run-result": {
+      "ok": true,
+      "detail": {
+        "stars": 2,
+        "passed": false,
+        "failures": [],
+        "digest": "sha256:7ef2f458e60ab21f096de2c26fdc2b2a6d62a50328326d111bce24207087c40d"
+      }
+    },
+    "L02.player-beat-3stars": {
+      "ok": true,
+      "detail": {
+        "stars": 3,
+        "passed": true,
+        "failures": []
+      }
+    },
+    "L02.player-beat-no-failures": {
+      "ok": true,
+      "detail": []
+    },
+    "L02.reset-ready": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "state": "READY",
+        "epoch": 1
+      }
+    },
+    "L03.session-created": {
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "port": "paper+bot",
+        "epoch": 0
+      }
+    },
+    "L03.level-detail": {
+      "ok": true,
+      "detail": null
+    },
+    "L03.run-result": {
+      "ok": true,
+      "detail": {
+        "stars": 1,
+        "passed": false,
+        "failures": [
+          "天亮后你亲手敲钟"
+        ],
+        "digest": "sha256:a23596022efbcda38162f2121d699a256f52c74cfeb2cde392d937248ec21720"
+      }
+    },
+    "L03.player-beat-3stars": {
+      "ok": true,
+      "detail": {
+        "stars": 3,
+        "passed": true,
+        "failures": []
+      }
+    },
+    "L03.player-beat-no-failures": {
+      "ok": true,
+      "detail": []
+    },
+    "L03.reset-ready": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "state": "READY",
+        "epoch": 1
+      }
+    },
+    "L04.session-created": {
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "port": "paper+bot",
+        "epoch": 0
+      }
+    },
+    "L04.level-detail": {
+      "ok": true,
+      "detail": null
+    },
+    "L04.run-result": {
+      "ok": true,
+      "detail": {
+        "stars": 2,
+        "passed": false,
+        "failures": [],
+        "digest": "sha256:515793aa5ca09a175caa1098da99c7c856db3463cc8c2632ffa0bc91914d3f12"
+      }
+    },
+    "L04.player-beat-3stars": {
+      "ok": true,
+      "detail": {
+        "stars": 3,
+        "passed": true,
+        "failures": []
+      }
+    },
+    "L04.player-beat-no-failures": {
+      "ok": true,
+      "detail": []
+    },
+    "L04.reset-ready": {
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "state": "READY",
+        "epoch": 1
+      }
+    },
+    "failure-path.start-rejected": {
+      "ok": true,
+      "detail": {
+        "isWorldUnavailable": true,
+        "message": "真实 MC 未就绪：1s 内连不上插件服务通道 ws://127.0.0.1:59999。最近错误：cannot connect to plugin RPC at ws://127.0.0.1:59999",
+        "hint": "排查顺序：① `npm run mc:up` 并确认日志出现 Done；② `curl 127.0.0.1:4317/api/health` 不是这里，改看 Paper 日志 it/.mc-server/console.log 是否有 LoomCraft 插件加载与 RPC listening：ws://127.0.0.1:8765；③ 端口被旧进程占用时先 `npm run mc:down` 再起。",
+        "offlineHealth": {
+          "ok": false,
+          "port": "paper",
+          "sessions": 0,
+          "uptimeSec": 0,
+          "version": "1.0.0-t1",
+          "mc": {
+            "kind": "paper",
+            "connected": false
+          },
+          "bot": {
+            "name": "Golem",
+            "connected": false
+          },
+          "error": "真实 MC 未连接：真实 MC 未就绪：1s 内连不上插件服务通道 ws://127.0.0.1:59999。最近错误：cannot connect to plugin RPC at ws://127.0.0.1:59999",
+          "hint": "先 `npm run mc:up`，确认 Paper 日志出现 Done 且插件 RPC 8765 已监听；然后重启 engine（npm run dev:engine:paper）。"
+        }
+      }
+    },
+    "failure-path.chinese-message": {
+      "ok": true,
+      "detail": "真实 MC 未就绪：1s 内连不上插件服务通道 ws://127.0.0.1:59999。最近错误：cannot connect to plugin RPC at ws://127.0.0.1:59999"
+    },
+    "failure-path.health-not-mock": {
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "port": "paper",
+        "error": "真实 MC 未连接：真实 MC 未就绪：1s 内连不上插件服务通道 ws://127.0.0.1:59999。最近错误：cannot connect to plugin RPC at ws://127.0.0.1:59999"
+      }
+    }
+  },
+  "levels": {
+    "L01": {
+      "levelId": "L01",
+      "steps": {
+        "session": {
+          "status": 201,
+          "port": "paper+bot",
+          "epoch": 0
+        },
+        "run": {
+          "stars": 1,
+          "passed": false,
+          "failures": [
+            "4 盏路灯全部点亮",
+            "第 4 盏灯由你亲手点亮"
+          ],
+          "digest": "sha256:d4abd3fd70d604af299247df5572d96a415b9103b433aa0df3c418b2311fc101"
+        },
+        "beat": {
+          "stars": 3,
+          "passed": true,
+          "failures": []
+        },
+        "reset": {
+          "status": 200,
+          "state": "READY",
+          "epoch": 1
+        }
+      },
+      "durationMs": 28572
+    },
+    "L02": {
+      "levelId": "L02",
+      "steps": {
+        "session": {
+          "status": 201,
+          "port": "paper+bot",
+          "epoch": 0
+        },
+        "run": {
+          "stars": 2,
+          "passed": false,
+          "failures": [],
+          "digest": "sha256:7ef2f458e60ab21f096de2c26fdc2b2a6d62a50328326d111bce24207087c40d"
+        },
+        "beat": {
+          "stars": 3,
+          "passed": true,
+          "failures": []
+        },
+        "reset": {
+          "status": 200,
+          "state": "READY",
+          "epoch": 1
+        }
+      },
+      "durationMs": 25400
+    },
+    "L03": {
+      "levelId": "L03",
+      "steps": {
+        "session": {
+          "status": 201,
+          "port": "paper+bot",
+          "epoch": 0
+        },
+        "run": {
+          "stars": 1,
+          "passed": false,
+          "failures": [
+            "天亮后你亲手敲钟"
+          ],
+          "digest": "sha256:a23596022efbcda38162f2121d699a256f52c74cfeb2cde392d937248ec21720"
+        },
+        "beat": {
+          "stars": 3,
+          "passed": true,
+          "failures": []
+        },
+        "reset": {
+          "status": 200,
+          "state": "READY",
+          "epoch": 1
+        }
+      },
+      "durationMs": 59249
+    },
+    "L04": {
+      "levelId": "L04",
+      "steps": {
+        "session": {
+          "status": 201,
+          "port": "paper+bot",
+          "epoch": 0
+        },
+        "run": {
+          "stars": 2,
+          "passed": false,
+          "failures": [],
+          "digest": "sha256:515793aa5ca09a175caa1098da99c7c856db3463cc8c2632ffa0bc91914d3f12"
+        },
+        "beat": {
+          "stars": 3,
+          "passed": true,
+          "failures": []
+        },
+        "reset": {
+          "status": 200,
+          "state": "READY",
+          "epoch": 1
+        }
+      },
+      "durationMs": 36006
+    }
+  },
+  "failurePath": {
+    "isWorldUnavailable": true,
+    "message": "真实 MC 未就绪：1s 内连不上插件服务通道 ws://127.0.0.1:59999。最近错误：cannot connect to plugin RPC at ws://127.0.0.1:59999",
+    "hint": "排查顺序：① `npm run mc:up` 并确认日志出现 Done；② `curl 127.0.0.1:4317/api/health` 不是这里，改看 Paper 日志 it/.mc-server/console.log 是否有 LoomCraft 插件加载与 RPC listening：ws://127.0.0.1:8765；③ 端口被旧进程占用时先 `npm run mc:down` 再起。",
+    "offlineHealth": {
+      "ok": false,
+      "port": "paper",
+      "sessions": 0,
+      "uptimeSec": 0,
+      "version": "1.0.0-t1",
+      "mc": {
+        "kind": "paper",
+        "connected": false
+      },
+      "bot": {
+        "name": "Golem",
+        "connected": false
+      },
+      "error": "真实 MC 未连接：真实 MC 未就绪：1s 内连不上插件服务通道 ws://127.0.0.1:59999。最近错误：cannot connect to plugin RPC at ws://127.0.0.1:59999",
+      "hint": "先 `npm run mc:up`，确认 Paper 日志出现 Done 且插件 RPC 8765 已监听；然后重启 engine（npm run dev:engine:paper）。"
+    }
+  },
+  "errors": [],
+  "serverReadyMs": 208,
+  "health": {
+    "ok": true,
+    "port": "paper",
+    "sessions": 0,
+    "uptimeSec": 0,
+    "version": "1.0.0-t1",
+    "mc": {
+      "kind": "paper",
+      "connected": true,
+      "version": "26.1.2",
+      "pluginVersion": "0.1.0",
+      "tick": 18829,
+      "prepared": true,
+      "sessionId": "ed733673-4c8e-41b9-8188-43f52a1e620a",
+      "epoch": 26
+    },
+    "bot": {
+      "name": "Golem",
+      "connected": true
+    }
+  },
+  "finishedAt": "2026-10-31T06:10:32.669Z",
+  "ok": true
+}

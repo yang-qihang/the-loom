@@ -378,6 +378,7 @@ await 收尾()
     mainTask: "把顺序版改成能重叠的写法：两坛一起开酿、取苹果藏进酿造等待、治愈与交付并行；缺材料时换备方。",
     makeTask: "换一座更远的材料架，或换一个更短的入夜准备时间，仍然按同一套并发写法完成。",
     playerBeat: "你先把药水泼向笼中的村民，再亲手敲响暮钟。",
+    playerBeatHint: "手持药水泼笼子，再持钟右键",
     successCriteria: [
       {
         id: "two-brews",
@@ -526,6 +527,34 @@ await golem.say("三坛一起出坛，节日药水备齐")
     ],
     whyYou: "最后泼药水、敲钟这两下，只有活人的手能做；灰崽能替你跑、替你等，但不能替你到场。",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值（泼药水/敲钟节拍不占目标）。
+  progress: [
+    {
+      id: "l09-two-brews",
+      text: "两坛药同时开酿，都按时出坛",
+      check: g => brewedOk(g) && brewedConcurrently(g),
+    },
+    {
+      id: "l09-apple-in-wait",
+      text: "取金苹果藏在酿造的等待里",
+      check: g => {
+        const apples = appleTaken(g);
+        if (apples.length === 0) return false;
+        const appleSeq = Math.min(...apples.map(seqOf));
+        const stands = standsOf(g);
+        const firstStart = Math.min(...stands.map(台 => Math.min(...waterAt(g, 台).map(seqOf))));
+        const firstFinish = Math.min(...stands.map(台 => Math.min(...potionAt(g, 台).map(seqOf))));
+        return appleSeq > firstStart && appleSeq < firstFinish;
+      },
+    },
+    {
+      id: "l09-deliver-cure",
+      text: "交付三瓶药水，摆好金苹果",
+      check: g =>
+        potionsAtCauldron(g).length >= 3 &&
+        agentPlaces(g, "golden_apple").some(e => samePos(e.pos, pos(g.var("cage")))),
+    },
+  ],
   phases: ["顺序版到并发版", "缺料降级"],
 });
 

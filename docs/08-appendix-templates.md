@@ -3,6 +3,7 @@
 > 状态：v1｜负责人：scout-assurance（Lead 验收）｜最后更新：2026-10-31
 > 上游：`docs/08-ai-workflow.md`（本文是它的落地附录，§A.x 对应 08 的 §x）、`docs/06-level-spec-system.md`、`docs/07-architecture.md`、`research/assurance-notes.md`
 > 用法：角色提示词复制进 teammate/`subagent` prompt；任务卡复制进 task description；脚本写到 `scripts/`；模板放仓库根。路径以 `docs/07` §9 仓库结构为准，命令从仓库根执行。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 **A.0 所有角色共用的两条硬约定**
 

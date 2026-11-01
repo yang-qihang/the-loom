@@ -1,6 +1,6 @@
 # bot/ — 织偶（Mineflayer）管理器
 
-> 状态：T1 实现｜负责人：scout-minecraft｜最后更新：2026-10-31
+> 状态：已交付（T1 起实现；2026-11-01 增加 pathfinder 卡死恢复）｜负责人：scout-minecraft｜最后更新：2026-11-01
 > 上游：`docs/21-t1-contracts.md` §5、`docs/02-minecraft-stack.md`
 > 锁定栈：mineflayer **4.39.0** + mineflayer-pathfinder **2.4.5** + minecraft-protocol 1.68.0（Node 22；版本写在 `package.json`）
 
@@ -51,3 +51,10 @@ await bot.disconnect();
 - 平地寻路：约 2.3–3.1s/10–14 格（L01 全流程 3 次移动+3 次放置 ≈ 12s）。
 - 单次 place+前进约 0.3–0.4s；1 宽桥逐格铺 15 次实测 0 掉落（见 `spikes/mc-bot-paper/bridge-spike.js`）。
 - 已知坑：路径目标若正好在障碍物后面（灯柱另一侧），pathfinder 会原地打转 → 已用「候选格按离 bot 距离排序 + 逐个重试」解决（`it/debug-scene.ts` 可复现调试）。
+
+## 2026-11-01：pathfinder 卡死恢复（`_gotoWithRecovery`）
+
+- L05–L10 真实路径上偶发「路径被头部高度的装饰方块拐角挡住」→ 现在 `moveTo` 走 `_gotoWithRecovery`：
+  失败后按左右方向做一次短距横向 nudge 再重试，仍失败抛 `MOVE_STUCK`（中文人话）。
+- 错误码新增 `MOVE_STUCK`；其余错误码不变。
+- 对应证据：`it/l5-real.ts`–`it/l10-real.ts` 真实 Paper PASS（`evidence/l*-real-latest.json`）。

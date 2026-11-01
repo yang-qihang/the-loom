@@ -186,8 +186,49 @@ export const L01: LevelDef & { challenge: ChallengeDef } = {
     ...L01_BASE.task,
     mainTask: "让灰崽把 1 到 3 号灯点亮，再走到 4 号灯下；最后一盏由你亲手点亮，做完回到艾拉身边。",
     makeTask: "回程顺路把桥另一侧的第 5 盏小灯也点亮，这盏可以不做。",
-    playerBeat: "4 号灯由你亲手点亮：走到村道尽头 x=2, z=16，手持灯笼，准星对准灯柱顶端，按鼠标右键放置。",
+    playerBeat: "4 号灯由你亲手点亮：走到村道尽头 x=2, z=16 的灯柱前，手持灯笼，对着灯柱按右键放置（站地面即可，不用看见柱顶）。",
+    playerBeatHint: "手持灯笼，对着灯柱按右键，不用看顶面",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值，Studio 按 id 逐条打勾。
+  progress: [
+    {
+      id: "l01-three-lamps",
+      text: "灰崽按顺序点亮 1、2、3 号灯",
+      check: g => {
+        const lampList = g.var("lamps") as Pos[];
+        // 只看每盏灯的「第一次」放置：不重置直接再跑一遍时，重复事件不能把顺序判错。
+        const firstOrder: number[] = [];
+        const seen = new Set<number>();
+        for (const event of g.events("block.place")) {
+          if (event.actorType !== "agent") continue;
+          const index = lampList.slice(0, 3).findIndex(p => samePos(event.pos, p));
+          if (index < 0 || seen.has(index)) continue;
+          seen.add(index);
+          firstOrder.push(index);
+        }
+        return (
+          lampList.slice(0, 3).every(p => g.block(p).id === "minecraft:lantern") &&
+          firstOrder.length === 3 &&
+          firstOrder.every((value, i) => (i === 0 ? value === 0 : value > firstOrder[i - 1]))
+        );
+      },
+    },
+    {
+      id: "l01-fourth-by-player",
+      text: "你亲手点亮 4 号灯",
+      player: true,
+      check: g => {
+        const fourth = (g.var("lamps") as Pos[])[3];
+        if (!fourth) return false;
+        return g.events("block.place").some(e => e.actorType === "player" && samePos(e.pos, fourth));
+      },
+    },
+    {
+      id: "l01-golem-home",
+      text: "灰崽回到艾拉身边",
+      check: g => g.withinRadius(g.agent("golem"), g.npc("eira"), 4),
+    },
+  ],
   narrative: {
     opening: ["小径上四盏灯又灭了。", "先让灰崽点亮 1 到 3 号灯，再走到 4 号灯下。", "最后一盏要由你亲手点：织偶替不了活人的手。"],
     worldState: "天要黑了，晚归的村民还走在路上，路得亮起来。",
@@ -320,15 +361,12 @@ export const L01Content: LevelContent & { copy: ContentCopy; challenge: Challeng
       if (block === "minecraft:lantern") return y >= 12; // 路灯保留
       return !(x >= -13 && x <= 3 && z >= -3 && z <= 17);
     });
-    // 第 4 盏灯前的两级石阶：玩家站上去视线与灯柱顶端齐平，不用一直仰望。
-    const lampAccess: Array<{ pos: Pos; block: string }> = [
-      { pos: [1, 11, 17], block: "minecraft:stone_bricks" },
-      { pos: [1, 12, 16], block: "minecraft:stone_bricks" },
-    ];
+    // 本关沙盒体积：清掉上一会话残留的方块（y=65 的其它关卡不在此区域内），再铺本关场景。
+    // 第 4 盏灯的柱子由插件按 tracked 灯位从地面砌到 y=13，灯位 y=14 保持空气。
+    await port.clearRegion([-26, 9, -12], [12, 20, 32]);
     await port.setBlocks([
       ...lamps.map(pos => ({ pos, block: "minecraft:air" })),
       ...safeDecor,
-      ...lampAccess,
     ]);
     await port.spawnEntity({ type: "villager", id: "eira", name: "艾拉", pos: [0, 11, 6], role: "npc" });
     await port.spawnEntity({ type: "golem", id: "golem", name: "灰崽", pos: [0, 11, 0], role: "agent" });
@@ -343,7 +381,7 @@ export const L01Content: LevelContent & { copy: ContentCopy; challenge: Challeng
   async annotate(port) {
     const entries = lamps.map((p, index) => ({
       id: `lamp-${index + 1}`,
-      text: index === 3 ? "4 号灯 · 由你亲手点亮（走到 x=2, z=16，手持灯笼右键灯柱顶端）" : `${index + 1} 号灯`,
+      text: index === 3 ? "4 号灯 · 由你亲手点亮（走到灯柱前，手持灯笼右键柱子）" : `${index + 1} 号灯`,
       pos: [p[0], p[1] + 1, p[2]] as [number, number, number],
     }));
     entries.push({ id: "eira", text: "艾拉 · 老织者", pos: [0, 13, 6] });

@@ -236,6 +236,15 @@ export class PaperWorldPort implements WorldPort {
   private lastLayout: Record<string, unknown> | null = null;
   lastReset: Record<string, unknown> | null = null;
 
+  /** 录制 content.playerBeat 期间为 true：playerPlace/setTime/setWeather 只入队，不碰真实世界。 */
+  private recordingPlayerBeat = false;
+  private recordedBeat: {
+    beats: Array<{ pos: Vec3; block: string }>;
+    effects: Array<Record<string, unknown>>;
+  } = { beats: [], effects: [] };
+  /** afterPrepare 里 playerGive 发的道具：插件的容错交互只认这几件。 */
+  private grantedItems: string[] = [];
+
   readonly actions: Array<{ action: string; ms: number }> = [];
 
   constructor(options: PaperWorldPortOptions) {
@@ -278,6 +287,8 @@ export class PaperWorldPort implements WorldPort {
     this.epoch = begin.epoch;
     this.recorded = emptyScene();
     this.virtualCache.clear();
+    this.grantedItems = [];
+    this.recordedBeat = { beats: [], effects: [] };
 
     await content.prepare(this);
     const layout = this.deriveLayout(content);
@@ -286,7 +297,45 @@ export class PaperWorldPort implements WorldPort {
     this.prepared = true;
     await this.waitForBotAtScene();
     await content.afterPrepare?.(this);
+    // 录制玩家节拍：content.playerBeat 的 playerPlace/setTime/setWeather 只入队不执行，
+    // 然后把 beats/items/effects 静默登记给插件（activate 之前玩家提前操作会被插件拦下）。
+    await this.recordPlayerBeat(content);
+    await this.armPlayerBeat(content);
     this.log(`prepared ${content.def.id} session=${this.sessionId.slice(0, 8)} epoch=${this.epoch}`);
+  }
+
+  private async recordPlayerBeat(content: LevelContent): Promise<void> {
+    this.recordedBeat = { beats: [], effects: [] };
+    if (!content.playerBeat) return;
+    this.recordingPlayerBeat = true;
+    try {
+      await content.playerBeat(this);
+    } catch (error) {
+      this.log(`record playerBeat failed: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      this.recordingPlayerBeat = false;
+    }
+  }
+
+  private async armPlayerBeat(content: LevelContent): Promise<void> {
+    const hint = content.def.task.playerBeatHint ?? content.def.task.playerBeat ?? "";
+    await this.rpc.call("playerBeat.arm", {
+      sessionId: this.sessionId,
+      beats: this.recordedBeat.beats,
+      items: this.grantedItems,
+      effects: this.recordedBeat.effects,
+      hint,
+    });
+  }
+
+  /** 引擎判定 playerBeatReady 后调用：插件显示发光标记 + actionbar 提示，并允许完成。 */
+  async activatePlayerBeat(): Promise<void> {
+    await this.rpc.call("playerBeat.activate", { sessionId: this.sessionId });
+  }
+
+  /** 调试/验收：插件里的玩家节拍状态（armed/active/每一条 done）。 */
+  async playerBeatStatus(): Promise<Record<string, unknown>> {
+    return this.rpc.call<Record<string, unknown>>("playerBeat.status", { sessionId: this.sessionId });
   }
 
   async reset(_content?: LevelContent): Promise<void> {
@@ -482,11 +531,19 @@ export class PaperWorldPort implements WorldPort {
   }
 
   async setTime(ticks: number): Promise<void> {
+    if (this.recordingPlayerBeat) {
+      this.recordedBeat.effects.push({ kind: "time", ticks });
+      return;
+    }
     this.recorded.timeTicks = ticks;
     await this.rpc.call("world.setTime", { sessionId: this.sessionId, ticks });
   }
 
   async setWeather(weather: "clear" | "rain" | "thunder"): Promise<void> {
+    if (this.recordingPlayerBeat) {
+      this.recordedBeat.effects.push({ kind: "weather", weather });
+      return;
+    }
     this.recorded.weather = weather;
     await this.rpc.call("world.setWeather", { sessionId: this.sessionId, weather });
   }
@@ -496,10 +553,17 @@ export class PaperWorldPort implements WorldPort {
   }
 
   async playerGive(item: string, count = 1): Promise<void> {
+    const normalized = normBlock(item);
+    if (!this.grantedItems.includes(normalized)) this.grantedItems.push(normalized);
     await this.rpc.call("player.give", { sessionId: this.sessionId, item, count });
   }
 
   async playerPlace(block: string, pos: Vec3): Promise<void> {
+    if (this.recordingPlayerBeat) {
+      // 玩家节拍录制：只记目标，不真的放方块（真实流程由玩家亲手右键/放置）。
+      this.recordedBeat.beats.push({ block: normBlock(block), pos });
+      return;
+    }
     this.recorded.playerPlaces.push({ block: normBlock(block), pos });
     await this.rpc.call("player.place", {
       sessionId: this.sessionId,
@@ -531,6 +595,13 @@ export class PaperWorldPort implements WorldPort {
   async dispose(): Promise<void> {
     if (this.disposed) return;
     this.disposed = true;
+    if (this.sessionId) {
+      try {
+        await this.rpc.call("session.end", { sessionId: this.sessionId });
+      } catch {
+        /* 会话已失效/插件已停：清理失败不阻断引擎 dispose。 */
+      }
+    }
     try {
       await this.bot.disconnect();
     } catch {

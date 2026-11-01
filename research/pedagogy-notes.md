@@ -4,6 +4,7 @@
 > 上游：`BRIEF.md`、`docs/04-learning-design.md`、`docs/05-curriculum.md`、`docs/06-level-spec-system.md`
 > 下游：Lead 的 level design、`docs/10-demo-and-report.md`、level smith 的 spec
 > 核实方式：DOI 经 OpenAlex 元数据核对（2026-10-31）；课程站/商店页 HTTP 200 检查。DOI 页对无头请求常 403（浏览器正常）。
+> 历史说明（2026-11-01 文档审计）：本文是设计阶段调研记录，保留原始结论与来源；项目实现已落地，当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## 0. TL;DR（10 条）
 

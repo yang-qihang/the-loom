@@ -3,6 +3,8 @@
 > 状态：ADR（Rejected for 4-day scope，保留为 v2 选项）｜负责人：Lead｜最后更新：2026-10-31
 > 触发：用户提出「用 Luanti 替代 Minecraft Java 会不会更好（接口透明、Lua 简洁）」。
 > 结论：**4 天交付维持 Minecraft + TypeScript；Luanti 写入 v2 / 一学期版路线，不进本次 foundation。**
+> 历史说明（2026-11-01 文档审计）：本文件是已拒绝的 ADR（Luanti 备选），保留作决策记录；当前基础仍是 Minecraft + TypeScript。
+> 上游：BRIEF.md、docs/02-minecraft-stack.md
 
 ---
 

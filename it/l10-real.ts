@@ -159,6 +159,18 @@ async function main() {
       count: 1,
     });
     check("give.HumanLike", giveKeystone?.ok === true, giveKeystone);
+    // docs/46 §1.3：玩家节拍在「织偶部分完成」后才允许完成。这里是独立 e2e harness（没有引擎
+    // 会话状态机），显式 activate 以模拟引擎在 playerBeatReady 时的行为；未激活前的右键会被插件拦下。
+    const beatArmed = await rpc.call("playerBeat.arm", {
+      sessionId: port.session.sessionId,
+      beats: [{ pos: L10_BRIDGE.keystone, block: "minecraft:lodestone" }],
+      items: ["minecraft:lodestone"],
+      hint: "手持合龙石，对准中央基座按右键",
+      effects: [],
+    });
+    check("playerBeat.armed", beatArmed?.ok === true, beatArmed);
+    const beatActivate = await rpc.call("playerBeat.activate", { sessionId: port.session.sessionId });
+    check("playerBeat.activate", beatActivate?.ok === true, beatActivate);
     // 玩家出生点就在桥边（arena 中心留出了不放方块的安全格），真人实体直接右键放合龙石。
     await bots.HumanLike.place("minecraft:lodestone", L10_BRIDGE.keystone[0], L10_BRIDGE.keystone[1], L10_BRIDGE.keystone[2]);
     await sleep(500);

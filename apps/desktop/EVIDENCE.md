@@ -1,5 +1,7 @@
 # task-31 证据 — Tauri 2 桌面封装 spike（2026-10-31）
 
+> 历史证据（T3/T4，2026-10-31）：文中「Mock-only / 未收进安装包」是当时状态；**2026-11-01 起安装包已内置真实运行时**（Node 22 / Java 25 / Paper 26.1.2 / 插件 / 干净世界 / 真实引擎 / 织偶），当前事实见 `apps/desktop/README.md` 与 `docs/43-environment-and-bundling.md`。
+
 > 负责人：scout-language｜环境：Fedora 44 / Rust 1.98.1 / WebKitGTK 2.54.2 / Tauri 2.12.5 / Node 22.23.1
 > 用户不测试；以下均为自动化 + 截图证据。
 > 最后更新：2026-10-31T09:32Z（task-65 最终：无系统窗框 + 自绘像素标题栏 + 原生行为收口 + 字号控件；见 §9；桌面 engine 当前 **Mock-only**）。

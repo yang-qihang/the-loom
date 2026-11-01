@@ -333,6 +333,7 @@ golem.say("五栋房子都立起来了。")
     mainTask: "用同一份造房写法造出五栋房子，每栋门口挂一块门牌。",
     makeTask: "把造房拆成六个有名字的小步骤，主程序只负责读地块和调用。",
     playerBeat: "五块门牌由你亲手挂到门口（织者之印）。",
+    playerBeatHint: "手持门牌，对五块门口各按右键",
     successCriteria: [
       {
         id: "houses-built",
@@ -347,7 +348,11 @@ golem.say("五栋房子都立起来了。")
       {
         id: "budget-kept",
         text: "用掉的方块不超总预算，也不算错重摆",
-        check: g => agentPlaces(g).length <= Number(g.var("materialBudget")),
+        check: g => {
+          // 同一个格子只算一次：不重置连续跑两遍时，重复摆同一格不能把预算判超。
+          const distinct = new Set(agentPlaces(g).filter(e => !!e.pos).map(e => e.pos!.join(",")));
+          return distinct.size <= Number(g.var("materialBudget"));
+        },
       },
       {
         id: "signs-ready",
@@ -421,6 +426,29 @@ golem.say("五栋房子都立起来了。")
     ],
     whyYou: "屋梁的最后一块、门牌上的名字，得你亲手来；活人的手，织偶替不了。",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值；门牌是玩家节拍。
+  progress: [
+    {
+      id: "l05-houses-built",
+      text: "五块地各立起一栋能住的房子",
+      check: g => plotList(g.var("plots")).every(p => hutCells(p).every(c => g.block(c.pos).id === C + c.block)),
+    },
+    {
+      id: "l05-styles-follow",
+      text: "每栋的墙和屋顶按地块样式走",
+      check: g => plotList(g.var("plots")).every(p => hutCells(p).every(c => g.block(c.pos).id === C + c.block)),
+    },
+    {
+      id: "l05-signs-ready",
+      text: "五块门牌由你亲手挂到门口",
+      player: true,
+      check: g => {
+        const signs = posList(g.var("signs"));
+        const placed = playerPlaces(g);
+        return signs.every(s => g.block(s).id === C + "oak_sign" && placed.some(e => samePos(e.pos, s)));
+      },
+    },
+  ],
   phases: ["三栋橡木房", "第四栋换屋顶", "第五块地与门牌"],
 });
 

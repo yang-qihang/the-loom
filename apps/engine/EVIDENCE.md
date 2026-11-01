@@ -1,5 +1,7 @@
 # Engine T1 证据（2026-10-31）
 
+> 历史证据（T1，2026-10-31）：文中测试数/覆盖范围（70 tests、L01）为当时快照；当前证据见 `apps/engine/README.md`、`evidence/l*-real-latest.json`、`evidence/engine-paper-latest.json`。
+
 > 负责人：scout-language｜任务：task-20｜环境：Node 22.23.1 / TypeScript 6.0.3 / vitest 5.0.5
 > 所有命令在本仓库根目录执行；用户不参与测试，以下均为自动化证据。
 

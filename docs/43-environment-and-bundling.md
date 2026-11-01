@@ -1,6 +1,6 @@
 # 43 — 环境、依赖、打包边界
 
-> 状态：交接事实｜最后更新：2026-10-31
+> 状态：交接事实（当前安装包已内置真实运行时）｜负责人：Lead｜最后更新：2026-11-01｜上游：`README.md`、`apps/desktop/README.md`、`docs/46-playtest-fix-plan.md`
 
 ## 1. 用户应自己安装的
 
@@ -34,6 +34,7 @@
 - 真实引擎在 4317 提供 Studio 使用的 HTTP API；
 - 织偶用包内 mineflayer 连接 Paper；
 - 向导里仍可选「真实织机地址」连接外部引擎（高级用途），默认不需要。
+- **世界布局版本迁移**：包内 `paper/world/.loom-world-version` 与可写目录 marker 不一致时，启动时自动用包内干净世界替换 `~/.loomcraft/runtime/paper/world`（旧关卡残留会污染 sandbox；关卡进度/星级存于 Studio，不存于世界，不受影响）。
 
 ## 5. 构建自包含运行时
 
@@ -48,24 +49,28 @@ npx tauri build
 
 > 注：AppImage 打包在本机曾遇到 linuxdeploy 图标/体积问题；RPM 可直接生成。可用 AppDir + `linuxdeploy-plugin-appimage.AppImage` 手动补图打包。
 
-## 5. 当前真实模式启动路径
+## 6. 当前真实模式启动路径（源码开发）
 
 ```bash
 bash scripts/mc-up.sh
-PORT=4320 LOOM_WORLD=paper npm run dev:engine:paper
+PORT=4320 npm run dev:engine:paper   # 脚本内部会设 LOOM_WORLD=paper
 # 桌面向导填 http://127.0.0.1:4320
 ```
 
-## 6. 打包命令
+## 7. 打包命令
 
 ```bash
-cd apps/desktop
-npm run assets
-npx tauri build
+# 一键入口（推荐）：插件 → 真实引擎 → Studio → 自包含 runtime → AppImage/RPM
+bash scripts/package-desktop.sh
+
+# 或分步：
+bash scripts/build-real-runtime.sh
+npm run desktop:assets
+npm run desktop:build
 ```
 
 产物：
 - `apps/desktop/src-tauri/target/release/bundle/appimage/*.AppImage`
 - `apps/desktop/src-tauri/target/release/bundle/rpm/*.rpm`
 
-当前自包含安装包：AppImage 356MB / RPM 382MB；构建时约 1GB 运行时资源，构建前请评估磁盘/CI 缓存。
+当前自包含安装包（2026-11-01 重打包）：AppImage ≈400MB / RPM ≈417MB；构建期 `apps/desktop/src-tauri/runtime/real/` 约 1GB，不入 Git，构建前请评估磁盘/CI 缓存。

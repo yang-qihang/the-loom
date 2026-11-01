@@ -3,6 +3,7 @@
 > 状态：v1｜负责人：Lead｜最后更新：2026-10-31
 > 上游：`docs/00-consistency-review.md`（独立审计，2026-10-31 11:55–11:58 快照）、`docs/06b-levelkit-implementation-spec.md` §8、`docs/02b-level-feasibility.md` §7
 > 用途：记录审计发现的处置结果，供实施团队确认「哪些契约已变、以谁为准」。
+> 历史说明（2026-11-01 文档审计）：本文件是设计阶段的审计/评审记录，保留原始结论与日期；部分处置与当前实现已变化，当前以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

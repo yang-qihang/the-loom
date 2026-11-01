@@ -190,6 +190,7 @@ await world.keystone()
     mainTask: "两只织偶分工补桥：先互报份额、各取一半材料，再从两岸同时铺到中间；桥面只剩一格时，由你放合龙石。",
     makeTask: "桥变宽或缺口变长时协议不改：只让份额与铺法跟着缺口走，两只织偶仍各说一句完工再交给你。",
     playerBeat: "桥面只剩中央一格时，你手持合龙石右键中央基座；放下后触发合龙演出与村民过桥。",
+    playerBeatHint: "手持合龙石，对准中央基座按右键",
     successCriteria: [
       {
         id: "deck-full",
@@ -235,9 +236,17 @@ await world.keystone()
           const places = g.events("block.place").filter(
             e => e.actorType === "agent" && e.data?.block === "minecraft:oak_planks",
           );
-          const l = places.filter(e => e.actor === left).length;
-          const r = places.filter(e => e.actor === right).length;
-          return places.length === gap - 1 && l === Math.ceil((gap - 1) / 2) && r === Math.floor((gap - 1) / 2);
+          // 同一个格子只算一次：不重置连续跑两遍时，重复事件不能把「各铺一半」判错。
+          const keysOf = (actor: string) =>
+            new Set(places.filter(e => e.actor === actor && !!e.pos).map(e => e.pos!.join(",")));
+          const leftKeys = keysOf(left);
+          const rightKeys = keysOf(right);
+          const distinct = new Set([...leftKeys, ...rightKeys]);
+          return (
+            distinct.size === gap - 1 &&
+            leftKeys.size === Math.ceil((gap - 1) / 2) &&
+            rightKeys.size === Math.floor((gap - 1) / 2)
+          );
         },
       },
       {
@@ -305,7 +314,8 @@ await world.keystone()
         e => e.actorType === "agent" && e.data?.block === "minecraft:oak_planks",
       );
       const says = g.events("say").filter(e => e.actorType === "agent");
-      return places.length === num(g, "gap") - 1 && says.every(e => !String(e.data?.text ?? "").includes("完工"));
+      const distinct = new Set(places.filter(e => !!e.pos).map(e => e.pos!.join(",")));
+      return distinct.size === num(g, "gap") - 1 && says.every(e => !String(e.data?.text ?? "").includes("完工"));
     },
   } as ChallengeDef,
   narrative: {
@@ -317,6 +327,62 @@ await world.keystone()
     ],
     whyYou: "最后一块合龙石只有活人的手能放；织偶能替你铺桥，替不了你把这座桥合上。",
   },
+  // 玩家可见任务进度：与 grading criteria 共用同一份世界快照真值；合龙石是玩家节拍。
+  progress: [
+    {
+      id: "l10-deck-ready",
+      text: "织偶把桥面铺到中央，留出最后一格",
+      check: g => {
+        const deck = num(g, "deck");
+        const gap = num(g, "gap");
+        const start = num(g, "gapStart");
+        const y = num(g, "deckY");
+        const keystone = start + Math.ceil((gap - 1) / 2);
+        const zs = num(g, "bridgeWidth") === 3 ? [-1, 0, 1] : [0];
+        for (const z of zs) {
+          for (let x = 0; x < deck; x++) {
+            if (z === 0 && x === keystone) continue; // 最后一格留给玩家放合龙石
+            if (g.block([x, y, z]).id !== "minecraft:oak_planks") return false;
+          }
+        }
+        return true;
+      },
+    },
+    {
+      id: "l10-both-weavers",
+      text: "两只织偶各报份额、各铺一半",
+      check: g => {
+        const left = String(g.var("leftAgent"));
+        const right = String(g.var("rightAgent"));
+        const moves = g.events("agent.move").filter(e => e.actorType === "agent");
+        const says = g.events("say").filter(e => e.actorType === "agent");
+        const bothActive = [left, right].every(a => moves.some(e => e.actor === a) && says.some(e => e.actor === a));
+        const gap = num(g, "gap");
+        const places = g.events("block.place").filter(e => e.actorType === "agent" && e.data?.block === "minecraft:oak_planks");
+        // 同一个格子只算一次：不重置连续跑两遍时，重复事件不能把「各铺一半」判错。
+        const keysOf = (actor: string) =>
+          new Set(places.filter(e => e.actor === actor && !!e.pos).map(e => e.pos!.join(",")));
+        const leftKeys = keysOf(left);
+        const rightKeys = keysOf(right);
+        const distinct = new Set([...leftKeys, ...rightKeys]);
+        return (
+          bothActive &&
+          distinct.size === gap - 1 &&
+          leftKeys.size === Math.ceil((gap - 1) / 2) &&
+          rightKeys.size === Math.floor((gap - 1) / 2)
+        );
+      },
+    },
+    {
+      id: "l10-keystone",
+      text: "中央一格由你亲手放合龙石",
+      player: true,
+      check: g =>
+        g.events("block.place").some(
+          e => e.data?.block === "minecraft:lodestone" && (e.actorType === "player" || Boolean(g.var("testMode"))),
+        ),
+    },
+  ],
   phases: ["单织偶失败与先发后等", "双织偶协议与合龙"],
 });
 

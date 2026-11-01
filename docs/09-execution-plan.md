@@ -4,6 +4,7 @@
 > 上游：`docs/07-architecture.md`（做什么）、`docs/08-ai-workflow.md`（怎么做）、`docs/05-curriculum.md`（做哪些关）
 > 下游：每日 `STATUS.md`、`docs/10-demo-and-report.md`
 > 一句话：**4 天不是把 4 周的计划压缩，而是把范围砍到「一条能演出完整故事的垂直切片 + 一个可验证的教学骨架」，然后把这条切片做到发光。**
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

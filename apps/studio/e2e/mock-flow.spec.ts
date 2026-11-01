@@ -28,7 +28,9 @@ test("本地演示兜底：选关 → 运行 → 玩家节拍 → 3 星 → 重�
   await expect(page.getByTestId("code-editor")).toBeVisible();
   await page.evaluate(() => window.__loomStudio?.fillReference());
   await page.getByTestId("btn-run").click();
-  await expect(page.getByTestId("result-card")).toContainText("最后一步");
+  // 参考解只完成织偶部分：目标面板按 progress 真值打勾，并出现玩家节拍卡片。
+  await expect(page.getByTestId("btn-player-beat")).toBeVisible();
+  await expect(page.getByTestId("result-card")).toContainText("织者之印");
 
   await page.evaluate(() => window.__loomStudio?.playerBeat());
   await expect(page.getByTestId("result-headline")).toContainText("灯全亮");

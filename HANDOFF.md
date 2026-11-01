@@ -1,103 +1,85 @@
 # HANDOFF — 项目续跑快照（新 conversation / 新 agent 从这里开始）
 
-> 更新时间：2026-10-31 13:05（Asia/Shanghai）｜当前 commit：见 `git log -1`
+> 更新时间：2026-11-01 12:40（Asia/Shanghai）｜当前 commit：`git log -1`（工作区有未提交改动；**不要自行 git commit**，Lead 统一提交）
 > 用户要求：**全权由 AI 推进整个项目；用户不参与测试/操作；必须美观、精致、coherent、层层递进、易用、文字清晰无 AI 味。**
-> 本文件是「断点续跑」入口：新会话先读 `HANDOFF.md` → `AGENTS.md` → `docs/21-t1-contracts.md` → `STATUS.md`，然后跑 `npm run verify`。
+> 本文件是「断点续跑」入口：新会话先读 `README.md` → `STATUS.md` → `docs/46-playtest-fix-plan.md`（当前事实源）→ `AGENTS.md` → `docs/41-ai-contributor-guide.md`，再跑验证命令。
 
-## 0. 里程碑（2026-10-31 14:30 最终交付快照）
+## 0. 当前交付快照（2026-11-01，v1.4）
 
-**最终交付快照**：L01–L09 可玩（Mock + Studio），L01–L04 真实 MC e2e 全绿；Engine paper 模式 L01–L04 34/34；Tauri AppImage/rpm 无浏览器；试符台/织典/序章/手记/纯中文完成；185 测试全绿；verify exit 0（lg warn：Fresh Reader tracked fail）。L10 为终局设计/预演，多织偶运行时未接；桌面包 engine 默认 Mock-only。Fresh Reader Round2 仍 10 blocker，Round3 复读进行中。
+- **可玩**：L01–L10 全部可玩；真实 Paper e2e 全 PASS（`it/l1-real.ts`–`it/l10-real.ts`，L01 21 项 / L02–L09 各 13 项 / L10 19 项；L10 额外有 Studio 会话注入 11 项）。
+- **今天修复的 4 类试玩问题**（详见 `docs/46-playtest-fix-plan.md` §5）：① 目标面板由 `LevelDef.progress` 单一真值驱动、逐条打勾；② 严格线性玩家节拍（`playerBeatReady` 门控 + 插件拦截提前右键）；③ 切关/reset 的 sandbox 纯净（清场景/实体/背包，全区域 checkpoint 还原）；④ 第 4 盏灯容错右键（站地面、手持灯笼对柱子右键即可，不用看柱顶）。
+- **桌面**：AppImage ≈400MB / RPM ≈417MB，内置 Node 22 + Java 25 + Paper 26.1.2 + 插件 + 干净世界 + 真实引擎 + mineflayer 织偶；用户只需安装 Minecraft 26.1.2。旧 `~/.loomcraft/runtime/paper/world` 会按世界布局版本 marker 自动换干净世界（进度/星级存 Studio，不存世界）。
+- **质量**：`npx tsc --noEmit` 0；`npm test` 235/235（25 files）；Studio `test:e2e` 6/6、`test:e2e:local` 2/2；`bash scripts/verify.sh` exit 0（lg 有 tracked warn）；纯中文门禁 0 违规。
+- **明确边界**：挑战层是说明卡非可玩会话；真人（非 AI 代理）多背景盲测未执行；部分关卡真实客户机截图未全部重拍；Fresh Reader Round 4 未清零（G-FRESH-READER 仍 tracked fail）。独立验收另发现 L03 玩家出生点在钟楼结构内、L02 蛋糕目标格被塔基占用（见 `evidence/playtest-fix/report.md` §4）。
 
-**T1 门禁通过（真实 Minecraft）**：Paper 26.1.2 上，织偶用参考解点亮 3 盏灯 → 插件 testMode 触发玩家节拍 → 评分 **PASSED / 3 星 / 隐藏测试全过**；starter 失败、缺玩家节拍失败；reset ≤2s 且两次 hash 一致；**真实评分与 MockWorld 逐项一致**（digest 相同）。证据：`evidence/l1-real-2026-10-31T05-14-40-618Z.json`。
-Mock/Engine 侧：`npm test` 70 测试全绿；`bash scripts/verify.sh` l0–l3 全绿；Engine HTTP/SSE 全流程 3 星；Studio `vite build` 通过（Playwright mock e2e 待跑）。
-安全加固：worker+vm 沙箱、world.vars deep-freeze、snapshot epoch/digest 绑定、guard-tests 已接入 verify l0（warn）。
+## 1. 现在可直接跑的命令
 
-## 1. 已完成（可运行）
+```bash
+# 质量门（typecheck / 单测 / 契约 / 内容 / 专项 gate）
+npm ci
+npm test                       # 25 files / 235 tests
+npm run typecheck
+bash scripts/verify.sh         # 默认 l0,l1,l2,l3,lg；exit 0
+bash scripts/verify.sh --layers l0,l1,l2,l3,lg,ux   # 彩排前跑 UOS
 
-- 设计交付包 v1.3：docs/00–21（审计/评审/架构/课程/关卡/美术/质量门/契约），13 份 level spec。
-- 技术实证（真实 MC）：Paper 26.1.2 build74 + Java 25 + mineflayer 4.39.0；双通道 7/7；L10 铺桥 10/10；3 bot；actorType；Mannequin。
-- **T1 代码基线**（commit `98964dd`）：
-  - `packages/protocol`（zod：LevelMeta/WorldEvent/WorldSnapshot/RPC + ASYNC_SDK_METHODS）
-  - `packages/sdk`（Golem/World 类型）
-  - `packages/level-spec`（defineLevel/validateLevel/**L01 定义**）
-  - `packages/grading`（g API/0–3 星/隐藏测试）
-  - `packages/mockworld`（无 MC 确定性世界）
-  - `packages/runner`（**顺序门面 auto-await AST 变换** + esbuild + 执行 + L01 e2e 测试 + `npm run demo:l01`）
-  - `packages/worldport`（WorldPort/LevelContent/FxCue + MockWorldPort）
-  - `content/levels/L01.content.ts`（场景 prepare/playerBeat 钩子）
-  - 测试：**7/7 通过**；`npm run demo:l01` 输出 3 星/失败/缺玩家三种情形。
-- `docs/20-quality-bar.md`（用户质量标准的可执行门禁）、`docs/21-t1-contracts.md`（并行契约）。
+# Studio 验收（Playwright 自动起引擎与静态站；用系统 Chrome）
+npm --prefix apps/studio run test:e2e        # 6/6
+npm --prefix apps/studio run test:e2e:local  # 2/2
+
+# 真实 Paper（无头；同一服务端串行）
+bash scripts/mc-up.sh
+npx tsx it/l1-real.ts          # … l2 … l10 逐关串行
+bash scripts/mc-reset.sh       # 单独测 world.reset
+bash scripts/mc-down.sh
+
+# 桌面 App（自包含真实运行时）
+bash scripts/launch-desktop.sh
+
+# 重新打包（唯一入口）
+bash scripts/package-desktop.sh
+```
 
 ## 2. 当前正在跑的进程
 
-- Paper 26.1.2 spike 服：`spikes/mc-bot-paper/server/`，Java 进程（`pgrep -ax java` 中含 `paper.jar`），端口 **25565**，日志 `server/console.log`，插件 `loom-spike-plugin-0.1.0.jar`（7/7 RPC 已验证）。
-- 若需重启：见 `spikes/mc-bot-paper/README.md` / `docs/02`；先 `kill` 该 java PID，再 `nohup java -Xms1G -Xmx2G -jar paper.jar --nogui </dev/null >console.log 2>&1 &`。
-- 无其他常驻进程；`incoming/other-plan/` 是对照方案（只读，已评审）。
+- **无必须常驻的进程**。桌面 App/`launch-desktop.sh` 会自己拉起内置 Paper + 真实引擎，并在启动前清理旧实例；手跑真实 e2e 时 `mc-up.sh` 起的 Paper 用完 `mc-down.sh` 停掉。
+- 端口约定：HTTP 引擎 `4317`（可用 `PORT` 覆盖）、Paper `25565`、插件 RPC `8765`；Studio dev `5173`；真实 e2e 的 Studio/引擎用 `4399`/`5186`；自动化 GUI 只允许 `:98`/`:99`，禁止 `:0`。
+- 日志：`~/.loomcraft/logs/`（桌面/内置 Paper/引擎）、`it/.mc-server/console.log`（手跑 Paper）。
 
-## 3. 当前并行（T1 已过，T2/T3/T4 铺开）
+## 3. 下一轮优先级（按用户价值）
 
-- T2-MC（scout-minecraft，task-30）：L03/L04 13/13；L01 20/21（no-beat 对照差异）、L02 回归 8/13（收蛋映射/摘要与 Mock 不一致），MC 线修复中；PaperWorldPort 适配器待交 Engine。
-- T3-TAURI（scout-language，task-31）+ T4-DESKTOP-REBUILD（task-54）：**完成**（AppImage 120MB/rpm 18MB、Xvfb/X11、置顶/伴玩、无浏览器、纯中文、v3.1/试符台/织典）。**桌面包 engine 默认 Mock-only**；真实 Paper 用 `npm run dev:engine:paper`。
-- T3-ENGINE-PAPER（scout-minecraft，task-49）：**完成**（`LOOM_WORLD=paper`，真实 server/bot/engine 四关 34/34，3 星）。
-- T3-EXPLICIT/L09（task-51/52）：**完成**（显式 await；L09 14/14，185 测试）。
-- T3-CODEX/REPL UI（task-47/36）：**完成**（Studio e2e 5/5，截图 14–18）。
-- Fresh Reader Round 1（docs/31）：FAIL（11 blocker/20 major）；task-41 文案 v3.1、task-42 内容、task-43 Studio UI 修复中；task-44 Round 2 复读待跑。
-- T2-STUDIO（scout-prior-art，task-26）：真实 Engine 联调 + 纯中文 UI + L01–L04 关卡墙。
-- T2-CONTENT（smith-act1，task-27）：L02–L04 挑战层/体量/叙事。
-- T2-COPY v3（scout-pedagogy，task-32）：**已完成**（328 条纯中文；序章 8 屏/三幕开场/每关三句/手记；25/25 盲读）。Studio 需接 prologue/journal（task-38）。
-- T2-SPEC（smith-act2/act3，task-33/34）：**已完成**（L05–L10 全部 ≥50/60 行、2–3 阶段、挑战层）。
-- T3-ACT2/ACT3（smith-act2/act3，task-45/46）：L05–L08 MockWorld 内容实现进行中。
-- T3-TAURI（scout-language，task-31）：Tauri 2 桌面封装 spike（不许浏览器）。
-- QA（scout-assurance，已交付）：pure-zh lint + verify 分层；待内容线齐后升 `--strict-copy`。
-
-## 3b. 下一步（T2：Act I 全可玩 + Studio live）
-
-1) Studio ↔ Engine live 联调（HttpEngine + copy JSON + 截图/UX 走查）→ 浏览器里真实可玩 L01。
-2) 真实 MC 的 L02–L04 场景（插件 SceneManager 按 content 的 vars/regions 摆放）+ 真实 e2e；MockWorld 与真实 digest 对齐。
-3) 美术 pass：L01–L04 的 palette/机位/道具密度（docs/19）+ 3 张截图/关。
-4) 文案：L01–L04 回写已完成（docs/22），L05–L10 下一批。
-5) Act II 内容：先扩 SDK（fill/clear/placeSign、容器、plot），再 L05–L07 content。
-6) 最终：demo 录像/报告更新/彩排。
-
-## 3b. 原并行工作流（已完成/收尾）
-
-| 线 | owner | 目标 |
-|---|---|---|
-| MC 插件+织偶 | scout-minecraft | `plugin/` 正式插件（T1 RPC 子集）+ `bot/` 管理器 + `scripts/mc-up.sh` + 真实 L01 场景/重置 + 无头 e2e |
-| Engine | scout-language | `apps/engine/` HTTP+SSE、`packages/session/` 会话状态机、WorldPort 适配、Mock 验收 |
-| Studio | scout-prior-art | `apps/studio/` Vite+React+Monaco：关卡选择/编辑器/目标/教练/Run/Stop/Reset |
-| 内容 | smith-act1 | `content/levels/L02–L04.content.ts` + MockWorld 场景/断言 |
-| QA | scout-assurance | `qa/` 盲测/红队、契约测试、verify 扩展、证据 JSON |
-| Lead | — | 契约/评审/集成/真实 L1 联调/报告/美术 |
+1. **真人可达性两项**：L03 玩家出生点从钟楼内部挪出、L02 蛋糕目标格改到空位（`evidence/playtest-fix/report.md` §4；需内容/引擎线，不是插件机制问题）。
+2. **挑战层从说明卡升级为可玩会话**（当前所有关卡「挑战层」只是可阅读说明卡）。
+3. **真人多背景盲测**：目前所有玩家路径证据都是 AI 自动化（真实 Paper e2e + Studio e2e + UOS）。
+4. **真实客户端截图重拍**：部分关卡（docs/34 §5）需按固定机位补；新增第 4 盏灯发光标记、L01 去掉石阶后的画面要重拍。
+5. **Fresh Reader Round 4**：用全新 2 个 fresh agent 复读，清零前不写「完成」。
+6. 织典/文案后续批次：L05–L10 引导与织典页文案继续覆盖（docs/22）。
 
 ## 4. 关键约束（所有 agent）
 
-1. 不越 write scope；不改别人文件；**不要 git commit**（Lead 统一提交）。
-2. 所有完成必须附证据：命令 + exit 0 + 产物路径。
-3. 版本锁：MC/Paper 26.1.2、Java 25、mineflayer 4.39.0、TS 6.0.3、esbuild 0.28.2、Monaco 0.57.0。
-4. 学生 API 只能来自 `docs/12`；语法不越级；类型错误不阻断、语法错误阻断。
-5. 文案遵守 `docs/20` §3（无 AI 味、动词按钮、错误=哪里错+怎么改）。
-6. 用户不测试：所有验收必须自动化；人工只做最终看截图/彩排（Lead 代看）。
+1. 不越 write scope；不改别人文件；**不要 git commit**（Lead 统一提交）；不改测试/断言变绿。
+2. 版本锁：MC/Paper **26.1.2 build 74**、Java **25**、mineflayer **4.39.0**、minecraft-protocol 1.68.0、pathfinder 2.4.5、TS **6.0.3**、esbuild 0.28.2、Monaco 0.57.0。升级 = ADR + Lead 签字。
+3. 学生 API 只能来自 `docs/12`；语法不越级；类型错误不阻断、语法错误阻断。
+4. 文案遵守 `docs/20` §3（无 AI 味、动词按钮、错误=哪里错+怎么改）；界面叙述纯中文。
+5. 真实 e2e 同一 Paper 串行；GUI 自动化只用 `:98/:99`；改插件必须冷启动，不 `/reload`。
+6. 事实/完成标准：命令 + exit 0 + 产物路径；`STATUS.md` 每个集成点更新；不要用「应该可以」代替证据。
 
-## 5. 验证命令
+## 5. 文档地图（新 agent 按需读）
 
-```bash
-npm run typecheck
-npm test
-npm run demo:l01
-npm run verify        # typecheck + test
-```
+- 当前事实源：`docs/46-playtest-fix-plan.md`、`STATUS.md`、`README.md`、`docs/41-ai-contributor-guide.md`。
+- 架构/契约：`docs/07-architecture.md`、`docs/21-t1-contracts.md`（T1 基线，2026-11-01 的 RPC/进度变更见 docs/46 §2）。
+- 设计期历史（结论保留、当前实现以代码为准）：`docs/00`–`docs/18`、`docs/24`。
+- 质量/流程：`docs/20`、`docs/28`、`docs/29`、`docs/30`、`qa/README.md`。
+- 玩法/交接：`docs/42-player-guide.md`、`docs/43-environment-and-bundling.md`、`docs/36-github-handoff.md`、`docs/40-development-history.md`。
+- 文档审计：`docs/47-docs-audit-2026-11-01.md`（本次审计的判定表与删除清单）。
 
-## 6. 已知待修（下一轮）
+## 6. 历史记录（2026-10-31 及更早）
 
-- `packages/worldport` 的 MockWorldPort 命名冲突（private world vs getter world）需修（若已修则忽略）。
-- `content/levels/L01.content.ts` 的 prepare 目前只做最小场景；真实 MC 版等插件 RPC。
-- 尚未有 `apps/engine` / `apps/studio` / 正式 `plugin/` / `bot/` 代码（本轮起由各 owner 建）。
-- `docs/20` 的文案检查脚本与 `docs/19` 美术机位尚未落地。
+- T1 真实 MC 垂直切片：L01 真实 Paper e2e 3 星、评分与 Mock 逐项一致、reset ≤2s hash 稳定（`evidence/l1-real-2026-10-31T05-14-40-618Z.json`）。
+- T2/T3：Engine paper 模式接入、Studio 真实联调、文案 v3 + 序章/手记、试符台/织典、桌面封装、L10 双织偶真实运行时、Fresh Reader 1–3 轮。
+- 更早里程碑（设计交付、L10 铺桥 spike 10/10）见 `STATUS.md` 历史段与 `docs/40-development-history.md`；历史段中的数字/进度已过时，不要当现状引用。
 
 ## 7. 新会话续跑建议
 
-1. 读本文件 + `STATUS.md` 最新段 + `docs/21`。
-2. `git log --oneline -5` 确认 commit；`npm run verify` 确认绿。
-3. 用 `team_task_list` 看并行任务；用 `list_agents` 看谁在跑；不要重复它们的文件。
-4. 优先做：集成各线 → 真实 L1 无头 e2e → Studio UI 可玩 → 复制 L02–L04 → 美术/文案/报告。
+1. 读本文件 + `STATUS.md` 最新段（2026-11-01）+ `docs/46`。
+2. `git log --oneline -5` 确认 commit；`git status` 看未提交改动；`npm test` + `bash scripts/verify.sh` 确认绿。
+3. 用 `team_task_list` 看任务板；不要重复别人文件。当前已知未闭环见 §3。

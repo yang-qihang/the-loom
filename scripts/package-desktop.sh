@@ -57,7 +57,7 @@ cp "$BUNDLE/appimage/Loomcraft-x86_64.AppImage" "$BUNDLE/appimage/Loomcraft_0.1.
 # 一次性验收：运行时/插件/字体/包体必须同时是新的
 test -f "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage"
 grep -q 'playerGive' "$ROOT/apps/desktop/src-tauri/runtime/real/engine.mjs"
-javap -classpath "$ROOT/apps/desktop/src-tauri/runtime/real/paper/plugins/loomcraft-plugin.jar" -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem'
+javap -p -classpath "$ROOT/apps/desktop/src-tauri/runtime/real/paper/plugins/loomcraft-plugin.jar" -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem'
 grep -Rq 'Iosevka' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || true
 echo "[package] OK"
 ls -lh "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage" "$BUNDLE/rpm/"*.rpm 2>/dev/null || true

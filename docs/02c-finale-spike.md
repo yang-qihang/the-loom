@@ -3,6 +3,7 @@
 > 状态：v1（已完成实测）｜负责人：scout-minecraft｜最后更新：2026-10-31
 > 上游：`docs/02b-level-feasibility.md` §2.3/U8/U9/U11、`content/levels/L10-two-weavers.md`（v1）、`spikes/mc-bot-paper/`（Paper 26.1.2 build 74 / Java 25 / mineflayer 4.39.0 锁定栈）
 > 证据：`spikes/mc-bot-paper/bridge-run.log`、`bridge-spike-results.json`、`bridge-spike.js`、`server/plugins` 内 plugin v2 源码 `plugin/src/main/java/dev/loom/spike/LoomSpikePlugin.java`。**本文件不改 docs/02b**，合并建议见 §5。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## 0. 结论（TL;DR）
 

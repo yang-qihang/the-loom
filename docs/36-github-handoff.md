@@ -1,6 +1,6 @@
 # 36 — GitHub 交接说明（给人类开发者）
 
-> 状态：L01–L10 真实 Paper 已 PASS｜最后更新：2026-10-31
+> 状态：交接可用（L01–L10 真实 Paper 已 PASS；2026-11-01 试玩修复已落地）｜负责人：Lead｜最后更新：2026-11-01｜上游：`STATUS.md`、`docs/46-playtest-fix-plan.md`
 > 目的：让另一个人能复现、定位并继续修复，不需要再开新的可行性 spike。
 
 ## 1. 先看哪几份
@@ -10,7 +10,8 @@
 3. `STATUS.md` → 当前交付状态
 4. `docs/07-architecture.md` → 双通道、WorldPort、场景/评分
 5. `docs/06-level-spec-system.md` → 关卡/评分/隐藏测试
-6. 本文件 → 当前 blocker 与复现命令
+6. `docs/46-playtest-fix-plan.md` → 2026-11-01 的进度/节拍/sandbox 契约与验收
+7. 本文件 → 当前 blocker 与复现命令
 
 ## 2. 为什么说「不需要新 spike」
 
@@ -29,7 +30,7 @@
 
 ```bash
 npm ci
-npm test                         # 应全绿；基线 230 tests
+npm test                         # 应全绿；基线 235 tests / 25 files
 npm run typecheck
 bash scripts/verify.sh           # exit 0
 
@@ -40,20 +41,19 @@ npx tsx it/l6-real.ts            # PASS (3 星, digest=MOCK)
 npx tsx it/l7-real.ts            # PASS (3 星, digest=MOCK)
 npx tsx it/l8-real.ts            # PASS (3 星, digest=MOCK)
 npx tsx it/l9-real.ts            # PASS (3 星, digest=MOCK)
-npx tsx it/l10-real.ts          # PASS (双织偶, 17 checks)
+npx tsx it/l10-real.ts          # PASS (双织偶, 19 checks)
 ```
 
 证据：`evidence/l5-real-latest.json` … `l9-real-latest.json`；harness 会输出每步 CHECK 与失败坐标。
 
-## 5. 当前真实 blocker（按优先级）
+## 5. 当前真实 blocker / 已知边界（按优先级，2026-11-01）
 
-1. **L05–L09 真实可走性**：织偶真实 Paper 上被脚手架/房屋/自动支撑柱堵路；解析现场：
-   - `it/real-harness.ts` 是入口；`packages/worldport/src/paper-port.ts` 的 `moveTo` / `agent.mark` 是织偶动作；
-   - `plugin/src/main/java/dev/loomcraft/mc/SceneManager.java` 的 `buildArena` 曾自动给 tracked 高点补石柱；需要判断是保留还是要求内容自支撑；
-   - 不允许用后台 teleport 冒充玩家路径，也不允许削弱 grading 来「变绿」。
-2. **L10 多织偶运行时**：engine 当前单 bot；需扩展 `WorldPort.agent` / runner SDK / plugin `bots.set` / 消息收发，接入 docs/02c 的 lane。
-3. **Fresh Reader 剩余 blocker**：见 `docs/31-fresh-reader-report.md` 与 `docs/32-fresh-reader-fix-tracker.md`；含错误提示、标注可读性、序章身份说明等。
-4. **桌面真实运行时**：最新安装包已内置 Node/Java/Paper/插件/世界/真实引擎与织偶；首次启动把 Paper 世界复制到可写目录再启动。
+> L05–L09 真实可走性、L10 多织偶运行时、桌面真实运行时三项已在 2026-10-31 解决（`it/l5-real.ts`–`l10-real.ts` PASS；桌面安装包已内置真实运行时），不再列为 blocker。
+
+1. **真人体验遗留问题已修（11-01）**：L03/L05 显式 `playerSpawn`；L02 蛋糕、L04 南瓜目标格改为空气格（会真的落块）。仅剩 L03 钟本体在钟楼结构内不可见（美术边界，对着钟楼右键可完成）。证据：`evidence/playtest-fix/report.md` §4。
+2. **挑战层仍是说明卡**，未接可玩会话。
+3. **真人多背景盲测未执行**；G-FRESH-READER 仍 tracked fail（Round 4 未清零），不得假绿。
+4. **部分关卡真实客户端截图未全部重拍**（docs/34 §5）。
 
 ## 6. 交接时必须先做的清理
 
@@ -67,3 +67,4 @@ npx tsx it/l10-real.ts          # PASS (双织偶, 17 checks)
 - 不改测试/断言来变绿；评分真值只在 engine/plugin。
 - 自动化只在 `:98/:99`，不碰 `:0`。
 - 提交前 `npm test`、`npm run typecheck`、`bash scripts/verify.sh` 必须绿；`G-FRESH-READER` 仍是 tracked fail，不能假绿。
+- 改目标进度/玩家节拍前先读 `docs/46` §1–§2；进度唯一真值是 `LevelDef.progress`，玩家节拍严格线性。

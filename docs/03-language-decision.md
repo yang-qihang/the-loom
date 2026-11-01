@@ -4,6 +4,7 @@
 > 上游：`research/language-notes.md`（scout-language，2026-10-31 版本核实）、`BRIEF.md` D1
 > 下游：`docs/07-architecture.md`（执行管线）、`docs/04-learning-design.md`（语言能力→教学映射）
 > 一句话：**学生语言 = 一个被刻意收窄的 TypeScript 子集（我们叫它 LoomTS）**；不造语言、不用 Racket；TS 没有宏，但用户想要的「给物体写逻辑的 DSL 感」由 SDK 的声明式 API 实现，而不是宏。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ---
 

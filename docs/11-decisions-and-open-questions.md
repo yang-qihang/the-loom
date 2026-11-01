@@ -3,6 +3,8 @@
 > 状态：v1｜负责人：Lead｜最后更新：2026-10-31
 > 格式：轻量 ADR（Status / Context / Decision / Consequences / Alternatives / Revisit Trigger）
 > 规则：任何 agent 不得静默改变这里的决定；要改必须写新 ADR 并由 Lead 记录。人类只需看 §13 的待确认清单。
+> 历史说明（2026-11-01 文档审计）：本文件是设计期决策记录（D1–D43），**保留原决策不改**；2026-11-01 的接口/进度/节拍变更以 `docs/46-playtest-fix-plan.md` §2 的新契约为准。
+> 上游：BRIEF.md、docs/09-execution-plan.md、docs/18-comparison-other-plan.md
 
 ---
 

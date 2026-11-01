@@ -3,6 +3,7 @@
 > 状态：v1 草稿｜负责人：scout-prior-art（Lead 委派）｜最后更新：2026-10-31｜上游：docs/06、content/level-spec.schema.json、docs/07 §4/§5/§8/§9/§10、docs/12、research/assurance-notes.md §6、docs/08-appendix-templates.md §A.6–A.8
 > 定位：把 docs/06 的 spec 体系下沉为「Day 1 可照写」的实现规格。**本文件不改 docs/06 与 schema**；发现的冲突列在 §8「待 Lead 裁决」。
 > 版本依据：zod 4.6.7 / fast-check 4.10.2 / Vitest 5.0.5 / esbuild 0.28.2 / TypeScript 6.0.3 均为 docs/07 §10 已锁版本（2026-10-31 经 npm registry 复核）；候选库 yaml 2.9.1、acorn 8.19.0、expect-type 1.4.0 同日查得。
+> 历史说明（2026-11-01 文档审计）：本文件为设计阶段产物（2026-10-31），保留原始设计结论；实现与当前状态以 `STATUS.md`、`docs/46-playtest-fix-plan.md` 与代码为准。
 
 ## 0. TL;DR（8 条）
 

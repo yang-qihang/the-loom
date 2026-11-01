@@ -39,7 +39,11 @@ for lib in $(ldd "$NODE_BIN" | awk '/=> \//{print $3} /^\//{print $1}'); do cp -
 # 5) Java
 cp -a "$JAVA_HOME_SRC/." "$DEST/java/"
 # 6) Paper / 插件 / 世界（日志与运行时输入输出不打包）
-rsync -a --exclude logs --exclude 'console.*' --exclude '*.log' "$PAPER_SRC/" "$DEST/paper/"
+rsync -a --exclude logs --exclude 'console.*' --exclude '*.log' --exclude 'session.lock' "$PAPER_SRC/" "$DEST/paper/"
+# 世界布局版本 marker：插件/场景/重置语义升级时 bump，桌面壳会为老用户换一份干净世界。
+WORLD_LAYOUT_VERSION="${LOOM_WORLD_LAYOUT_VERSION:-loomworld-v2}"
+mkdir -p "$DEST/paper/world"
+printf '%s\n' "$WORLD_LAYOUT_VERSION" > "$DEST/paper/world/.loom-world-version"
 # 7) 插件必须和当前源码一起构建，不能复用旧 jar（否则 player.give/关卡钩子会悄悄过期）
 (cd "$ROOT/plugin" && ./gradlew clean build --no-daemon -q)
 mkdir -p "$DEST/paper/plugins/spark"
@@ -49,5 +53,5 @@ printf '{"_header":"spark configuration file - https://spark.lucko.me/docs/Confi
 # 8) eula
 printf 'eula=true\n' > "$DEST/paper/eula.txt"
 grep -q 'playerGive' "$DEST/engine.mjs" || { echo "引擎 bundle 未包含 playerGive" >&2; exit 3; }
-(cd "$ROOT/plugin" && javap -classpath build/libs/loomcraft-plugin.jar -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem' || { echo "插件 jar 未包含快捷栏 setItem 逻辑" >&2; exit 3; })
+(cd "$ROOT/plugin" && javap -p -classpath build/libs/loomcraft-plugin.jar -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem' || { echo "插件 jar 未包含快捷栏 setItem 逻辑" >&2; exit 3; })
 du -sh "$DEST"

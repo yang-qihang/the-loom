@@ -57,9 +57,19 @@ export function paperConfig(env: NodeJS.ProcessEnv = process.env): PaperConfig {
   };
 }
 
-/** 少数关卡的真实几何与 mock 坐标不同（L01 灯柱建在世界 y=14，需要 groundY=11）。 */
+/**
+ * 少数关卡的真实几何与 mock 坐标不同，或 arena 中心不是人该落的位置（docs/46 §1.4 试玩反馈）。
+ * 依据：tmp/audit-spawn.ts 按 PaperWorldPort.deriveLayout + 插件 buildArena 规则复算，
+ * 逐关核对 spawn 格 body/head 为空气、脚下实心、且到主目标的视线无遮挡。
+ * - L01 灯柱建在世界 y=14，地面 y=10（站立 y=11）：玩家落在村道 (2,11,4)。
+ * - L03 arena 中心正好是钟楼中心的钟格（被钟楼实心结构包住）：玩家落在南侧主路 (0,65,12)，正对钟楼。
+ * - L05 arena 中心 (13,-2) 贴着民房后墙、视线被挡：玩家落在东西主路 (13,64,6)，正对五块房区。
+ * 其余关卡（L02/L04/L06/L07/L08/L09/L10）默认 arena 中心经验算均可站立且主目标可见，不覆盖。
+ */
 export const PAPER_SCENE_HINTS: Record<string, SceneHint> = {
   L01: { groundY: 11, floorY: 10, playerSpawn: [2, 11, 4] },
+  L03: { playerSpawn: [0, 65, 12] },
+  L05: { playerSpawn: [13, 64, 6] },
 };
 
 export interface HealthPayload {
