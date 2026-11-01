@@ -273,12 +273,16 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       const content = findLevelContent(levelId);
       if (!content) throw new SessionError(`未知关卡 ${levelId}`, "NOT_FOUND");
       const mode = typeof body.mode === "string" && body.mode === "repl" ? "repl" : "level";
-      if (runtime.mode === "paper") await disposePaperSessions();
+      // 真实 Paper 模式同一时刻只允许一个真实世界会话（插件一个 arena/一个 sessionId）。
+      // 试符台是「练一句」的沙箱：用内存 Mock 世界准备本关场景，既不动真实世界/关卡进度，
+      // 也不再 dispose 玩家正在玩的关卡会话（Studio 文案承诺「不会动这一关的进度」）。
+      const replInPaper = mode === "repl" && runtime.mode === "paper";
+      if (runtime.mode === "paper" && !replInPaper) await disposePaperSessions();
       let session: GameSession;
       try {
-        const port = await runtime.createPort(content);
+        const port = replInPaper ? new MockWorldPort() : await runtime.createPort(content);
         const runTimeoutMs =
-          runtime.mode === "paper" ? Number(process.env.LOOM_RUN_TIMEOUT_MS ?? 240_000) : undefined;
+          runtime.mode === "paper" && !replInPaper ? Number(process.env.LOOM_RUN_TIMEOUT_MS ?? 240_000) : undefined;
         if (process.env.LOOM_DEBUG_ENGINE === "1") {
           console.log(`[debug] session create level=${levelId} world=${runtime.mode} runTimeoutMs=${runTimeoutMs}`);
         }

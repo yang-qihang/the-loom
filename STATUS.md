@@ -15,7 +15,7 @@
 
 **终验**：`tsc` 0；`npm test` 25 files / 235 tests；content 162 tests；`verify.sh` pass（仅 Round 1 遗留 `G-FRESH-READER` tracked warning）；Studio e2e 6/6 + local 2/2；guidance 隔离冒烟 42/42；monaco-font 22/22 + 桌面壳 8/8；真实 Paper e2e L01–L10 全 PASS；重新打包 AppImage（428MB）/ RPM（435MB，2026-11-01 14:13），包内已含新字体/引擎/插件/世界素材。证据：`evidence/playtest-fix/start-positions.md`、`evidence/scene-shots/hi-res/`、`evidence/ui-hires/`、`evidence/monaco-font-verify.json`、`evidence/code-analysis.json`、`apps/studio/public/world/`、`report/`。
 
-**已知边界**：真实 Paper 模式单会话（开 REPL 会 dispose 当前关卡会话，mock 无感）；L10 出生朝向看不到桥（素材用桥面机位并注明）；L03 钟本体在钟楼内不可见（对钟楼右键可完成）；`guard-tests` manifest drift 为 Round 1 前基线。
+**已知边界**：真实 Paper 模式同一时刻只重建一个真实世界会话，但试符台使用独立 Mock 会话，不再 dispose/影响当前关卡进度；L10 出生朝向看不到桥（素材用桥面机位并注明）；L03 钟本体在钟楼内不可见（对钟楼右键可完成）；`guard-tests` manifest drift 为 Round 1 前基线。
 
 ## 2026-11-01 试玩反馈修复（v1.4，已完成）
 
