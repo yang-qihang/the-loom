@@ -100,6 +100,8 @@ body { background: var(--bg); }
 .conn .dot { width: 7px; height: 7px; border-radius: 0; background: #5c4a34; }
 .conn[data-state="ok"] .dot { background: var(--ok); }
 .conn[data-state="bad"] .dot { background: var(--bad); }
+/* EnvState：starting/checking = 暖黄（正在启动/检测），needs_action/error = 红。 */
+.conn[data-state="busy"] .dot { background: var(--warm); box-shadow: 0 0 6px rgba(217, 178, 92, 0.5); }
 .conn[data-state="mock"] .dot { background: var(--warm); }
 .conn[data-state="off"] .dot { background: #5c4a34; }
 body.companion .conn-label { display: none; }
