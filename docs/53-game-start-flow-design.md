@@ -1,8 +1,8 @@
-# 53 — 主界面启动流程与 Minecraft 客户端适配（设计任务，不实现）
+# 53 — 主界面启动流程与 Minecraft 客户端适配（task-7 已实现）
 
-> 状态：需求澄清 / 任务设计（未开始编码）
+> 状态：**已实现（本地工作区，未提交）**；命令/事件/状态机契约见 `docs/57-launcher-env-contract.md`（原 docs/55）；**task-16 版本门控（MC 26.1.2 / 协议 775，禁止 1.21.1 误绿）已落地，见 `docs/58-client-version-compatibility-review.md`**
 > 日期：2026-11-02
-> 关联：docs/26、docs/43、docs/45、docs/51、`apps/desktop/shell/wizard.html`、`apps/desktop/src-tauri/src/main.rs`
+> 关联：docs/26、docs/43、docs/45、docs/51、`apps/desktop/shell/wizard.html`、`apps/desktop/shell/shell.js`、`apps/desktop/src-tauri/src/main.rs`、`envstate.rs`、`launcher.rs`
 > 目标：确定 L0 主界面、L1 关卡墙、L2 关卡内的完整状态机、按钮语义和客户端启动器策略。
 
 ## 1. 目标体验

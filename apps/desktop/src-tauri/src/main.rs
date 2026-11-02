@@ -6,20 +6,37 @@
 //! 业务逻辑仍在 apps/studio 与 apps/engine；本文件只做窗口与进程编排。
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 use std::net::{SocketAddr, TcpStream};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use tauri::{Emitter, Manager, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use window_geometry::{GeoRect, GeoSize};
+
+mod envstate;
+mod launcher;
+mod window_geometry;
 
 const ENGINE_PORT: u16 = 4317;
 const MC_PORT: u16 = 25565;
+/// L1「退出游戏」：先礼后兵地关客户端，最多等 8 秒。
+const CLIENT_CLOSE_WAIT_MS: u64 = 8_000;
+/// 四灯监视线程节拍（只用端口/进程/本地 health，不做 PowerShell/UIA，避免旧卡顿回归）。
+const ENV_MONITOR_INTERVAL_MS: u64 = 2_000;
+/// CloseRequested 二次放行窗口：第一次 prevent 后 N 秒内再点 X/Alt+F4 视为「坚持关闭」。
+const CLOSE_SECOND_PASS_MS: u64 = 6_000;
+/// shell 确认弹窗迟迟不 ack 时，Rust 兜底放行关闭（避免窗口永远关不掉）。
+const CLOSE_CONFIRM_FALLBACK_MS: u64 = 10_000;
+/// engine+paper 就绪但织偶超过 N 秒未连上 → L0 转为可点「重启织偶」。
+const BOT_STALL_MS: u64 = 60_000;
 const PIN_SHORTCUT: &str = "Ctrl+Shift+L";
+const RESTORE_SHORTCUT: &str = "Ctrl+Shift+F";
 const FOCUS_SHORTCUT: &str = "Alt+Z";
 const COMPANION_WIDTH: u32 = 420;
 const COMPANION_HEIGHT: u32 = 620;
@@ -35,6 +52,15 @@ struct Settings {
     mode: String,
     page: String,
     prism_command: Option<String>,
+    /// 可选：手工指定 .minecraft 目录（空 = 自动探测 APPDATA/.minecraft、仓库 .minecraft）。
+    #[serde(default)]
+    minecraft_dir: Option<String>,
+    /// 可选：目标版本，默认 26.1.2（见 launcher::DEFAULT_MC_VERSION）。
+    #[serde(default)]
+    mc_version: Option<String>,
+    /// 可选：离线 profile 用户名（空 = LOOM_MC_USERNAME > 系统用户名 > Player）。
+    #[serde(default)]
+    mc_username: Option<String>,
     window: Option<WindowGeom>,
     #[serde(skip)]
     last_save: Option<Instant>,
@@ -48,6 +74,9 @@ impl Default for Settings {
             mode: "workbench".into(),
             page: "wizard".into(),
             prism_command: None,
+            minecraft_dir: None,
+            mc_version: None,
+            mc_username: None,
             window: None,
             last_save: None,
         }
@@ -98,6 +127,13 @@ struct RuntimeStatus {
     world_detail: String,
 }
 
+/// 当前关卡会话（shell 从 Studio 的 `loom:session` 消息同步过来）。
+#[derive(Clone, Debug)]
+struct GameSessionRef {
+    session_id: String,
+    level_id: String,
+}
+
 struct AppState {
     settings: Mutex<Settings>,
     children: Mutex<HashMap<String, Child>>,
@@ -107,6 +143,182 @@ struct AppState {
     repo_root: Option<PathBuf>,
     #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     kde_wayland: bool,
+    /// 正在执行的长操作（engine/paper/bot/client），全局启动锁防重复。
+    starting: Mutex<HashSet<String>>,
+    /// 最近一次四灯快照（env_state 命令直接返回；监视线程负责刷新 + 发事件）。
+    env: Mutex<envstate::EnvState>,
+    /// 各灯最近一次失败原因（成功时清除）。
+    errors: Mutex<HashMap<String, String>>,
+    /// 当前关卡会话（L2 客户端丢失判定与「一键重连当前进度」）。
+    session: Mutex<Option<GameSessionRef>>,
+    /// L2 红色阻断：关卡会话进行中、客户端掉线。
+    client_lost: Mutex<bool>,
+    /// 是否曾经亮过客户端灯（区分「还没启动」与「从运行中掉线」）。
+    client_seen_ready: Mutex<bool>,
+    /// 客户端适配器给出的安装/手动引导 key（prism/hmcl/official/pcl2/install…）。
+    client_guide: Mutex<Option<String>>,
+    /// 最近一次成功使用的客户端适配器（L2 一键重启优先复用）。
+    last_client_adapter: Mutex<Option<String>>,
+    /// 用户已确认退出（CloseRequested 放行 / quit_game 正在执行）。
+    quit_confirmed: Mutex<bool>,
+    /// 第一次关闭请求时间（用于「二次点 X 直接放行」）；None = 无未确认请求。
+    close_requested_at: Mutex<Option<Instant>>,
+    /// shell 确认弹窗的 ack 时间（Rust 超时兜底用）。
+    quit_ack_at: Mutex<Option<Instant>>,
+    /// 自动启动只跑一次。
+    autostart_started: Mutex<bool>,
+    /// 启动器取消标志（env_cancel），launcher 等待窗口时检查。
+    client_cancel: Arc<AtomicBool>,
+    /// engine+paper 已就绪但 bot 未连上的起始时间（P1-7 织偶死局）。
+    bot_pending_since: Mutex<Option<Instant>>,
+    /// task-18：最近一次检测到的 26.1.x 客户端 `--gameDir`（direct 启动优先复用它）。
+    client_game_dir: Mutex<Option<String>>,
+}
+
+impl AppState {
+    /// 配置好、但尚未启动的初始环境快照（L0 首帧不闪烁）。
+    fn initial_env(&self) -> envstate::EnvState {
+        let mut state = envstate::EnvState::default();
+        let light = |detail: &str| envstate::EnvLight {
+            state: envstate::STATE_CHECKING.to_string(),
+            detail: detail.to_string(),
+            hint: None,
+            can_start: false,
+            can_retry: false,
+            guide: None,
+        };
+        state.engine = light("正在检测织机…");
+        state.paper = light("正在检测世界服务端…");
+        state.bot = light("正在检测织偶…");
+        state.client = light("正在检测《我的世界》…");
+        state
+    }
+
+    /// 尝试占住某个启动锁；已在跑则返回 false（防重复启动）。
+    fn try_begin_start(&self, kind: &str) -> bool {
+        match self.starting.lock() {
+            Ok(mut set) => set.insert(kind.to_string()),
+            Err(_) => false,
+        }
+    }
+
+    fn end_start(&self, kind: &str) {
+        if let Ok(mut set) = self.starting.lock() {
+            set.remove(kind);
+        }
+    }
+
+    fn starting_snapshot(&self) -> Vec<String> {
+        self.starting
+            .lock()
+            .map(|set| set.iter().cloned().collect())
+            .unwrap_or_default()
+    }
+
+    fn set_error(&self, kind: &str, message: Option<String>) {
+        if let Ok(mut errors) = self.errors.lock() {
+            match message {
+                Some(message) => {
+                    errors.insert(kind.to_string(), message);
+                }
+                None => {
+                    errors.remove(kind);
+                }
+            }
+        }
+    }
+
+    fn set_client_guide(&self, guide: Option<String>) {
+        if let Ok(mut current) = self.client_guide.lock() {
+            *current = guide;
+        }
+    }
+
+    fn set_last_client_adapter(&self, adapter: Option<String>) {
+        if let Ok(mut current) = self.last_client_adapter.lock() {
+            *current = adapter;
+        }
+    }
+
+    fn session_snapshot(&self) -> (bool, Option<GameSessionRef>) {
+        match self.session.lock() {
+            Ok(guard) => (guard.is_some(), guard.clone()),
+            Err(_) => (false, None),
+        }
+    }
+
+    /// 每次启动固定 L0：把持久化页面强制改回 wizard（shell 每次启动也会强制 show("wizard")）。
+    fn force_l0_page(&self) {
+        if let Ok(mut settings) = self.settings.lock() {
+            settings.page = "wizard".into();
+        }
+    }
+
+    fn build_launch_context(&self, prefer_adapter: Option<String>, server: Option<String>) -> launcher::LaunchContext {
+        let (settings_snapshot, repo_root, resource_dir) = (
+            self.settings.lock().map(|guard| guard.clone()).unwrap_or_default(),
+            self.repo_root.clone(),
+            self.resource_dir(),
+        );
+        let minecraft_dir = settings_snapshot
+            .minecraft_dir
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(PathBuf::from)
+            .or_else(|| {
+                // task-18：当前 26.1.2 客户端在跑时，直接复用它的 .minecraft（产品自管客户端）。
+                self.client_game_dir
+                    .lock()
+                    .ok()
+                    .and_then(|guard| guard.clone())
+                    .map(PathBuf::from)
+            });
+        let mut extra_minecraft_dirs: Vec<PathBuf> = Vec::new();
+        if let Ok(guard) = self.client_game_dir.lock() {
+            if let Some(dir) = guard.as_deref().map(PathBuf::from) {
+                if minecraft_dir.as_ref() != Some(&dir) {
+                    extra_minecraft_dirs.push(dir);
+                }
+            }
+        }
+        let version = launcher::DEFAULT_MC_VERSION.to_string();
+        let username = settings_snapshot
+            .mc_username
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .or_else(|| std::env::var("LOOM_MC_USERNAME").ok().map(|value| value.trim().to_string()).filter(|value| !value.is_empty()))
+            .or_else(|| std::env::var("USERNAME").ok().or_else(|| std::env::var("USER").ok()))
+            .unwrap_or_else(|| "Player".to_string())
+            .chars()
+            .filter(|ch| ch.is_ascii_alphanumeric() || *ch == '_')
+            .take(16)
+            .collect::<String>();
+        let username = if username.is_empty() { "Player".to_string() } else { username };
+        let bundled_java = {
+            let exe = if cfg!(target_os = "windows") { "java.exe" } else { "java" };
+            let mut candidates = vec![resource_dir.join("runtime").join("real").join("java").join("bin").join(exe)];
+            if let Some(root) = repo_root.as_ref() {
+                candidates.push(root.join("apps/desktop/src-tauri/runtime/real/java/bin").join(exe));
+            }
+            candidates.into_iter().find(|path| path.exists())
+        };
+        launcher::LaunchContext {
+            minecraft_dir,
+            extra_minecraft_dirs,
+            version,
+            username,
+            server,
+            prism_command: settings_snapshot.prism_command.clone(),
+            bundled_java,
+            repo_root,
+            logs_dir: self.logs_dir.clone(),
+            prefer_adapter,
+            cancel: Some(self.client_cancel.clone()),
+        }
+    }
 }
 
 impl AppState {
@@ -496,9 +708,41 @@ fn copy_dir_all(from: &Path, to: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// 可写目录里的内置 Paper 路径。
+fn bundled_paper_dir() -> PathBuf {
+    loom_dir().join("runtime").join("paper")
+}
+
+/// task-16 P0：25565 上的 java 是否确实是我们拉起的 26.1.2 Paper，
+/// 而不是用户自己的旧 Paper/其他服务端（端口开着不等于世界就绪）。
+fn paper_owned_by_us(state: &AppState) -> bool {
+    if child_alive(state, "paper") {
+        return true;
+    }
+    let owned_dir = bundled_paper_dir().to_string_lossy().replace('\\', "/").to_ascii_lowercase();
+    launcher::java_process_cmdlines().iter().any(|cmdline| {
+        let normalized = cmdline.replace('\\', "/").to_ascii_lowercase();
+        normalized.contains("paper.jar")
+            && (normalized.contains(&owned_dir)
+                || normalized.contains("loomcraft")
+                || normalized.contains("the-loom")
+                || normalized.contains("the loom"))
+    })
+}
+
 fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
     if port_open(MC_PORT) {
-        return Ok(OpStatus { ok: true, detail: "世界已在运行（127.0.0.1:25565）。".into() });
+        if paper_owned_by_us(state) {
+            return Ok(OpStatus { ok: true, detail: "内置 Paper 世界已在运行（127.0.0.1:25565）。".into() });
+        }
+        return Err(
+            "25565 端口已被其他服务端占用（不是内置 26.1.2 Paper）。请先关闭旧 Paper/其他服务端，再点「重试启动世界」；织界不会自动杀它。"
+                .into(),
+        );
+    }
+    // 幂等（P0-1/P1-8）：已有存活的 Paper 子进程时绝不再次 spawn（防止同目录第二个 java/抢 session.lock）。
+    if child_alive(state, "paper") {
+        return Ok(OpStatus { ok: true, detail: "世界服务端已在启动中（进程存活），等待 25565 就绪。".into() });
     }
     let Some(real) = find_real_runtime(state) else {
         return Err("安装包内没有真实运行时（runtime/real）。".into());
@@ -613,6 +857,10 @@ fn spawn_engine_child(state: &AppState) -> Result<OpStatus, String> {
     if port_open(engine_port()) {
         return Ok(OpStatus { ok: true, detail: format!("引擎已在运行（127.0.0.1:{}）。", engine_port()) });
     }
+    // 幂等（P0-1）：已有存活的 engine 子进程时不再 spawn 第二个。
+    if child_alive(state, "engine") {
+        return Ok(OpStatus { ok: true, detail: format!("织机进程已在启动中，等待 127.0.0.1:{} 就绪。", engine_port()) });
+    }
     // 打包版优先启动包内真实引擎（Node + bot + 真实 Paper 适配器）。
     if let Some(real) = find_real_runtime(state) {
         let node = bundled_node_path(&real);
@@ -680,14 +928,13 @@ fn spawn_engine_child(state: &AppState) -> Result<OpStatus, String> {
 
 fn kill_children(state: &AppState) {
     if let Ok(mut children) = state.children.lock() {
-        // 先停 engine，再给 Paper 通过 stdin 发 stop 让世界落盘；最后才强杀/清进程树。
+        // 先停 engine，再给 Paper 通过 stdin 发 stop 让世界落盘（Windows/Linux 一致，P1-1）；最后才强杀/清进程树。
         for name in ["engine", "paper"] {
             let Some(child) = children.get_mut(name) else { continue; };
             let pid = child.id();
             state.log("lifecycle", &format!("停止子进程 {name}（pid {pid}）"));
-            #[cfg(target_os = "windows")]
+            // P1-1：Windows/Linux 都先通过 stdin 发 stop，让 Paper 落盘后再（必要时）强杀。
             if name == "paper" {
-                use std::io::Write;
                 if let Some(stdin) = child.stdin.as_mut() {
                     let _ = stdin.write_all(b"stop\n");
                     let _ = stdin.flush();
@@ -714,7 +961,7 @@ fn kill_children(state: &AppState) {
                 let _ = taskkill.output();
             }
         }
-        // 其它子进程（例如 Prism）直接回收。
+        // 其它子进程（直接启动的 Minecraft、Prism 等）直接回收。
         for (name, child) in children.iter_mut() {
             if name == "engine" || name == "paper" {
                 continue;
@@ -734,6 +981,171 @@ fn kill_children(state: &AppState) {
         }
         children.clear();
     }
+}
+
+// ---------------- L0 启动编排（P0-1：锁覆盖到端口就绪） ----------------
+
+/// 子进程是否仍存活；已退出则顺手从表里移除。
+fn child_alive(state: &AppState, name: &str) -> bool {
+    match state.children.lock() {
+        Ok(mut children) => match children.get_mut(name) {
+            Some(child) => match child.try_wait() {
+                Ok(Some(_)) => {
+                    children.remove(name);
+                    false
+                }
+                Ok(None) => true,
+                Err(_) => {
+                    children.remove(name);
+                    false
+                }
+            },
+            None => false,
+        },
+        Err(_) => false,
+    }
+}
+
+/// 等端口就绪；子进程中途退出立刻失败（不再让锁被过早释放）。
+fn wait_port_or_exit(state: &AppState, name: &str, port: u16, timeout: Duration) -> Result<(), String> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        if port_open(port) {
+            return Ok(());
+        }
+        if !child_alive(state, name) {
+            // 进程刚退出时端口可能刚关闭：再确认一次。
+            if port_open(port) {
+                return Ok(());
+            }
+            return Err(format!("{name} 进程已退出，端口 {port} 未就绪；查看「打开日志目录」里的日志。"));
+        }
+        if Instant::now() >= deadline {
+            // 进程仍在（慢机器首次解压/加载）：保留它，报可重试错误，避免杀半启动的服务器。
+            return Err(format!(
+                "{name} 启动超时（{port} 未就绪，进程仍在后台启动）；稍后刷新或重试即可，不会重复启动。"
+            ));
+        }
+        std::thread::sleep(Duration::from_millis(400));
+    }
+}
+
+/// Paper：spawn 幂等 + 等端口（锁由调用方持有）。
+fn start_paper_wait(state: &AppState) -> Result<(), String> {
+    if port_open(MC_PORT) {
+        // task-16：端口开着但如果不是内置 26.1.2 Paper，不能当作“世界就绪”。
+        if paper_owned_by_us(state) {
+            state.set_error("paper", None);
+            return Ok(());
+        }
+        return Err(
+            "25565 端口已被其他服务端占用（不是内置 26.1.2 Paper）。请先关闭旧 Paper/其他服务端，再点「重试启动世界」；织界不会自动杀它。"
+                .into(),
+        );
+    }
+    if !child_alive(state, "paper") {
+        let status = spawn_paper_any(state)?;
+        state.log("lifecycle", &format!("启动世界：{}", status.detail));
+    }
+    wait_port_or_exit(state, "paper", MC_PORT, Duration::from_secs(150))?;
+    state.set_error("paper", None);
+    Ok(())
+}
+
+/// Engine：spawn 幂等 + 等端口（锁由调用方持有）。
+fn start_engine_wait(state: &AppState) -> Result<(), String> {
+    if port_open(engine_port()) {
+        state.set_error("engine", None);
+        return Ok(());
+    }
+    if !child_alive(state, "engine") {
+        let status = spawn_engine_child(state)?;
+        state.log("lifecycle", &format!("启动织机：{}", status.detail));
+    }
+    wait_port_or_exit(state, "engine", engine_port(), Duration::from_secs(45))?;
+    state.set_error("engine", None);
+    Ok(())
+}
+
+/// 织偶重试：重启 engine 并等 bot.connected（P1-7）。
+fn restart_bot_wait(state: &AppState) -> Result<(), String> {
+    let (session_active, _) = state.session_snapshot();
+    if session_active {
+        return Err("关卡进行中不能重启织机（会丢当前会话）；请先回到 L0 再重试织偶。".into());
+    }
+    // 只重启 engine（Paper 不动）。
+    if let Ok(mut children) = state.children.lock() {
+        if let Some(mut child) = children.remove("engine") {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+    }
+    state.set_error("bot", None);
+    state.set_error("engine", None);
+    std::thread::sleep(Duration::from_millis(600));
+    if port_open(engine_port()) {
+        // 老进程可能还占着端口：等它释放，超时则报错（不重复 spawn）。
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while port_open(engine_port()) && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(300));
+        }
+    }
+    start_engine_wait(state)?;
+    let deadline = Instant::now() + Duration::from_secs(90);
+    loop {
+        if let Some(health) = envstate::read_engine_health(engine_port()) {
+            if health.bot_connected {
+                state.set_error("bot", None);
+                return Ok(());
+            }
+        }
+        if !child_alive(state, "engine") {
+            return Err("织机在重启后退出，织偶未连接；查看日志目录。".into());
+        }
+        if Instant::now() >= deadline {
+            return Err("织机已启动，但织偶 90 秒内没有进服；检查 Paper/插件日志或点「重启织偶」再试。".into());
+        }
+        std::thread::sleep(Duration::from_millis(700));
+    }
+}
+
+/// 保存窗口几何前先看是否全屏/最大化（task-17：最大化/全屏时不要把屏幕尺寸写进普通窗口几何）。
+fn save_geometry_if_windowed(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        if window.is_fullscreen().unwrap_or(false) || window.is_maximized().unwrap_or(false) {
+            return;
+        }
+    }
+    save_window_geometry(app, true);
+}
+
+/// Ctrl+Shift+F 兜底（P0-2/P1-11）：全屏→退出全屏；伴玩→回工作台；最小化→还原。
+fn restore_safety(app: &AppHandle) {
+    let Some(window) = app.get_webview_window("main") else { return };
+    let state = app.state::<AppState>();
+    if window.is_fullscreen().unwrap_or(false) {
+        let _ = window.set_fullscreen(false);
+        let info = window_state_of(&window);
+        let _ = window.emit("loom://window-state", info);
+        state.log("window", "Ctrl+Shift+F：退出全屏");
+        return;
+    }
+    let companion = state.settings.lock().map(|settings| settings.mode == "companion").unwrap_or(false);
+    if companion {
+        let _ = apply_mode(&window, "workbench");
+        if let Ok(mut settings) = state.settings.lock() {
+            settings.mode = "workbench".into();
+        }
+        state.save();
+        let _ = window.emit("loom://mode", "workbench");
+        let _ = window.emit("loom://restore-companion", ());
+        state.log("window", "Ctrl+Shift+F：伴玩模式退出 → 工作台");
+        return;
+    }
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.set_focus();
+    state.log("window", "Ctrl+Shift+F：还原/聚焦窗口");
 }
 
 fn default_focus_follow() -> bool { true }
@@ -764,12 +1176,18 @@ fn toggle_pin_internal(app: &tauri::AppHandle) -> Result<bool, String> {
 }
 
 fn apply_mode(window: &WebviewWindow, mode: &str) -> Result<(), String> {
+    // P1-11：进伴玩/工作台前先退出全屏，否则小窗/工作台按钮在无系统框的全屏里可能看不见。
+    if window.is_fullscreen().unwrap_or(false) {
+        window.set_fullscreen(false).map_err(|error| error.to_string())?;
+    }
     let companion = mode == "companion";
     let (width, height) = if companion { (COMPANION_WIDTH, COMPANION_HEIGHT) } else { (WORKBENCH_WIDTH, WORKBENCH_HEIGHT) };
     window
         .set_size(tauri::Size::Logical(tauri::LogicalSize::new(width as f64, height as f64)))
         .map_err(|error| error.to_string())?;
     window.center().map_err(|error| error.to_string())?;
+    // task-17：小屏/窄工作区上 1280×840 或 420×620 也不能超出工作区。
+    clamp_window_to_work_area(window, None);
     Ok(())
 }
 
@@ -791,7 +1209,14 @@ fn save_settings(app: tauri::AppHandle, settings: Settings) {
         stored.focus_follow = settings.focus_follow;
         stored.mode = settings.mode;
         stored.page = settings.page;
-        stored.prism_command = settings.prism_command;
+        // P0-4 第二道防线：即使调用方绕过壳白名单，也拒绝携带 shell 元字符的启动器命令。
+        stored.prism_command = settings
+            .prism_command
+            .as_deref()
+            .and_then(launcher::sanitize_program_setting);
+        stored.minecraft_dir = settings.minecraft_dir;
+        stored.mc_version = settings.mc_version;
+        stored.mc_username = settings.mc_username;
     }
     state.save();
 }
@@ -806,13 +1231,73 @@ fn window_minimize(window: WebviewWindow) -> Result<(), String> {
     window.minimize().map_err(|error| error.to_string())
 }
 
-#[tauri::command]
-fn window_toggle_maximize(window: WebviewWindow) -> Result<(), String> {
-    if window.is_maximized().map_err(|error| error.to_string())? {
-        window.unmaximize().map_err(|error| error.to_string())
-    } else {
-        window.maximize().map_err(|error| error.to_string())
+/// 窗口状态快照（壳顶栏还原/全屏按钮与双击标题栏共用；事件 loom://window-state）。
+#[derive(Serialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+struct WindowStateInfo {
+    fullscreen: bool,
+    maximized: bool,
+    visible: bool,
+}
+
+fn window_state_of(window: &WebviewWindow) -> WindowStateInfo {
+    WindowStateInfo {
+        fullscreen: window.is_fullscreen().unwrap_or(false),
+        maximized: window.is_maximized().unwrap_or(false),
+        visible: window.is_visible().unwrap_or(true),
     }
+}
+
+fn emit_window_state(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = app.emit("loom://window-state", window_state_of(&window));
+    }
+}
+
+#[tauri::command]
+fn window_state(window: WebviewWindow) -> WindowStateInfo {
+    window_state_of(&window)
+}
+
+/// 全屏/退出全屏。任务-8：无论从哪里进入全屏，都必须有回到窗口态的路径。
+#[tauri::command]
+fn window_toggle_fullscreen(window: WebviewWindow) -> Result<WindowStateInfo, String> {
+    let next = !window.is_fullscreen().map_err(|error| error.to_string())?;
+    window.set_fullscreen(next).map_err(|error| error.to_string())?;
+    let info = window_state_of(&window);
+    let _ = window.emit("loom://window-state", info.clone());
+    Ok(info)
+}
+
+/// 还原窗口：先退出全屏，再取消最大化；返回普通窗口态（保留可见/可操作）。
+#[tauri::command]
+fn window_restore_main(window: WebviewWindow) -> Result<WindowStateInfo, String> {
+    if window.is_fullscreen().map_err(|error| error.to_string())? {
+        window.set_fullscreen(false).map_err(|error| error.to_string())?;
+    }
+    if window.is_maximized().map_err(|error| error.to_string())? {
+        window.unmaximize().map_err(|error| error.to_string())?;
+    }
+    // task-17：取消最大化/全屏后，OS 恢复的普通窗口也可能落在屏幕外/超出工作区。
+    clamp_window_to_work_area(&window, None);
+    let info = window_state_of(&window);
+    let _ = window.emit("loom://window-state", info.clone());
+    Ok(info)
+}
+
+#[tauri::command]
+fn window_toggle_maximize(window: WebviewWindow) -> Result<WindowStateInfo, String> {
+    // 全屏状态下「最大化/还原」语义是「先退出全屏」，避免按钮看起来没反应。
+    if window.is_fullscreen().map_err(|error| error.to_string())? {
+        window.set_fullscreen(false).map_err(|error| error.to_string())?;
+    } else if window.is_maximized().map_err(|error| error.to_string())? {
+        window.unmaximize().map_err(|error| error.to_string())?;
+    } else {
+        window.maximize().map_err(|error| error.to_string())?;
+    }
+    let info = window_state_of(&window);
+    let _ = window.emit("loom://window-state", info.clone());
+    Ok(info)
 }
 
 #[tauri::command]
@@ -890,6 +1375,10 @@ fn snap_half(app: tauri::AppHandle) -> Result<(), String> {
 fn show_main_window(app: tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
+        // task-17：窗口真正显示后再做一次物理 clamp（DPI/外框以显示后的真实值为准），
+        // 并把修正后的几何写回，避免下次启动继续用超屏坐标。
+        clamp_window_to_work_area(&window, Some(&app));
+        save_geometry_if_windowed(&app);
         let _ = window.set_focus();
     }
 }
@@ -1026,79 +1515,667 @@ fn start_paper(app: tauri::AppHandle) -> Result<OpStatus, String> {
 
 #[tauri::command]
 fn launch_prism(app: tauri::AppHandle) -> Result<OpStatus, String> {
+    // P0-4：旧命令也走安全适配层（自定义命令直启 exe，不经过 cmd /C start / sh -lc）。
     let state = app.state::<AppState>();
-    let configured = state.settings.lock().ok().and_then(|guard| guard.prism_command.clone());
-    #[cfg(target_os = "linux")]
-    let default_command = "flatpak run org.prismlauncher.PrismLauncher".to_string();
-    #[cfg(not(target_os = "linux"))]
-    let default_command = "prismlauncher.exe".to_string();
-    let command = std::env::var("LOOM_PRISM").ok().or(configured).unwrap_or(default_command);
-    let _ = fs::create_dir_all(&state.logs_dir);
-    let log_file = File::create(state.logs_dir.join("prism.log")).map_err(|error| error.to_string())?;
-    let log_file_err = log_file.try_clone().map_err(|error| error.to_string())?;
-    #[cfg(target_os = "linux")]
-    let spawned = Command::new("sh")
-        .args(["-lc", &format!("{command} >/dev/null 2>&1 &")])
-        .current_dir(state.repo_root.clone().unwrap_or_else(loom_dir))
-        .stdout(Stdio::from(log_file))
-        .stderr(Stdio::from(log_file_err))
-        .spawn();
-    #[cfg(not(target_os = "linux"))]
-    let spawned = {
-        let mut cmd = Command::new("cmd");
-        cmd.args(["/C", "start", "", &command])
-            .current_dir(state.repo_root.clone().unwrap_or_else(loom_dir))
-            .stdout(Stdio::from(log_file))
-            .stderr(Stdio::from(log_file_err));
-        no_console(&mut cmd);
-        cmd.spawn()
-    };
-    spawned.map_err(|error| format!("拉起 Prism 失败：{error}"))?;
-    state.log("lifecycle", &format!("拉起 Prism：{command}"));
-    Ok(OpStatus { ok: true, detail: "已请求拉起 Minecraft（Prism）。若没有出现，请手动打开 Prism 并进入 26.1.2 实例。".into() })
+    let context = state.build_launch_context(None, None);
+    let outcome = launcher::launch_prism_only(&context);
+    state.log("launcher", &format!("launch_prism：{}", outcome.detail));
+    Ok(OpStatus { ok: outcome.ok || outcome.needs_manual, detail: outcome.detail })
 }
 
 #[tauri::command]
 fn client_running() -> bool {
-    #[cfg(target_os = "linux")]
-    {
-        // 不 spawn pgrep（8 秒一次会阻塞）；直接读 /proc。
-        if let Ok(entries) = fs::read_dir("/proc") {
-            for entry in entries.flatten() {
-                let name = entry.file_name();
-                if !name.to_string_lossy().chars().all(|c| c.is_ascii_digit()) {
-                    continue;
-                }
-                let cmdline = entry.path().join("cmdline");
-                if let Ok(bytes) = fs::read(cmdline) {
-                    if String::from_utf8_lossy(&bytes).contains("net.minecraft.client.main.Main") {
-                        return true;
+    launcher::client_process_running()
+}
+
+// ============================================================================
+// L0/L1/L2：四灯 EnvState + 全局启动锁 + 客户端启动器适配
+//
+// 契约（同时写进 docs/55-launcher-env-contract.md，Studio/壳共用）：
+//   命令：env_state / env_refresh / env_autostart / env_start / env_retry
+//         launch_client / restart_client_and_reconnect
+//         set_game_session / clear_game_session / quit_game / open_launcher_download
+//   事件：loom://env（四灯快照）、loom://quit-requested（窗口 X/Alt+F4，需红色确认）
+//         loom://client-restored（L2 一键重连成功）、loom://client-failed
+// ============================================================================
+
+/// 启动世界服务端：打包版走内置 runtime；开发机（无打包 runtime）退回 scripts/mc-up.sh。
+fn spawn_paper_any(state: &AppState) -> Result<OpStatus, String> {
+    match spawn_bundled_paper(state) {
+        Ok(status) => Ok(status),
+        Err(error) => {
+            if let Some(root) = state.repo_root.as_ref() {
+                let script = root.join("scripts/mc-up.sh");
+                if script.exists() {
+                    let _ = fs::create_dir_all(&state.logs_dir);
+                    let log_file = File::create(state.logs_dir.join("paper.log")).map_err(|cause| cause.to_string())?;
+                    let log_file_err = log_file.try_clone().map_err(|cause| cause.to_string())?;
+                    let child = Command::new("bash")
+                        .arg(&script)
+                        .current_dir(root)
+                        .stdout(Stdio::from(log_file))
+                        .stderr(Stdio::from(log_file_err))
+                        .spawn()
+                        .map_err(|cause| format!("{error}；开发脚本 scripts/mc-up.sh 也启动失败：{cause}"))?;
+                    if let Ok(mut children) = state.children.lock() {
+                        children.insert("paper".into(), child);
                     }
+                    state.log("lifecycle", "开发模式：通过 scripts/mc-up.sh 启动世界");
+                    return Ok(OpStatus {
+                        ok: true,
+                        detail: "开发模式：已通过 scripts/mc-up.sh 启动世界（首次约 10–20 秒）。".into(),
+                    });
                 }
             }
+            Err(error)
         }
-        return false;
     }
-    #[cfg(target_os = "windows")]
+}
+
+/// 由「主进程事实」组装四灯快照（监视线程每 2 秒一次；命令 env_refresh 立即一次）。
+/// task-16 P0：客户端/服务端都做版本门控，任何不匹配都不能绿、不能 allReady。
+fn build_env_state(
+    state: &AppState,
+    client_probe: launcher::ClientProbe,
+    health: Option<envstate::EngineHealth>,
+) -> envstate::EnvState {
+    let launching = state.starting_snapshot();
+    let errors = state.errors.lock().map(|guard| guard.clone()).unwrap_or_default();
+    let (session_active, _session) = state.session_snapshot();
+    let client_guide = state.client_guide.lock().ok().and_then(|guard| guard.clone());
+    let client_adapter = state.last_client_adapter.lock().ok().and_then(|guard| guard.clone());
+    let expected = launcher::DEFAULT_MC_VERSION;
+    let client_running = client_probe.running;
+    let client_version = client_probe.version.clone();
+    let other_client_version = client_probe.other_version().map(str::to_string);
+    let client_compatible = client_probe.compatible(expected);
+    // task-18：记住 26.1.x 客户端的 .minecraft，direct 启动优先复用（产品自管客户端）。
+    if client_compatible {
+        if let Some(game_dir) = client_probe.game_dir.as_ref() {
+            let path = game_dir.display().to_string();
+            if let Ok(mut stored) = state.client_game_dir.lock() {
+                *stored = Some(path.clone());
+            }
+            // 首次检测到产品客户端且用户没显式配置时，把它写进设置，重启后 direct 也能找到。
+            let mut persist = false;
+            if let Ok(mut settings) = state.settings.lock() {
+                if settings
+                    .minecraft_dir
+                    .as_deref()
+                    .map(str::trim)
+                    .filter(|value| !value.is_empty())
+                    .is_none()
+                {
+                    settings.minecraft_dir = Some(path);
+                    persist = true;
+                }
+            }
+            if persist {
+                state.save();
+            }
+        }
+    }
+    let paper_port_open = port_open(MC_PORT);
+    let engine_ready = health.as_ref().map(|value| value.ok).unwrap_or(false);
+    let bot_ready = health.as_ref().map(|value| value.bot_connected).unwrap_or(false);
+    let mock = health.as_ref().map(|value| value.mock).unwrap_or(false);
+    let server_version = health
+        .as_ref()
+        .filter(|value| value.mc_connected)
+        .map(|value| value.mc_version.trim().to_string())
+        .filter(|value| !value.is_empty());
+    let server_compatible = mock
+        || server_version
+            .as_deref()
+            .map(|value| launcher::client_version_compatible(Some(value), expected))
+            .unwrap_or(false);
+    let paper_confirmed = mock || (health.as_ref().map(|value| value.mc_connected).unwrap_or(false) && server_compatible);
+    if !engine_ready || !paper_confirmed || bot_ready {
+        if let Ok(mut since) = state.bot_pending_since.lock() {
+            *since = None;
+        }
+    } else if let Ok(mut since) = state.bot_pending_since.lock() {
+        if since.is_none() {
+            *since = Some(Instant::now());
+        }
+    }
+    let bot_stalled = state
+        .bot_pending_since
+        .lock()
+        .ok()
+        .and_then(|since| *since)
+        .map(|started| started.elapsed() >= Duration::from_millis(BOT_STALL_MS))
+        .unwrap_or(false);
+    let input = envstate::PollInput {
+        engine_health: health.as_ref(),
+        paper_port_open,
+        client_running,
+        client_version: client_version.clone(),
+        other_client_version: other_client_version.clone(),
+        expected_version: expected,
+        launching: &launching,
+        errors: &errors,
+        client_guide: client_guide.clone(),
+        client_adapter: client_adapter.clone(),
+        bot_stalled,
+    };
+    let (engine, paper, bot, client) = envstate::poll_lights(&input);
+    let paper_ok = mock || paper.state == envstate::STATE_READY;
+    let bot_ok = mock || bot.state == envstate::STATE_READY;
+    let client_ok = mock || client_compatible;
+    let seen_ready = state.client_seen_ready.lock().map(|value| *value).unwrap_or(false);
+    let client_version_mismatch = !mock && client_running && !client_compatible;
+    let usable_client = client_running && client_compatible;
+    let (client, client_lost, next_seen_ready) = envstate::apply_client_loss(envstate::ClientLossInput {
+        mock,
+        engine_ready,
+        client_running: usable_client,
+        session_active,
+        seen_ready,
+        client,
+        guide: client_guide.clone(),
+        client_version_mismatch,
+    });
+    if let Ok(mut seen) = state.client_seen_ready.lock() {
+        *seen = next_seen_ready;
+    }
+    if let Ok(mut lost) = state.client_lost.lock() {
+        *lost = client_lost;
+    }
+    // task-16：版本不匹配（含「运行中但读不到版本」、服务端连上但版本未知）都算 blocked。
+    let version_blocked = !mock
+        && (client_version_mismatch
+            || (health.as_ref().map(|value| value.mc_connected).unwrap_or(false) && !server_compatible));
+    let all_ready = engine_ready && paper_ok && bot_ok && client_ok && !client_lost && !version_blocked;
+    let launch_context = state.build_launch_context(None, None);
+    let (minecraft_dir, _versions) = launcher::detect_minecraft_dir(&launch_context);
+    envstate::EnvState {
+        engine,
+        paper,
+        bot,
+        client,
+        all_ready,
+        launching,
+        client_lost,
+        session_active,
+        client_adapter,
+        client_available_launcher: client_guide,
+        client_version,
+        other_client_version,
+        server_version,
+        expected_version: expected.to_string(),
+        minecraft_dir: minecraft_dir.map(|path| path.display().to_string()),
+        version_blocked,
+        mock,
+        updated_at: envstate::now_millis(),
+    }
+}
+
+fn refresh_env(app: &AppHandle) -> envstate::EnvState {
+    let state = app.state::<AppState>();
+    let health = envstate::read_engine_health(engine_port());
+    let client_probe = launcher::client_probe();
+    let env = build_env_state(&state, client_probe, health);
+    if let Ok(mut stored) = state.env.lock() {
+        *stored = env.clone();
+    }
+    env
+}
+
+fn emit_env(app: &AppHandle, env: &envstate::EnvState) {
+    let _ = app.emit("loom://env", env);
+}
+
+/// 后台监视线程：只做端口/进程/本地 health 探测（无 PowerShell/UIA，避免旧卡顿回归）。
+fn spawn_env_monitor(app: AppHandle) {
+    std::thread::spawn(move || {
+        let mut last = String::new();
+        loop {
+            std::thread::sleep(Duration::from_millis(ENV_MONITOR_INTERVAL_MS));
+            let env = refresh_env(&app);
+            // P1-6：去重时忽略 updatedAt，否则每 2 秒必发事件、L0 按钮被反复重建。
+            let Ok(json) = serde_json::to_string(&{
+                let mut probe = env.clone();
+                probe.updated_at = 0;
+                probe
+            }) else {
+                continue;
+            };
+            if json != last {
+                last = json;
+                emit_env(&app, &env);
+            }
+        }
+    });
+}
+
+/// L0 首屏自动启动：Paper → engine（织偶由 engine 自动连接）→ 客户端自动检测/拉起（task-11）。
+/// P0-1：每步的锁覆盖到端口就绪（或子进程被判退出/超时）才释放。
+fn spawn_env_autostart(app: AppHandle) {
+    std::thread::spawn(move || {
+        // 先让 L0 首帧渲染出来，再做重活，避免启动白屏。
+        std::thread::sleep(Duration::from_millis(700));
+        {
+            let state = app.state::<AppState>();
+            let mut started = match state.autostart_started.lock() {
+                Ok(guard) => guard,
+                Err(_) => return,
+            };
+            if *started {
+                return;
+            }
+            *started = true;
+        }
+        {
+            let state = app.state::<AppState>();
+            if state.try_begin_start("paper") {
+                let result = start_paper_wait(&state);
+                if let Err(error) = result {
+                    state.log("lifecycle", &format!("自动启动世界失败：{error}"));
+                    state.set_error("paper", Some(error));
+                }
+                state.end_start("paper");
+            }
+        }
+        {
+            let state = app.state::<AppState>();
+            if state.try_begin_start("engine") {
+                let result = start_engine_wait(&state);
+                if let Err(error) = result {
+                    state.log("lifecycle", &format!("自动启动引擎失败：{error}"));
+                    state.set_error("engine", Some(error));
+                }
+                state.end_start("engine");
+            }
+        }
+        // task-11/16/18：自动检测/拉起《我的世界》客户端（需求；失败才在卡片显示安装/引导）。
+        // 只自动尝试一次；Mock 演示、或显式禁用（自动化/无 GUI 验证）时跳过。
+        // 已运行但版本不兼容时（如 1.21.1）不杀它，继续按 direct 优先启动产品 26.1.2。
+        {
+            let mock = envstate::read_engine_health(engine_port())
+                .map(|health| health.mock)
+                .unwrap_or(false);
+            let disabled = std::env::var("LOOM_DISABLE_CLIENT_AUTOSTART")
+                .map(|value| value == "1" || value.eq_ignore_ascii_case("true"))
+                .unwrap_or(false);
+            let state = app.state::<AppState>();
+            let probe = launcher::client_probe();
+            let compatible = probe.compatible(launcher::DEFAULT_MC_VERSION);
+            let version_label = probe.version.clone().unwrap_or_else(|| "未知版本".to_string());
+            if envstate::should_autostart_client(mock, compatible, disabled) && state.try_begin_start("client") {
+                state.client_cancel.store(false, Ordering::SeqCst);
+                if probe.running {
+                    state.log(
+                        "launcher",
+                        &format!("L0 自动检测：客户端版本 {version_label} 与 {} 不匹配，仍尝试启动正确版本（不会关闭旧客户端）", launcher::DEFAULT_MC_VERSION),
+                    );
+                } else {
+                    state.log("launcher", "L0 自动尝试启动《我的世界》客户端（失败才显示安装/引导）");
+                }
+                spawn_client_worker(app.clone(), None);
+            } else if compatible {
+                state.log("launcher", &format!("L0 自动检测：客户端 {version_label} 已运行且版本匹配，复用不重复启动"));
+            } else if mock {
+                state.log("launcher", "L0 自动检测：Mock 演示环境，跳过客户端启动");
+            } else if disabled {
+                state.log("launcher", "L0 自动检测：LOOM_DISABLE_CLIENT_AUTOSTART=1，跳过客户端启动");
+            }
+        }
+        let env = refresh_env(&app);
+        emit_env(&app, &env);
+    });
+}
+
+/// 单卡启动的 worker 壳：拿锁 → 等就绪 → 放锁 → 刷新事件。
+fn run_single_start(app: AppHandle, kind: &'static str) {
+    std::thread::spawn(move || {
+        let state = app.state::<AppState>();
+        let result = match kind {
+            "paper" => start_paper_wait(&state),
+            "engine" => start_engine_wait(&state),
+            "bot" => restart_bot_wait(&state),
+            _ => Err(format!("未知启动项：{kind}")),
+        };
+        if let Err(error) = result {
+            state.log("lifecycle", &format!("启动 {kind} 失败：{error}"));
+            state.set_error(kind, Some(error));
+        }
+        state.end_start(kind);
+        let env = refresh_env(&app);
+        emit_env(&app, &env);
+    });
+}
+
+fn env_start_inner(app: AppHandle, kind: &str) -> OpStatus {
+    match kind {
+        "engine" | "paper" | "bot" => {
+            {
+                let state = app.state::<AppState>();
+                if kind == "bot" {
+                    let (session_active, _) = state.session_snapshot();
+                    if session_active {
+                        return OpStatus {
+                            ok: false,
+                            detail: "关卡进行中不能重启织机（会丢当前会话）；请先回到 L0 再重试织偶。".into(),
+                        };
+                    }
+                }
+                let busy_detail = match kind {
+                    "engine" => "织机正在启动中，请稍候。",
+                    "paper" => "世界服务端正在启动中，请稍候。",
+                    _ => "织偶正在重连中，请稍候。",
+                };
+                if !state.try_begin_start(kind) {
+                    return OpStatus { ok: false, detail: busy_detail.into() };
+                }
+                state.set_error(kind, None);
+            }
+            run_single_start(app, if kind == "engine" { "engine" } else if kind == "paper" { "paper" } else { "bot" });
+            OpStatus {
+                ok: true,
+                detail: match kind {
+                    "engine" => "已开始启动织机（首次约 5–15 秒）。",
+                    "paper" => "已开始启动世界服务端（首次约 10–20 秒）。",
+                    _ => "正在重启织机以重连织偶（Paper 不受影响）…",
+                }
+                .into(),
+            }
+        }
+        "client" => {
+            {
+                let state = app.state::<AppState>();
+                if !state.try_begin_start("client") {
+                    return OpStatus { ok: false, detail: "《我的世界》正在启动中，请稍候。".into() };
+                }
+                state.client_cancel.store(false, Ordering::SeqCst);
+            }
+            spawn_client_worker(app, None);
+            OpStatus { ok: true, detail: "已开始启动《我的世界》（会自动选择可用的启动器；可点「取消启动」中止）。".into() }
+        }
+        "all" => {
+            {
+                let state = app.state::<AppState>();
+                if !state.try_begin_start("all") {
+                    return OpStatus { ok: false, detail: "已经在启动中，请稍候。".into() };
+                }
+            }
+            std::thread::spawn(move || {
+                let state = app.state::<AppState>();
+                // P1-8：all 必须尊重子锁；拿不到说明另一个入口正在启动，直接跳过（不再并发 spawn）。
+                if state.try_begin_start("paper") {
+                    if let Err(error) = start_paper_wait(&state) {
+                        state.set_error("paper", Some(error));
+                    }
+                    state.end_start("paper");
+                } else {
+                    state.log("lifecycle", "一键启动：世界服务端已由其他启动占用，跳过");
+                }
+                if state.try_begin_start("engine") {
+                    if let Err(error) = start_engine_wait(&state) {
+                        state.set_error("engine", Some(error));
+                    }
+                    state.end_start("engine");
+                } else {
+                    state.log("lifecycle", "一键启动：织机已由其他启动占用，跳过");
+                }
+                state.end_start("all");
+                let env = refresh_env(&app);
+                emit_env(&app, &env);
+            });
+            OpStatus { ok: true, detail: "正在依次启动世界服务端与织机（已在启动的步骤会自动跳过）…".into() }
+        }
+        other => OpStatus { ok: false, detail: format!("未知启动项：{other}") },
+    }
+}
+
+/// 客户端启动线程（L0「启动《我的世界》」与 L2「一键重启并连接」共用）。
+fn spawn_client_worker(app: AppHandle, prefer: Option<String>) {
+    std::thread::spawn(move || {
+        let state = app.state::<AppState>();
+        state.set_error("client", None);
+        state.client_cancel.store(false, Ordering::SeqCst);
+        // task-16：只有 engine 确认连上的是 26.1.2 Paper 时才 quickPlay 进服；
+        // 旧 Paper 占 25565 时绝不把客户端往里送。
+        let server = envstate::read_engine_health(engine_port())
+            .filter(|health| {
+                health.mc_connected
+                    && launcher::client_version_compatible(Some(&health.mc_version), launcher::DEFAULT_MC_VERSION)
+            })
+            .map(|_| launcher::DEFAULT_SERVER.to_string());
+        let prefer_adapter = prefer.or_else(|| state.last_client_adapter.lock().ok().and_then(|guard| guard.clone()));
+        let context = state.build_launch_context(prefer_adapter, server);
+        let outcome = launcher::launch_client(&context);
+        if let Some(child) = outcome.child {
+            if let Ok(mut children) = state.children.lock() {
+                children.insert("minecraft".into(), child);
+            }
+        }
+        if outcome.ok {
+            state.set_last_client_adapter(Some(outcome.adapter.clone()));
+            state.set_client_guide(outcome.guide.clone());
+            if outcome.needs_manual {
+                // 已拉起启动器 UI，但还需要用户在启动器里点「启动」：按可操作提示展示，不算自动化成功。
+                let hint = outcome.hint.clone().unwrap_or_default();
+                state.set_error("client", Some(if hint.is_empty() { outcome.detail.clone() } else { format!("{}；{}", outcome.detail, hint) }));
+            } else {
+                state.set_error("client", None);
+            }
+            state.log("launcher", &format!("客户端（{}）：{}", outcome.adapter, outcome.detail));
+            let _ = app.emit("loom://client-restored", &outcome.detail);
+        } else {
+            state.set_error("client", Some(outcome.detail.clone()));
+            state.set_client_guide(outcome.guide.clone());
+            state.log("launcher", &format!("客户端启动失败（{}）：{}", outcome.adapter, outcome.detail));
+            let _ = app.emit("loom://client-failed", &outcome.detail);
+        }
+        state.end_start("client");
+        let env = refresh_env(&app);
+        emit_env(&app, &env);
+    });
+}
+
+fn quit_game_impl(app: &AppHandle) {
     {
-        // EnumWindows 命中 Minecraft 窗口即可，避免每次刷新启动 PowerShell/Get-CimInstance。
-        return win_focus::minecraft_window_exists();
+        let state = app.state::<AppState>();
+        if let Ok(mut confirmed) = state.quit_confirmed.lock() {
+            if *confirmed {
+                return;
+            }
+            *confirmed = true;
+        }
+        // 中止所有进行中的客户端启动链，避免退出后还冒出一个孤儿 java。
+        state.client_cancel.store(true, Ordering::SeqCst);
+        state.log("lifecycle", "用户确认退出游戏：开始关闭客户端/世界/织机");
+        // 先礼后兵地关 Minecraft（task-18：只关版本匹配的 26.1.x 产品客户端；
+        // 用户自己开的 1.21.1 旧客户端不关、不杀）。
+        let _ = launcher::close_client_window_for_version(launcher::DEFAULT_MC_VERSION);
+        let deadline = Instant::now() + Duration::from_millis(CLIENT_CLOSE_WAIT_MS.min(5_000));
+        while Instant::now() < deadline && launcher::client_process_running() {
+            std::thread::sleep(Duration::from_millis(200));
+        }
+        save_geometry_if_windowed(app);
+        kill_children(&state);
+        state.save();
     }
-    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    if let Ok(contents) = fs::read_to_string(loom_dir().join("desktop.lock")) {
+        if contents.trim() == std::process::id().to_string() {
+            let _ = fs::remove_file(loom_dir().join("desktop.lock"));
+        }
+    }
+    app.exit(0);
+}
+
+#[tauri::command]
+fn env_state(app: tauri::AppHandle) -> envstate::EnvState {
+    let state = app.state::<AppState>();
+    state.env.lock().map(|guard| guard.clone()).unwrap_or_default()
+}
+
+#[tauri::command]
+fn env_refresh(app: tauri::AppHandle) -> envstate::EnvState {
+    let env = refresh_env(&app);
+    emit_env(&app, &env);
+    env
+}
+
+#[tauri::command]
+fn env_autostart(app: tauri::AppHandle) {
+    spawn_env_autostart(app);
+}
+
+#[tauri::command]
+fn env_start(app: tauri::AppHandle, kind: String) -> OpStatus {
+    env_start_inner(app, kind.trim().to_ascii_lowercase().as_str())
+}
+
+#[tauri::command]
+fn env_retry(app: tauri::AppHandle, kind: String) -> OpStatus {
+    env_start_inner(app, kind.trim().to_ascii_lowercase().as_str())
+}
+
+#[tauri::command]
+fn launch_client(app: tauri::AppHandle) -> OpStatus {
+    env_start_inner(app, "client")
+}
+
+#[tauri::command]
+fn restart_client_and_reconnect(app: tauri::AppHandle) -> OpStatus {
     {
-        false
+        let state = app.state::<AppState>();
+        if !state.try_begin_start("client") {
+            return OpStatus { ok: false, detail: "《我的世界》正在启动中，请稍候。".into() };
+        }
+        let prefer = state.last_client_adapter.lock().ok().and_then(|guard| guard.clone());
+        state.log("launcher", "L2：一键重启客户端并连接当前世界");
+        spawn_client_worker(app.clone(), prefer);
     }
+    OpStatus {
+        ok: true,
+        detail: "正在重新拉起《我的世界》并连接当前世界；关卡进度/Paper 会话不会重建。".into(),
+    }
+}
+
+#[tauri::command]
+fn set_game_session(app: tauri::AppHandle, session_id: Option<String>, level_id: Option<String>) {
+    let state = app.state::<AppState>();
+    let next = match (session_id, level_id) {
+        (Some(session_id), Some(level_id)) if !session_id.trim().is_empty() && !level_id.trim().is_empty() => Some(GameSessionRef {
+            session_id: session_id.trim().to_string(),
+            level_id: level_id.trim().to_string(),
+        }),
+        _ => None,
+    };
+    let lost_next = next.is_none();
+    let event_payload = next
+        .as_ref()
+        .map(|session| serde_json::json!({ "sessionId": session.session_id, "levelId": session.level_id }))
+        .unwrap_or(serde_json::Value::Null);
+    if let Ok(mut session) = state.session.lock() {
+        *session = next;
+    }
+    if lost_next {
+        if let Ok(mut lost) = state.client_lost.lock() {
+            *lost = false;
+        }
+    }
+    let _ = app.emit("loom://session-changed", event_payload);
+    let env = refresh_env(&app);
+    emit_env(&app, &env);
+}
+
+#[tauri::command]
+fn clear_game_session(app: tauri::AppHandle) {
+    set_game_session(app, None, None);
+}
+
+#[tauri::command]
+fn open_launcher_download(kind: String) -> OpStatus {
+    let key = kind.trim().to_ascii_lowercase();
+    let (url, label) = launcher::download_guide(&key);
+    if launcher::open_url(url) {
+        OpStatus { ok: true, detail: format!("已打开下载页：{label}（{url}）；安装完成后再回来点「重试」。" ) }
+    } else {
+        OpStatus { ok: false, detail: format!("打不开浏览器；请手动访问：{url}") }
+    }
+}
+
+#[tauri::command]
+fn quit_game(app: tauri::AppHandle) {
+    quit_game_impl(&app);
+}
+
+/// shell 已显示确认弹窗（ack）：Rust 停止「确认 UI 无响应」超时兜底。
+#[tauri::command]
+fn quit_ack(app: tauri::AppHandle) {
+    {
+        let state = app.state::<AppState>();
+        if let Ok(mut ack) = state.quit_ack_at.lock() {
+            *ack = Some(Instant::now());
+        };
+    }
+}
+
+/// shell 引导失败/无监听时的兜底：允许关闭（下次 X/Alt+F4 直接放行）。
+#[tauri::command]
+fn window_allow_close(app: tauri::AppHandle) {
+    let state = app.state::<AppState>();
+    if let Ok(mut confirmed) = state.quit_confirmed.lock() {
+        *confirmed = true;
+    }
+    state.log("window", "shell 请求 allow_close：后续关闭请求直接放行");
+}
+
+/// 立即关闭窗口（Rust 兜底出口，供 shell 引导异常时调用）。
+#[tauri::command]
+fn window_force_close(app: tauri::AppHandle) {
+    {
+        let state = app.state::<AppState>();
+        if let Ok(mut confirmed) = state.quit_confirmed.lock() {
+            *confirmed = true;
+        }
+        state.client_cancel.store(true, Ordering::SeqCst);
+        state.log("lifecycle", "shell 请求 force_close：关闭窗口");
+    }
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.close();
+    }
+}
+
+/// 取消进行中的《我的世界》启动链（等待窗口/直启进程会在下一个检查点退出并 kill）。
+#[tauri::command]
+fn env_cancel(app: tauri::AppHandle) -> OpStatus {
+    let state = app.state::<AppState>();
+    state.client_cancel.store(true, Ordering::SeqCst);
+    state.log("launcher", "用户取消启动《我的世界》");
+    let env = refresh_env(&app);
+    emit_env(&app, &env);
+    OpStatus { ok: true, detail: "已请求取消启动；正在结束等待中的启动器/直启进程。".into() }
 }
 
 #[tauri::command]
 fn runtime_status() -> RuntimeStatus {
     let engine_ok = port_open(engine_port());
-    let world_ok = port_open(MC_PORT);
+    // task-16：25565 端口开着 ≠ 26.1.2 Paper 就绪（旧 1.21.1 也会占端口）。
+    let world_health = envstate::read_engine_health(engine_port());
+    let world_ok = world_health
+        .as_ref()
+        .map(|health| {
+            health.mc_connected
+                && launcher::client_version_compatible(Some(&health.mc_version), launcher::DEFAULT_MC_VERSION)
+        })
+        .unwrap_or(false);
     RuntimeStatus {
         engine_ok,
         engine_detail: if engine_ok { "引擎 4317 已连接".into() } else { "引擎未启动（向导里点「启动引擎」）".into() },
         world_ok,
-        world_detail: if world_ok { "世界 25565 已连接".into() } else { "世界未启动（向导里点「启动世界」）".into() },
+        world_detail: if world_ok {
+            match world_health.as_ref().map(|health| health.mc_version.as_str()) {
+                Some(version) if !version.is_empty() => format!("世界 25565 已连接（{version}）"),
+                _ => "世界 25565 已连接（26.1.2）".into(),
+            }
+        } else {
+            "世界未就绪：25565 可能是旧 Paper/其他服务端，或内置 26.1.2 尚未启动".into()
+        },
     }
 }
 
@@ -1118,6 +2195,178 @@ fn open_logs(app: tauri::AppHandle) -> Result<(), String> {
 
 // ---------------- 窗口/应用生命周期 ----------------
 
+// task-17 P0：窗口几何恢复/保存都必须夹到「当前显示器工作区」（Windows 取 rcWork，含任务栏），
+// 否则保存的大窗口（如 2560×1440）在 1707 宽屏幕上恢复会右侧被裁。
+
+fn preferred_window_size() -> GeoSize {
+    GeoSize { width: WORKBENCH_WIDTH, height: WORKBENCH_HEIGHT }
+}
+
+fn min_window_size() -> GeoSize {
+    GeoSize { width: window_geometry::MIN_WINDOW_WIDTH, height: window_geometry::MIN_WINDOW_HEIGHT }
+}
+
+fn physical_rect(rect: GeoRect, scale: f64) -> GeoRect {
+    let scale = if scale > 0.0 { scale } else { 1.0 };
+    GeoRect {
+        x: (rect.x as f64 * scale).round() as i32,
+        y: (rect.y as f64 * scale).round() as i32,
+        width: ((rect.width as f64 * scale).round() as u32).max(1),
+        height: ((rect.height as f64 * scale).round() as u32).max(1),
+    }
+}
+
+fn logical_rect(rect: GeoRect, scale: f64) -> GeoRect {
+    let scale = if scale > 0.0 { scale } else { 1.0 };
+    GeoRect {
+        x: (rect.x as f64 / scale).round() as i32,
+        y: (rect.y as f64 / scale).round() as i32,
+        width: ((rect.width as f64 / scale).round() as u32).max(1),
+        height: ((rect.height as f64 / scale).round() as u32).max(1),
+    }
+}
+
+/// 某个显示器的物理工作区（Windows：GetMonitorInfoW rcWork；其它平台：整块屏幕）。
+fn monitor_work_area_physical(monitor: &tauri::Monitor) -> GeoRect {
+    let position = monitor.position();
+    let size = monitor.size();
+    let center_x = position.x + (size.width / 2) as i32;
+    let center_y = position.y + (size.height / 2) as i32;
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(work) = win_work_area::work_area_for_point(center_x, center_y) {
+            return work;
+        }
+    }
+    GeoRect {
+        x: position.x,
+        y: position.y,
+        width: size.width.max(1),
+        height: size.height.max(1),
+    }
+}
+
+fn monitor_work_areas_logical(window: &WebviewWindow) -> Vec<GeoRect> {
+    let Ok(monitors) = window.available_monitors() else { return Vec::new() };
+    monitors
+        .iter()
+        .map(|monitor| {
+            let scale = monitor.scale_factor();
+            logical_rect(monitor_work_area_physical(monitor), scale)
+        })
+        .collect()
+}
+
+/// 恢复保存几何时选工作区：优先与保存矩形交集最大的显示器；都不相交（旧屏被拔掉）→ 主屏。
+fn choose_saved_work_area(window: &WebviewWindow, saved: Option<GeoRect>) -> Option<GeoRect> {
+    let works = monitor_work_areas_logical(window);
+    if works.is_empty() {
+        return None;
+    }
+    if let Some(saved) = saved {
+        if let Some(work) = works
+            .iter()
+            .copied()
+            .max_by_key(|work| saved.intersection_area(work))
+            .filter(|work| saved.intersection_area(work) > 0)
+        {
+            return Some(work);
+        }
+    }
+    if let Some(primary) = window.primary_monitor().ok().flatten() {
+        let scale = primary.scale_factor();
+        let work = logical_rect(monitor_work_area_physical(&primary), scale);
+        if work.width > 0 && work.height > 0 {
+            return Some(work);
+        }
+    }
+    works.into_iter().next()
+}
+
+/// 当前窗口所在显示器的物理工作区（窗口中心点命中）。
+fn work_area_physical_for_window(window: &WebviewWindow) -> Option<GeoRect> {
+    let position = window.outer_position().ok()?;
+    let size = window.outer_size().ok()?;
+    let center_x = position.x + (size.width / 2) as i32;
+    let center_y = position.y + (size.height / 2) as i32;
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(work) = win_work_area::work_area_for_point(center_x, center_y) {
+            return Some(work);
+        }
+    }
+    let monitors = window.available_monitors().ok()?;
+    let containing = monitors.iter().find(|monitor| {
+        let monitor_position = monitor.position();
+        let monitor_size = monitor.size();
+        center_x >= monitor_position.x
+            && center_x < monitor_position.x + monitor_size.width as i32
+            && center_y >= monitor_position.y
+            && center_y < monitor_position.y + monitor_size.height as i32
+    });
+    if let Some(monitor) = containing {
+        return Some(monitor_work_area_physical(monitor));
+    }
+    window
+        .primary_monitor()
+        .ok()
+        .flatten()
+        .map(|monitor| monitor_work_area_physical(&monitor))
+}
+
+fn log_window(app: Option<&AppHandle>, message: String) {
+    if let Some(app) = app {
+        let state = app.state::<AppState>();
+        state.log("window", &message);
+    }
+}
+
+/// task-17：恢复后/DPI 变化后把窗口物理外框夹回工作区。
+/// 与 `restore_rect` 共用同一套策略：尺寸先夹、位置再夹、完全出屏则居中回退。
+fn clamp_window_to_work_area(window: &WebviewWindow, app: Option<&AppHandle>) {
+    if window.is_fullscreen().unwrap_or(false) || window.is_maximized().unwrap_or(false) {
+        return;
+    }
+    let (Ok(position), Ok(size)) = (window.outer_position(), window.outer_size()) else { return };
+    let Some(work) = work_area_physical_for_window(window) else { return };
+    let scale = window.scale_factor().unwrap_or(1.0);
+    let min = physical_rect(
+        GeoRect { x: 0, y: 0, width: min_window_size().width, height: min_window_size().height },
+        scale,
+    );
+    let min_size = GeoSize { width: min.width, height: min.height };
+    let preferred = physical_rect(
+        GeoRect { x: 0, y: 0, width: preferred_window_size().width, height: preferred_window_size().height },
+        scale,
+    );
+    let preferred_size = GeoSize { width: preferred.width, height: preferred.height };
+    let saved = GeoRect { x: position.x, y: position.y, width: size.width.max(1), height: size.height.max(1) };
+    let (rect, adjusted) = window_geometry::restore_rect(Some(saved), work, min_size, preferred_size);
+    if !adjusted && window_geometry::fully_visible(&rect, &work) {
+        return;
+    }
+    let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(rect.width, rect.height)));
+    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(rect.x, rect.y)));
+    // 恢复后再校验一次（WM 可能按最小尺寸/装饰做二次调整），只做一轮，避免和用户拖动打架。
+    if let (Ok(position), Ok(size)) = (window.outer_position(), window.outer_size()) {
+        let actual = GeoRect { x: position.x, y: position.y, width: size.width.max(1), height: size.height.max(1) };
+        if !window_geometry::fully_visible(&actual, &work) {
+            let (fitted, _) = window_geometry::restore_rect(Some(actual), work, min_size, preferred_size);
+            let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(fitted.width, fitted.height)));
+            let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(fitted.x, fitted.y)));
+        }
+    }
+    if adjusted {
+        log_window(
+            app,
+            format!(
+                "窗口几何超出工作区，已夹回：{}x{} @ ({},{}) → {}x{} @ ({},{})",
+                saved.width, saved.height, saved.x, saved.y, rect.width, rect.height, rect.x, rect.y
+            ),
+        );
+    }
+}
+
 fn apply_saved_window(app: &tauri::AppHandle) {
     let Some(window) = app.get_webview_window("main") else { return };
     let state = app.state::<AppState>();
@@ -1128,15 +2377,51 @@ fn apply_saved_window(app: &tauri::AppHandle) {
     let _ = window.set_always_on_top(always_on_top);
     if mode == "companion" {
         let _ = apply_mode(&window, "companion");
-    } else if let Some(geometry) = geometry {
+        clamp_window_to_work_area(&window, Some(app));
+        return;
+    }
+    let saved = geometry.as_ref().map(|geom| GeoRect {
+        x: geom.x,
+        y: geom.y,
+        width: geom.width.max(1),
+        height: geom.height.max(1),
+    });
+    if let Some(work) = choose_saved_work_area(&window, saved) {
+        let (rect, adjusted) = window_geometry::restore_rect(saved, work, min_window_size(), preferred_window_size());
+        let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(rect.width as f64, rect.height as f64)));
+        let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition::new(rect.x as f64, rect.y as f64)));
+        if adjusted {
+            let saved_label = saved
+                .map(|rect| format!("{}x{} @ ({},{})", rect.width, rect.height, rect.x, rect.y))
+                .unwrap_or_else(|| "无".to_string());
+            log_window(
+                Some(app),
+                format!(
+                    "恢复窗口几何已夹到工作区：保存 {saved_label}，工作区 {}x{} @ ({},{}) → {}x{} @ ({},{})",
+                    work.width, work.height, work.x, work.y, rect.width, rect.height, rect.x, rect.y
+                ),
+            );
+        }
+    } else if let Some(geometry) = geometry.as_ref() {
+        // 拿不到显示器信息时退回旧行为，但仍由后面的物理 clamp 兜底。
         let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(geometry.width as f64, geometry.height as f64)));
         let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition::new(geometry.x as f64, geometry.y as f64)));
+    }
+    // 恢复后再 clamp 一次（窗口显示后由 show_main_window 再做物理 clamp；
+    // 隐藏窗口的 outer_* 可能还是创建时的默认值，不能据此覆盖刚恢复的几何）。
+    if window.is_visible().unwrap_or(false) {
+        clamp_window_to_work_area(&window, Some(app));
+        save_geometry_if_windowed(app);
     }
 }
 
 fn save_window_geometry(app: &tauri::AppHandle, force: bool) {
     let Some(window) = app.get_webview_window("main") else { return };
     let state = app.state::<AppState>();
+    // task-17：最大化/全屏都不记录普通窗口几何，避免把屏幕尺寸/偏移写进下次启动。
+    if window.is_fullscreen().unwrap_or(false) || window.is_maximized().unwrap_or(false) {
+        return;
+    }
     if !force {
         let throttled = state
             .settings
@@ -1149,13 +2434,41 @@ fn save_window_geometry(app: &tauri::AppHandle, force: bool) {
             return;
         }
     }
-    if let (Ok(scale), Ok(position), Ok(size)) = (window.scale_factor(), window.outer_position(), window.inner_size()) {
-        let geometry = WindowGeom {
+    if let (Ok(scale), Ok(position), Ok(size)) = (window.scale_factor(), window.outer_position(), window.outer_size()) {
+        let mut geometry = WindowGeom {
             x: (position.x as f64 / scale).round() as i32,
             y: (position.y as f64 / scale).round() as i32,
-            width: (size.width as f64 / scale).round() as u32,
-            height: (size.height as f64 / scale).round() as u32,
+            width: (size.width as f64 / scale).round().max(1.0) as u32,
+            height: (size.height as f64 / scale).round().max(1.0) as u32,
         };
+        // task-17：保存前也夹到当前工作区，坏数据（超屏/负坐标）不落盘。
+        let logical_saved = GeoRect { x: geometry.x, y: geometry.y, width: geometry.width, height: geometry.height };
+        let works = monitor_work_areas_logical(&window);
+        let center = GeoRect {
+            x: logical_saved.x + (logical_saved.width / 2) as i32,
+            y: logical_saved.y + (logical_saved.height / 2) as i32,
+            width: 1,
+            height: 1,
+        };
+        if let Some(work) = works
+            .iter()
+            .copied()
+            .find(|work| center.intersection_area(work) > 0)
+            .or_else(|| works.into_iter().next())
+        {
+            let (fitted, adjusted) = window_geometry::restore_rect(Some(logical_saved), work, min_window_size(), preferred_window_size());
+            if adjusted {
+                log_window(
+                    Some(app),
+                    format!(
+                        "保存窗口几何前已夹到工作区：{}x{} @ ({},{}) → {}x{} @ ({},{})",
+                        geometry.width, geometry.height, geometry.x, geometry.y,
+                        fitted.width, fitted.height, fitted.x, fitted.y
+                    ),
+                );
+            }
+            geometry = WindowGeom { x: fitted.x, y: fitted.y, width: fitted.width, height: fitted.height };
+        }
         if geometry.width >= COMPANION_WIDTH && geometry.height >= COMPANION_HEIGHT {
             if let Ok(mut settings) = state.settings.lock() {
                 settings.window = Some(geometry);
@@ -1167,7 +2480,8 @@ fn save_window_geometry(app: &tauri::AppHandle, force: bool) {
 
 fn cleanup(app: &tauri::AppHandle) {
     let state = app.state::<AppState>();
-    save_window_geometry(app, true);
+    // P1-9：全屏退出时不要把屏幕尺寸写进普通窗口几何。
+    save_geometry_if_windowed(app);
     kill_children(&state);
     state.save();
     if let Ok(contents) = fs::read_to_string(loom_dir().join("desktop.lock")) {
@@ -1177,6 +2491,84 @@ fn cleanup(app: &tauri::AppHandle) {
     }
 }
 
+
+#[cfg(target_os = "windows")]
+mod win_work_area {
+    use super::window_geometry::GeoRect;
+
+    type Hmonitor = *mut core::ffi::c_void;
+    type Bool = i32;
+    const MONITOR_DEFAULTTONEAREST: u32 = 2;
+
+    #[repr(C)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    #[repr(C)]
+    struct Rect {
+        left: i32,
+        top: i32,
+        right: i32,
+        bottom: i32,
+    }
+
+    #[repr(C)]
+    struct MonitorInfo {
+        cb_size: u32,
+        rc_monitor: Rect,
+        rc_work: Rect,
+        dw_flags: u32,
+    }
+
+    #[link(name = "user32")]
+    extern "system" {
+        fn MonitorFromPoint(point: Point, flags: u32) -> Hmonitor;
+        fn GetMonitorInfoW(monitor: Hmonitor, info: *mut MonitorInfo) -> Bool;
+    }
+
+    /// task-17：取某点所在显示器的**工作区**（rcWork，已扣除任务栏）。
+    pub fn work_area_for_point(x: i32, y: i32) -> Option<GeoRect> {
+        unsafe {
+            let monitor = MonitorFromPoint(Point { x, y }, MONITOR_DEFAULTTONEAREST);
+            if monitor.is_null() {
+                return None;
+            }
+            let mut info: MonitorInfo = std::mem::zeroed();
+            info.cb_size = std::mem::size_of::<MonitorInfo>() as u32;
+            if GetMonitorInfoW(monitor, &mut info) == 0 {
+                return None;
+            }
+            let width = (info.rc_work.right - info.rc_work.left).max(1) as u32;
+            let height = (info.rc_work.bottom - info.rc_work.top).max(1) as u32;
+            Some(GeoRect { x: info.rc_work.left, y: info.rc_work.top, width, height })
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use crate::window_geometry::{fully_visible, restore_rect, GeoSize};
+
+        #[test]
+        fn win32_work_area_query_and_real_screen_clamp() {
+            // 真机回归（Windows）：查询 rcWork（含任务栏），并验证 2560×1440 保存几何能 fit。
+            let work = work_area_for_point(0, 0).expect("GetMonitorInfoW 工作区查询");
+            assert!(work.width > 0 && work.height > 0);
+            assert!(work.x == 0 && work.y == 0, "主屏工作区原点应为 (0,0)：{work:?}");
+            let (rect, adjusted) = restore_rect(
+                Some(GeoRect { x: 0, y: 0, width: 2560, height: 1440 }),
+                work,
+                GeoSize { width: 420, height: 620 },
+                GeoSize { width: 1280, height: 840 },
+            );
+            assert!(adjusted, "2560×1440 在真实工作区 {:?} 上必须被夹", work);
+            assert!(rect.width <= work.width && rect.height <= work.height);
+            assert!(fully_visible(&rect, &work), "恢复矩形必须完全在工作区内：{rect:?} vs {work:?}");
+        }
+    }
+}
 
 // ---------------- X11 焦点跟随鼠标 ----------------
 // Tauri 在 Wayland 下无法可靠地做全局指针/窗口焦点；桌面壳强制 XWayland，
@@ -1367,7 +2759,7 @@ registerShortcut('LoomToggleFocus', 'Loom: toggle focus', 'Alt+Z', toggleLoomFoc
 }
 
 #[cfg(target_os = "windows")]
-mod win_focus {
+pub(crate) mod win_focus {
     use std::ffi::c_void;
 
     type Hwnd = *mut c_void;
@@ -1385,8 +2777,6 @@ mod win_focus {
             lparam: isize,
         ) -> Bool;
         fn IsWindowVisible(hwnd: Hwnd) -> Bool;
-        fn GetWindowTextLengthW(hwnd: Hwnd) -> i32;
-        fn GetWindowTextW(hwnd: Hwnd, buffer: *mut u16, max: i32) -> i32;
         fn IsIconic(hwnd: Hwnd) -> Bool;
         fn ShowWindow(hwnd: Hwnd, command: i32) -> Bool;
         fn SetForegroundWindow(hwnd: Hwnd) -> Bool;
@@ -1403,42 +2793,42 @@ mod win_focus {
 
     struct Search {
         found: Hwnd,
+        /// P0-3：只认 launcher 校验过的 java/javaw 客户端进程，绝不按标题误认浏览器/启动器。
+        pids: Vec<u32>,
     }
 
     unsafe extern "system" fn enum_proc(hwnd: Hwnd, lparam: isize) -> Bool {
         if IsWindowVisible(hwnd) == 0 {
             return 1;
         }
-        let len = GetWindowTextLengthW(hwnd);
-        if len <= 0 || len > 512 {
+        let context = &mut *(lparam as *mut Search);
+        let mut pid: Dword = 0;
+        GetWindowThreadProcessId(hwnd, &mut pid);
+        if !context.pids.contains(&pid) {
             return 1;
         }
-        let mut buffer = vec![0u16; (len + 1) as usize];
-        let got = GetWindowTextW(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);
-        if got <= 0 {
-            return 1;
-        }
-        let title = String::from_utf16_lossy(&buffer[..got as usize]).to_lowercase();
-        if title.contains("minecraft") {
-            let context = &mut *(lparam as *mut Search);
-            context.found = hwnd;
-            return 0;
-        }
-        1
+        context.found = hwnd;
+        0
     }
 
     fn find_minecraft_window() -> Hwnd {
+        // 先做进程级校验（java/javaw + cmdline/GLFW），再找该进程的可见窗口。
+        // task-18：多客户端时 Alt+Z 优先聚焦 26.1.x 产品客户端，不全屏切到旧 1.21.1。
+        let mut pids = crate::launcher::minecraft_pids_for_version(crate::launcher::DEFAULT_MC_VERSION);
+        if pids.is_empty() {
+            pids = crate::launcher::minecraft_pids();
+        }
+        if pids.is_empty() {
+            return std::ptr::null_mut();
+        }
         let mut search = Search {
             found: std::ptr::null_mut(),
+            pids,
         };
         unsafe {
             EnumWindows(Some(enum_proc), &mut search as *mut Search as isize);
         }
         search.found
-    }
-
-    pub fn minecraft_window_exists() -> bool {
-        !find_minecraft_window().is_null()
     }
 
     /// 尝试把 Minecraft 窗口提到前台。Windows 前台锁允许“当前前台进程”切换，
@@ -1542,7 +2932,29 @@ fn main() {
         resource_dir: Mutex::new(PathBuf::new()),
         repo_root: find_repo_root(),
         kde_wayland,
+        starting: Mutex::new(HashSet::new()),
+        env: Mutex::new(envstate::EnvState::default()),
+        errors: Mutex::new(HashMap::new()),
+        session: Mutex::new(None),
+        client_lost: Mutex::new(false),
+        client_seen_ready: Mutex::new(false),
+        client_guide: Mutex::new(None),
+        last_client_adapter: Mutex::new(None),
+        quit_confirmed: Mutex::new(false),
+        autostart_started: Mutex::new(false),
+        close_requested_at: Mutex::new(None),
+        quit_ack_at: Mutex::new(None),
+        client_cancel: Arc::new(AtomicBool::new(false)),
+        bot_pending_since: Mutex::new(None),
+        client_game_dir: Mutex::new(None),
     };
+    {
+        state.force_l0_page();
+        state.save();
+        if let Ok(mut env) = state.env.lock() {
+            *env = state.initial_env();
+        }
+    }
 
     let app = tauri::Builder::default()
         .plugin(
@@ -1553,8 +2965,11 @@ fn main() {
                     }
                     if shortcut.matches(Modifiers::ALT, Code::KeyZ) {
                         focus_workbench(app);
-                    } else {
+                    } else if shortcut.matches(Modifiers::CONTROL | Modifiers::SHIFT, Code::KeyL) {
                         let _ = toggle_pin_internal(app);
+                    } else if shortcut.matches(Modifiers::CONTROL | Modifiers::SHIFT, Code::KeyF) {
+                        // P0-2/P1-11：Rust 级兜底——shell 崩了也能退出全屏/伴玩。
+                        restore_safety(app);
                     }
                 })
                 .build(),
@@ -1578,14 +2993,92 @@ fn main() {
             #[cfg(not(target_os = "linux"))]
             let kde_script = false;
             let window = app.get_webview_window("main").expect("main window");
+            emit_window_state(app.handle());
             let app_handle = app.handle().clone();
             window.on_window_event(move |event| match event {
-                tauri::WindowEvent::Moved(_) | tauri::WindowEvent::Resized(_) => save_window_geometry(&app_handle, false),
-                tauri::WindowEvent::CloseRequested { .. } => {
+                tauri::WindowEvent::Moved(_) | tauri::WindowEvent::Resized(_) => {
+                    // task-17：全屏/最大化时不写 geometry（会把屏幕尺寸/偏移污染下次普通窗口）。
+                    let skip = app_handle
+                        .get_webview_window("main")
+                        .map(|window| {
+                            window.is_fullscreen().unwrap_or(false) || window.is_maximized().unwrap_or(false)
+                        })
+                        .unwrap_or(false);
+                    if !skip {
+                        save_window_geometry(&app_handle, false);
+                    }
+                    emit_window_state(&app_handle);
+                }
+                tauri::WindowEvent::ScaleFactorChanged { .. } => {
+                    // task-17：DPI/显示器变化后先把窗口夹回工作区，再保存新几何。
+                    if let Some(window) = app_handle.get_webview_window("main") {
+                        clamp_window_to_work_area(&window, Some(&app_handle));
+                    }
                     save_window_geometry(&app_handle, true);
+                    emit_window_state(&app_handle);
+                }
+                tauri::WindowEvent::CloseRequested { api, .. } => {
+                    save_geometry_if_windowed(&app_handle);
                     let state = app_handle.state::<AppState>();
-                    kill_children(&state);
-                    state.save();
+                    let confirmed = state.quit_confirmed.lock().map(|guard| *guard).unwrap_or(false);
+                    if confirmed {
+                        // quit_game/allow_close 已确认：放行真正的关闭（退出清理由 RunEvent::Exit 兜底）。
+                        return;
+                    }
+                    // P0-2：第一次关闭只提醒，同一次会话里再次请求（或 shell 确认 UI 无响应）才放行，避免永久关不掉。
+                    let now = Instant::now();
+                    let second_pass = state
+                        .close_requested_at
+                        .lock()
+                        .ok()
+                        .and_then(|guard| *guard)
+                        .map(|first| now.duration_since(first) <= Duration::from_millis(CLOSE_SECOND_PASS_MS))
+                        .unwrap_or(false);
+                    if second_pass {
+                        if let Ok(mut confirmed) = state.quit_confirmed.lock() {
+                            *confirmed = true;
+                        }
+                        state.log("lifecycle", "关闭请求二次到达：直接放行");
+                        return;
+                    }
+                    if let Ok(mut first) = state.close_requested_at.lock() {
+                        *first = Some(now);
+                    }
+                    if let Ok(mut ack) = state.quit_ack_at.lock() {
+                        *ack = None;
+                    }
+                    api.prevent_close();
+                    state.log("lifecycle", "收到关闭请求：等待用户确认退出");
+                    let _ = app_handle.emit("loom://quit-requested", ());
+                    // P0-2 兜底：若 shell 没有在 10s 内 ack（JS 崩了/事件没接上），强制放行关闭。
+                    let watchdog = app_handle.clone();
+                    std::thread::spawn(move || {
+                        std::thread::sleep(Duration::from_millis(CLOSE_CONFIRM_FALLBACK_MS));
+                        let state = watchdog.state::<AppState>();
+                        let confirmed = state.quit_confirmed.lock().map(|guard| *guard).unwrap_or(false);
+                        if confirmed {
+                            return;
+                        }
+                        let acked = state
+                            .quit_ack_at
+                            .lock()
+                            .ok()
+                            .and_then(|guard| *guard)
+                            .map(|ack| ack.elapsed() < Duration::from_millis(CLOSE_CONFIRM_FALLBACK_MS))
+                            .unwrap_or(false);
+                        if acked {
+                            return;
+                        }
+                        state.log("lifecycle", "确认 UI 无响应：放行关闭（Rust 兜底）");
+                        if let Ok(mut confirmed) = state.quit_confirmed.lock() {
+                            *confirmed = true;
+                        }
+                        state.client_cancel.store(true, Ordering::SeqCst);
+                        if let Some(window) = watchdog.get_webview_window("main") {
+                            let _ = window.set_fullscreen(false);
+                            let _ = window.close();
+                        }
+                    });
                 }
                 _ => {}
             });
@@ -1621,6 +3114,21 @@ fn main() {
                     state.log("shortcut", &format!("注册 {PIN_SHORTCUT} 失败：{error}"));
                 }
             }
+            // P0-2/P1-11：全屏/伴玩兜底快捷键（即使 shell 页面卡死也能按）。
+            match app
+                .global_shortcut()
+                .register(Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyF))
+            {
+                Ok(()) => {
+                    let state = app.state::<AppState>();
+                    state.log("shortcut", &format!("注册全局快捷键 {RESTORE_SHORTCUT} 成功（退出全屏/伴玩兜底）"));
+                    let _ = app.emit("loom://shortcut", RESTORE_SHORTCUT);
+                }
+                Err(error) => {
+                    let state = app.state::<AppState>();
+                    state.log("shortcut", &format!("注册 {RESTORE_SHORTCUT} 失败：{error}"));
+                }
+            }
             let startup_handle = app.handle().clone();
             std::thread::spawn(move || {
                 // 页面若因 JS 错误没调用 show_main_window，5 秒后兜底显示，避免永久不可见。
@@ -1628,23 +3136,10 @@ fn main() {
                 if let Some(window) = startup_handle.get_webview_window("main") {
                     let _ = window.show();
                 }
-                let state = startup_handle.state::<AppState>();
-                if find_real_runtime(&state).is_some() {
-                    match spawn_bundled_paper(&state) {
-                        Ok(status) => state.log("lifecycle", &format!("自动启动世界：{}", status.detail)),
-                        Err(error) => state.log("lifecycle", &format!("自动启动世界失败：{error}")),
-                    }
-                    let deadline = Instant::now() + Duration::from_secs(75);
-                    while Instant::now() < deadline && !port_open(MC_PORT) {
-                        std::thread::sleep(Duration::from_millis(700));
-                    }
-                }
-                match spawn_engine_child(&state) {
-                    Ok(status) => state.log("lifecycle", &format!("自动启动引擎：{}", status.detail)),
-                    Err(error) => state.log("lifecycle", &format!("自动启动引擎失败：{error}")),
-                }
-                let _ = startup_handle.emit("loom://status", runtime_status());
             });
+            // L0 四灯：监视线程每 2 秒只做端口/进程/health 探测；自动启动 Paper+engine（织偶随 engine 连接）。
+            spawn_env_monitor(app.handle().clone());
+            spawn_env_autostart(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -1655,6 +3150,21 @@ fn main() {
             set_mode,
             client_running,
             env_probe,
+            env_state,
+            env_refresh,
+            env_autostart,
+            env_start,
+            env_retry,
+            launch_client,
+            restart_client_and_reconnect,
+            set_game_session,
+            clear_game_session,
+            open_launcher_download,
+            quit_game,
+            quit_ack,
+            env_cancel,
+            window_allow_close,
+            window_force_close,
             start_engine,
             stop_engine,
             start_paper,
@@ -1665,6 +3175,9 @@ fn main() {
             window_toggle_maximize,
             window_close,
             window_start_drag,
+            window_state,
+            window_toggle_fullscreen,
+            window_restore_main,
             set_webview_zoom,
             engine_ready,
             show_main_window,
