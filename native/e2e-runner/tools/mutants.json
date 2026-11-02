@@ -1,0 +1,232 @@
+[
+  {
+    "id": "sched-active-workers-min-to-max",
+    "category": "worker-count",
+    "description": "active_workers 用 max 而非 min（并发线程数可超过 workers）",
+    "file": "src/scheduler.cpp",
+    "find": "const std::size_t active_workers = std::min(worker_count, jobs.size());",
+    "replace": "const std::size_t active_workers = std::max(worker_count, jobs.size());",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "sched-workers-lower-bound",
+    "category": "worker-count",
+    "description": "去掉 workers<1 校验（接受 0/负数）",
+    "file": "src/scheduler.cpp",
+    "find": "if (options_.workers < 1 || options_.workers > 1024) {",
+    "replace": "if (options_.workers < 0 || options_.workers > 1024) {",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "sched-result-order",
+    "category": "result-ordering",
+    "description": "结果按反序写入（完成序掩盖输入序）",
+    "file": "src/scheduler.cpp",
+    "find": "results[index] = run_one(jobs[index], lease);",
+    "replace": "results[jobs.size() - 1 - index] = run_one(jobs[index], lease);",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "sched-env-mc-port",
+    "category": "env-injection",
+    "description": "MC_PORT 注入成 RPC 端口",
+    "file": "src/scheduler.cpp",
+    "find": "spec.env[\"MC_PORT\"] = std::to_string(lease.mc_port);",
+    "replace": "spec.env[\"MC_PORT\"] = std::to_string(lease.rpc_port);",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "sched-exception-as-pass",
+    "category": "status-mapping",
+    "description": "调度器捕获的 executor 异常被记为 Pass（假绿）",
+    "file": "src/scheduler.cpp",
+    "find": "      result.status = JobStatus::Error;\n      result.exit_code = -1;\n      result.tail_log = std::string(\"调度器捕获执行器异常：\") + error.what();",
+    "replace": "      result.job = original;\n      result.worker = lease.slot;\n      result.status = JobStatus::Pass;",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "sched-default-timeout",
+    "category": "timeout-unit",
+    "description": "job.timeout_ms<=0 时不用 default_timeout_ms（写死 1000）",
+    "file": "src/scheduler.cpp",
+    "find": "if (spec.timeout_ms <= 0) spec.timeout_ms = options_.default_timeout_ms;",
+    "replace": "if (spec.timeout_ms <= 0) spec.timeout_ms = 1000;",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "ports-lowest-free",
+    "category": "port-allocation",
+    "description": "acquire 从最高槽位倒序分配（不再最低空闲）",
+    "file": "src/ports.cpp",
+    "find": "for (int slot = 0; slot < capacity_; ++slot) {",
+    "replace": "for (int slot = capacity_ - 1; slot >= 0; --slot) {",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "ports-capacity-bound",
+    "category": "port-boundary",
+    "description": "去掉 capacity<1 下界校验",
+    "file": "src/ports.cpp",
+    "find": "if (capacity < 1 || capacity > 1024) throw_invalid",
+    "replace": "if (capacity > 1024) throw_invalid",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "ports-overlap-check",
+    "category": "port-boundary",
+    "description": "关闭 MC/RPC 端口区间重叠校验",
+    "file": "src/ports.cpp",
+    "find": "const bool overlap = mc_base <= rpc_base + capacity - 1 && rpc_base <= mc_base + capacity - 1;",
+    "replace": "const bool overlap = false;",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "ports-release-guard",
+    "category": "port-release",
+    "description": "release 不再校验「未租用」槽位（静默成功）",
+    "file": "src/ports.cpp",
+    "find": "  if (!leased_[static_cast<std::size_t>(slot)]) {\n    throw std::out_of_range(\"端口槽位未被租用，不能归还：\" + std::to_string(slot));\n  }",
+    "replace": "  if (false) {\n    throw std::out_of_range(\"端口槽位未被租用，不能归还：\" + std::to_string(slot));\n  }",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "ports-release-bounds-equivalent",
+    "category": "port-release",
+    "description": "等价改写：边界判断改 De Morgan（无行为差异，skip 用于验证工具能识别等价 mutant）",
+    "file": "src/ports.cpp",
+    "find": "if (slot < 0 || slot >= capacity_) {",
+    "replace": "if (!(slot >= 0 && slot < capacity_)) {",
+    "skip_reason": "等价 mutant：De Morgan 改写，语义完全相同（工具应跳过/不计入 kill rate）",
+    "extra": {}
+  },
+  {
+    "id": "config-workers-bound",
+    "category": "config-validation",
+    "description": "去掉 workers<1 下界校验",
+    "file": "src/config.cpp",
+    "find": "if (config.workers < 1 || config.workers > 64) {",
+    "replace": "if (config.workers > 64) {",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "config-level-max",
+    "category": "config-validation",
+    "description": "关卡编号上限放宽到 99（L99 被接受）",
+    "file": "src/config.cpp",
+    "find": "if (number < 1 || number > 10) {",
+    "replace": "if (number < 1 || number > 99) {",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "config-expand-level-num",
+    "category": "config-expand",
+    "description": "{level_num} 展开成完整 level 文本",
+    "file": "src/config.cpp",
+    "find": "    const int number = parse_int_strict(std::string_view(level_text).substr(1), \"--levels\");\n    level_num = std::to_string(number);",
+    "replace": "    const int number = parse_int_strict(std::string_view(level_text).substr(1), \"--levels\");\n    level_num = std::to_string(number == 10 ? 9 : number);",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "report-all-passed-fail-batch",
+    "category": "status-mapping",
+    "description": "失败批次 all_passed 返回 true（假绿）",
+    "file": "src/report.cpp",
+    "find": "  for (const auto& job : jobs) {\n    if (job.status != JobStatus::Pass) return false;\n  }",
+    "replace": "  for (const auto& job : jobs) {\n    if (job.status != JobStatus::Pass) return true;\n  }",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "report-escape-quote",
+    "category": "json-escape",
+    "description": "JSON 转义不再转义双引号",
+    "file": "src/report.cpp",
+    "find": "      case '\"': out += \"\\\\\\\"\"; break;",
+    "replace": "      case '\"': out += \"\\\"\"; break;",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "process-signal-exit-code",
+    "category": "status-mapping",
+    "description": "被信号杀死时退出码不再 +128",
+    "file": "src/process.cpp",
+    "find": "if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);",
+    "replace": "if (WIFSIGNALED(status)) return WTERMSIG(status);",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "process-status-map",
+    "category": "status-mapping",
+    "description": "非零退出也映射为 Pass（假绿）",
+    "file": "src/process.cpp",
+    "find": "      result.status = code.value_or(-1) == 0 ? JobStatus::Pass : JobStatus::Fail;",
+    "replace": "      result.status = JobStatus::Pass;",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "process-timeout-unit",
+    "category": "timeout-unit",
+    "description": "超时等待用 1ms（超时单位错误，所有 job 立刻超时）",
+    "file": "src/process.cpp",
+    "find": "      if (now >= deadline) {",
+    "replace": "      if (true) {",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "process-exit-code-zero",
+    "category": "status-mapping",
+    "description": "exit_code 恒为 0",
+    "file": "src/process.cpp",
+    "find": "      result.exit_code = code.value_or(-1);",
+    "replace": "      result.exit_code = 0;",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "process-tail-limit",
+    "category": "report-tail",
+    "description": "tail 上限放大（不再最后 4KB）",
+    "file": "src/process.cpp",
+    "find": "    } else {\n      result.status = code.value_or(-1) == 0 ? JobStatus::Pass : JobStatus::Fail;\n      result.exit_code = code.value_or(-1);\n      result.tail_log = process->tail(kDefaultTailBytes);",
+    "replace": "    } else {\n      result.status = code.value_or(-1) == 0 ? JobStatus::Pass : JobStatus::Fail;\n      result.exit_code = code.value_or(-1);\n      result.tail_log = process->tail(1 << 20);",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "factory-slot-ignored",
+    "category": "stack-reuse",
+    "description": "worker_index_of 忽略 LOOM_WORKER 恒为 0（并发 job 抢同一栈）",
+    "file": "src/factory.cpp",
+    "find": "  int worker_index_of(const JobSpec& job) const {\n    return std::max(0, parse_env_int(env_value(job.env, \"LOOM_WORKER\", \"\"), 0));\n  }",
+    "replace": "  int worker_index_of(const JobSpec& job) const {\n    (void)job;\n    return 0;\n  }",
+    "skip_reason": null,
+    "extra": {}
+  },
+  {
+    "id": "factory-no-stack-reuse",
+    "category": "stack-reuse",
+    "description": "ensure_stack 禁用复用（每个 job 冷启动 Paper）",
+    "file": "src/factory.cpp",
+    "find": "      if (found != stacks_.end()) {",
+    "replace": "      if (false) {",
+    "skip_reason": null,
+    "extra": {}
+  }
+]

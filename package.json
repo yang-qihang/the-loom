@@ -25,7 +25,10 @@
     "desktop:run": "apps/desktop/src-tauri/target/release/loomcraft-desktop",
     "build:codex": "node scripts/build-codex.mjs",
     "dev:engine:paper": "bash scripts/engine-paper.sh",
-    "it:engine-paper": "tsx it/engine-paper.ts"
+    "it:engine-paper": "tsx it/engine-paper.ts",
+    "native:build": "cmake -S native/e2e-runner -B tmp/native-build -DCMAKE_BUILD_TYPE=Release && cmake --build tmp/native-build -j 8",
+    "native:test": "npm run native:build && ctest --test-dir tmp/native-build --output-on-failure",
+    "e2e:parallel": "npm run native:build && tmp/native-build/loom-e2e"
   },
   "dependencies": {
     "zod": "4.6.7"
