@@ -1681,6 +1681,8 @@ body.desktop-shell code {
 .justified-text-block { display: block; width: 100%; }
 .justified-line { display: block; white-space: nowrap; }
 .justified-line.is-last { white-space: normal; }
+/* 幕开场只有一行（按当前实际渲染宽度检测）：居中，左右边距相等；多行仍首行占满、末行左起。 */
+.act-opening-line.is-single-line { text-align: center; text-align-last: center; }
 
 
 body .map-hero-copy p,

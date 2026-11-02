@@ -323,8 +323,8 @@ export function ActIntroOverlay({ act, mode, onDone }: ActIntroProps) {
         <NarrativeScroll ariaLabel={`${copy.title}剧情`} resetKey={index}>
           <StageBackdrop variant={act * 2 + index}>
             <div className="stage-lines-text">
-              <p>
-                <JustifiedText text={copy.screens[index]} />
+              <p className="act-opening-line">
+                <JustifiedText text={copy.screens[index]} centerWhenSingleLine />
               </p>
             </div>
           </StageBackdrop>

@@ -154,11 +154,18 @@ test("WebKit 降级路径：所有宽度首行占满、末行左对齐", async (
         }
       }
     }
-    if (viewport.width < 1000) {
-      // 幕开场：同样必须走 JustifiedText（首行占满、末行左起）。
+    {
+      // 幕开场：多行必须走 JustifiedText（首行占满、末行左起）；单行必须按实际渲染宽度检测并居中。
       await page.getByTestId("onboarding-skip").click();
       await page.getByTestId("level-card-L01").click();
       await expect(page.getByTestId("act-overlay")).toBeVisible();
+      if (viewport.width >= 1000) {
+        const line = page.locator('[data-testid="act-overlay"] .act-opening-line');
+        await expect(line).toHaveClass(/is-single-line/);
+        expect(await line.evaluate((element) => getComputedStyle(element).textAlign)).toBe("center");
+        await context.close();
+        continue;
+      }
       await expect.poll(() => page.locator('[data-testid="act-overlay"] .justified-text-block').count(), { timeout: 10_000 }).toBeGreaterThan(0);
       const actRows = await page.locator('[data-testid="act-overlay"] .justified-text-block').evaluateAll((blocks) =>
         blocks.map((block) => {

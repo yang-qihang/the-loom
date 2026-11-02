@@ -91,7 +91,7 @@ function computeLines(host: HTMLElement, text: string): string[] {
   }
 }
 
-export function JustifiedText({ text }: { text: string }): ReactNode {
+export function JustifiedText({ text, centerWhenSingleLine = false }: { text: string; centerWhenSingleLine?: boolean }): ReactNode {
   const anchorRef = useRef<HTMLSpanElement>(null);
   const blockRef = useRef<HTMLSpanElement>(null);
   const [lines, setLines] = useState<string[] | null>(null);
@@ -99,11 +99,12 @@ export function JustifiedText({ text }: { text: string }): ReactNode {
   const updateFallback = (): void => {
     const parent = anchorRef.current?.parentElement;
     if (!parent) return;
+    const next = computeLines(parent, text);
+    parent.classList.toggle("is-single-line", centerWhenSingleLine && next.length === 1);
     if (probeNativeCjkJustify() || text.includes("`")) {
       setLines(null);
       return;
     }
-    const next = computeLines(parent, text);
     setLines(next.length > 1 ? next : null);
   };
 
