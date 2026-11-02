@@ -267,20 +267,26 @@ function toast(text) {
 /**
  * 唯一的「EnvState 灯态 → 卡内小按钮」规则（四卡共用，文案只来自 EnvState）：
  *   checking → 检测中…（禁用）；starting/launching → 正在启动…（禁用）；ready → 已就绪（禁用）；
- *   needs_action/error → 重新启动（可点）；客户端：启动 26.1.2 / 重新启动客户端 / 去安装启动器。
+ *   needs_action/error → 重新启动（可点）；客户端：准备 26.1.2 / 启动 26.1.2 / 重新启动客户端 / 去安装启动器。
  */
-function actionFor(light, kind, launching) {
-  const state = light?.state || "checking";
-  if (state === "checking") return { label: "检测中…", disabled: true, tone: "checking" };
-  if (state === "starting" || (Array.isArray(launching) && launching.includes(kind))) {
+function actionFor(light, kind, launching, state) {
+  const env = state || {};
+  const isChecking = !state; // 还没拿到 EnvState
+  if (isChecking || light?.state === "checking") return { label: "检测中…", disabled: true, tone: "checking" };
+  if (light?.state === "starting" || (Array.isArray(launching) && launching.includes(kind))) {
     return { label: STARTING_LABEL[kind] || "正在启动…", disabled: true, tone: "starting" };
   }
-  if (state === "ready") return { label: "已就绪", disabled: true, tone: "ready" };
+  if (light?.state === "ready") return { label: "已就绪", disabled: true, tone: "ready" };
   if (kind === "client") {
+    // task-20：本机已有 26.1.2（clientInstallDir）或需准备（clientPrepareAvailable）时，
+    // 统一走 client_prepare：有资产=采用本机 26.1.2；无资产=打开官方下载页并给诊断。
+    if (env.clientPrepareAvailable === true || env.clientInstallDir) {
+      return { label: "准备 26.1.2", disabled: false, tone: "blocked", action: "prepare" };
+    }
     if (light?.guide && !light?.canStart && !light?.canRetry) {
       return { label: "去安装启动器", disabled: false, tone: "blocked", action: "guide", guide: light.guide };
     }
-    if (light?.canRetry || state === "error") return { label: "重新启动客户端", disabled: false, tone: "blocked", action: "start" };
+    if (light?.canRetry || light?.state === "error") return { label: "重新启动客户端", disabled: false, tone: "blocked", action: "start" };
     return { label: "启动 26.1.2", disabled: false, tone: "blocked", action: "start" };
   }
   return { label: "重新启动", disabled: false, tone: "blocked", action: "start" };
@@ -306,16 +312,22 @@ function render(next) {
     const light = next[kind] || {};
     const view = cardEls[kind];
     if (!view) continue;
-    const action = actionFor(light, kind, launching);
+    const action = actionFor(light, kind, launching, next);
     const button = view.button;
     button.textContent = action.label;
     button.disabled = !!action.disabled;
     button.dataset.tone = action.tone;
     button.dataset.action = action.action || "";
     button.dataset.guide = action.guide || "";
-    button.title = [light.detail, light.hint].filter(Boolean).join(" · ") || action.label;
+    let hint = light.hint || "";
+    // task-20：本机已有 26.1.2 资产时把 installDir 消费到提示/悬浮 title（有 Rust hint 时不重复）。
+    if (kind === "client" && light.state !== "ready" && next.clientInstallDir && !hint) {
+      hint = "本机已检测到 26.1.2 客户端，可一键准备。";
+    }
     view.detail.textContent = light.detail || view.fallback;
-    view.hint.textContent = light.hint || "";
+    view.hint.textContent = hint;
+    button.title = [light.detail, hint, next.clientInstallDir && kind === "client" ? `安装目录：${next.clientInstallDir}` : ""]
+      .filter(Boolean).join(" · ") || action.label;
   }
   const blocked = next.versionBlocked === true;
   const ready = next.allReady === true && !blocked;
@@ -337,7 +349,10 @@ async function pull() {
 async function runCardAction(kind, button) {
   if (!button.dataset.action) return;
   try {
-    if (button.dataset.action === "guide") {
+    if (button.dataset.action === "prepare") {
+      const status = await invoke("client_prepare");
+      toast(status?.detail || "已处理 26.1.2 准备。");
+    } else if (button.dataset.action === "guide") {
       const status = await invoke("open_launcher_download", { kind: button.dataset.guide || "install" });
       toast(status?.detail || "已打开下载页");
     } else {

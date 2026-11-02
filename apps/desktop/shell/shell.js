@@ -285,6 +285,17 @@ els.openLogs.addEventListener("click", async () => {
   }
 });
 
+/** iframe → 壳 IPC 白名单：Studio / wizard / companion 允许转发的 Tauri 命令（task-20 加 client_prepare）。 */
+const BRIDGE_COMMANDS = new Set([
+  "env_state", "env_refresh", "env_autostart", "env_start", "env_retry", "env_cancel",
+  "client_prepare", "launch_client", "restart_client_and_reconnect",
+  "open_launcher_download", "open_logs",
+  "get_settings", "save_settings", "set_pin", "toggle_pin", "set_mode",
+  "client_running", "env_probe", "runtime_status", "engine_ready", "show_main_window",
+  "window_state", "window_restore_main", "window_toggle_fullscreen", "window_toggle_maximize",
+  "window_minimize", "window_start_drag", "window_close", "snap_half",
+]);
+
 window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data !== "object") return;
@@ -292,7 +303,12 @@ window.addEventListener("message", event => {
     // iframe 里没有 window.__TAURI__（Tauri 只注入主 frame），由壳代发命令。
     const source = event.source;
     if (!source || typeof source.postMessage !== "function") return;
-    invoke(data.command, data.args).then(
+    const command = String(data.command || "");
+    if (!BRIDGE_COMMANDS.has(command)) {
+      source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: `命令不在白名单：${command}` }, "*");
+      return;
+    }
+    invoke(command, data.args).then(
       result => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: true, result }, "*"),
       error => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: String(error) }, "*"),
     );
