@@ -1,9 +1,9 @@
 # 57 — 启动流程 / EnvState / 客户端启动器契约（task-7/8/9/11/16/17/18/20）
 
-> 状态：已实现并完成对抗性 P0/P1 加固 + 集成真机修复 + 版本门控 + 窗口几何 clamp + 产品直启启动器（本地工作区，未提交）｜日期：2026-11-02
-> 基线：`85cc282`（工作区含未提交改动；Studio 侧另有 ui-shell-fixer 的 WIP，见 §8）
+> 状态：已实现并完成对抗性 P0/P1 加固 + 集成真机修复 + 版本门控 + 窗口几何 clamp + 产品直启启动器；**已合入 main（`b9a92af`，2026-11-02）**。合入后 Linux 验证：verify 绿（仅 G-FRESH-READER 已知告警）、cargo check/test 49 passed / 4 ignored、mock e2e 7/7、完整 e2e 41/41｜日期：2026-11-02
+> 基线：`main@5b31af9` → 合入 `b9a92af`；Windows 真机行为与 Linux 静态/无头验证分层记录。
 > 上游：`docs/53-game-start-flow-design.md`、`docs/54-takeover-audit-and-task-plan.md`、`docs/58-client-version-compatibility-review.md`、`tmp/audit/ui-issues.md`、`tmp/audit/launcher-adversarial-review.md`、`tmp/integrated-screen.png`
-> 实现范围：`apps/desktop/src-tauri/**`、`apps/desktop/shell/**`、`docs/**`；**不改 `apps/studio`**。
+> 实现范围：`apps/desktop/src-tauri/**`、`apps/desktop/shell/**`、`apps/studio/src` 的 EnvState/顶栏接入、`docs/**`；不改关卡内容、评分真值与版本锁。
 > 本文是壳 / L0 UI / Studio 三方共用的接口契约；Studio 侧消费由 UI 任务接入（壳已通过 `postMessage` 下发同一份快照）。
 
 ---
@@ -235,7 +235,7 @@ Rust `envstate::EnvState`（camelCase JSON）：
 本轮（task-20 启动器后端）实际跑过（Windows host，`4109095` + 本地改动）：
 
 - `cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml`：**exit 0，0 warnings**。
-- `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`：**50 passed / 0 failed / 4 ignored**
+- `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`：**49 passed / 0 failed / 4 ignored（Linux 合入后）**；Windows 本机原记录为 50 passed。跨平台修正：直启命令单测原先写死 `natives-windows`，在 Linux 会误判合法 OS 过滤；已改为按宿主 OS 断言，测试语义不变。
   - `envstate`：四灯判定/全绿/错误+启动中、客户端丢失→恢复、mock 不阻断、织偶超时 needs_action、client 1.21.1 不绿 / 26.1 族绿 / 未知版本不绿 / 端口-only 不算 Paper ready / 旧 Paper error / L2 版本不匹配 / 多客户端优先 26.1.2 + 旧版本提示不阻塞；
   - `launcher`：rules/arch、Maven→路径、Prism 实例、直启命令、离线 UUID、命令注入拒绝、quickPlay、cancel、open_url、`--version` 解析与兼容矩阵、空目录不挡 versions/26.1.2、PCL 候选、多客户端 probe + gameDir、**task-20 默认 direct 第一顺序、外部启动器仅接受 26.1.x、现有安装检测（要求 26.1.2.json）**；
   - `window_geometry`：窗口几何 clamp 全套（见 §5.1）+ 真实 Win32 rcWork 查询。
@@ -247,7 +247,7 @@ Rust `envstate::EnvState`（camelCase JSON）：
 
 ## 8. 未完成 / 交给后续
 
-1. **Studio 侧切换状态源（P1-10，ui-shell-fixer WIP）**：`loom:env` 消费（顶栏「织机在线」）与 L2 时禁用运行/评分/切关需要改 `apps/studio`；当前工作区有 ui-shell-fixer 的未提交 Studio 改动（`shell-env.ts` untracked 等），本任务未触碰、也未验证。**建议 task-7/8/9 与 Studio 接入原子提交或由 Lead 明确降级**。
+1. ~~Studio 侧切换状态源~~ **已完成并合入**：`apps/studio/src/shell-env.ts` 消费壳下发 `loom:env`；地图墙/工作台状态胶囊与 L2 禁用运行/玩家节拍已接入；e2e「桌面壳嵌入」覆盖无第二标题栏、EnvState 驱动与 zoom 100% 链。
 2. **P1-5 部分收口**：壳在进入工作室/回 L0/伴随退出时会 `clear_game_session`，但 Studio 从关卡返回地图墙不会主动发 `loom:session(null)`（需要 Studio 改动）；地图墙上的旧会话可能让 L2 阻断多显示一会儿，用户可「回到 L0」清掉。契约：Studio 应在 Workbench unmount 时 `postMessage({type:"loom:session", sessionId:null, levelId:null})`。
 3. **L2 阻断在 Studio 内部**：目前壳用全屏红色覆盖层挡住 iframe 交互；Studio 内没有单独禁用按钮（无 Studio 改动时的唯一可行方式）。
 4. **打包期（task-11/16/17/18/20 阻塞点）**：`build-assets.mjs` 会把新的 wizard.html/shell.js 复制进 dist/runtime；本轮未重建安装包。当前安装包早于本批修复，需要重建/重装后才能真机看到「产品直启为默认 / 1.21.1 在跑仍启动 26.1.2 / 顶栏四灯同色 / 窗口几何 clamp / 准备 26.1.2 入口」。

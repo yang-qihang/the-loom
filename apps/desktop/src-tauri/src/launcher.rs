@@ -2228,8 +2228,15 @@ mod tests {
         assert!(argv.iter().any(|arg| arg == "26.1.2"));
         assert!(argv.windows(2).any(|pair| pair[0] == "--quickPlayMultiplayer" && pair[1] == "127.0.0.1:25565"));
         let classpath = argv.iter().find(|arg| arg.contains("base-1.0.jar")).expect("classpath entry");
-        assert!(classpath.contains("natives-windows-2.0.jar"), "natives jar 也进 classpath（LWJGL 从 classpath 解压）");
-        assert!(!classpath.contains("linuxonly"), "OS 规则不匹配的库不能进 classpath");
+        // 下面两条必须按当前宿主 OS 断言：原测试在 Windows 上写死 natives-windows，
+        // 在 Linux CI 会把合法过滤误判为失败（分支 Windows 本机测试未覆盖）。
+        if cfg!(target_os = "windows") {
+            assert!(classpath.contains("natives-windows-2.0.jar"), "Windows 下 natives jar 也进 classpath（LWJGL 从 classpath 解压）");
+            assert!(!classpath.contains("linuxonly"), "OS 规则不匹配的库不能进 classpath");
+        } else {
+            assert!(classpath.contains("linuxonly-1.0.jar"), "Linux 下匹配 OS 的库必须进 classpath");
+            assert!(!classpath.contains("natives-windows-2.0.jar"), "OS 规则不匹配的库不能进 classpath");
+        }
         // 占位符不应残留
         assert!(!argv.iter().any(|arg| arg.contains("${")));
     }
