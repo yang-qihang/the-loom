@@ -363,6 +363,7 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 .card.waiting { border-color: rgba(232, 180, 106, 0.55); background: rgba(232, 180, 106, 0.08); }
 .card.waiting p { color: var(--ink); margin: 0 0 12px; line-height: 1.8; }
 .stage-lines-text { text-align: left; max-width: 34em; margin: 0 auto; text-wrap: pretty; }
+/* 序言/幕/关开场：有足够宽度/文本时整行两端对齐；末行保持左对齐，窄内容自然换行（用户 2026-11-02 修正）。 */
 .stage-lines-text p { margin: 0 0 10px; line-height: 1.9; text-align: justify; text-justify: inter-ideograph; text-align-last: start; }
 .card {
   border: 1px solid var(--line);
