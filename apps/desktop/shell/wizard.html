@@ -158,12 +158,42 @@ const setPill = (id, probe) => {
 };
 const log = text => { $("log").textContent = text; };
 
+let latestEnv = null;
+const envStateLabel = state => ({ ready: "就绪", starting: "正在启动", checking: "检测中", needs_action: "需要处理", error: "启动失败" }[state] || "检测中");
+function setEnvPill(id, light) {
+  const pill = $("pill-" + id); const detail = $("detail-" + id);
+  if (!pill || !detail) return;
+  const state = light?.state || "checking";
+  pill.className = "pill " + (state === "ready" ? "ok" : state === "needs_action" || state === "error" ? "bad" : "");
+  pill.textContent = envStateLabel(state);
+  const extra = [];
+  if (light?.detail) extra.push(light.detail);
+  if (light?.hint) extra.push(light.hint);
+  detail.textContent = extra.join(" ");
+}
+function applyEnvState(env) {
+  if (!env || typeof env !== "object") return;
+  latestEnv = env;
+  setEnvPill("prism", env.client || {});
+  setEnvPill("paper", env.paper || {});
+  if (env.client?.state === "ready" && env.clientVersion) {
+    $("detail-prism").textContent = `已连接《我的世界》${env.clientVersion}${env.otherClientVersion ? `（另有 ${env.otherClientVersion} 在运行，未关闭）` : ""}`;
+  }
+  if (env.versionBlocked) $("detail-prism").textContent = env.client?.detail || "客户端版本不匹配，本作需要 26.1.2";
+}
+async function refreshEnvState() {
+  try { applyEnvState(await invoke("env_state")); } catch { /* old shell fallback */ }
+}
 async function probe() {
   log("正在检测本机环境…");
   try {
     const report = await invoke("env_probe");
-    setPill("java", report.java); setPill("node", report.node); setPill("prism", report.prism); setPill("paper", report.paper);
-    log([report.java, report.node, report.prism, report.paper].filter(p => !p.ok).map(p => "· " + p.detail).join("\n") || "四个步骤都就绪了。");
+    setPill("java", report.java); setPill("node", report.node);
+    await refreshEnvState();
+    const missing = [report.java, report.node].filter(p => !p.ok).map(p => "· " + p.detail);
+    if (latestEnv?.versionBlocked) missing.push("· 客户端版本不匹配：本作需要 26.1.2");
+    else if (latestEnv && !latestEnv.allReady) missing.push("· 四灯尚未全部就绪");
+    log(missing.join("\n") || "四个步骤都就绪了。");
   } catch (error) { log("# 检测失败：" + error); }
 }
 
@@ -177,14 +207,31 @@ $("btn-paper").onclick = async () => {
   try { const r = await invoke("start_paper"); log(r.detail); } catch (e) { log("# 启动世界失败：" + e); }
 };
 $("btn-prism").onclick = async () => {
-  log("正在启动《我的世界》启动器……");
-  try { const r = await invoke("launch_prism"); log(r.detail); } catch (e) { log("# 启动《我的世界》失败：" + e); }
+  log("正在启动《我的世界》26.1.2……");
+  try {
+    const env = await invoke("env_state");
+    if (env.client?.state === "ready") { applyEnvState(env); log(`客户端已连接：${env.clientVersion || "26.1.2"}`); return; }
+    if (env.clientPrepareAvailable) {
+      const prepared = await invoke("client_prepare");
+      log(prepared?.detail || "已准备本机 26.1.2 客户端。");
+    }
+    const r = await invoke("launch_client");
+    log(r?.detail || "正在启动《我的世界》26.1.2……");
+    await refreshEnvState();
+  } catch (e) { log("# 启动《我的世界》失败：" + e); }
 };
-$("btn-enter").onclick = () => {
+$("btn-enter").onclick = async () => {
+  try {
+    const env = await invoke("env_state");
+    applyEnvState(env);
+    if (env.versionBlocked) { log("客户端版本不匹配：本作需要 26.1.2；请先准备/启动正确的客户端。"); return; }
+    if (!env.allReady) { log("四灯尚未全部就绪，暂时不能进入工坊。"); return; }
+  } catch { /* fall through to old shell */ }
   try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); } catch { location.href = "./studio/index.html"; }
 };
 void probe();
 setInterval(() => void probe(), 8000);
+setInterval(() => void refreshEnvState(), 2000);
 </script>
 </body>
 </html>
