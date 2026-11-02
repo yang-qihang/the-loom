@@ -250,8 +250,8 @@ Rust `envstate::EnvState`（camelCase JSON）：
 1. ~~Studio 侧切换状态源~~ **已完成并合入**：`apps/studio/src/shell-env.ts` 消费壳下发 `loom:env`；地图墙/工作台状态胶囊与 L2 禁用运行/玩家节拍已接入；e2e「桌面壳嵌入」覆盖无第二标题栏、EnvState 驱动与 zoom 100% 链。
 2. **P1-5 部分收口**：壳在进入工作室/回 L0/伴随退出时会 `clear_game_session`，但 Studio 从关卡返回地图墙不会主动发 `loom:session(null)`（需要 Studio 改动）；地图墙上的旧会话可能让 L2 阻断多显示一会儿，用户可「回到 L0」清掉。契约：Studio 应在 Workbench unmount 时 `postMessage({type:"loom:session", sessionId:null, levelId:null})`。
 3. **L2 阻断在 Studio 内部**：目前壳用全屏红色覆盖层挡住 iframe 交互；Studio 内没有单独禁用按钮（无 Studio 改动时的唯一可行方式）。
-4. **打包期（task-11/16/17/18/20 阻塞点）**：`build-assets.mjs` 会把新的 wizard.html/shell.js 复制进 dist/runtime；本轮未重建安装包。当前安装包早于本批修复，需要重建/重装后才能真机看到「产品直启为默认 / 1.21.1 在跑仍启动 26.1.2 / 顶栏四灯同色 / 窗口几何 clamp / 准备 26.1.2 入口」。
-5. **真机 GUI 回归**（1.21.1 在跑 + 点击/自动启动 26.1.2 最终四灯绿且旧客户端仍在、26.1.2 已连接不重复启动、缺 26.1.2 时一键准备采用 repo 资产、退出只关产品客户端）待 Lead 重建安装包后在桌面阶段执行；窗口几何查 `~/.loomcraft/logs`「恢复窗口几何已夹到工作区」，启动器行为查 `launcher.log`（direct/reuse/一键准备）。L01 hidden h1、world 干净包等既有问题不在本任务内。
+4. **打包期（task-11/16/17/18/20）**：`build-assets.mjs` 会把新的 wizard.html/shell.js 复制进 dist/runtime；**Lead 已在合入后重建 Linux 包（AppImage 459M / RPM 453M，2026-11-02 23:28）**。Windows 安装包仍需在 Windows host 重建/重装后做 GUI 真机验收。
+5. **真机 GUI 回归**（1.21.1 在跑 + 点击/自动启动 26.1.2 最终四灯绿且旧客户端仍在、26.1.2 已连接不重复启动、缺 26.1.2 时一键准备采用 repo 资产、退出只关产品客户端）：Linux 包已重建、无头 e2e/静态契约已过；Windows GUI 待 Windows host 重装后执行。窗口几何查 `~/.loomcraft/logs`「恢复窗口几何已夹到工作区」，启动器行为查 `launcher.log`（direct/reuse/一键准备）。L01 hidden h1、world 干净包等既有问题不在本任务内。
 6. **版本门控/启动器已知边界（task-16/18/20）**：
    - 「客户端灯 ready」= 版本匹配的 26.1.x 进程在运行；不等于已成功进服（插件 health 只报 bot 连接）。真正进服由 L2 会话/Studio 事件确认。
    - 版本解析依赖 `--version` 命令行或窗口标题；读不到时保守「未知版本」不绿。
