@@ -115,10 +115,19 @@ TEST_CASE("stack: 两个 worker 目录/端口互不冲突（并发 start）") {
   StackProvisioner provisioner(fixture.config);
   std::unique_ptr<Stack> stack0;
   std::unique_ptr<Stack> stack1;
-  std::thread first([&] { stack0 = provisioner.start(0); });
-  std::thread second([&] { stack1 = provisioner.start(1); });
+  std::exception_ptr error0;
+  std::exception_ptr error1;
+  // 注意：线程里不能抛未捕获异常（std::terminate→SIGABRT），先捕获再在主线程判定。
+  std::thread first([&] {
+    try { stack0 = provisioner.start(0); } catch (...) { error0 = std::current_exception(); }
+  });
+  std::thread second([&] {
+    try { stack1 = provisioner.start(1); } catch (...) { error1 = std::current_exception(); }
+  });
   first.join();
   second.join();
+  if (error0) std::rethrow_exception(error0);
+  if (error1) std::rethrow_exception(error1);
   REQUIRE(stack0 != nullptr);
   REQUIRE(stack1 != nullptr);
   CHECK(stack0->dir != stack1->dir);
