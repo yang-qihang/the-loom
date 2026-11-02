@@ -19,26 +19,38 @@ export function NarrativeLines({ className, children }: { className?: string; ch
     const group = groupRef.current;
     if (!group) return;
 
+    const measureNaturalWidth = (paragraph: HTMLElement): number => {
+      // 用隐藏克隆测“不换行时的自然宽度”，不受当前左右 padding 影响；
+      // 否则居中后内容变窄 → 段落换行 → 退出居中 → 恢复变宽 → 再次居中，形成鬼畜循环。
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "position:absolute;left:-99999px;top:0;visibility:hidden;white-space:nowrap;width:max-content;";
+      const clone = paragraph.cloneNode(true) as HTMLElement;
+      wrapper.appendChild(clone);
+      group.appendChild(wrapper);
+      const width = wrapper.getBoundingClientRect().width;
+      wrapper.remove();
+      return width;
+    };
+
     const update = () => {
-      const width = group.getBoundingClientRect().width;
+      // group.clientWidth 是完整内容宽度（含 padding），即使当前处于居中状态也保持不变。
+      const width = group.clientWidth;
       const paragraphs = [...group.querySelectorAll<HTMLElement>("p")];
       if (width <= 0 || paragraphs.length === 0) return;
 
-      let allSingleLine = true;
+      let allFitOneLine = true;
       let maxParagraphWidth = 0;
       for (const paragraph of paragraphs) {
-        const range = document.createRange();
-        range.selectNodeContents(paragraph);
-        const lineRects = [...range.getClientRects()].filter((rect) => rect.width > 0);
-        const lineTops = new Set(lineRects.map((rect) => Math.round(rect.top)));
-        if (lineTops.size !== 1) {
-          allSingleLine = false;
+        const naturalWidth = measureNaturalWidth(paragraph);
+        if (naturalWidth <= 0) continue;
+        if (naturalWidth > width - 2) {
+          allFitOneLine = false;
           break;
         }
-        maxParagraphWidth = Math.max(...lineRects.map((rect) => rect.width));
+        maxParagraphWidth = Math.max(maxParagraphWidth, naturalWidth);
       }
 
-      const shouldCenter = allSingleLine && maxParagraphWidth > 0 && maxParagraphWidth < width - 2;
+      const shouldCenter = allFitOneLine && maxParagraphWidth > 0;
       group.classList.toggle("is-centered-block", shouldCenter);
       if (!shouldCenter) {
         group.style.paddingLeft = "";
@@ -47,7 +59,7 @@ export function NarrativeLines({ className, children }: { className?: string; ch
       }
 
       // 用左右 padding 把段组整体推到容器中线；块宽由最宽一段决定。
-      // 取 floor 保证内容宽度不小于 maxParagraphWidth，避免取整后重新换行抖动。
+      // floor 保证内容宽度不小于 maxParagraphWidth，避免取整后重新换行。
       const offset = Math.max(0, Math.floor((width - maxParagraphWidth) / 2));
       group.style.paddingLeft = `${offset}px`;
       group.style.paddingRight = `${offset}px`;
