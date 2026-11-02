@@ -215,11 +215,11 @@ Rust `envstate::EnvState`（camelCase JSON）：
 
 真机问题：保存过的大窗口几何恢复后超出当前屏幕（用户约 1707 宽，右侧被裁）。规则：
 
-- **纯逻辑**（`window_geometry.rs`，15+ 单测）：`restore_rect(saved, work, min, preferred)` 先夹 width/height 到工作区、再夹 x/y；**与工作区零交集**（旧显示器被拔/换屏/负坐标）→ 夹好尺寸后居中回退；`None`/0 尺寸 → 默认 1280×840 居中；工作区小于最小窗口（420×620）→ 允许缩到工作区大小。`fully_visible` 做恢复后校验。
+- **纯逻辑**（`window_geometry.rs`，15+ 单测）：`restore_rect(saved, work, min, preferred)` 先夹 width/height 到工作区、再夹 x/y；**与工作区零交集**（旧显示器被拔/换屏/负坐标）→ 夹好尺寸后居中回退；`None`/0 尺寸 → 默认 1440×900 居中；工作区小于最小窗口（420×620）→ 允许缩到工作区大小。`fully_visible` 做恢复后校验。
 - **Windows 工作区**：`win_work_area` 用 `MonitorFromPoint` + `GetMonitorInfoW` 取 **rcWork**（已扣任务栏），不是整块屏幕；其它平台退化为 monitor 全尺寸。真实 Win32 查询单测 `win32_work_area_query_and_real_screen_clamp` 已在本机通过。
 - **恢复前**：`apply_saved_window` 用 `choose_saved_work_area` 选交集最大的显示器（都不相交 → 主屏），逻辑坐标 clamp 后 set；**恢复后**：窗口可见时 `show_main_window`/ScaleFactorChanged 再按物理外框 clamp 一次（WM/DPI 二次调整兜底），并写回修正几何。
 - **保存时**：`save_window_geometry`/`save_geometry_if_windowed` 在 **全屏或最大化时直接跳过**（不写 geometry）；写盘前也 clamp 到当前工作区，超屏/负坐标不会进 settings.json。
-- **模式切换**：`apply_mode`（伴玩/工作台）与 `window_restore_main`（取消最大化/全屏）后都 clamp，窄工作区不会因固定 1280×840 溢出。
+- **模式切换**：`apply_mode`（伴玩/工作台）与 `window_restore_main`（取消最大化/全屏）后都 clamp，窄工作区不会因固定 1440×900 溢出。
 - **DPI**：保存的是逻辑坐标，恢复按当前 monitor 逻辑工作区 clamp；本机 125% 场景测试（逻辑工作区 1365×768，保存 1585×891）验证物理 1707×960 内 fit。
 
 ## 6. 跨平台与 cfg 约束

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { RichText } from "../RichText";
 import { createPortal } from "react-dom";
+import { getDesktopInvoke } from "../../desktop";
 import { TextbookContent, textbookSections } from "./TextbookContent";
 import type { TextbookLibrary } from "../../textbook/types";
 import "./textbook.css";
@@ -45,6 +46,8 @@ export interface TextbookWindowProps {
   onNavigate: (id: string) => void;
   onClose: () => void;
   className?: string;
+  /** 由桌面壳的独立 WebviewWindow 承载：不使用 DOM 内拖拽/缩放，标题栏拖动交给 Tauri。 */
+  standalone?: boolean;
 }
 
 interface WindowGeometry {
@@ -154,6 +157,7 @@ export function TextbookWindow({
   onNavigate,
   onClose,
   className,
+  standalone = false,
 }: TextbookWindowProps): ReactNode {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -168,6 +172,14 @@ export function TextbookWindow({
   const [pinned, setPinned] = useState<boolean>(() => readStoredWindowState()?.pinned ?? false);
   const [dragging, setDragging] = useState(false);
 
+  // 独立窗口的「置顶」必须落到原生窗口，不能只改 DOM z-index；这里把持久化的初值同步过去。
+  useEffect(() => {
+    if (!standalone) return;
+    const invoke = getDesktopInvoke();
+    if (!invoke) return;
+    void invoke("set_textbook_pin", { value: pinned }).catch(() => {});
+  }, [pinned, standalone]);
+
   const orderedChapters = useMemo(
     () => Object.values(chapters).sort((a, b) => a.order - b.order || a.levelId.localeCompare(b.levelId)),
     [chapters],
@@ -177,7 +189,7 @@ export function TextbookWindow({
   const previousChapter = currentIndex > 0 ? orderedChapters[currentIndex - 1] : null;
   const nextChapter = currentIndex >= 0 && currentIndex < orderedChapters.length - 1 ? orderedChapters[currentIndex + 1] : null;
   const sections = useMemo(() => (chapter ? textbookSections(chapter) : []), [chapter]);
-  const compact = geometry.width < TEXTBOOK_COMPACT_WIDTH;
+  const compact = (standalone ? viewportSize().width : geometry.width) < TEXTBOOK_COMPACT_WIDTH;
 
   // 几何/置顶变化后落盘（拖动过程中只在停手后写一次，避免每帧写 localStorage）。
   useEffect(() => {
@@ -203,6 +215,10 @@ export function TextbookWindow({
     const root = rootRef.current;
     if (!root) return;
     if (!root.contains(document.activeElement)) root.focus({ preventScroll: true });
+  }, []);
+
+  const togglePinned = useCallback((): void => {
+    setPinned((value) => !value);
   }, []);
 
   const onRootPointerDown = useCallback(
@@ -231,6 +247,11 @@ export function TextbookWindow({
       const target = event.target as HTMLElement | null;
       if (target?.closest(TITLEBAR_BUTTON_SELECTOR)) return;
       event.preventDefault();
+      if (standalone) {
+        const invoke = getDesktopInvoke();
+        if (invoke) void invoke("window_start_drag").catch(() => {});
+        return;
+      }
       event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
         pointerId: event.pointerId,
@@ -241,10 +262,11 @@ export function TextbookWindow({
       };
       setDragging(true);
     },
-    [geometry.x, geometry.y],
+    [geometry.x, geometry.y, standalone],
   );
 
   const onTitlebarPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>): void => {
+    if (standalone) return;
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     const dx = event.clientX - drag.startX;
@@ -252,7 +274,7 @@ export function TextbookWindow({
     setGeometry((current) =>
       clampGeometry({ ...current, x: drag.originX + dx, y: drag.originY + dy }, viewportSize()),
     );
-  }, []);
+  }, [standalone]);
 
   const finishDrag = useCallback((event: ReactPointerEvent<HTMLDivElement>): void => {
     const drag = dragRef.current;
@@ -266,6 +288,11 @@ export function TextbookWindow({
     if (event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
+    if (standalone) {
+      const invoke = getDesktopInvoke();
+      if (invoke) void invoke("textbook_start_resize", { direction: "south-east" }).catch(() => {});
+      return;
+    }
     event.currentTarget.setPointerCapture(event.pointerId);
     resizeRef.current = {
       pointerId: event.pointerId,
@@ -274,9 +301,10 @@ export function TextbookWindow({
       originWidth: geometry.width,
       originHeight: geometry.height,
     };
-  }, [geometry.height, geometry.width]);
+  }, [geometry.height, geometry.width, standalone]);
 
   const onResizePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>): void => {
+    if (standalone) return;
     const resize = resizeRef.current;
     if (!resize || resize.pointerId !== event.pointerId) return;
     const dx = event.clientX - resize.startX;
@@ -292,7 +320,7 @@ export function TextbookWindow({
         viewportSize(),
       ),
     );
-  }, []);
+  }, [standalone]);
 
   const finishResize = useCallback((event: ReactPointerEvent<HTMLDivElement>): void => {
     const resize = resizeRef.current;
@@ -321,26 +349,31 @@ export function TextbookWindow({
 
   if (typeof document === "undefined") return null;
 
-  const windowClassName = ["tb-window", className].filter(Boolean).join(" ");
+  const windowClassName = ["tb-window", standalone ? "tb-window-standalone" : "", className].filter(Boolean).join(" ");
   const counterText = chapter && currentIndex >= 0 ? `第 ${currentIndex + 1} / ${orderedChapters.length} 章` : "—";
 
   return createPortal(
     <div
       ref={rootRef}
       className={windowClassName}
-      style={{
-        left: geometry.x,
-        top: geometry.y,
-        width: geometry.width,
-        height: geometry.height,
-        zIndex: pinned ? TEXTBOOK_PINNED_Z_INDEX : TEXTBOOK_UNPINNED_Z_INDEX,
-      }}
+      style={
+        standalone
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0 }
+          : {
+              left: geometry.x,
+              top: geometry.y,
+              width: geometry.width,
+              height: geometry.height,
+              zIndex: pinned ? TEXTBOOK_PINNED_Z_INDEX : TEXTBOOK_UNPINNED_Z_INDEX,
+            }
+      }
       role="dialog"
       aria-modal={false}
       aria-label={chapter ? `配套教材：${chapter.title}` : "配套教材"}
       tabIndex={-1}
       data-testid="textbook-window"
       data-pinned={pinned ? "true" : "false"}
+      data-standalone={standalone ? "true" : "false"}
       data-compact={compact ? "true" : "false"}
       data-dragging={dragging ? "true" : "false"}
       onKeyDown={onKeyDown}
@@ -373,7 +406,7 @@ export function TextbookWindow({
             aria-pressed={pinned}
             aria-label={pinned ? "取消置顶教材窗口" : "置顶教材窗口"}
             title={pinned ? "取消置顶" : "置顶窗口"}
-            onClick={() => setPinned((value) => !value)}
+            onClick={togglePinned}
           >
             {pinned ? "取消置顶" : "置顶"}
           </button>
@@ -453,7 +486,7 @@ export function TextbookWindow({
       </div>
 
       <footer className="tb-footer">
-        <span className="tb-footer-hint">拖动标题栏移动 · 右下角缩放 · Esc 关闭</span>
+        <span className="tb-footer-hint">{standalone ? "拖动标题栏移动 · Esc 关闭" : "拖动标题栏移动 · 右下角缩放 · Esc 关闭"}</span>
         <button type="button" className="btn btn-primary tb-start" data-testid="btn-textbook-start" onClick={onClose}>
           开始写代码
         </button>

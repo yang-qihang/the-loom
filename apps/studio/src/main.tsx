@@ -1,11 +1,14 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { TextbookStandalone } from "./components/textbook/TextbookStandalone";
 import { DesktopTitlebar } from "./components/DesktopTitlebar";
 import { isDesktopShell, isTopLevelWindow } from "./desktop";
 
+// 独立教材窗口不继承壳的 UI zoom：它是独立原生窗口，按自身尺寸阅读。
+const standaloneTextbook = new URLSearchParams(window.location.search).get("textbook");
 const scale = new URLSearchParams(window.location.search).get("scale");
-if (scale) document.documentElement.style.zoom = scale;
+if (scale && !standaloneTextbook) document.documentElement.style.zoom = scale;
 import { installNativeGuard } from "./native-guard";
 import "./styles.css";
 import "./guidance.css";
@@ -24,9 +27,16 @@ const renderOwnTitlebar = isDesktopShell() && isTopLevelWindow();
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root container");
 
+// 独立教材窗口由 Rust 创建，URL 带 ?textbook=<levelId>；此时只渲染教材，不启动 Studio/引擎。
 createRoot(root).render(
   <StrictMode>
-    {renderOwnTitlebar ? <DesktopTitlebar /> : null}
-    <App />
+    {standaloneTextbook ? (
+      <TextbookStandalone initialId={standaloneTextbook} />
+    ) : (
+      <>
+        {renderOwnTitlebar ? <DesktopTitlebar /> : null}
+        <App />
+      </>
+    )}
   </StrictMode>,
 );

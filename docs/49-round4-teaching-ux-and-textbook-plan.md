@@ -71,8 +71,9 @@
 - 写作规范与分章 brief：`apps/studio/src/textbook/README.md`。
 - 内容：`chapters/L01.ts`…`L10.ts`（两 writer 并行），聚合 `textbook/index.ts`（Lead）。
 - 校验（Lead 写 `content/textbook.test.ts`）：10 章齐全；块结构合法；代码块可被 esbuild 解析；代码示例 API 不越级（按 packages/sdk api-registry）；字数/代码块/术语下限；terms 中英文成对。
-- UI：`components/textbook/TextbookWindow.tsx`（非模态 portal、拖动、缩放、置顶、关闭、章节导航、位置/尺寸/状态持久化）+ `TextbookContent.tsx`（正文可读字体、代码 Maple Mono + 复制、callout、terms）。
-- 首次阅读流程（Lead 接入 App/Workbench）：进入关卡后若本章未读，自动打开教材窗口，窗口底部「开始写代码」关闭；之后可从工作台顶栏/手记入口随时回看；已读状态 localStorage（`loom.textbook.read.v1`）。
+- UI：`components/textbook/TextbookWindow.tsx`（非模态、拖动、缩放、置顶、关闭、章节导航、状态持久化）+ `TextbookContent.tsx`（正文可读字体、代码 Maple Mono + 复制、callout、terms）。
+- **桌面壳独立窗口（2026-11-02 invariant 修复）**：桌面版由 Rust `open_textbook_window` 创建无 parent 的独立 WebviewWindow，加载随包 `studio/index.html?textbook=<levelId>`；拖动/缩放/置顶/关闭全部走 Tauri 原生命令，不再受主窗口 viewport clamp 限制，可移出主窗口并保持置顶。浏览器/无 Tauri 环境仍保留原 portal 浮窗作为 fallback（现有 e2e 覆盖）。
+- 首次阅读流程（Lead 接入 App/Workbench）：进入关卡后若本章未读，自动打开教材；桌面版打开独立窗口，窗口底部「开始写代码」关闭；之后可从工作台顶栏/手记入口随时回看；已读状态 localStorage（`loom.textbook.read.v1`）。
 - 与剧情关系：教材可引用世界概念，但不复述剧情；按「直觉动机 → 定义 → 语法/示例 → 常见错误 → 与关卡任务的关系 → 小结练习」组织。
 
 ### 2.6 C 模块与构建系统（课程要求）

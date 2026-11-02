@@ -13,6 +13,7 @@ import { TextbookWindow } from "./components/textbook/TextbookWindow";
 import { TEXTBOOK, isTextbookRead, markTextbookRead } from "./textbook";
 import { levelCards, levelCopy } from "./copy";
 import { useShellEnv } from "./shell-env";
+import { getDesktopInvoke } from "./desktop";
 import {
   EMPTY_PROGRESS,
   loadProgress,
@@ -146,6 +147,17 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
   // 配套教材（用户任务 6）：入口常驻工作台；关闭时把本章记为已读。
   const openTextbook = useCallback((levelId: string) => {
     if (!TEXTBOOK[levelId]) return;
+    const invoke = getDesktopInvoke();
+    if (invoke) {
+      // 桌面壳：教材是随包本地页面的独立 WebviewWindow；浏览器/单测没有 bridge 时保留 DOM 浮动窗口。
+      void invoke("open_textbook_window", { levelId })
+        .then(() => {
+          markTextbookRead(levelId);
+          setProgress((current) => ({ ...current }));
+        })
+        .catch(() => setTextbookLevelId(levelId));
+      return;
+    }
     setTextbookLevelId(levelId);
   }, []);
   const closeTextbook = useCallback(() => {
@@ -161,8 +173,8 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
     if (screen.kind !== "workbench") return;
     const levelId = screen.levelId;
     if (!TEXTBOOK[levelId] || isTextbookRead(levelId)) return;
-    setTextbookLevelId(levelId);
-  }, [screen]);
+    openTextbook(levelId);
+  }, [screen, openTextbook]);
 
   const nextPlayableLevel = useMemo(() => {
     if (!cards) return null;

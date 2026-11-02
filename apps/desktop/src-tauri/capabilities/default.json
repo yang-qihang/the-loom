@@ -3,7 +3,8 @@
   "identifier": "default",
   "description": "织界桌面壳默认能力：核心 IPC + 事件",
   "windows": [
-    "main"
+    "main",
+    "textbook"
   ],
   "permissions": [
     "core:default",

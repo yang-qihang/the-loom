@@ -40,8 +40,8 @@ const RESTORE_SHORTCUT: &str = "Ctrl+Shift+F";
 const FOCUS_SHORTCUT: &str = "Alt+Z";
 const COMPANION_WIDTH: u32 = 420;
 const COMPANION_HEIGHT: u32 = 620;
-const WORKBENCH_WIDTH: u32 = 1280;
-const WORKBENCH_HEIGHT: u32 = 840;
+const WORKBENCH_WIDTH: u32 = 1440;
+const WORKBENCH_HEIGHT: u32 = 900;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -1192,6 +1192,74 @@ fn apply_mode(window: &WebviewWindow, mode: &str) -> Result<(), String> {
 }
 
 // ---------------- Tauri 命令 ----------------
+
+/// 教材独立窗口使用随包的本地 Studio 页面，避免把 remote engine URL 交给 WebView：
+/// 本地页面有 Tauri IPC，关闭/置顶/拖动/缩放才能工作，也不依赖 engine 的端口是否可访问。
+fn validate_textbook_level(raw: &str) -> Result<String, String> {
+    let level = raw.trim();
+    if level.is_empty() || level.len() > 16 || !level.chars().all(|ch| ch.is_ascii_alphanumeric() || ch == '-' || ch == '_') {
+        return Err("教材关卡号无效".to_string());
+    }
+    Ok(level.to_string())
+}
+
+/// 打开/复用配套教材窗口：它是无父窗口的独立 WebviewWindow，几何/任务栏/拖动都不依赖主窗口。
+#[tauri::command]
+fn open_textbook_window(app: tauri::AppHandle, level_id: String) -> Result<(), String> {
+    let level = validate_textbook_level(&level_id)?;
+    let page = format!("studio/index.html?textbook={level}");
+    if let Some(window) = app.get_webview_window("textbook") {
+        // 同一窗口复用，保留用户拖到的位置/尺寸；只改 query 触发 React 章节更新。
+        let _ = window.eval(format!("window.location.search = '?textbook={level}'"));
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+        return Ok(());
+    }
+    let window = tauri::WebviewWindowBuilder::new(&app, "textbook", tauri::WebviewUrl::App(page.into()))
+        .title("配套教材")
+        .inner_size(980.0, 760.0)
+        .min_inner_size(420.0, 320.0)
+        .resizable(true)
+        .decorations(false)
+        .visible(true)
+        .focused(true)
+        .build()
+        .map_err(|error| format!("打开教材窗口失败：{error}"))?;
+    let _ = window.center();
+    Ok(())
+}
+
+#[tauri::command]
+fn set_textbook_pin(window: WebviewWindow, value: bool) -> Result<bool, String> {
+    if window.label() != "textbook" {
+        return Err("只能操作教材窗口".to_string());
+    }
+    window.set_always_on_top(value).map_err(|error| error.to_string())?;
+    Ok(value)
+}
+
+#[tauri::command]
+fn textbook_start_resize(window: WebviewWindow, direction: String) -> Result<(), String> {
+    if window.label() != "textbook" {
+        return Err("只能操作教材窗口".to_string());
+    }
+    let direction = match direction.as_str() {
+        "east" => tauri_runtime::ResizeDirection::East,
+        "north" => tauri_runtime::ResizeDirection::North,
+        "north-east" => tauri_runtime::ResizeDirection::NorthEast,
+        "north-west" => tauri_runtime::ResizeDirection::NorthWest,
+        "south" => tauri_runtime::ResizeDirection::South,
+        "south-west" => tauri_runtime::ResizeDirection::SouthWest,
+        "west" => tauri_runtime::ResizeDirection::West,
+        _ => tauri_runtime::ResizeDirection::SouthEast,
+    };
+    window
+        .as_ref()
+        .window()
+        .start_resize_dragging(direction)
+        .map_err(|error| error.to_string())
+}
 
 #[tauri::command]
 fn get_settings(app: tauri::AppHandle) -> Settings {
@@ -3314,7 +3382,10 @@ fn main() {
             set_webview_zoom,
             engine_ready,
             show_main_window,
-            snap_half
+            snap_half,
+            open_textbook_window,
+            set_textbook_pin,
+            textbook_start_resize
         ])
         .build(tauri::generate_context!())
         .expect("构建织界桌面应用失败");
