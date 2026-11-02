@@ -1681,9 +1681,7 @@ body.desktop-shell code {
 .justified-text-block { display: block; width: 100%; }
 .justified-line { display: block; white-space: nowrap; }
 .justified-line.is-last { white-space: normal; }
-.stage-lines-text p.is-narrow,
-.stage-lines-text .opening-copy.is-narrow,
-.opening-copy.is-narrow { text-align: left; }
+
 
 body .map-hero-copy p,
 body .hud-note,

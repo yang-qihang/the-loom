@@ -119,37 +119,41 @@ test("字体三轨道 + 行内代码渲染策略", async ({ page }) => {
 });
 
 
-test("WebKit 降级路径：逐行补齐两端对齐（桌面 Tauri/WebKitGTK）", async ({ browser }) => {
-  // Chrome e2e 无法直接跑 WebKitGTK；用 WebKit UA 触发同一条 fallback 代码路径，
-  // 验证 prologue 每段非末行 line span 都被补齐到与容器同宽。
-  const context = await browser.newContext({
-    userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-    viewport: { width: 1280, height: 900 },
-  });
-  const page = await context.newPage();
-  await page.addInitScript(() => {
-    localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: false, actsSeen: [], levelsStarted: [], lastCompletedLevelId: null }));
-    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01","L02","L03","L04","L05","L06","L07","L08","L09","L10"]));
-  });
-  await page.goto("/");
-  await expect(page.getByTestId("prologue-overlay")).toBeVisible();
-  await expect.poll(() => page.locator(".justified-text-block").count(), { timeout: 10_000 }).toBeGreaterThan(0);
-  const rows = await page.locator('[data-testid="prologue-overlay"] .justified-text-block').evaluateAll((blocks) =>
-    blocks.map((block) => {
-      const width = block.getBoundingClientRect().width;
-      const lines = [...block.querySelectorAll<HTMLElement>(".justified-line")].map((line) => {
-        const rect = line.getBoundingClientRect();
-        return { width: rect.width, right: rect.right, isLast: line.classList.contains("is-last") };
-      });
-      return { width, lines };
-    }),
-  );
-  expect(rows.length).toBeGreaterThanOrEqual(2);
-  for (const row of rows) {
-    for (const line of row.lines) {
-      if (line.isLast) continue;
-      expect(Math.abs(line.width - row.width), "WebKit fallback 非末行未补齐到容器宽度").toBeLessThan(2);
+test("WebKit 降级路径：所有宽度首行占满、末行左对齐", async ({ browser }) => {
+  const ua = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15";
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 480, height: 900 }]) {
+    const context = await browser.newContext({ userAgent: ua, viewport });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: false, actsSeen: [], levelsStarted: [], lastCompletedLevelId: null }));
+      localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01","L02","L03","L04","L05","L06","L07","L08","L09","L10"]));
+    });
+    await page.goto("/");
+    await expect(page.getByTestId("prologue-overlay")).toBeVisible();
+    await expect.poll(() => page.locator(".justified-text-block").count(), { timeout: 10_000 }).toBeGreaterThan(0);
+    const rows = await page.locator('[data-testid="prologue-overlay"] .justified-text-block').evaluateAll((blocks) =>
+      blocks.map((block) => {
+        const width = block.getBoundingClientRect().width;
+        const left = block.getBoundingClientRect().left;
+        const lines = [...block.querySelectorAll<HTMLElement>(".justified-line")].map((line) => {
+          const rect = line.getBoundingClientRect();
+          const cs = getComputedStyle(line);
+          return { width: rect.width, left: rect.left, right: rect.right, align: cs.textAlign, isLast: line.classList.contains("is-last") };
+        });
+        return { width, left, lines };
+      }),
+    );
+    expect(rows.length).toBeGreaterThanOrEqual(2);
+    for (const row of rows) {
+      for (const line of row.lines) {
+        if (line.isLast) {
+          expect(line.left, `${viewport.width}px 末行必须从左侧开始`).toBeCloseTo(row.left, 1);
+          expect(line.align, `${viewport.width}px 末行不得右对齐`).not.toBe("right");
+        } else {
+          expect(Math.abs(line.width - row.width), `${viewport.width}px 非末行未占满容器`).toBeLessThan(2);
+        }
+      }
     }
+    await context.close();
   }
-  await context.close();
 });

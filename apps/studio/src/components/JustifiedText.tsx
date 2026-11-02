@@ -99,9 +99,7 @@ export function JustifiedText({ text }: { text: string }): ReactNode {
   const updateFallback = (): void => {
     const parent = anchorRef.current?.parentElement;
     if (!parent) return;
-    const narrow = parent.clientWidth < 360;
-    parent.classList.toggle("is-narrow", narrow);
-    if (narrow || probeNativeCjkJustify() || text.includes("`")) {
+    if (probeNativeCjkJustify() || text.includes("`")) {
       setLines(null);
       return;
     }
@@ -139,10 +137,13 @@ export function JustifiedText({ text }: { text: string }): ReactNode {
       const el = lineEls[index];
       el.style.letterSpacing = "";
       if (index === lineEls.length - 1) continue;
-      const natural = el.getBoundingClientRect().width;
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const naturalRect = range.getClientRects()[0];
+      const natural = naturalRect ? naturalRect.width : el.getBoundingClientRect().width;
       const chars = Array.from(lines[index] ?? "").length;
       if (chars <= 1 || natural <= 0) continue;
-      const spacing = (target - natural) / (chars - 1);
+      const spacing = (target - natural) / chars;
       if (spacing > 0.02) el.style.letterSpacing = `${spacing.toFixed(3)}px`;
     }
   }, [lines]);

@@ -243,6 +243,7 @@ test("字体资产：像素装饰字 + MiSans 正文 + 长文 + 字体真加载"
   // 2026-11-02 用户要求：有充足文本时，序言/幕/关开场正文两端对齐（短行/末行保持自然左对齐）。
   const stageAlign = await page.locator('[data-testid="prologue-overlay"] .stage-lines-text p').first().evaluate((element) => getComputedStyle(element).textAlign);
   expect(stageAlign, "序言正文未两端对齐").toBe("justify");
+  expect(await page.locator('[data-testid="prologue-overlay"] .stage-lines-text p').first().evaluate((element) => getComputedStyle(element).textAlignLast), "末行必须从左侧开始，不得右对齐").toBe("left");
   // 两段正文必须共享同一文本盒（左右边必须一致；不能一段比另一段整体右移）。
   const stageBoxes = await page.locator('[data-testid="prologue-overlay"] .stage-lines-text p').evaluateAll((elements) =>
     elements.map((element) => {
