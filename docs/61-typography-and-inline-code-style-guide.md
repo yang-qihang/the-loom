@@ -91,3 +91,5 @@
 - **幕开场单屏只有一行时**（必须按当前实际渲染宽度动态检测，不能按字数猜）：该行居中，左右留白相等；一旦当前宽度下换成多行，立即回到「首行占满 + 末行左起」。实现为 `JustifiedText` 的 `centerWhenSingleLine`，`ResizeObserver` 跟随窗口变化。
 - **WebKitGTK 的纯 CJK justification 不扩展**（实测首行仅到自然宽度）：`JustifiedText.tsx` 用 UA 检测 WebKit，按真实换行拆行并对非末行逐行 letter-spacing 补齐；Chrome 走原生 justify。e2e 用 WebKit UA 触发同一 fallback 路径，断言非末行宽度 = 容器宽度。
 - 验收桌面端时至少做一次「首启序章」；如果本机已有进度，先备份并清理 `~/.local/share/dev.loomcraft.desktop`（Linux）或在测试机 profile 里重置，才能看到序章。
+
+- **叙事浮层标题（序章/幕开场/关开场）**：`.narrative-head` 必须占满卡片内容宽度，`h2` 用 `width:100%; text-align:center` 居中，不依赖 shrink-to-fit/flex 基线；像素字 `letter-spacing` 不得让标题视觉偏左。WebKitGTK 实测标题 Range 中线与卡片中线一致。

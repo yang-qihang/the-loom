@@ -67,6 +67,7 @@ body.desktop-shell .codex-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   gap: 8px;
   padding: 24px 32px 12px;
   text-align: center;
@@ -80,10 +81,12 @@ body.desktop-shell .codex-card {
    长标题横向溢出（720px 视口 + 28px 像素字）。这里覆盖成可换行并保持居中。 */
 .narrative-card h2,
 .journal-card h2 {
+  width: 100%;
   max-width: 100%;
   white-space: normal;
   overflow-wrap: anywhere;
   text-wrap: balance;
+  text-align: center;
 }
 
 /* ------------------------------------------------------------------ 可滚动内容 */
