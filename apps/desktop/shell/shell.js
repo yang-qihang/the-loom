@@ -80,6 +80,8 @@ function frameUrl(page) {
   const params = new URLSearchParams();
   params.set("engine", engine);
   params.set("scale", String(settings.uiScale));
+  // WebView 可能缓存旧 Studio HTML；每次启动带 version 查询，避免桌面停留在旧 CSS/JS。
+  params.set("v", String(Date.now()));
   if (page === "companion") {
     if (currentSession) params.set("session", currentSession);
     if (currentLevel) params.set("level", currentLevel);

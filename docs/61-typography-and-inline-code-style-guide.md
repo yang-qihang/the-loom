@@ -80,3 +80,12 @@
 3. 新增用户可见文案若包含反引号，必须在 `style-policy.spec.ts` 的扫描路径覆盖的页面可见，或补一条 `expect(locator).toContainText` 断言确认渲染成 `.inline-code`。
 4. Lead 合并前抽查 `git diff` 里所有 `font-family` 与新增 `{...}` 文本渲染；发现回归直接 BLOCK。
 5. 若确需例外（例如纯 ASCII 键帽必须等宽），在 PR/commit 说明里写明理由并更新本文档，不得静默破坏。
+
+## 7. 桌面壳（Tauri / WebKitGTK）与浏览器 e2e 的差异
+
+- 桌面主窗是 `apps/desktop/shell/index.html`（自绘标题栏），**Studio 在 iframe 里由内嵌 engine 加载**（`runtime/real/studio/index.html`）；Playwright e2e 用的是 Chromium 直接加载 Studio 构建。两者不是同一个渲染引擎：Linux 桌面是 **WebKitGTK**，对 CJK 两端对齐/换行的实现与 Chrome 不完全一致。
+- 桌面壳的「取消置顶 / 伴玩 / 设置」和右上角窗口按钮属于 `apps/desktop/shell/{index.html,shell.css,shell.js}`，**不是** Studio 的 React `DesktopTitlebar`；改桌面壳 UI 必须改 shell 文件并重新打包。
+- 桌面壳会 `document.documentElement.style.zoom = uiScale`（默认 0.8）；窗口按钮用同 viewBox/同 strokeWidth 的 SVG，统一 14px，禁止用 `— / □ / ✕` 字形凑。
+- 桌面 HTML 可能被 WebKit 缓存：`shell.js` 给 Studio iframe URL 追加 `?v=<timestamp>`，每次启动绕开旧 HTML；仍要求 UI 改动后**重新打包并完全退出旧进程**再启动。
+- 序言/幕/关开场正文：`text-align: justify` + `text-align-last: left`（窄内容/末行必须从左侧换行），并显式 `width:100%`；两段正文共享同一文本盒。e2e 断言文本盒 left/right/width 一致，末行不得右对齐。
+- 验收桌面端时至少做一次「首启序章」；如果本机已有进度，先备份并清理 `~/.local/share/dev.loomcraft.desktop`（Linux）或在测试机 profile 里重置，才能看到序章。

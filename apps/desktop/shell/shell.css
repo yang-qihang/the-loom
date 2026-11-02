@@ -40,7 +40,7 @@ body { margin: 0; display: flex; flex-direction: column; background: var(--bg); 
 .bar-actions { margin-left: auto; display: flex; gap: 8px; }
 .btn {
   border: 1px solid var(--line); background: var(--panel); color: var(--text);
-  padding: 5px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit;
+  padding: 5px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: var(--pixel);
 }
 .btn:hover { border-color: var(--warm); color: var(--warm-2); }
 .btn.primary { background: linear-gradient(180deg, #7a5a2e, #5c421f); border-color: var(--warm); color: #ffe8b8; }
@@ -73,6 +73,7 @@ body.companion .btn { padding: 4px 9px; font-size: 12px; white-space: nowrap; }
 
 /* ---- T9 自绘像素标题栏（decorations=false；无系统窗框） ---- */
 :root {
+  --pixel: "Zpix", "Departure Mono", ui-monospace, monospace;
   --bg: #0e1710;
   --panel: #17251a;
   --panel-2: #1e2f20;
@@ -108,7 +109,7 @@ body.companion .bar-status { gap: 3px; margin-left: 2px; }
 .btn {
   border: 2px solid var(--line); border-radius: 0; background: var(--panel);
   color: var(--text); padding: 7px 11px; font-size: 12px; line-height: 18px;
-  box-shadow: none; text-shadow: none; font-family: inherit;
+  box-shadow: none; text-shadow: none; font-family: var(--pixel);
 }
 .btn:hover { border-color: var(--warm); color: var(--warm-2); background: var(--panel-2); }
 .btn.primary { background: #6b5220; border-color: var(--warm); color: #ffe9b0; }
@@ -116,7 +117,12 @@ body.companion .bar-status { gap: 3px; margin-left: 2px; }
 .win-btn {
   width: 32px; height: 32px; padding: 0; border: 2px solid var(--line);
   background: var(--panel); color: var(--muted); border-radius: 0;
-  font-family: inherit; font-size: 12px; line-height: 1; cursor: pointer;
+  font-size: 0; line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.win-icon {
+  width: 14px; height: 14px; display: block; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: square;
 }
 .win-btn:hover { border-color: var(--warm); color: var(--warm-2); background: var(--panel-2); }
 .win-btn.is-close:hover { border-color: var(--bad); color: #ffd9cf; background: #43221d; }
