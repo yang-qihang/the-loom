@@ -1,5 +1,5 @@
 {
-  "ts": "2026-11-02T10:39:11.097Z",
+  "ts": "2026-11-02T11:00:06.211Z",
   "viewports": [
     {
       "width": 1440,
@@ -774,8 +774,8 @@
         "right": 34
       },
       "canScroll": true,
-      "scrollTopAfter": 208,
-      "lastChildBottomGap": 23.91,
+      "scrollTopAfter": 207,
+      "lastChildBottomGap": 23.45,
       "actions": 2
     },
     {
@@ -831,8 +831,8 @@
         "right": 34
       },
       "canScroll": true,
-      "scrollTopAfter": 287,
-      "lastChildBottomGap": 24.11,
+      "scrollTopAfter": 286,
+      "lastChildBottomGap": 23.66,
       "actions": 2
     },
     {

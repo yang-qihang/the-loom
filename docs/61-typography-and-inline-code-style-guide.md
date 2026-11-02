@@ -6,7 +6,7 @@
 
 ## 0. 一句话版本
 
-**代码 = Maple Mono；非像素正文 = MiSans VF（Noto Sans SC 只做 fallback）；像素装饰字 = Zpix + Departure Mono（只用于短标题/按钮/标签/角色名）。**
+**代码 = Maple Mono；长段可读正文 = MiSans VF（Noto Sans SC 只做 fallback）；其余短 UI / 装饰字默认 = Zpix + Departure Mono（标题、按钮、标签、角色名、短说明、HUD note、地图 hero 短句、判据/结算目标等）。**
 **所有用户可见的 `` `行内代码` `` 必须渲染成 `<code class="inline-code">`，绝不能显示反引号、不能单独起段。**
 
 ## 1. 三条字体轨道（唯一合法用途）
@@ -14,8 +14,8 @@
 | Token / CSS 变量 | 字体栈（权威） | 允许出现的位置 | 禁止出现的位置 |
 |---|---|---|---|
 | `--font-code`（`code` / `pre` / `kbd` / `.mono` / `.inline-code` 等） | `"Maple Mono", "Maple Mono CN", "Noto Sans CJK SC", ...` | Monaco 编辑器；参考解；指令手册签名/示例；织典代码；试符台输入/历史；日志中的代码；`inline-code`；教材代码块；错误条里的代码 | 任何叙述、标题、按钮、标签、正文 |
-| `--font-text` / `--font-reading`（`body`、长文、普通 UI 文本） | `"MiSans VF", "MiSans", "Noto Sans SC", ...` | 序章/幕/关开场正文；旅途手记；教练长句；结算说明；手册说明；织典正文；教材正文/目标；伴玩/向导正文/表单；HUD 说明 | 代码（含行内代码）；像素装饰短标题/按钮/标签 |
-| `--font-pixel` / `--serif` / `--mono`（像素装饰） | `"Zpix", "Departure Mono", ...` | **短、低信息量**的装饰部分：h1–h6 章节/关卡标题、`.btn` 按钮、chip/标签、kicker、卡片标题、角色名（“艾拉”）、HUD 短标签、键帽、地图墙标题、结算标题、教材标题/按钮、`stage-speaker` | **代码（绝对禁止）**；长段正文；任何需要逐行阅读的说明 |
+| `--font-text` / `--font-reading`（长段可读正文） | `"MiSans VF", "MiSans", "Noto Sans SC", ...` | 序章/幕/关开场**多行叙述**；旅途手记正文；教练长句；结算长说明；手册 summary/details；织典正文；教材正文/目标（长）；伴玩/向导正文与表单 | 代码（含行内代码）；短 UI/装饰（应走像素） |
+| `--font-pixel` / `--serif` / `--mono`（像素短 UI/装饰） | `"Zpix", "Departure Mono", ...` | **默认用于短 UI/装饰**：h1–h6 章节/关卡标题、`.btn` 按钮、chip/标签、kicker、卡片标题、角色名（“艾拉”）、HUD 短标签/短说明、键帽、地图墙标题与 hero 短句、结算标题/目标、教材标题/按钮、判据、`stage-speaker` | **代码（绝对禁止）**；长段正文；任何需要逐行阅读的说明 |
 
 补充：
 - **Noto Sans SC 只做 MiSans 的 fallback**，不得重新把 `--font-text` 主字体改回 Noto；地图墙/标题若使用 `--pixel`，不得改成 MiSans。
@@ -59,7 +59,7 @@
 | 静态样式契约 | `npm run check:style` | 三轨道 token 正确；代码选择器禁用像素字；`--font-pixel` 保留 Zpix/Departure；`--font-text` 主字体 MiSans；`--font-code` 主字体 Maple |
 | 字体/组件 e2e | `cd apps/studio && npx playwright test -c playwright.config.ts e2e/typography.spec.ts e2e/style-policy.spec.ts` | 代码点 computed family 含 Maple、不含像素；长文含 MiSans；标题/按钮/角色名含像素；`document.fonts.check` 三类字体加载 |
 | 行内代码 DOM 审计 | 同上（style-policy 的 `literal backticks` 扫描） | 页面可见文本不得出现未被代码元素包住的反引号；跳过 `code/pre/textarea`（合法代码块） |
-| 全量门禁 | `bash scripts/verify.sh` | l0 已接入 `check:style`；2026-11-02 实测 pass（仅既有 `G-FRESH-READER` tracked warn）；Studio real e2e 37/38 通过 + `runtime-recovery` 单测重跑通过（已知偶发，非字体回归）；mock e2e 5/5 |
+| 全量门禁 | `bash scripts/verify.sh` | l0 已接入 `check:style`；2026-11-02 实测 pass（仅既有 `G-FRESH-READER` tracked warn）；Studio real e2e **38/38 通过**（含 style-policy）；mock e2e **5/5** |
 
 ## 5. 当前组件映射（新增组件按同类字段照做）
 
@@ -70,7 +70,7 @@
 | `CodexScreen.tsx` | title/subtitle/solve/mechanism/cost/inGame/misconception 全部 `RichText`；code 块 `pre>code` Maple | 新增 codex 文案必须走 RichText |
 | `TextbookContent.tsx` / `TextbookWindow.tsx` | 正文/目标/列表 `RichText`；h2/h3/callout title/caption/term 也 `RichText`；code 块 Maple | 教材 markdown 源仍用反引号表示行内代码 |
 | `GuidanceManual.tsx` / `PositionHud.tsx` / `ReplScreen.tsx` / `Workbench.tsx` / `SolutionViewer.tsx` | 说明文字 RichText；代码/签名 Maple；按钮像素 | 已知历史 bug 点：`footHint`、`noPoints`、`coordHint`、`helpHint`、`helpOpened`、`mcHelpSteps` |
-| `MapWall.tsx` / `ResultCard.tsx` | 标题/按钮像素；目标/判据/codeRequirements 由 RichText；代码块 Maple | 新增字段若来自 copy JSON 且含反引号，必须 RichText |
+| `MapWall.tsx` / `ResultCard.tsx` | 标题/按钮/hero kicker/hero 短句/判据/settle goal/codeRequirements 像素；代码块 Maple；长段说明才 MiSans | 新增字段若来自 copy JSON 且含反引号，必须 RichText |
 | `apps/desktop/shell/*` | 标题/按钮/日志/role 名像素；正文/表单 MiSans；无代码字体混入 UI | 桌面壳与 Studio 同一字体资产 |
 
 ## 6. 变更流程（防止 teammate 破坏 invariants）

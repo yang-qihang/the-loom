@@ -190,7 +190,7 @@
 - **D44 字体三轨道（替代此前多轮反复）**：
   - **代码**：所有渲染代码的位置（Monaco、参考解、手册签名/示例、织典代码、试符台输入/历史、日志代码、`inline-code`、教材代码块）只用 **Maple Mono**；**禁止像素字体**，也禁止正文 MiSans。
   - **非像素正文/普通 UI**：序章/幕/关开场叙述、手记、教练长句、结算说明、手册说明、织典正文、教材正文、伴玩/向导正文等，用 **MiSans VF**（Noto Sans SC 只作 fallback）。
-  - **像素装饰字**：仅用于短、低信息量的装饰部分——章节/关卡标题、按钮、chip/标签、kicker、角色名（如「艾拉」）、HUD 短标签、键帽、地图墙/开场标题、教材标题/按钮；**不得用于代码或长段阅读文本**。
+  - **像素短 UI/装饰字（默认）**：用于所有短、低信息量元素——章节/关卡标题、按钮、chip/标签、kicker、角色名（如「艾拉」）、HUD 短标签/短说明、键帽、地图墙/开场标题与 hero 短句、判据/结算目标、设置短说明、教材标题/按钮；**不得用于代码或长段阅读文本**。只有长段正文才用 MiSans。
   - 依据/验收：`docs/61-typography-and-inline-code-style-guide.md`、`npm run check:style`、`apps/studio/e2e/typography.spec.ts`、`apps/studio/e2e/style-policy.spec.ts`。2026-11-02 曾短暂把所有装饰字改成 MiSans，用户当场修正为「像素装饰保留，MiSans 用于非像素正文」。
 - **D45 行内代码必须渲染，不得裸显示反引号**：所有用户可见文本里的 `` `...` `` 一律通过 `RichText` 输出行内 `<code class="inline-code">`（Maple，行内，不另起段落）；标题、列表项、目标、结算、教材 h2/h3/目标、codex 正文、HUD/手册/试符台提示等都不例外。占位符/`aria-label`/`title` 等非富文本属性去掉反引号。自动化：`style-policy.spec.ts` 扫描页面可见文本；`scripts/check-style-policy.mjs` 静态检查已知富文本字段。
 - **D46 防回归门禁**：`check:style` 接入 `verify.sh` l0（Windows `verify.ps1` 同步），`style-policy.spec.ts` 接入真实/mock Playwright 配置；任何前端 agent 改字体/文案前必须读 `docs/61` 并跑这两条。

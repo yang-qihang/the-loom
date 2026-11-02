@@ -152,8 +152,8 @@
 | 用途 | 字体 | 范围 |
 |---|---|---|
 | **代码（全部）** | Maple Mono CN（OFL，随包；`--font-code`） | Monaco 编辑器、参考解查看器、指令手册的签名/示例、织典代码、试符台输入/历史、教练卡/结算/日志里的代码片段、inline-code、教材代码块、错误条行号 |
-| **非像素正文/普通 UI 文本** | **MiSans VF**（Apache-2.0，随包切片；`--font-text`/`--font-reading`；Noto Sans SC fallback） | 序章/幕/关开场叙述、旅途手记正文、教练长句、结算说明、日志、手册说明、织典正文、系统页长文、教材正文、伴玩/向导正文 |
-| **像素装饰字（标题/按钮/标签）** | **Zpix + Departure Mono**（`--font-pixel` / `--serif` / `--mono`） | h1–h6、`.btn`、chip/标签、卡片标题、kicker、结算标题、HUD/短标签、键帽、角色名（“艾拉”）、地图墙/开场标题、教材标题/按钮 |
+| **长段可读正文** | **MiSans VF**（Apache-2.0，随包切片；`--font-text`/`--font-reading`；Noto Sans SC fallback） | 序章/幕/关开场**多行叙述**、旅途手记正文、教练长句、手册 summary/details、织典正文、系统页长文、教材正文/目标、伴玩/向导正文 |
+| **像素短 UI/装饰字（默认）** | **Zpix + Departure Mono**（`--font-pixel` / `--serif` / `--mono`） | h1–h6、`.btn`、chip/标签、卡片标题、kicker、结算标题/目标、判据、HUD 短标签/短说明、键帽、角色名（“艾拉”）、地图墙/开场标题+hero 短句、设置短说明、教材标题/按钮 |
 
 - **原则**：代码 = 代码字体；正文/普通 UI = MiSans；像素装饰字保留 Zpix/Departure Mono。三者不混用；不靠系统 fallback 假一致（三种字体都随包，桌面 App 与浏览器同一份）。
 - **验收**：`apps/studio/e2e/typography.spec.ts` 断言 —— 代码元素 computed font-family 含 `Maple Mono`、长文（≥24 字正文）含 `Noto Sans SC`、标题/按钮含 `MiSans`；`document.fonts.check("16px \"MiSans VF\"")`、`Zpix`、`Departure Mono` 均为 true；字体请求无 4xx；截图人工核对。序章/幕/关开场方框内的 `.stage-lines` 横向金线已删除（2026-11-02 用户反馈为视觉干扰）。

@@ -1,5 +1,5 @@
 {
-  "ts": "2026-11-02T10:40:19.817Z",
+  "ts": "2026-11-02T11:00:16.276Z",
   "case": "syntax-error-then-reference",
   "firstError": "第 1 行：\n这一行还没写完：先看括号、引号和逗号，改完再运行一次。",
   "runRequests": 2,

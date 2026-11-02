@@ -83,6 +83,18 @@ const SHORT_LABEL_SELECTOR = [
   ".repl-who",
   ".repl-level-chip",
   ".map-hero-kicker",
+  ".map-hero-copy p",
+  ".hud-note",
+  ".repl-hint",
+  ".repl-input-label",
+  ".repl-subtitle",
+  ".map-status",
+  ".settings-row p",
+  ".world-strip-text span",
+  ".criterion",
+  ".settle-goal",
+  ".code-req-item",
+  ".card.waiting p",
   ".system-kicker",
   "[aria-hidden='true']",
 ].join(", ");
@@ -231,6 +243,19 @@ test("字体资产：像素装饰字 + MiSans 正文 + 长文 + 字体真加载"
   // 2026-11-02 用户要求：有充足文本时，序言/幕/关开场正文两端对齐（短行/末行保持自然左对齐）。
   const stageAlign = await page.locator('[data-testid="prologue-overlay"] .stage-lines-text p').first().evaluate((element) => getComputedStyle(element).textAlign);
   expect(stageAlign, "序言正文未两端对齐").toBe("justify");
+  // 两段正文必须共享同一文本盒（左右边必须一致；不能一段比另一段整体右移）。
+  const stageBoxes = await page.locator('[data-testid="prologue-overlay"] .stage-lines-text p').evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, width: rect.width };
+    }),
+  );
+  expect(stageBoxes.length, "序言应有至少两段正文").toBeGreaterThanOrEqual(2);
+  for (const box of stageBoxes) {
+    expect(Math.abs(box.left - stageBoxes[0].left), "序言两段左边缘不一致").toBeLessThan(0.5);
+    expect(Math.abs(box.right - stageBoxes[0].right), "序言两段右边缘不一致").toBeLessThan(0.5);
+    expect(Math.abs(box.width - stageBoxes[0].width), "序言两段文本盒宽度不一致").toBeLessThan(0.5);
+  }
   const loadState = await fontLoadState(page);
   expect(loadState.misans, "MiSans VF 未加载").toBe(true);
   expect(loadState.zpix, "Zpix 未加载").toBe(true);
@@ -350,7 +375,7 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await expectFamilies(page, ".repl-input", MAPLE, "试符台输入框");
   await expectFamilies(page, ".repl-example code", MAPLE, "试符台示例代码");
   await expectFamilies(page, CODE_SELECTOR, MAPLE, "试符台内代码元素");
-  await expectFamilies(page, ".repl-hint", MISANS, "试符台说明文字");
+  await expectFamilies(page, ".repl-hint", PIXEL, "试符台短说明文字");
   await page.screenshot({ path: resolve(EVIDENCE, "09-repl.png") });
   await page.getByTestId("btn-repl-back").click();
 

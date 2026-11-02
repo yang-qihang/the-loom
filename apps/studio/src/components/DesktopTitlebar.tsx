@@ -30,13 +30,19 @@ export function DesktopTitlebar() {
       <div className="dtitle-drag" data-tauri-drag-region onDoubleClick={() => control("window_toggle_maximize")} />
       <div className="dtitle-controls">
         <button type="button" className="dtitle-btn" onClick={() => control("window_minimize")} aria-label="最小化窗口" title="最小化" data-testid="btn-win-min">
-          —
+          <svg className="dtitle-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3.5 8h9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+          </svg>
         </button>
         <button type="button" className="dtitle-btn" onClick={() => control("window_toggle_maximize")} aria-label="最大化或还原窗口" title="最大化 / 还原" data-testid="btn-win-max">
-          □
+          <svg className="dtitle-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="none" stroke="currentColor" strokeWidth="1.6" />
+          </svg>
         </button>
         <button type="button" className="dtitle-btn is-close" onClick={() => control("window_close")} aria-label="关闭窗口" title="关闭" data-testid="btn-win-close">
-          ✕
+          <svg className="dtitle-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+          </svg>
         </button>
       </div>
     </header>

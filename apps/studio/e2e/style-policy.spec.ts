@@ -52,7 +52,15 @@ test("字体三轨道 + 行内代码渲染策略", async ({ page }) => {
   expect(await literalBackticks(page), "地图墙出现未渲染反引号").toEqual([]);
   expect(await family(page, ".map-head h1"), "地图墙标题应为像素字").toMatch(PIXEL);
   expect(await family(page, ".map-head .lede"), "地图墙引导长文应为 MiSans").toMatch(MISANS);
+  expect(await family(page, ".map-hero-kicker"), "灰岩村的黄昏标签应为像素字").toMatch(PIXEL);
+  expect(await family(page, ".map-hero-copy p"), "地图墙短说明应为像素字").toMatch(PIXEL);
+  const kickerSize = Number.parseFloat(await page.locator(".map-hero-kicker").evaluate((element) => getComputedStyle(element).fontSize));
+  const heroBodySize = Number.parseFloat(await page.locator(".map-hero-copy p").evaluate((element) => getComputedStyle(element).fontSize));
+  expect(kickerSize, "灰岩村的黄昏字号必须大于紧跟的正文").toBeGreaterThan(heroBodySize);
   expect(await family(page, ".btn"), "按钮应为像素字").toMatch(PIXEL);
+  for (const id of ["btn-settings"]) {
+    expect(await family(page, `[data-testid="${id}"]`), `${id} 应为像素字`).toMatch(PIXEL);
+  }
 
   await page.getByTestId("level-card-L01").click();
   for (let i = 0; i < 3; i++) {
@@ -70,7 +78,14 @@ test("字体三轨道 + 行内代码渲染策略", async ({ page }) => {
   await expect(page.getByTestId("code-editor")).toBeVisible();
   expect(await literalBackticks(page), "工作台出现未渲染反引号").toEqual([]);
   expect(await family(page, ".coach-line"), "教练卡正文应为 MiSans").toMatch(MISANS);
+  expect(await family(page, ".hud-note"), "HUD 短说明应为像素字").toMatch(PIXEL);
   expect(await family(page, ".btn"), "工作台按钮应为像素字").toMatch(PIXEL);
+  for (const id of ["btn-pin", "btn-companion"]) {
+    const locator = page.getByTestId(id);
+    if (await locator.isVisible().catch(() => false)) {
+      expect(await locator.evaluate((element) => getComputedStyle(element).fontFamily), `${id} 应为像素字`).toMatch(PIXEL);
+    }
+  }
   expect(await family(page, ".monaco-editor .view-lines"), "编辑器应为 Maple").toMatch(MAPLE);
   for (const codeSelector of ["code", ".inline-code"]) {
     const families = await page.locator(codeSelector).evaluateAll((elements) => elements.map((element) => getComputedStyle(element).fontFamily));

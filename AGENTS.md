@@ -24,7 +24,7 @@
 6. **不编造事实**：版本/API/链接必须可核实（URL + 日期）；不确定写「未验证」。
 7. **不用 `/reload` 热重载插件**：改插件 → 重启服务端（冷启动约 12s，脚本见 docs/02）。
 8. **不把 Mojang 资产打包进产物**：资源包只用自制资产；内部演示引用官方资源需注明。
-9. **前端字体/行内代码契约**：按 `docs/61` ——代码只用 Maple Mono（禁止像素字/正文/MiSans）；非像素正文用 MiSans VF（Noto 只 fallback）；像素字只用于短标题/按钮/标签/角色名等装饰；所有含反引号的行内代码必须走 `RichText` 渲染成 `.inline-code`，禁止裸显示反引号或另起一段；`npm run check:style` 与 `style-policy.spec.ts` 必须通过。
+9. **前端字体/行内代码契约**：按 `docs/61` ——代码只用 Maple Mono（禁止像素字/正文/MiSans）；非像素正文用 MiSans VF（Noto 只 fallback）；短 UI/装饰（标题/按钮/标签/角色名/判据/短说明）默认用像素字，只有长段正文用 MiSans；所有含反引号的行内代码必须走 `RichText` 渲染成 `.inline-code`，禁止裸显示反引号或另起一段；`npm run check:style` 与 `style-policy.spec.ts` 必须通过。
 
 ## 3. 完成标准（四行证据，缺一不可）
 
