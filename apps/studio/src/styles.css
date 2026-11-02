@@ -848,7 +848,7 @@ body.has-overlay { overflow: hidden; }
 .actions-extra .rune-seal { color: var(--ink-faint); }
 
 /* Fresh Reader 修复：开场三小标题 + 任务条强调 */
-.opening-copy { display: flex; flex-direction: column; gap: 4px; text-align: justify; -webkit-text-align-last: left; text-justify: inter-ideograph; text-align-last: left; }
+.opening-copy { display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-width: 0; width: 100%; text-align: justify; -webkit-text-align-last: left; text-justify: inter-ideograph; text-align-last: left; }
 .opening-label { font-size: 14px; color: var(--amber); letter-spacing: 1px; }
 .opening-line.is-task { background: rgba(232, 180, 106, 0.14); border-left-color: var(--amber); }
 .opening-line.is-task .opening-label { color: var(--amber); }

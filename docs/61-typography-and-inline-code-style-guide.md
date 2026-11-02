@@ -95,3 +95,6 @@
 - **叙事浮层标题（序章/幕开场/关开场）**：`.narrative-head` 必须占满卡片内容宽度，`h2` 用 `width:100%; text-align:center` 居中，不依赖 shrink-to-fit/flex 基线；像素字 `letter-spacing` 不得让标题视觉偏左。WebKitGTK 实测标题 Range 中线与卡片中线一致。
 
 - **多段正文的段组居中**：若组内所有段落当前都只渲染一行、且没有任何一段实际占满容器宽度，则把整个段组作为整体居中（块宽 = 最宽一段，短段保持左对齐）；只要任一段换行或任一行占满，就回到正常两端对齐。检测用 Range 行盒（按 top 去重）做，`NarrativeLines` + ResizeObserver 实时更新。
+
+- **关开场三段容器等宽**：`.opening-copy` 必须是 `.opening-line` 的 flex 剩余宽度（`flex:1 1 auto; min-width:0; width:100%`），不能 shrink-to-fit；否则第二段会明显窄于其他两段。WebKitGTK 静态探针三段 copy 宽度均为 494.49px。
+- **叙事翻页不得有 transient 宽度跳变**：`NarrativeLines` 按 `index` 重挂载并跳过 ResizeObserver 首次通知，`JustifiedText` 按文本 key 重挂载，避免新页先复用旧页行宽/旧段组 padding 再缩紧。切页采集 RAF 采样，宽度在首帧后不再变化。

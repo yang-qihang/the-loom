@@ -259,7 +259,7 @@ export function PrologueOverlay({ mode, onDone }: PrologueProps) {
           <StageBackdrop variant={index}>
             <p className="stage-scene">{screen.scene}</p>
             <p className="stage-speaker">{screen.speaker}</p>
-            <NarrativeLines className="stage-lines-text">
+            <NarrativeLines className="stage-lines-text" key={index}>
               {screen.lines.map((line) => (
                 <p key={line}>
                   <JustifiedText text={line} />
@@ -323,8 +323,8 @@ export function ActIntroOverlay({ act, mode, onDone }: ActIntroProps) {
         </header>
         <NarrativeScroll ariaLabel={`${copy.title}剧情`} resetKey={index}>
           <StageBackdrop variant={act * 2 + index}>
-            <NarrativeLines className="stage-lines-text">
-              <p className="act-opening-line">
+            <NarrativeLines className="stage-lines-text" key={index}>
+              <p className="act-opening-line" key={copy.screens[index]}>
                 <JustifiedText text={copy.screens[index]} centerWhenSingleLine />
               </p>
             </NarrativeLines>

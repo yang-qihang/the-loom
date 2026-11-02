@@ -210,3 +210,18 @@ test("WebKit 降级路径：所有宽度首行占满、末行左对齐", async (
     await context.close();
   }
 });
+
+test("关开场三段的文本容器等宽（不再出现第二段窄于其他两段）", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: true, actsSeen: [1], levelsStarted: [], lastCompletedLevelId: null }));
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01","L02","L03","L04","L05","L06","L07","L08","L09","L10"]));
+  });
+  await page.goto("/");
+  await page.getByTestId("level-card-L01").click();
+  await page.getByTestId("opening-overlay").waitFor();
+  const widths = await page.locator('[data-testid="opening-lines"] .opening-copy').evaluateAll((copies) =>
+    copies.map((copy) => copy.getBoundingClientRect().width),
+  );
+  expect(widths.length).toBe(3);
+  for (const width of widths) expect(Math.abs(width - widths[0]), "关开场文本容器必须等宽").toBeLessThan(1);
+});

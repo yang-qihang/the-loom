@@ -66,7 +66,16 @@ export function NarrativeLines({ className, children }: { className?: string; ch
     };
 
     update();
-    const observer = new ResizeObserver(update);
+    // ResizeObserver 的首次通知发生在本轮布局之后；此时 initial update 已经算过，
+    // 跳过它可以避免在首帧已绘制后再改一次 padding/宽度，造成肉眼可见的抖动。
+    let firstObservation = true;
+    const observer = new ResizeObserver(() => {
+      if (firstObservation) {
+        firstObservation = false;
+        return;
+      }
+      update();
+    });
     observer.observe(group);
     return () => observer.disconnect();
   }, [children]);
