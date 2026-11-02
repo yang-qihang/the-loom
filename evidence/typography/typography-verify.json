@@ -45,7 +45,7 @@
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/assets/MiSansVF.3ee7f36171786397.50-B2mtXAXw.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.53744263f2939586.3-DT-x9XRC.woff2",
         "status": 200
       },
       {
@@ -53,11 +53,11 @@
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/assets/MiSansVF.53744263f2939586.3-DT-x9XRC.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.73924789affc3080.5-O0rdDs3A.woff2",
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/assets/MiSansVF.73924789affc3080.5-O0rdDs3A.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.3ee7f36171786397.50-B2mtXAXw.woff2",
         "status": 200
       },
       {
@@ -77,11 +77,11 @@
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/assets/MiSansVF.353f733c1a9d24dd.14-DsPHSW78.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.8739e6cdf2007d9e.18-CW9JsvXP.woff2",
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/assets/MiSansVF.8739e6cdf2007d9e.18-CW9JsvXP.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.353f733c1a9d24dd.14-DsPHSW78.woff2",
         "status": 200
       },
       {
@@ -201,5 +201,5 @@
       "codicon"
     ]
   },
-  "ts": "2026-11-02T12:35:07.957Z"
+  "ts": "2026-11-02T12:51:37.201Z"
 }
