@@ -21,6 +21,14 @@ export function PositionHud({ engine, sessionId, level, onOpenManual, onSnapshot
   const copy = chrome.hud;
   const [snapshot, setSnapshot] = useState<SnapshotView | null>(null);
   const [paused, setPaused] = useState(false);
+  /**
+   * 展开/收起：窄窗（≤1100px，编辑器+右栏上下排列）默认收起，把高度让给代码编辑器；
+   * 宽屏默认展开。用户可随时一键切换。
+   */
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return true;
+    return !window.matchMedia("(max-width: 1100px)").matches;
+  });
   const points: PointRow[] = useMemo(() => pointRows(level, snapshot?.points), [level, snapshot?.points]);
   const onSnapshotRef = useRef(onSnapshot);
   useEffect(() => {
@@ -75,38 +83,56 @@ export function PositionHud({ engine, sessionId, level, onOpenManual, onSnapshot
   const containerEntries = container ? Object.entries(container) : [];
 
   return (
-    <section className="card hud" aria-label={copy.title} data-testid="position-hud">
+    <section className={expanded ? "card hud" : "card hud is-collapsed"} aria-label={copy.title} data-testid="position-hud">
       <header className="card-head">
         <h3 data-ui-panel-title>{copy.title}</h3>
-        {onOpenManual ? (
-          <button type="button" className="btn btn-quiet card-collapse" onClick={onOpenManual} data-testid="btn-hud-manual">
-            {copy.manualLink}
+        <div className="hud-actions">
+          {!expanded ? (
+            <span className="card-tag hud-pos-tag" data-testid="hud-collapsed-pos">
+              {golemPos ? `(${xzText(golemPos)})` : copy.unknown}
+            </span>
+          ) : null}
+          {onOpenManual ? (
+            <button type="button" className="btn btn-quiet card-collapse" onClick={onOpenManual} data-testid="btn-hud-manual">
+              {copy.manualLink}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="btn btn-quiet card-collapse"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((open) => !open)}
+            data-testid="btn-hud-toggle"
+          >
+            {expanded ? "收起" : "展开"}
           </button>
-        ) : null}
+        </div>
       </header>
-      <div className="card-body">
-        <p className="hud-row" data-testid="hud-golem">
-          <span className="hud-label">{copy.golem}</span>
-          <code className="hud-value" data-testid="hud-golem-pos">{golemPos ? `(${xzText(golemPos)})` : copy.unknown}</code>
-        </p>
-        {points.length > 0 ? (
-          <ul className="hud-points" data-testid="hud-points">
-            {points.map((point) => (
-              <li className="hud-point" key={point.key} data-testid={`hud-point-${point.key}`}>
-                <span className="hud-label">{point.name}</span>
-                <code className="hud-value">({xzText(point.pos)})</code>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {containerEntries.length > 0 ? (
-          <p className="hud-row hud-container" data-testid="hud-container">
-            <span className="hud-label">{copy.container}</span>
-            <span className="hud-value">{fillCount(copy.count, containerEntries)}</span>
+      {expanded ? (
+        <div className="card-body">
+          <p className="hud-row" data-testid="hud-golem">
+            <span className="hud-label">{copy.golem}</span>
+            <code className="hud-value" data-testid="hud-golem-pos">{golemPos ? `(${xzText(golemPos)})` : copy.unknown}</code>
           </p>
-        ) : null}
-        <p className="hud-note"><RichText text={paused ? copy.paused : copy.coordHint} /></p>
-      </div>
+          {points.length > 0 ? (
+            <ul className="hud-points" data-testid="hud-points">
+              {points.map((point) => (
+                <li className="hud-point" key={point.key} data-testid={`hud-point-${point.key}`}>
+                  <span className="hud-label">{point.name}</span>
+                  <code className="hud-value">({xzText(point.pos)})</code>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {containerEntries.length > 0 ? (
+            <p className="hud-row hud-container" data-testid="hud-container">
+              <span className="hud-label">{copy.container}</span>
+              <span className="hud-value">{fillCount(copy.count, containerEntries)}</span>
+            </p>
+          ) : null}
+          <p className="hud-note"><RichText text={paused ? copy.paused : copy.coordHint} /></p>
+        </div>
+      ) : null}
     </section>
   );
 }
