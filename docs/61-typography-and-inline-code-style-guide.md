@@ -93,3 +93,5 @@
 - 验收桌面端时至少做一次「首启序章」；如果本机已有进度，先备份并清理 `~/.local/share/dev.loomcraft.desktop`（Linux）或在测试机 profile 里重置，才能看到序章。
 
 - **叙事浮层标题（序章/幕开场/关开场）**：`.narrative-head` 必须占满卡片内容宽度，`h2` 用 `width:100%; text-align:center` 居中，不依赖 shrink-to-fit/flex 基线；像素字 `letter-spacing` 不得让标题视觉偏左。WebKitGTK 实测标题 Range 中线与卡片中线一致。
+
+- **多段正文的段组居中**：若组内所有段落当前都只渲染一行、且没有任何一段实际占满容器宽度，则把整个段组作为整体居中（块宽 = 最宽一段，短段保持左对齐）；只要任一段换行或任一行占满，就回到正常两端对齐。检测用 Range 行盒（按 top 去重）做，`NarrativeLines` + ResizeObserver 实时更新。

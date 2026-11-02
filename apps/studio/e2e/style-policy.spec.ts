@@ -154,6 +154,25 @@ test("WebKit 降级路径：所有宽度首行占满、末行左对齐", async (
         }
       }
     }
+    if (viewport.width >= 1000) {
+      // 序章 screen 2：两段都是一行且未占满 → 整个段组以最宽段为块宽整体居中，短段左对齐。
+      await page.getByTestId("onboarding-next").click();
+      await expect(page.locator('[data-testid="prologue-overlay"] .stage-lines-text.is-centered-block')).toHaveCount(1);
+      const group = await page.locator('[data-testid="prologue-overlay"] .stage-lines-text').evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const paragraphs = [...element.querySelectorAll("p")].map((paragraph) => {
+          const range = document.createRange();
+          range.selectNodeContents(paragraph);
+          return { left: paragraph.getBoundingClientRect().left, width: range.getBoundingClientRect().width };
+        });
+        return { width: box.width, paragraphs, paddingLeft: Number.parseFloat(getComputedStyle(element).paddingLeft) };
+      });
+      const widest = Math.max(...group.paragraphs.map((paragraph) => paragraph.width));
+      expect(group.paragraphs.length).toBeGreaterThanOrEqual(2);
+      expect(group.paddingLeft).toBeGreaterThan(0);
+      expect(Math.abs(group.paragraphs[0].left - group.paragraphs[1].left), "段组左边界必须一致").toBeLessThan(1);
+      expect(Math.abs(group.paddingLeft - (group.width - widest) / 2), "段组必须以最宽段居中").toBeLessThan(2);
+    }
     {
       // 幕开场：多行必须走 JustifiedText（首行占满、末行左起）；单行必须按实际渲染宽度检测并居中。
       await page.getByTestId("onboarding-skip").click();

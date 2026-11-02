@@ -3,6 +3,7 @@ import { acts, buttons, chrome, fill, journal, journalLabels, levelCopy, prologu
 import { ConceptRevealCard } from "./ConceptRevealCard";
 import type { StudioProgress } from "../progress";
 import { JustifiedText } from "./JustifiedText";
+import { NarrativeLines } from "./NarrativeLines";
 
 const CHINESE_INDEX = ["一", "二", "三"];
 
@@ -258,13 +259,13 @@ export function PrologueOverlay({ mode, onDone }: PrologueProps) {
           <StageBackdrop variant={index}>
             <p className="stage-scene">{screen.scene}</p>
             <p className="stage-speaker">{screen.speaker}</p>
-            <div className="stage-lines-text">
+            <NarrativeLines className="stage-lines-text">
               {screen.lines.map((line) => (
                 <p key={line}>
                   <JustifiedText text={line} />
                 </p>
               ))}
-            </div>
+            </NarrativeLines>
           </StageBackdrop>
           <p className="narrative-note">{prologue.skippable}</p>
         </NarrativeScroll>
@@ -322,11 +323,11 @@ export function ActIntroOverlay({ act, mode, onDone }: ActIntroProps) {
         </header>
         <NarrativeScroll ariaLabel={`${copy.title}剧情`} resetKey={index}>
           <StageBackdrop variant={act * 2 + index}>
-            <div className="stage-lines-text">
+            <NarrativeLines className="stage-lines-text">
               <p className="act-opening-line">
                 <JustifiedText text={copy.screens[index]} centerWhenSingleLine />
               </p>
-            </div>
+            </NarrativeLines>
           </StageBackdrop>
           <p className="narrative-note">{rules.skip}</p>
         </NarrativeScroll>
