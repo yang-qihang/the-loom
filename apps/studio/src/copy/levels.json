@@ -144,7 +144,7 @@
       "title": "试符台",
       "subtitle": "一次写一句；灰崽会照着你写的做。",
       "placeholder": {
-        "text": "在这里写一行符文，比如：`golem.moveTo(-12, -2)`",
+        "text": "在这里写一行符文，比如：golem.moveTo(-12, -2)",
         "codeRefs": [
           "golem.moveTo"
         ]

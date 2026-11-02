@@ -3,6 +3,7 @@ import { chrome } from "../copy";
 import type { StudioProgress } from "../progress";
 import codexData from "../../../../content/codex/codex.json";
 import { ConceptRevealCard } from "./ConceptRevealCard";
+import { RichText } from "./RichText";
 
 interface CodexLanguage {
   lang: string;
@@ -106,8 +107,8 @@ export function CodexScreen({ progress, onBack }: CodexScreenProps) {
                     >
                       <span className="codex-item-number">{PAGE_NUMBER[pages.indexOf(page)] ?? page.id}</span>
                       <span className="codex-item-main">
-                        <span className="codex-item-title">{page.title}</span>
-                        <span className="codex-item-sub">{zh(page.subtitle)}</span>
+                        <span className="codex-item-title"><RichText text={page.title} /></span>
+                        <span className="codex-item-sub"><RichText text={zh(page.subtitle)} /></span>
                       </span>
                       <span className="codex-item-source">{sourceLabel(page.unlock)}</span>
                       <span className={open ? "codex-badge is-open" : "codex-badge"}>
@@ -127,21 +128,21 @@ export function CodexScreen({ progress, onBack }: CodexScreenProps) {
                   <p className="codex-detail-index">
                     {chrome.codex.pagePrefix} {PAGE_NUMBER[pageIndex] ?? selected.id}
                   </p>
-                  <h3 data-ui-panel-title>{selected.title}</h3>
-                  <p className="codex-detail-sub">{selected.subtitle}</p>
+                  <h3 data-ui-panel-title><RichText text={selected.title} /></h3>
+                  <p className="codex-detail-sub"><RichText text={selected.subtitle} /></p>
                 </header>
                 <div className="codex-sections">
                   <section className="codex-section">
                     <h4>{chrome.codex.solve}</h4>
-                    <p>{zh(selected.solve)}</p>
+                    <p><RichText text={zh(selected.solve)} /></p>
                   </section>
                   <section className="codex-section">
                     <h4>{chrome.codex.mechanism}</h4>
-                    <p>{zh(selected.mechanism)}</p>
+                    <p><RichText text={zh(selected.mechanism)} /></p>
                   </section>
                   <section className="codex-section">
                     <h4>{chrome.codex.cost}</h4>
-                    <p>{zh(selected.cost)}</p>
+                    <p><RichText text={zh(selected.cost)} /></p>
                   </section>
                   <section className="codex-section">
                     <h4>{chrome.codex.crossLanguage}</h4>
@@ -168,7 +169,7 @@ export function CodexScreen({ progress, onBack }: CodexScreenProps) {
                   </section>
                   <section className="codex-section">
                     <h4>{chrome.codex.inGame}</h4>
-                    <p>{zh(selected.inGame)}</p>
+                    <p><RichText text={zh(selected.inGame)} /></p>
                   </section>
                   {/^L\d+$/.test(selected.unlock) ? (
                     <section className="codex-section" data-testid="codex-concept">
@@ -180,14 +181,14 @@ export function CodexScreen({ progress, onBack }: CodexScreenProps) {
                       <span className="codex-warn-badge">{chrome.codex.misconceptionBadge}</span>
                       {chrome.codex.misconception}
                     </h4>
-                    <p>{zh(selected.misconception)}</p>
+                    <p><RichText text={zh(selected.misconception)} /></p>
                   </section>
                 </div>
-                <footer className="codex-foot">{chrome.codex.from}：{sourceLabel(selected.unlock)}</footer>
+                <footer className="codex-foot">{chrome.codex.from}：<RichText text={sourceLabel(selected.unlock)} /></footer>
               </>
             ) : (
               <div className="codex-locked" data-testid="codex-locked">
-                <h3 data-ui-panel-title>{selected.title}</h3>
+                <h3 data-ui-panel-title><RichText text={selected.title} /></h3>
                 <p className="codex-locked-hint">{chrome.codex.lockedHint}</p>
                 <p className="muted">来自{sourceLabel(selected.unlock)}。</p>
               </div>

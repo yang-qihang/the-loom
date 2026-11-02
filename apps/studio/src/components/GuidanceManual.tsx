@@ -159,7 +159,7 @@ export function GuidanceManual({ levelId, level, engine, onClose, onOpenRepl }: 
           <section className="gd-section" aria-label={copy.pointsTitle}>
             <h3 className="gd-section-title">{copy.pointsTitle}</h3>
             {points.length === 0 ? (
-              <p className="gd-empty" data-testid="manual-no-points">{copy.noPoints}</p>
+              <p className="gd-empty" data-testid="manual-no-points"><RichText text={copy.noPoints} /></p>
             ) : (
               <table className="gd-points" data-testid="manual-points">
                 <thead>
@@ -191,7 +191,7 @@ export function GuidanceManual({ levelId, level, engine, onClose, onOpenRepl }: 
         </div>
 
         <footer className="gd-foot">
-          <span className="gd-foot-hint">{copy.footHint}</span>
+          <span className="gd-foot-hint"><RichText text={copy.footHint} /></span>
           {onOpenRepl ? (
             <button type="button" className="btn" onClick={onOpenRepl} data-testid="btn-manual-repl">
               {copy.replGo}

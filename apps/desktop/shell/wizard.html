@@ -4,13 +4,14 @@
 <meta charset="UTF-8" />
 <title>织界 · 首启向导</title>
 <style>
+  @import url("./studio/fonts/misans/MiSansVF.min.css");
   @font-face { font-family:"Departure Mono"; src:url("./studio/fonts/DepartureMono-Regular.woff2") format("woff2"); font-display:swap; }
   @font-face { font-family:"Zpix"; src:url("./studio/fonts/zpix.woff2") format("woff2"); font-display:swap; }
   :root { --bg:#16110c; --panel:#221a12; --line:#4a3826; --warm:#d6a85c; --warm2:#f5cd80; --text:#f1e5cd; --muted:#b8a488; --ok:#9fce8a; --bad:#e08a7a; }
   * { box-sizing:border-box; border-radius:0 !important; }
   body { margin:0; min-height:100%; background:
       radial-gradient(1000px 380px at 50% -80px, rgba(214,168,92,0.18), transparent 70%), var(--bg);
-    color:var(--text); font-family:"Departure Mono","Zpix","Noto Sans SC",ui-monospace,monospace;
+    color:var(--text); font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif;
     display:flex; justify-content:center; padding:34px 28px 28px; }
   .wrap { width:min(860px,100%); }
   h1 { font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:26px; letter-spacing:4px; color:var(--warm2); margin:0 0 6px; font-weight:600; }
@@ -36,7 +37,7 @@
   .tip-list strong { color:var(--text); font-weight:600; }
   .log { margin-top:16px; font-size:12px; color:var(--muted); white-space:pre-wrap; min-height:18px; }
   .loom-wordmark {
-    font-family:"Zpix","Departure Mono",ui-monospace,monospace;
+    font-family:"Departure Mono","Zpix",ui-monospace,monospace;
     font-size:76px; line-height:1; letter-spacing:12px; color:var(--warm2);
     margin:0 0 4px; image-rendering:pixelated; text-shadow:none;
   }
@@ -47,20 +48,20 @@
   .engine-mode { margin:28px 0 0; padding:14px 14px 12px; border:2px solid #4a3a24; background:#17120e; }
   .engine-mode label {
     display:block; margin:0 0 10px; color:#d8c8a8; font-size:13px; line-height:1.6;
-    font-family:"Zpix","Departure Mono",ui-monospace,monospace; letter-spacing:0.4px;
+    font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; letter-spacing:0.4px;
   }
   .engine-row { display:flex; gap:8px; align-items:stretch; }
   .engine-row input {
     flex:1; min-width:0; height:38px; border:2px solid #6b5638; background:#211a12; color:#f0e6d2;
-    padding:0 10px; font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:14px;
+    padding:0 10px; font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; font-size:14px;
   }
   .engine-row button {
     height:38px; padding:0 12px; border:2px solid #6b5638; background:#211a12; color:#f0e6d2;
-    font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:13px; line-height:34px;
+    font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; font-size:13px; line-height:34px;
     cursor:pointer; box-shadow:none;
   }
   .engine-row button:hover { border-color:var(--warm); color:var(--warm2); background:#2b2117; }
-  .sub, .detail, .log, .tip, .pill, button, input { font-family:"Departure Mono","Zpix",ui-monospace,monospace; }
+  .sub, .detail, .log, .tip, .pill, button, input { font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; }
   /* 与 Studio 一致：全部直角、去渐变塑料感 */
   * { border-radius:0 !important; }
   button.primary { background:#6b5220 !important; }

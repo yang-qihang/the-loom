@@ -1,13 +1,13 @@
 # native/e2e-runner 红队审查（task-18，独立只读）— 最终版
 
-> 结论时间：2026-11-02 18:00（+08:00；18:05 补记 C7 复测；18:10 补记 official bench 归属与串行基线更正）｜审查人：native-review（progress-pipeline）
+> 结论时间：2026-11-02 18:00（+08:00；18:05 补记 C7 复测；18:10 补记 official bench 归属与串行基线更正；18:26 补记 mutation 最终归档）｜审查人：native-review（progress-pipeline）
 > 分支 `native/parallel-e2e`；契约 `docs/58-cpp-parallel-e2e-plan.md` §3/§4/§5
 > 实现冻结（api-runtime 报告）：core 17 文件 sha256 `4e7fbc38…7150c93`；红队复核用二进制 = Lead `tmp/native-build/loom-e2e`（sha256 `ae84acfd…9e5261`，与我从同一源码重编的 `tmp/native-redteam/builds/release6/loom-e2e` 完全一致）
 > 红队未修改仓库任何实现/测试/CMake/scripts；所有破坏用例与变异均在 `tmp/native-redteam/` 或副本中做。
 
 ## 0. 最终结论
 
-**C++ runner（native/e2e-runner）实现侧：PASS。** 并行编排、进程/超时/信号、端口、证据聚合、栈复用、资源清理均经实际执行验证；红队发现的 6 个 P0/P1 问题全部修复并由原复现脚本在新二进制上复测通过；构建矩阵 Release/ASan+UBSan/TSAN/valgrind 全绿；速度按官方基准（Lead 执行）：**3w×3 关 1.46×（≥1.3× 达标）、2w×4 关 1.29×**；红队独立 2w×4 关（含 L01、基线口径不同）交叉验证 1.31–1.32×（§4.2）。
+**C++ runner（native/e2e-runner）实现侧：PASS。** 并行编排、进程/超时/信号、端口、证据聚合、栈复用、资源清理均经实际执行验证；红队发现的 6 个 P0/P1 问题全部修复并由原复现脚本在新二进制上复测通过；构建矩阵 Release/ASan+UBSan/TSAN/valgrind 全绿，官方 mutation 归档 ok=true/killRate=1.0（22/22 executed killed、1 equivalent skip、0 invalid/stale）；速度按官方基准（Lead 执行）：**3w×3 关 1.46×（≥1.3× 达标）、2w×4 关 1.29×**；红队独立 2w×4 关（含 L01、基线口径不同）交叉验证 1.31–1.32×（§4.2）。
 
 **整体验收：CONDITIONAL PASS —— 仍受 2 个「非 C++ runner」事项约束，需 Lead 裁决/记账：**
 
@@ -68,7 +68,7 @@
 | R7 | P1 验收指标 | 2-worker 真实跑加速比 1.19×（2 关）低于 1.3× | api-engine `stack-smoke-l01-l05.json`：wall 64.7s vs serial 76.9s | **已按官方基准口径解决（归属 Lead）**：3w×3 关 95.137s / 138.76s = **1.46×**（达标）；2w×4 关 118.64s / 153.36s = **1.29×**（接近门槛，2 关按裁决 ≥1.1×）；红队独立 2w×4 关含 L01 1.31–1.32×（基线口径不同，交叉验证）。bench 文件均为 Lead 执行（非红队），详见 §4.2 |
 | R8 | P1 验收（非 C++） | L01 的 h1 采样在并行负载下不稳定：4 关并行 2/2 次 L01 FAIL，L01 单独跑 PASS；C++ runner 行为正确 | run1 `l1.starter.report-equals-mock`、run2 `l1.no-beat.report-equals-mock`，均为 hidden h1 real=false/mock=true | **未修**（归内容/engine，docs/57 P1-2）；建议修 h1 判定或验收 retry；**不要据此判 C++ runner 失败** |
 | R9 | P2 测试环境 | 多个测试进程/其它 agent 并发跑 e2e 时，`pick_free_base()` 选端口后被抢占 → `StackStartError: worker N 的端口被占用` → `test_stack_fake` SIGABRT / `test_factory_fake` 期望 Timeout 得 Error。红队压测：串行 12 次 1 次失败；release7 首次 ctest 1/13 次失败（load≈4–5），同用例单跑 5/5 PASS、ctest 重试 2/2 PASS；并发矩阵时必现；机器空闲单轮 ASan/TSAN 全绿 | 红队 asan6/tsan6 首次并发运行均因此失败；串行重跑 2/2 全绿；api-runtime 12 次 gate 2 次（集中在 stack/factory fake） | **测试隔离问题，非 core 假绿/UB**：建议测试进程串行（或端口段加进程前缀/重试），CI 注意不要并发跑 ctest 与 e2e |
-| R10 | P2 变异方法学 | 官方 mutation 旧版把 configure/compile 失败计 killed、budget 跳过不进分母 → 可刷 100% 假绿 | 代码审阅 + 旧版运行 | **验证器已修**（新增 invalid 状态、`not_executed` 使 ok=false、注释引用红队 P2）；本次基线运行因 R9 端口竞态在 baseline-test 失败，未产出最终 killRate —— 建议空闲机器单轮重跑后把 mutation.json 归档 |
+| R10 | P2 变异方法学 | 官方 mutation 旧版把 configure/compile 失败计 killed、budget 跳过不进分母 → 可刷 100% 假绿 | 代码审阅 + 旧版运行 | **已闭环**：验证器修方法论（invalid 不计 killed、`not_executed` 使 ok=false、counts 增 invalid/skippedBudget）+ 修复 copytree/ROOT/sanitizer `-L`；空机单轮归档 `evidence/native-e2e/mutation.json`：**ok=true，killRate=1.0，23 total / 22 executed / 22 killed / 0 survived / 1 equivalent skip / invalid 0 / stale 0 / skippedBudget 0，全部 killed_by=ctest**（`tmp/native-mutation-3`，generatedAt 2026-11-02T10:10:44Z；同结果验证副本 `tmp/native-test/mutation-verify.json`，mutation-4/10:22:20Z） |
 
 ## 4. 通过项（实测证据）
 
@@ -79,6 +79,7 @@
 | ASan+UBSan | `-DLOOM_SANITIZE=address,undefined -DCMAKE_CXX_FLAGS=-L$PWD/tmp/native-sanitizer-libs`；`LD_LIBRARY_PATH` 同上 | **PASS 2/2** |
 | TSAN | `-DLOOM_SANITIZE=thread …` | **PASS 2/2** |
 | valgrind | `valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=definite,indirect --track-fds=yes <release6/tests/loom-tests>` | **PASS**：71 cases；`All heap blocks were freed -- no leaks are possible`；`ERROR SUMMARY: 0 errors` |
+| mutation（官方） | `tools/mutation.py --build-dir tmp/native-mutation-3 --min-kill-rate 0.8 --out evidence/native-e2e/mutation.json`（空机单轮） | **ok=true，killRate=1.0**：22/22 executed killed（1 equivalent skip，0 invalid/stale/skippedBudget），证据已归档（红队复核 counts/命令一致性） |
 | CLI 破坏 | 47 条（空/重复/超长/0/极大/端口重叠/flag 作值…） | 46 符合预期，1 条 P2（C3 `--out --verbose`） |
 | 假栈（不启 Paper） | `fake_stack_harness5/6`：模板复制/端口改写/ready/超时/stop/清理/复用 | **14/14 PASS**；4 jobs/2 workers 全 PASS 且每 slot `paper_stack_start_count=1` |
 | 信号/进程 | SIGINT/SIGTERM；超时进程组；成功 job 孤儿；僵尸 | **PASS**：130/143 + 部分证据 + 0 孤儿/0 僵尸 |
@@ -107,7 +108,8 @@
 ## 5. 变异测试复核
 
 - **独立变异（红队副本注入，最终版结果 `tmp/native-redteam/logs/mutation-review.txt`）**：order/status-map/port-offset/json-escape/tail-full/allpass/worker-env = **killed-by-tests**（7/7 实际可执行的非等价变异全部被测试杀死）；`workers`（min→max）= survived，但为**等价 mutant**（只多起空闲线程/多租端口后释放，结果/时长不可观测，应标 skip 并给理由）；`timeout-ignore` = stale（我的 find 字符串随实现更新失效，需更新，非覆盖缺口）。
-- **官方 `tools/mutation.py`**：验证器已按红队 P2 修复方法论（configure/compile 失败→invalid 不计 killed；skipped-budget→`not_executed` 使 ok=false；counts 增 invalid/skippedBudget）。本次尝试在 baseline-test 因 R9 端口竞态失败（`test_factory_fake` 偶发 StackStartError/Error），未产出最终 killRate；建议机器空闲单轮重跑后归档 `evidence/native-e2e/mutation.json`。
+- **官方 `tools/mutation.py`（最终归档，红队复核一致性通过）**：`evidence/native-e2e/mutation.json` = **ok=true，killRate=1.0**；counts `{total:23, executed:22, killed:22, survived:0, skipped:1（equivalent skip：ports-release-bounds-equivalent De Morgan 等价）, invalid:0, stale:0, skippedBudget:0}`；**全部 22 个 killed_by=ctest（无编译失败冒杀）**；`generatedAt=2026-11-02T10:10:44Z`，`buildDir=tmp/native-mutation-3`（同结果的第二次空机单轮副本在 `tmp/native-test/mutation-verify.json`，mutation-4/10:22:20Z；两份 counts 一致）。方法学修复已确认：configure/compile 失败→invalid 不计 killed、skipped-budget→`not_executed` 使 ok=false、counts 增 invalid/skippedBudget，并修了 copytree 复用目录/ROOT 路径/sanitizer `-L`。
+- **一个需注意的 mutant 语义差异（非矛盾）**：官方 `sched-active-workers-min-to-max` 是把 `std::min(worker_count, jobs.size())` 换成 **`std::max(...)`**，在 jobs>workers 时会租超过 workers 的槽位 → 测试抛「端口槽位不足」→ 合法 killed；红队独立复核里我用的变体是 `min→worker_count`（只多起空闲线程、无可观测差异），当时判 equivalent。报告 §5 已区分：官方版本合法被杀，红队版本应标 skip-equivalent，两者不矛盾。
 
 ## 6. 可复跑命令清单
 
@@ -188,5 +190,5 @@ CCACHE_DIR=$PWD/tmp/ccache python3 native/e2e-runner/tools/mutation.py \
 3. **C3**：`--out/--levels` 值以 `--` 开头时给明确报错（P2）。
 4. **R9**：CI/验收跑 native 测试与真实 e2e 时避免并发（端口竞态），或测试侧加端口重试。
 5. **Windows 编译验证**（C5）：有 CI 条件时补；**C7 已闭环**（api-engine 18:01 实现 + 红队复测通过，建议 native-test 加「模板缺文件/端口占用 → console.log 存在且非空」断言防回归）。
-6. **R10 + R9**：空闲机器单轮官方 mutation 并归档 killRate；CI 对 flaky 用例（R9 端口竞态）加单测重跑/隔离，避免把环境 flake 计入质量门。
+6. **R10 已闭环**（mutation ok=true killRate=1.0 已归档）；仍建议 CI 对 flaky 用例（R9 端口竞态）加单测重跑/隔离，避免把环境 flake 计入质量门。
 7. **数据卫生**：`evidence/l*-real-latest.json` 已被 17:59 并行基准覆盖；生成正式报告时请统一从 git HEAD 取串行基线，或把并行 run 的 evidence 另命名（bench-*.json 已区分）。

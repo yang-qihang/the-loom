@@ -35,15 +35,16 @@
   --radius: 14px;
   /* ===== 字体系统（task-2 / docs/48 §1.7，详见 typography.css 顶部注释） =====
      三个语义变量决定「同一段文字该用什么字」：
-       --font-pixel 像素字（Zpix 中文 / Departure Mono 英文数字）→ 短标题、按钮、标签、chip
-       --font-text  可读正文（随包 Noto Sans SC，OFL-1.1）      → 长段正文/叙述/说明
+       --font-pixel 像素/装饰字（Zpix + Departure Mono）→ 章节标题、按钮、标签、chip、角色名（“艾拉”）
+       --font-text  非像素正文（MiSans VF，Noto Sans SC fallback）→ 长段正文/叙述/说明/普通 UI 文本
        --font-code  代码（随包 Maple Mono）                     → code/pre/kbd/.mono 与代码片段 */
   --font-pixel: "Zpix", "Departure Mono", "JetBrains Mono", ui-monospace, monospace;
-  --font-text: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-text: "MiSans VF", "MiSans", "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
   --font-reading: var(--font-text); /* 长文正文别名（教材窗口 textbook.css 等下游用这个拼写） */
   --font-code: "Maple Mono", "Maple Mono CN", "Noto Sans CJK SC", "JetBrains Mono", "Fira Code", ui-monospace, monospace;
-  /* 旧变量保留为别名/字面栈：既有规则按 --serif/--sans/--mono 写，逐个迁移成本高，
-     这里先让别名指向新体系（--mono 保留 Departure Mono 优先，因为它是既有标签/短数字的等宽像素栈）。 */
+  /* 旧变量保留为别名/字面栈：既有规则按 --serif/--sans/--mono 写，逐个迁移成本高。
+     2026-11-02 最终口径：像素字保留给标题/按钮/标签/角色名等装饰部分；MiSans 用于非像素正文；
+     --pixel/--serif/--mono 继续指向像素栈，--sans/--font-text 指向 MiSans。 */
   --serif: var(--font-pixel);
   --sans: var(--font-text);
   --mono: "Departure Mono", "Zpix", "JetBrains Mono", "Fira Code", "Noto Sans Mono", ui-monospace, monospace;
@@ -132,7 +133,7 @@ code, pre, kbd, .mono, .inline-code { font-family: var(--font-code); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--line-soft); color: var(--ink-dim); }
 
 .kbd {
-  /* 键盘键帽是「短标签」，按任务口径保留像素等宽字（Departure Mono），不属于代码。 */
+  /* 键盘键帽是「短标签」，属于像素装饰字，用 --mono（Departure Mono / Zpix）。 */
   font-family: var(--mono);
   font-size: 16px;
   color: var(--ink-faint);
@@ -362,7 +363,7 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 .card.waiting { border-color: rgba(232, 180, 106, 0.55); background: rgba(232, 180, 106, 0.08); }
 .card.waiting p { color: var(--ink); margin: 0 0 12px; line-height: 1.8; }
 .stage-lines-text { text-align: left; max-width: 34em; margin: 0 auto; text-wrap: pretty; }
-.stage-lines-text p { margin: 0 0 10px; line-height: 1.9; }
+.stage-lines-text p { margin: 0 0 10px; line-height: 1.9; text-align: justify; text-justify: inter-ideograph; text-align-last: start; }
 .card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -764,34 +765,11 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 .stage-5 { background: radial-gradient(100% 80% at 20% 80%, rgba(232, 180, 106, 0.14), transparent 60%), linear-gradient(180deg, #17120d, #0f0c09); }
 .stage-6 { background: radial-gradient(100% 80% at 80% 20%, rgba(217, 164, 65, 0.14), transparent 60%), linear-gradient(180deg, #17130d, #0f0c09); }
 .stage-7 { background: radial-gradient(120% 90% at 50% 0%, rgba(255, 207, 125, 0.18), transparent 65%), linear-gradient(180deg, #1a140d, #110d09); }
-.stage-lines {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  opacity: 0.55;
-  pointer-events: none;
-}
-.stage-lines span {
-  display: block;
-  height: 1px;
-  margin: 0 8%;
-  background: linear-gradient(90deg, transparent, rgba(232, 180, 106, 0.55), transparent);
-  animation: stage-weave 6s ease-in-out infinite;
-  transform-origin: center;
-}
-.stage-lines span:nth-child(2n) { animation-delay: 0.8s; background: linear-gradient(90deg, transparent, rgba(255, 207, 125, 0.35), transparent); }
-.stage-lines span:nth-child(3n) { animation-delay: 1.6s; }
-@keyframes stage-weave {
-  0%, 100% { transform: translateY(0) scaleX(0.82); opacity: 0.45; }
-  50% { transform: translateY(2px) scaleX(1); opacity: 0.9; }
-}
 .stage-content { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; }
 .stage-scene { color: var(--ink-faint); font-size: 16px; }
 .stage-speaker { color: var(--amber); font-family: var(--serif); font-size: 18px; }
 .stage-lines-text { display: flex; flex-direction: column; gap: 8px; max-width: 520px; }
-.stage-lines-text p { color: var(--ink); font-size: 18px; line-height: 1.7; }
+.stage-lines-text p { color: var(--ink); font-size: 18px; line-height: 1.7; text-align: justify; text-justify: inter-ideograph; text-align-last: start; }
 .narrative-dots { display: flex; gap: 8px; }
 .narrative-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
 .narrative-dots span.is-on { background: var(--amber); box-shadow: 0 0 8px rgba(232, 180, 106, 0.5); }
@@ -869,7 +847,7 @@ body.has-overlay { overflow: hidden; }
 .actions-extra .rune-seal { color: var(--ink-faint); }
 
 /* Fresh Reader 修复：开场三小标题 + 任务条强调 */
-.opening-copy { display: flex; flex-direction: column; gap: 4px; }
+.opening-copy { display: flex; flex-direction: column; gap: 4px; text-align: justify; text-justify: inter-ideograph; }
 .opening-label { font-size: 14px; color: var(--amber); letter-spacing: 1px; }
 .opening-line.is-task { background: rgba(232, 180, 106, 0.14); border-left-color: var(--amber); }
 .opening-line.is-task .opening-label { color: var(--amber); }
@@ -2010,7 +1988,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .monaco-editor [role="menuitem"]:hover { background: #2b2117 !important; }
 
 /* ===== Round 2b：只给代码编辑器 / 编辑器右键菜单 / 编辑器内部提示用清晰字体 =====
-   其余 Studio UI（标题、正文、按钮、HUD、手册……）保留上一版的中文像素字体（Zpix/Departure Mono）。
+   其余 Studio UI：装饰字（标题/按钮/标签）保留像素字 Zpix/Departure Mono；正文用 MiSans VF；代码用 Maple Mono。
    用户明确要求：Maple Mono 只用于代码编辑器及其配套菜单/提示；编辑器浮层用清晰可读字体（非像素）。 */
 @font-face {
   font-family: "Maple Mono";

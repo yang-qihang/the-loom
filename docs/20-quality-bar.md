@@ -145,18 +145,18 @@
 - **Demo Review**：完整 7 分钟彩排 2 次；每次记录「观众抬头/困惑」时间点；彩排不过不允许冻结。
 - 以上任一条不过，`STATUS.md` 不得写「完成」。
 
-## 3b4. 字体策略（全平台统一，2026-11-01 第四轮修正）
+## 3b4. 字体策略（全平台统一，2026-11-02 用户修正）
 
-用户第四轮反馈推翻第三轮的「仅编辑器 Maple」范围：**所有【代码】统一 Maple Mono；长段正文换统一可读中文字体；像素字体只留给信息量少的标题/按钮/标签**。当前规则（实现见 `apps/studio/src/typography.css`、`apps/studio/src/assets/fonts/`、`apps/studio/e2e/typography.spec.ts`）：
+2026-11-02 用户最终口径：**所有【代码】统一 Maple Mono；像素装饰字（章节标题/按钮/标签/角色名“艾拉”等）保留 Zpix + Departure Mono；非像素正文/普通 UI 文本统一 MiSans VF（Noto Sans SC 作为 fallback）**。当前规则（实现见 `apps/studio/src/typography.css`、`apps/studio/src/assets/fonts/`、`apps/desktop/shell`、`apps/studio/e2e/typography.spec.ts`）：
 
 | 用途 | 字体 | 范围 |
 |---|---|---|
 | **代码（全部）** | Maple Mono CN（OFL，随包；`--font-code`） | Monaco 编辑器、参考解查看器、指令手册的签名/示例、织典代码、试符台输入/历史、教练卡/结算/日志里的代码片段、inline-code、教材代码块、错误条行号 |
-| **长段正文** | **Noto Sans SC**（OFL-1.1，随包子集 woff2 400/700，约 2.21MB；`--font-text`/`--font-reading`） | 序章/幕/关开场叙述、旅途手记正文、教练长句、结算说明、日志、手册说明、织典正文、系统页长文、教材正文 |
-| **短标题 / 按钮 / 标签** | Zpix + Departure Mono（`--font-pixel` / `--serif` 别名） | h1–h3、`.btn`、chip/标签、卡片标题、kicker、结算标题、一句话说明 |
+| **非像素正文/普通 UI 文本** | **MiSans VF**（Apache-2.0，随包切片；`--font-text`/`--font-reading`；Noto Sans SC fallback） | 序章/幕/关开场叙述、旅途手记正文、教练长句、结算说明、日志、手册说明、织典正文、系统页长文、教材正文、伴玩/向导正文 |
+| **像素装饰字（标题/按钮/标签）** | **Zpix + Departure Mono**（`--font-pixel` / `--serif` / `--mono`） | h1–h6、`.btn`、chip/标签、卡片标题、kicker、结算标题、HUD/短标签、键帽、角色名（“艾拉”）、地图墙/开场标题、教材标题/按钮 |
 
-- **原则**：代码 = 代码字体；长文 = 可读正文字体；短标题/按钮 = 风格像素字体。三者不混用；不靠系统 fallback 假一致（三种字体都随包，桌面 App 与浏览器同一份）。
-- **验收**：`apps/studio/e2e/typography.spec.ts` 断言 —— 代码元素 computed font-family 含 `Maple Mono`、长文（≥24 字正文）含 `Noto Sans SC`、`h1–h3`/`.btn` 含 `Zpix`/`Departure Mono`；`document.fonts.check` 三字体均为 true；字体请求无 4xx；截图人工核对。
-- **体积/覆盖**：Maple Mono 三档约 16.9MB；Noto 子集 400/700 共 2.21MB（7554 码点，`scripts/check-font-coverage.mjs` 缺字 0）；新增生僻字需重跑 `scripts/build-font-subset.py`，覆盖检查会先红。
-- 历史背景：Round 2 初版全站 Maple（改过头）→ Round 3 回退为仅编辑器 → Round 4 按用户要求重定义为「代码全 Maple + 正文 Noto + 像素仅短标题/按钮」。
+- **原则**：代码 = 代码字体；正文/普通 UI = MiSans；像素装饰字保留 Zpix/Departure Mono。三者不混用；不靠系统 fallback 假一致（三种字体都随包，桌面 App 与浏览器同一份）。
+- **验收**：`apps/studio/e2e/typography.spec.ts` 断言 —— 代码元素 computed font-family 含 `Maple Mono`、长文（≥24 字正文）含 `Noto Sans SC`、标题/按钮含 `MiSans`；`document.fonts.check("16px \"MiSans VF\"")`、`Zpix`、`Departure Mono` 均为 true；字体请求无 4xx；截图人工核对。序章/幕/关开场方框内的 `.stage-lines` 横向金线已删除（2026-11-02 用户反馈为视觉干扰）。
+- **体积/覆盖**：Maple Mono 三档约 16.9MB；Noto 子集 400/700 共 2.21MB（7554 码点，作为 MiSans fallback 保留）；MiSans VF 官方切片 56 个约 4.55MB；像素字 Zpix/Departure Mono 保留。字形覆盖检查仍由 `scripts/check-font-coverage.mjs` 覆盖 Noto；MiSans 为全量官方切片，不额外子集化。
+- 历史背景：Round 2 初版全站 Maple（改过头）→ Round 3 回退为仅编辑器 → Round 4「代码全 Maple + 正文 Noto + 像素仅短标题/按钮」→ 2026-11-02 曾把装饰字改为 MiSans，随后用户修正为「像素装饰字保留 + 非像素正文 MiSans」。
 

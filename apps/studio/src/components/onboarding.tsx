@@ -10,11 +10,6 @@ function StageBackdrop({ variant, children }: { variant: number; children: React
   return (
     <div className={`narrative-stage stage-${variant % 8}`}>
       <div className="stage-photo" aria-hidden="true" />
-      <div className="stage-lines" aria-hidden="true">
-        {Array.from({ length: 6 }, (_, index) => (
-          <span key={index} />
-        ))}
-      </div>
       <div className="stage-content">{children}</div>
     </div>
   );

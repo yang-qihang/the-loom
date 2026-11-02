@@ -8,7 +8,7 @@
 - **玩家任务自动检测/自动结算（任务 1/7/9）**：引擎 `GET /api/session/:id/snapshot` 附带 `progress`（含 `player` 标志）/`playerBeatReady`/`allPassed`/`playerBeatRequired`/`playerBeatDone`/`sessionEpoch`（顶层+嵌套）；Studio 轮询每秒按 id 同步 GoalList（解决「世界 3/3、面板 2/3」），世界侧全部完成时一次性自动 confirm 玩家节拍并自动打开结算（paper 保持 confirm-only、mock 模拟语义不变；手动按钮保留兜底）。
 - **运行状态鲁棒性（用户 bug 真根因）**：同一 `GameSession` 内每次 run 前不恢复场景——第一次失败前已执行的语句把世界改脏（L02 蛋被收走 / L04 田被种乱 / L09 两坛已开酿），参考解按干净世界执行必失败。修复：`session.run()` 前条件恢复（上一轮失败 && !playerBeatReady && 确有世界写动作 → port.reset + epoch+1，已通过/已轮到玩家不回滚）；runner 执行前检查 TS `parseDiagnostics`（半截代码不再偷偷执行）；事件带 runId、SSE 帧带 id + `Last-Event-ID`（新连接不回放旧 error/hint）；后端 `{code,message,hint}` 透传到 Studio 错误卡并给「重置本关后重试」；双击运行同步防重入；本地 mock 支持块注释。
 - **剧情浮层排版（任务 2/5）**：序章/幕开场/关开场/旅途手记重构为「固定头 / 可滚内容 / 固定底」，隐藏原生滚动条 + 自绘悬浮滑轨 + 滚轮/键盘/拖拽/触屏 + 上下渐隐；左右留白恒对称（不依赖 `scrollbar-gutter`）；1024×600 / 896×603 / 720×560 不再裁切；同类长内容浮层（结算/手册/织典/试符台/完整解）同修；桌面壳 36px 标题栏避让。
-- **字体系统（任务 3/4）**：所有【代码】统一 **Maple Mono**（编辑器/参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；长段正文统一 **Noto Sans SC**（OFL-1.1，随包子集 woff2 400/700 共 2.21MB、7554 码点、缺字 0）；短标题/按钮/标签保留像素字体（Zpix/Departure Mono）。策略见 `docs/20` §3b4，实现 `apps/studio/src/typography.css`。
+- **字体系统（任务 3/4）**：所有【代码】统一 **Maple Mono**（编辑器/参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；长段正文统一 **Noto Sans SC**（OFL-1.1，随包子集 woff2 400/700 共 2.21MB、7554 码点、缺字 0）；非像素正文/普通 UI 统一 **MiSans VF**；像素装饰字（标题/按钮/标签/角色名）保留 Zpix/Departure Mono（2026-11-02 最终口径）。策略见 `docs/20` §3b4，实现 `apps/studio/src/typography.css`。
 - **配套教材（任务 6）**：**10 章、合计 76,429 汉字**（L01 7188 / L02 9713 / L03 8743 / L04 8895 / L05 9168 / L06 6504 / L07 6564 / L08 6547 / L09 6544 / L10 6563；每章 5–8 代码块、10–12 术语、warn callout、goals，只用本关及之前 API）。内容源 `apps/studio/src/textbook/content/*.md`，构建校验 `npx tsx scripts/build-textbook.ts --write`（0 error）；独立浮动窗口可拖动/缩放/置顶/持久化/章内目录/代码复制；进入关卡首次自动打开、关闭即记已读、工作台常驻「读本关教材/回看教材」入口。
 - **基础设施（任务 10）**：Playwright `webServer` 的 POSIX 环境变量前缀改为 `env` 注入 + `vite --mode e2e/mock`，`npm run test:e2e` / `test:e2e:local` 在 Windows 可直接运行；既有多份 spec 增加「教材已读」预置（回访玩家），与教材首次自动打开兼容。
 
@@ -16,7 +16,7 @@
 
 **2026-11-02 收口**：旧 C 图标生成器方案已废弃（`docs/60`）；新增 `native/e2e-runner` C++20 并行 e2e 执行器（3 workers × 3 关 1.46×，`docs/58`）。证据：`evidence/narrative-layout/`、`evidence/typography/`、`evidence/runtime-ui/`、`evidence/textbook-window/`。
 
-**Round 4 已知边界/遗留**（详见 docs/49 §5）：教材为长文阅读界面，**真人阅读/学习效果盲测未做**（Fresh Reader Round 4 仍未清零）；挑战层仍是说明卡；L09「取金苹果」仍用旧写法 `place("air", chest)`（内容侧语义 API 待修，教材已标注为旧写法）；`it/engine-paper.ts:191` 仍按旧 testMode 断言（待改成显式 simulate）；Zpix 字体许可证未核实；Noto 子集按 GB2312 + 仓库文本生成（新增生僻字需重跑 `scripts/build-font-subset.py`）；桌面壳 WebKitGTK 的字体/滚动需 Linux 实机复验；`build-assets.mjs` 在 Windows 仍有既有 `spawn .bin/vite` 平台限制（图标路径已单测）。
+**Round 4 已知边界/遗留**（详见 docs/49 §5）：教材为长文阅读界面，**真人阅读/学习效果盲测未做**（Fresh Reader Round 4 仍未清零）；挑战层仍是说明卡；L09「取金苹果」仍用旧写法 `place("air", chest)`（内容侧语义 API 待修，教材已标注为旧写法）；`it/engine-paper.ts:191` 仍按旧 testMode 断言（待改成显式 simulate）；Noto 子集按 GB2312 + 仓库文本生成（新增生僻字需重跑 `scripts/build-font-subset.py`）；桌面壳 WebKitGTK 的字体/滚动需 Linux 实机复验；`build-assets.mjs` 在 Windows 仍有既有 `spawn .bin/vite` 平台限制（图标路径已单测）。
 
 ## 2026-11-01 P0 修复与独立验证（Windows 原生，已完成）
 
@@ -45,10 +45,10 @@
 - **REPL**：试符台用当前关卡打开（不再跳回 L01），显示「当前关卡：X」，`help` 打开本关指令手册，命名点与 `golem.pos` 可读。
 - **概念揭晓**：结算/手记/织典按关揭示正式术语（L01 函数调用、L02 变量、L03 分支、L04 循环、L05 函数、L06 记录、L07 高阶函数、L08 接口、L09 异步、L10 协议），不回避专业术语。
 - **名实相符**：每关 `codeRequirements` + AST 分析器判定；starter 全不满足、参考解全满足；L02 参考解真用变量、L06 真用记录/switch、L07 真用 filter/map 流水线等。
-- **字体/Monaco（第三轮按用户要求修正）**：代码编辑器与编辑器浮层用嵌包 Maple Mono CN（OFL；菜单/补全/悬停/查找为清晰普通字体、不透明、中文化，根因 Monaco 0.57 `useShadowDOM:true` 已关）；**其余 UI 恢复上一版中文像素字体**（Zpix + Departure Mono），不再全站 Maple。
+- **字体/Monaco（2026-11-02 最终）**：代码统一嵌包 Maple Mono CN（OFL）；长文/普通 UI 用 MiSans VF（Apache-2.0，Noto fallback）；像素装饰字保留 Zpix/Departure Mono；Monaco 菜单/补全/悬停/查找清晰普通字体、不透明、中文化。
 - **起始点/截图**：10 关 `world.playerSpawn` 落盘；修复 L02/L09「玩家出生与灰崽重合、镜头糊在模型体内」；真实 Minecraft 26.1.2 客户端高清重拍（2560×990 ×10 关，含 L10）替换 Studio 关卡素材与 report 证据；Studio UI DPR2 高清截图。
 - **文案政策**：自然中文 + 必要英文术语（`for` 循环、`let` 变量、`Promise.all`…），`check-copy --pure-zh --strict` 0 违规。
-- **第三轮补充**：L01 流程按玩家直觉改为 7 行（3×moveTo+place + 回艾拉；4 号灯玩家亲手点，不再要求灰崽走到 4 号灯下）；学生 starter/参考解注释改为「正规工业结构 + 零基础可读」（JSDoc 文件头、编号分节、两种写法编号二选一）；新增「完整解（调试）」按钮（与指令手册/试符台同区域，可查看/复制参考解，成熟后移除）；字体按反馈回退（仅编辑器+编辑器浮层用 Maple，其余 UI 恢复中文像素字）。
+- **第三轮补充**：L01 流程按玩家直觉改为 7 行（3×moveTo+place + 回艾拉；4 号灯玩家亲手点，不再要求灰崽走到 4 号灯下）；学生 starter/参考解注释改为「正规工业结构 + 零基础可读」（JSDoc 文件头、编号分节、两种写法编号二选一）；新增「完整解（调试）」按钮（与指令手册/试符台同区域，可查看/复制参考解，成熟后移除）；字体按反馈回退（历史；2026-11-02 最终为代码 Maple / 长文 Noto / 装饰字 MiSans）。
 
 **终验**：`tsc` 0；`npm test` 25 files / 235 tests；content 162 tests；`verify.sh` pass（仅 Round 1 遗留 `G-FRESH-READER` tracked warning）；Studio e2e 6/6 + local 2/2；guidance 隔离冒烟 42/42；字体策略 Playwright 验收（UI 像素字/编辑器 Maple/右键菜单清晰不透明）；真实 Paper e2e L01–L10 全 PASS；重新打包 AppImage（429MB）/ RPM（436MB，2026-11-01 14:40），包内已含新字体/引擎/插件/世界素材。证据：`evidence/playtest-fix/start-positions.md`、`evidence/scene-shots/hi-res/`、`evidence/ui-hires/`、`evidence/ui-hires/font-policy-verify.json`、`evidence/code-analysis.json`、`apps/studio/public/world/`、`report/`。
 

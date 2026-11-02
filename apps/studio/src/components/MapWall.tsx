@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { acts, buttons, chrome, fill, journalLabels, levelCards, STATUS_PLAYABLE } from "../copy";
 import type { EngineMode } from "../types";
 import { RuneGlyph } from "./RuneGlyph";
+import { RichText } from "./RichText";
 
 interface MapWallProps {
   cards: ReturnType<typeof levelCards> | null;
@@ -69,7 +70,7 @@ export function MapWall({ cards, loading, error, engineMode, journalEnabled, onO
       {error ? (
         <div className="error-panel" role="alert">
           <p className="error-title">{chrome.map.errorTitle}</p>
-          <p className="error-detail">{error}</p>
+          <p className="error-detail"><RichText text={error} /></p>
           <div className="error-actions">
             <button type="button" className="btn btn-primary" onClick={onRetry} data-testid="btn-retry-levels">
               {chrome.map.retry}

@@ -39,7 +39,7 @@
 - Node 22 + Java 25 运行时
 - Paper 26.1.2 build 74、LoomCraft 插件、世界/配置
 - 真实引擎、mineflayer/minecraft-protocol 织偶依赖
-- Studio、桌面壳、嵌包字体（编辑器 Maple Mono + UI 像素字体）、Mock 演示引擎
+- Studio、桌面壳、嵌包字体（代码 Maple Mono + 正文 MiSans VF + 像素装饰字 Zpix/Departure Mono）、Mock 演示引擎
 
 用户不需要自己安装 Node/Java/Paper，也不需要另开终端启动引擎。
 
@@ -134,10 +134,10 @@ Round 2 终验（2026-11-01，最终工作树 + 重新打包产物）：
 - **位置 HUD 与 REPL**：显示灰崽/关键点坐标；试符台改用**当前关卡**打开（不再跳回第一关），`help` 返回本关 API。
 - **引导与概念揭晓**：每条 progress 带 `hint`（做什么/怎么做/可照抄/坐标从哪来），按节点推送不刷屏；结算/手记按关揭示正式术语（函数调用/变量/分支/循环/…，见 docs/04 §11.5）。
 - **名实相符**：每关新增 `codeRequirements`（AST 判定），starter 不满足、参考解满足，保证抽象真的被用上。
-- **字体与 Monaco**：代码编辑器及右键菜单/补全/悬停用嵌包 **Maple Mono**（清晰普通字体，菜单不透明、不再与代码叠字）；其余 Studio/桌面壳 UI 保留上一版中文像素字体（Zpix / Departure Mono）。
+- **字体与 Monaco**：所有代码统一嵌包 **Maple Mono**；非像素正文/普通 UI 文本用 **MiSans VF**（Noto fallback）；章节标题、按钮、标签、角色名等像素装饰字保留 **Zpix/Departure Mono**；菜单不透明、不再与代码叠字。
 - **截图与起始点**：真实客户端高清重拍各关（玩家出生视角），并逐关验收起始点合理（不穿模/不贴脸/不卡墙）。
 - **完整解（调试）**：工作台顶栏/更多菜单与「指令手册」「试符台」同一区域，每关可打开参考解查看/复制；当前是调试功能，游戏成熟后移除。
-- **字体修正（第三轮反馈）**：Maple Mono 只用于代码编辑器及其右键/补全/悬停等浮层；其余 Studio 与桌面壳 UI 恢复上一版中文像素字体（Zpix / Departure Mono）。
+- **字体修正（第三轮反馈→2026-11-02 最终）**：Round 3 曾把 Maple 收窄到编辑器；Round 4 恢复「代码全 Maple」；2026-11-02 按要求把非像素正文/普通 UI 换成 **MiSans VF**，像素装饰字（标题/按钮/角色名）保留 Zpix/Departure Mono。
 
 > 本轮验收：`docs/48` §3 清单与 §6 实施结果；脚本回归为 `npm test`、`bash scripts/verify.sh`、Studio e2e、L01–L10 真实 Paper e2e。桌面包路径：`apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage`、`.../bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm`。
 
@@ -145,7 +145,7 @@ Round 2 终验（2026-11-01，最终工作树 + 重新打包产物）：
 
 - **玩家任务自动检测与自动结算**：引擎 `GET /api/session/:id/snapshot` 附带 `progress/playerBeatReady/allPassed` 真值；Studio 每秒同步目标面板（逐条打勾），世界侧全部完成时自动确认玩家节拍并自动打开结算——不再需要手动点「我已在游戏里完成」（按钮保留为 paper/离线兜底）。游戏内中文完成提示仍由插件发出。
 - **剧情浮层排版**：序章/幕开场/关开场/旅途手记改为「固定头 / 可滚内容 / 固定底」；隐藏原生滚动条 + 自绘悬浮滑轨，滚轮/键盘/拖拽/触屏可滚；左右留白恒对称（不依赖 `scrollbar-gutter`）；小视口（1024×600/896×603/720×560）不再裁切。同类长内容浮层（结算/手册/织典/试符台/完整解）一并修复。
-- **字体系统**：所有【代码】统一 **Maple Mono**；长段正文统一 **Noto Sans SC**（OFL-1.1 随包子集 2.21MB）；短标题/按钮/标签保留像素字体 **Zpix/Departure Mono**（策略见 `docs/20` §3b4）。
+- **字体系统**：所有【代码】统一 **Maple Mono**；长段正文统一 **Noto Sans SC**（OFL-1.1 随包子集 2.21MB）；非像素正文/普通 UI 用 **MiSans VF**（Apache-2.0 随包切片）；像素装饰字保留 Zpix/Departure Mono（策略见 `docs/20` §3b4）。
 - **配套教材**：10 章、合计 **76,429 汉字**（每章 6.5k–9.7k 字、5–8 个代码块、10–12 条术语，只用本关及之前 API）；独立浮动窗口可拖动/缩放/置顶/记忆位置、章内目录、代码复制；进入关卡首次自动打开，关闭即记已读，工作台常驻「回看教材」入口。内容源 `apps/studio/src/textbook/content/*.md`，构建校验 `npx tsx scripts/build-textbook.ts --write`。
 - **运行状态鲁棒性（修复「第一次失败后粘参考解仍报错」）**：会话内上一次失败且改过世界时，下一次 run 前自动恢复场景（port.reset + epoch+1）；执行前做真语法检查（半截代码不再偷偷执行）；runId + SSE `Last-Event-ID` 过滤旧事件；后端错误原因（message/hint/code）透传到错误卡；双击运行防重入；本地 mock 支持块注释。
 - **质量门**：`tsc --noEmit` 0；`npm test` 28 files / 251 tests；Studio real-config e2e **37/37**（含新增 narrative-layout / typography / textbook-window / auto-beat / runtime-recovery）、mock-config e2e 4/4；教材内容校验 0 error；真实 Paper e2e L01/L10 + 引擎回归见下。

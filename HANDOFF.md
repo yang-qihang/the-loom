@@ -71,7 +71,7 @@ bash scripts/package-desktop.sh
 2. 版本锁：MC/Paper **26.1.2 build 74**、Java **25**、mineflayer **4.39.0**、minecraft-protocol 1.68.0、pathfinder 2.4.5、TS **6.0.3**、esbuild 0.28.2、Monaco 0.57.0。升级 = ADR + Lead 签字。
 3. 学生 API 只能来自 `docs/12`；语法不越级；类型错误不阻断、语法错误阻断（Round 4 起：语法错误在执行前拦截，半截代码不执行）。
 4. 文案遵守 `docs/20` §3/§3b/§3b4（无 AI 味、动词按钮、错误=哪里错+怎么改）：自然中文 + 必要英文计算机术语保留英文，概念统一「中文名（English term）」；UI 英文标签仍禁止。
-5. 字体红线（Round 4）：代码 = Maple Mono；长段正文 = Noto Sans SC；短标题/按钮/标签 = 像素字体；不得把长文换回像素字，也不得把短标题按钮换成正文/代码字体（见 `docs/20` §3b4 + e2e/typography.spec.ts）。
+5. 字体红线（2026-11-02 最终）：代码 = Maple Mono；正文/普通 UI = MiSans VF（Noto fallback）；章节标题/按钮/标签/角色名 = 像素字 Zpix/Departure Mono；不得把正文换回像素字，也不得把标题按钮换成正文/代码字体（见 `docs/20` §3b4 + e2e/typography.spec.ts）。
 6. 真实 e2e 同一 Paper 串行；GUI 自动化只用 `:98/:99`；改插件必须冷启动，不 `/reload`。
 7. 事实/完成标准：命令 + exit 0 + 产物路径；`STATUS.md` 每个集成点更新；不要用「应该可以」代替证据。
 8. **提交规范（2026-11-01 用户确认）**：任务完成并验证后由 Lead **直接提交到 `main`**（不再单开 fix 分支）；提交前过质量门（`tsc`、`npm test`、涉及面 e2e/验收）；**Windows 侧改动只能改善跨平台一致性，不得破坏 Linux 上建立的基线**（版本锁、真实 Paper e2e、AppImage/RPM 打包流程）；**完成一个阶段就及时 commit + push**。

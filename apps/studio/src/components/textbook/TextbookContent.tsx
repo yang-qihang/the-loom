@@ -87,7 +87,7 @@ function CodeBlock({ code, caption, blockIndex }: { code: string; caption?: stri
         <span className="tb-code-lang" aria-hidden="true">
           ts
         </span>
-        {caption ? <figcaption className="tb-code-caption">{caption}</figcaption> : <span className="tb-code-caption" />}
+        {caption ? <figcaption className="tb-code-caption"><RichText text={caption} /></figcaption> : <span className="tb-code-caption" />}
         <button
           type="button"
           className="tb-code-copy"
@@ -112,8 +112,8 @@ function TermsBlock({ items }: { items: TextbookTerm[] }): ReactNode {
       {items.map((term, index) => (
         <div className="tb-term" key={`${term.zh}-${index}`}>
           <dt className="tb-term-head">
-            <span className="tb-term-zh">{term.zh}</span>
-            <span className="tb-term-en">{term.en}</span>
+            <span className="tb-term-zh"><RichText text={term.zh} /></span>
+            <span className="tb-term-en"><RichText text={term.en} /></span>
           </dt>
           <dd className="tb-term-def">
             <RichText text={term.def} />
@@ -136,7 +136,7 @@ function CalloutBlock({ tone, title, text }: { tone: CalloutTone; title?: string
   return (
     <aside className={`tb-callout tb-callout-${tone}`} data-testid={`textbook-callout-${tone}`} role="note">
       <span className="tb-callout-label">{CALLOUT_LABEL[tone]}</span>
-      {title ? <p className="tb-callout-title">{title}</p> : null}
+      {title ? <p className="tb-callout-title"><RichText text={title} /></p> : null}
       <p className="tb-callout-text">
         <RichText text={text} />
       </p>
@@ -163,11 +163,15 @@ function BlockView({
     case "h2":
       return (
         <h2 className="tb-h2" id={sectionId} data-testid={`textbook-section-${blockIndex}`}>
-          {block.text}
+          <RichText text={block.text} />
         </h2>
       );
     case "h3":
-      return <h3 className="tb-h3">{block.text}</h3>;
+      return (
+        <h3 className="tb-h3">
+          <RichText text={block.text} />
+        </h3>
+      );
     case "code":
       return <CodeBlock code={block.code} caption={block.caption} blockIndex={blockIndex} />;
     case "list": {
@@ -217,7 +221,7 @@ export function TextbookContent({ chapter, className }: TextbookContentProps): R
             <p className="tb-intro-title">读完本章，你能：</p>
             <ul className="tb-intro-goals">
               {chapter.goals.map((goal, index) => (
-                <li key={index}>{goal}</li>
+                <li key={index}><RichText text={goal} /></li>
               ))}
             </ul>
           </>

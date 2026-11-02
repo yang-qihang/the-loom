@@ -1,6 +1,6 @@
 # 字体资产（Studio / 桌面壳共用）
 
-> 2026-11-01 第四轮修正：字体范围按用户要求扩展——**所有【代码】渲染点**统一本目录的 **Maple Mono（CN 变体）**（不只是编辑器：参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；**长段正文**用随包 **Noto Sans SC**（`src/assets/fonts/noto-sans-sc-*.woff2`，OFL-1.1，子集）；**短标题/按钮/标签**保留中文像素字体 **Zpix + Departure Mono**。实现与验收见 `docs/20` §3b4、`apps/studio/src/typography.css`、`apps/studio/e2e/typography.spec.ts`。
+> 2026-11-01 第四轮修正：字体范围按用户要求扩展——**所有【代码】渲染点**统一本目录的 **Maple Mono（CN 变体）**（不只是编辑器：参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；**长段正文**用随包 **Noto Sans SC**（`src/assets/fonts/noto-sans-sc-*.woff2`，OFL-1.1，子集）；**像素装饰字**（章节标题/按钮/标签/角色名）保留 **Zpix + Departure Mono**；**非像素正文/普通 UI** 用 **MiSans VF**（2026-11-02 最终口径）。实现与验收见 `docs/20` §3b4、`apps/studio/src/typography.css`、`apps/studio/e2e/typography.spec.ts`。
 
 ## Maple Mono（CN 变体）
 
@@ -25,11 +25,9 @@
   - 编辑器右键菜单 / suggest / hover / find / 参数提示的字体栈（styles.css 中 `--editor-font`，清晰普通字体，不用像素字）。
 - **禁止**：把 Maple Mono 用到编辑器之外的 Studio/桌面壳 UI（用户第三轮明确要求回退）。
 
-## Zpix（最像素）与 Departure Mono——UI 保留字体
+## MiSans VF——非像素正文/普通 UI 字体
 
-- **保留范围**：Studio 与桌面壳的标题、正文、按钮、说明、日志、HUD、手册等 UI 文本；`--serif: Zpix …`、`--sans/--mono: Departure Mono, Zpix …`（与上一版一致）。
-- **编辑器例外**：代码编辑器及其浮层用 Maple Mono / 清晰普通字体（见上）。
-- 构建时 `src/assets/fonts` 的 Departure/Zpix 会被 vite 打进 `dist/assets`；桌面壳用 `public/fonts` 下的同名副本（由 build-assets 复制到 `dist/studio/fonts`）。
-- 源文件与许可：Departure Mono（`DepartureMono-LICENSE.txt`，OFL 1.1）；Zpix 见上方文件与上游仓库。
-- 文件 `zpix.woff2` sha256 `1d6b356bba81ac3746889be39853042833ecebfc16afa8584ac462dafc162610`。
-- 来源：https://github.com/SolidZORO/zpix-pixel-font ，作者 SolidZORO；分发范围按上游仓库。
+- **用途**：Studio 与桌面壳（companion/wizard）的正文、叙述、说明、日志、表单等非像素普通 UI 文本；标题/按钮等像素装饰部分继续用 Zpix/Departure Mono。
+- **来源/许可**：npm `misans@5.0.0`（https://www.npmjs.com/package/misans ），许可证 Apache-2.0，见 `misans/MiSans-LICENSE.txt`；字体名称/商标归小米所有。
+- **随包文件**：`misans/MiSansVF.min.css` + 56 个 unicode-range woff2 切片（可变字重 150–700）。
+- Zpix/Departure Mono 仍保留给像素装饰部分（见同目录文件与许可）。

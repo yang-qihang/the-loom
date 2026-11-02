@@ -11,7 +11,7 @@
 | 1 | 玩家在 MC 完成最后一步后游戏内已有提示，但 Studio 目标不更新、要手动点「我已…」 | 引擎 snapshot 附带 progress，Studio 每秒自动同步目标；全部达成后自动 confirm 并自动结算（保留手动兜底） |
 | 2 | 序章/幕开场多页剧情文本左右留白不对称 | overlay 重构：对称 padding + 不依赖 `scrollbar-gutter`（桌面壳 WebKitGTK 可能不支持） |
 | 3 | 参考解等【代码】仍像素字体 | 所有代码渲染点统一嵌包 Maple Mono（`--font-code`） |
-| 4 | 像素字体过度使用 | 长段正文换 Noto Sans SC（OFL，嵌包、跨平台一致）；短标题/按钮/标签保留像素字体 |
+| 4 | 像素字体过度使用 | 长段正文换 Noto Sans SC（OFL，嵌包、跨平台一致）；2026-11-02 起所有非衬线装饰字（标题/按钮/标签）统一 MiSans VF |
 | 5 | 关卡开场长文（L06 商队的账本）被裁切、无滚动条 | header 固定 + 内容区自然滚动（悬浮滚动条、滚轮/键盘/拖拽/触屏），小视口不裁切 |
 | 6 | 引导不够，需要 10 幕配套“教材” | 每关一章长文（≥2800 汉字，含代码示例，SICP 式从直觉到抽象），独立弹出窗口（拖动/缩放/置顶/随时回看） |
 | 7 | 第一次失败后粘正确参考解仍报错 | runId 关联 + 旧/回放事件过滤 + 后端错误原因透传 + 错误后状态重置；e2e 回归 |
@@ -39,7 +39,7 @@
 
 - **代码**：一律 Maple Mono（已嵌包，`--font-code`）。覆盖 Monaco、SolutionViewer、GuidanceManual、CodexScreen、ReplScreen、CoachCard/ResultCard/错误条、RichText inline-code、教材代码块。
 - **正文**：Noto Sans SC（OFL-1.1，嵌包、子集化 woff2、附 LICENSE；两权重）。覆盖剧情/开场/手记/教练卡长句/教材正文。
-- **像素字体**：保留给 `h1–h3` 等短标题、`.btn` 按钮、chip/标签/小 caption 等「信息量少、可读性要求低」的元素。
+- **装饰字体（2026-11-02 最终）**：`h1–h6`、`.btn`、chip/标签/小 caption 等「信息量少」元素统一 **MiSans VF**；旧像素字体 Zpix/Departure Mono 已移除。
 - 原则：**代码 = 代码字体；长文 = 可读正文字体；短标题/按钮 = 风格字体**，三者不混用。
 
 ### 2.2 剧情 overlay 布局

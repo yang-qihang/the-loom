@@ -1,5 +1,5 @@
 {
-  "ts": "2026-11-01T14:37:52.569Z",
+  "ts": "2026-11-02T10:39:53.708Z",
   "viewport": {
     "width": 1440,
     "height": 960
@@ -36,10 +36,10 @@
   },
   "chapterTotal": 10,
   "reading": {
-    "fontFamily": "\"Noto Sans SC\", \"Noto Sans CJK SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, sans-serif",
+    "fontFamily": "\"MiSans VF\", MiSans, \"Noto Sans SC\", \"Noto Sans CJK SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, sans-serif",
     "fontSize": 17.5,
     "lineHeightRatio": 1.8,
-    "width": 679.875
+    "width": 738
   },
   "codeMetrics": {
     "fontFamily": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",

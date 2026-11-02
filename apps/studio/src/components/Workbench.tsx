@@ -775,7 +775,7 @@ export function Workbench({
                     <h4>第 4 盏灯怎么点</h4>
                     <ol>
                       {copy.playerBeatGuide.map((step) => (
-                        <li key={step}>{step}</li>
+                        <li key={step}><RichText text={step} /></li>
                       ))}
                     </ol>
                   </div>
@@ -785,7 +785,7 @@ export function Workbench({
                   <p>{chrome.workbench.mcHelpIntro}</p>
                   <ol>
                     {chrome.workbench.mcHelpSteps.map((step) => (
-                      <li key={step}>{step}</li>
+                      <li key={step}><RichText text={step} /></li>
                     ))}
                   </ol>
                   <p>

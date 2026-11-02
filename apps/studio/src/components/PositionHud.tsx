@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { chrome } from "../copy";
 import type { LevelView, SnapshotView, StudioEngine } from "../types";
 import { pointRows, xzText, type PointRow } from "./guidance-data";
+import { RichText } from "./RichText";
 
 interface PositionHudProps {
   engine: StudioEngine;
@@ -104,7 +105,7 @@ export function PositionHud({ engine, sessionId, level, onOpenManual, onSnapshot
             <span className="hud-value">{fillCount(copy.count, containerEntries)}</span>
           </p>
         ) : null}
-        <p className="hud-note">{paused ? copy.paused : copy.coordHint}</p>
+        <p className="hud-note"><RichText text={paused ? copy.paused : copy.coordHint} /></p>
       </div>
     </section>
   );

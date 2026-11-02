@@ -1,17 +1,28 @@
 {
   "fontLoad": {
-    "noto": true,
-    "maple": false,
+    "noto": false,
+    "maple": true,
+    "misans": true,
     "zpix": true,
     "departure": true,
     "loadedFamilies": [
       "Departure Mono",
-      "Noto Sans SC",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
       "Zpix"
     ],
     "responses": [
       {
-        "url": "http://127.0.0.1:5185/assets/noto-sans-sc-400-BMBUuRtC.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.16240990c6f7f7dd.0-hYNu36zK.woff2",
         "status": 200
       },
       {
@@ -19,15 +30,67 @@
         "status": 200
       },
       {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.1fa3a293a561985c.1-Ik97Bnim.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.235af3ebfd0343d5.2-9YwKK7yC.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.52728aa7bc854270.6-BmPMmo-Q.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.d77855c75a78e271.7-C_C7j9eS.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.8ac4bbc96a6db0e2.4-CLvgMvHJ.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.53744263f2939586.3-DT-x9XRC.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.73924789affc3080.5-O0rdDs3A.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.3ee7f36171786397.50-B2mtXAXw.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.8739e6cdf2007d9e.18-CW9JsvXP.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.c626836af9104d5f.16-Cn-uDijZ.woff2",
+        "status": 200
+      },
+      {
         "url": "http://127.0.0.1:5185/assets/zpix-ByAf9pOZ.woff2",
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/assets/noto-sans-sc-700-Dv9RFWQN.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.18220753c89aeaa7.9-ClfyzM_W.woff2",
         "status": 200
       },
       {
-        "url": "http://127.0.0.1:5185/fonts/MapleMono-CN-Italic.woff2",
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.c06909dbc78c83aa.8-9EM0gbMF.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.353f733c1a9d24dd.14-DsPHSW78.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.7d084b054b54abc1.55-D-niG1Cm.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/MiSansVF.4432f1e8b9c6afb6.11-4ZdC0IHJ.woff2",
         "status": 200
       },
       {
@@ -36,6 +99,10 @@
       },
       {
         "url": "http://127.0.0.1:5185/fonts/MapleMono-CN-SemiBold.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/fonts/MapleMono-CN-Italic.woff2",
         "status": 200
       }
     ]
@@ -78,6 +145,11 @@
     },
     {
       "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "golem.pos",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
       "text": "golem.moveTo(-12, 10); // 1 golem.pl",
       "visible": true
     },
@@ -103,8 +175,9 @@
     }
   ],
   "codeFontLoad": {
-    "noto": true,
+    "noto": false,
     "maple": true,
+    "misans": true,
     "zpix": true,
     "departure": true,
     "loadedFamilies": [
@@ -112,11 +185,22 @@
       "Maple Mono",
       "Maple Mono",
       "Maple Mono",
-      "Noto Sans SC",
-      "Noto Sans SC",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
+      "MiSans VF",
       "Zpix",
       "codicon"
     ]
   },
-  "ts": "2026-11-01T14:39:20.855Z"
+  "ts": "2026-11-02T10:41:43.654Z"
 }

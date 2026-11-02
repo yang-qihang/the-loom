@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { chrome } from "../copy";
 import type { LevelView } from "../types";
+import { RichText } from "./RichText";
 
 /**
  * 完整解查看器（调试用）：把本关 `referenceSolution` 原样展示出来，可滚动、可复制。
@@ -76,7 +77,7 @@ export function SolutionViewer({
           <p className="solution-note">{chrome.workbench.solutionLoading}</p>
         ) : error ? (
           <p className="solution-note solution-error" data-testid="solution-error">
-            {error}
+            <RichText text={error} />
           </p>
         ) : (
           <pre className="solution-code" data-testid="solution-code" tabIndex={0}>

@@ -72,6 +72,8 @@ grep -q 'playerGive' "$ROOT/apps/desktop/src-tauri/runtime/real/engine.mjs"
 javap -p -classpath "$ROOT/apps/desktop/src-tauri/runtime/real/paper/plugins/loomcraft-plugin.jar" -c dev.loomcraft.mc.SceneManager | grep -q 'PlayerInventory.setItem'
 grep -Rq 'Iosevka' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null && { echo "[package] 包里仍有 Iosevka 字体残留" >&2; exit 4; } || true
 grep -Rq 'Maple Mono' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || { echo "[package] 包里没有 Maple Mono 字体" >&2; exit 4; }
+grep -Rq 'MiSans' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || { echo "[package] 包里没有 MiSans 字体" >&2; exit 4; }
+grep -Rq 'Zpix\|Departure Mono' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || { echo "[package] 包里没有像素装饰字体" >&2; exit 4; }
 test -f "$ROOT/apps/desktop/src-tauri/runtime/real/paper/world/.loom-world-version" || { echo "[package] 缺世界布局版本 marker" >&2; exit 4; }
 # 安装包不得携带测试玩家数据/旧世界备份/运行日志（可复现 + 新用户干净世界）
 if find "$ROOT/apps/desktop/src-tauri/runtime/real/paper/world/players" -type f 2>/dev/null | grep -q .; then echo "[package] world/players 非空，禁止打包测试玩家数据" >&2; exit 5; fi

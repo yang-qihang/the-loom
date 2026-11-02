@@ -77,6 +77,11 @@ layer_l0() {
     WARN_NOTES+=("typecheck: content 测试 WIP 错误（见日志；内容线修，不阻塞 QA 门禁）")
     type_warn=1
   fi
+  # 字体/行内代码契约（docs/61）：三轨道 token、代码禁像素、已知富文本字段必须 RichText。
+  if ! node scripts/check-style-policy.mjs; then
+    log "✗ style-policy（docs/61）失败：字体/行内代码契约被破坏"
+    return 1
+  fi
   # 文案门禁：禁用词 + 纯中文（docs/20 §2/§3b）。默认仅告警，--strict-copy 判红。
   local copy_json="qa/evidence/qa-copy.json" line v
   npx tsx scripts/check-copy.mjs --pure-zh --json "$copy_json" >/dev/null 2>&1 || true

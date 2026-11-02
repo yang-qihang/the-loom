@@ -8,6 +8,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { RichText } from "../RichText";
 import { createPortal } from "react-dom";
 import { TextbookContent, textbookSections } from "./TextbookContent";
 import type { TextbookLibrary } from "../../textbook/types";
@@ -357,7 +358,7 @@ export function TextbookWindow({
         <div className="tb-titlebar-main">
           <p className="tb-titlebar-kicker">配套教材</p>
           <h2 className="tb-titlebar-title" data-testid="textbook-title" title={chapter?.title ?? "配套教材"}>
-            {chapter?.title ?? "本章教材尚未收录"}
+            <RichText text={chapter?.title ?? "本章教材尚未收录"} />
           </h2>
           <p className="tb-titlebar-sub" data-testid="textbook-subtitle">
             {chapter?.subtitle ?? "内容正在编写中；可先关闭窗口开始写代码。"}
@@ -433,7 +434,7 @@ export function TextbookWindow({
                     onClick={() => scrollToSection(section.id)}
                     title={section.text}
                   >
-                    {section.text}
+                    <RichText text={section.text} />
                   </button>
                 </li>
               ))}

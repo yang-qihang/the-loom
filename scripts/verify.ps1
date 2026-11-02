@@ -62,6 +62,8 @@ foreach ($layer in ($Layers -split ",")) {
         if ($LASTEXITCODE -ne 0) { return }
         & $Npx tsx scripts/check-copy.mjs --pure-zh --json "qa/evidence/qa-copy.json"
         # copy gate is warning-only by default in verify.sh; keep it visible but not blocking.
+        & (Get-Command node.exe).Source scripts/check-style-policy.mjs
+        if ($LASTEXITCODE -ne 0) { return }
         & (Get-Command node.exe).Source scripts/guard-tests.mjs --check --warn
         $global:LASTEXITCODE = 0
       }

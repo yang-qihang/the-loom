@@ -236,15 +236,15 @@ export function ReplScreen({ engine, levelId, onBack, onOpenManual }: ReplScreen
               </button>
             </div>
             <p className="repl-hint">{chrome.runeBench.inputHint}</p>
-            <p className="repl-hint repl-help-hint">{chrome.runeBench.helpHint}</p>
+            <p className="repl-hint repl-help-hint"><RichText text={chrome.runeBench.helpHint} /></p>
             {error ? (
               <p className="repl-error" role="alert" data-testid="repl-error">
-                {error}
+                <RichText text={error} />
               </p>
             ) : null}
             {notice ? (
               <p className="repl-notice" data-testid="repl-notice">
-                {notice}
+                <RichText text={notice} />
               </p>
             ) : null}
             <div className="repl-actions">

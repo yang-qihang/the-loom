@@ -10,7 +10,7 @@
   border-color: var(--line);
   background: linear-gradient(180deg, rgba(43, 32, 21, 0.96), rgba(30, 23, 16, 0.96));
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-  font-family: var(--font-pixel, "Zpix", "Departure Mono", ui-monospace, monospace);
+  font-family: var(--font-pixel, "MiSans VF", "MiSans", "Noto Sans SC", system-ui, sans-serif);
   font-size: 15px;
   letter-spacing: 0.04em;
   opacity: 0.92;

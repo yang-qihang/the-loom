@@ -25,7 +25,7 @@
   --tb-red: #e08a6a;
   --tb-reading: var(--font-reading, "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif);
   --tb-code: var(--font-code, "Maple Mono", "Maple Mono CN", "JetBrains Mono", ui-monospace, monospace);
-  --tb-pixel: var(--font-pixel, "Zpix", "Departure Mono", ui-monospace, monospace);
+  --tb-pixel: var(--font-pixel, "MiSans VF", "MiSans", "Noto Sans SC", system-ui, sans-serif);
 
   position: fixed;
   display: flex;

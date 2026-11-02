@@ -1,5 +1,5 @@
 {
-  "ts": "2026-11-01T14:37:29.222Z",
+  "ts": "2026-11-02T10:39:11.097Z",
   "viewports": [
     {
       "width": 1440,
@@ -762,8 +762,8 @@
         "right": 38
       },
       "canScroll": true,
-      "scrollTopAfter": 1031,
-      "lastChildBottomGap": 144.19,
+      "scrollTopAfter": 1029,
+      "lastChildBottomGap": 143.22,
       "actions": 1
     },
     {
@@ -774,8 +774,8 @@
         "right": 34
       },
       "canScroll": true,
-      "scrollTopAfter": 207,
-      "lastChildBottomGap": 23.45,
+      "scrollTopAfter": 208,
+      "lastChildBottomGap": 23.91,
       "actions": 2
     },
     {
@@ -786,7 +786,7 @@
         "right": 30
       },
       "canScroll": true,
-      "scrollTopAfter": 1274,
+      "scrollTopAfter": 1268,
       "lastChildBottomGap": 20.17,
       "actions": 2
     },
@@ -794,8 +794,8 @@
       "name": "完整解查看器",
       "viewport": "896x603",
       "gaps": null,
-      "canScroll": true,
-      "scrollTopAfter": 244,
+      "canScroll": false,
+      "scrollTopAfter": null,
       "lastChildBottomGap": null,
       "actions": 2
     },
@@ -807,8 +807,8 @@
         "right": 43
       },
       "canScroll": true,
-      "scrollTopAfter": 386,
-      "lastChildBottomGap": 155.45,
+      "scrollTopAfter": 384,
+      "lastChildBottomGap": 155,
       "actions": 4
     },
     {
@@ -819,8 +819,8 @@
         "right": 38
       },
       "canScroll": true,
-      "scrollTopAfter": 1104,
-      "lastChildBottomGap": 143.19,
+      "scrollTopAfter": 1103,
+      "lastChildBottomGap": 143.22,
       "actions": 1
     },
     {
@@ -831,8 +831,8 @@
         "right": 34
       },
       "canScroll": true,
-      "scrollTopAfter": 286,
-      "lastChildBottomGap": 23.66,
+      "scrollTopAfter": 287,
+      "lastChildBottomGap": 24.11,
       "actions": 2
     },
     {
@@ -843,7 +843,7 @@
         "right": 30
       },
       "canScroll": true,
-      "scrollTopAfter": 1358,
+      "scrollTopAfter": 1352,
       "lastChildBottomGap": 19.83,
       "actions": 2
     },
@@ -851,8 +851,8 @@
       "name": "完整解查看器",
       "viewport": "720x560",
       "gaps": null,
-      "canScroll": true,
-      "scrollTopAfter": 287,
+      "canScroll": false,
+      "scrollTopAfter": null,
       "lastChildBottomGap": null,
       "actions": 2
     },
@@ -864,8 +864,8 @@
         "right": 43
       },
       "canScroll": true,
-      "scrollTopAfter": 429,
-      "lastChildBottomGap": 155.45,
+      "scrollTopAfter": 427,
+      "lastChildBottomGap": 155,
       "actions": 4
     }
   ],

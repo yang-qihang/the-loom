@@ -20,7 +20,7 @@
 - 真实引擎 bundle（`runtime/real/engine.mjs`）
 - **mineflayer / minecraft-protocol / pathfinder** 与 `bot/manager.mjs`
 - Mock 演示引擎、图标、窗口/缩放/连接灯逻辑
-- **嵌包字体**：代码编辑器 Maple Mono（含中文回退，OFL 许可随包）；UI 保留 Zpix/Departure Mono 中文像素字体；全部随包，不依赖系统字体
+- **嵌包字体**：代码 Maple Mono（含中文回退，OFL 许可随包）；长文 Noto Sans SC（OFL）；装饰字 MiSans VF（Apache-2.0，随包切片）；全部随包，不依赖系统字体
 - **关卡截图素材**（`apps/studio/public/world/*.png` 玩家出生视角；`report/evidence/*.png` 报告配图；成品尺寸/文件以最终提交素材为准）
 
 ## 3. 用户只需要
@@ -81,8 +81,8 @@ npm run desktop:build
 
 ### 8.1 字体
 
-- 代码编辑器使用嵌包 **Maple Mono CN**（开启 ligature）；编辑器右键菜单/补全/悬停/查找用清晰普通字体，不用像素字。
-- Studio 其余 UI 保留上一版中文像素字体（Zpix）+ Departure Mono 栈；不把正文/标题改成 Maple Mono。
+- 代码统一使用嵌包 **Maple Mono CN**（开启 ligature）；编辑器右键菜单/补全/悬停/查找同样是清晰普通字体。
+- 所有非衬线装饰性字体（标题/按钮/标签）统一 **MiSans VF**；长段正文用 **Noto Sans SC**；不把正文/标题改成 Maple Mono。
 - 字体文件与 OFL 许可随 Studio 静态资源（`apps/studio/public/fonts/`）打包，桌面 App 与浏览器吃同一份文件，不依赖系统 fallback。
 - 验收方式（实现侧）：`document.fonts.check("16px \"Maple Mono\"")` 为 true、`.monaco-editor .view-lines` 的 computed font-family 含 Maple Mono；截图人工核对 0/O、1/l/I 不混淆。
 

@@ -5,8 +5,9 @@ import { resolve } from "node:path";
 /**
  * 字体系统回归（task-2 / docs/48 §1.7）：
  *  - 所有【代码】渲染位置 → Maple Mono（含编辑器外的手册/织典/试符台/参考解/日志内联代码）；
- *  - 长段正文 → Noto Sans SC（随包 woff2，可读非衬线中文）；
- *  - 短标题/按钮/标签仍为像素字（Zpix / Departure Mono）；
+
+ *  - 像素装饰字（章节标题/按钮/标签/角色名“艾拉”）保留 Zpix + Departure Mono；
+ *  - MiSans VF 用于非像素正文/普通 UI 文本（替换原 Noto 主字体，Noto 作 fallback）；
  *  - 字体文件真的加载成功（document.fonts.check + woff2 网络响应）。
  *
  * 证据：evidence/typography/*.png + typography-verify.json。
@@ -16,13 +17,13 @@ const EVIDENCE = resolve(process.cwd(), "../../evidence/typography");
 mkdirSync(EVIDENCE, { recursive: true });
 
 const MAPLE = "Maple Mono";
-const NOTO = "Noto Sans SC";
 const PIXEL = /Zpix|Departure Mono/;
+const MISANS = "MiSans";
 
 /** 代码渲染点（元素 + 类名）：任何一个 computed font-family 不含 Maple Mono 都算失败。 */
 const CODE_SELECTOR = "code, pre, kbd, .mono, .inline-code, .solution-code, .gd-signature, .codex-code, .hud-value, .repl-input";
 
-/** 长段正文扫描时跳过的「短标签/像素字/非正文」选择器（与 typography.css 的像素字清单同源）。 */
+/** 长段正文扫描时跳过的「短标签/装饰字/非正文」选择器（与 typography.css 的装饰字清单同源）。 */
 const SHORT_LABEL_SELECTOR = [
   "code",
   "pre",
@@ -123,6 +124,7 @@ async function fontLoadState(page: Page) {
   return page.evaluate(() => ({
     noto: document.fonts.check('16px "Noto Sans SC"', "织界正文"),
     maple: document.fonts.check('16px "Maple Mono"', "golem.pos"),
+    misans: document.fonts.check('16px "MiSans VF"', "织界"),
     zpix: document.fonts.check('16px "Zpix"', "织界"),
     departure: document.fonts.check('16px "Departure Mono"', "THE LOOM"),
     loadedFamilies: [...document.fonts]
@@ -163,7 +165,7 @@ async function expectFamiliesIfPresent(page: Page, selector: string, expected: s
 }
 
 /**
- * 通用长文断言：页面上任何 ≥24 字的可见文本块（跳过代码/按钮/短标签）都必须是 Noto Sans SC。
+ * 通用长文断言：页面上任何 ≥24 字的可见文本块（跳过代码/按钮/短标签）都必须是 MiSans VF。
  * 这样即使叙事/手册结构重构、类名变化，也不依赖具体 selector。
  */
 async function longTextRows(page: Page, rootSelector: string | null = null) {
@@ -192,13 +194,13 @@ async function longTextRows(page: Page, rootSelector: string | null = null) {
   );
 }
 
-async function expectLongTextNoto(page: Page, label: string, rootSelector: string | null = null) {
+async function expectLongTextMiSans(page: Page, label: string, rootSelector: string | null = null) {
   const rows = await longTextRows(page, rootSelector);
   expect(rows.length, `${label}: 找不到 ≥24 字的长段正文，字体断言无从谈起`).toBeGreaterThan(0);
-  const bad = rows.filter((row) => !row.family.includes(NOTO));
+  const bad = rows.filter((row) => !row.family.includes(MISANS));
   expect(
     bad.map((row) => `${row.tag}.${row.className}「${row.text}」→ ${row.family}`),
-    `${label}: 长段正文必须使用可读中文字体 Noto Sans SC`,
+    `${label}: 长段正文必须使用非像素正文 MiSans VF`,
   ).toEqual([]);
 }
 
@@ -210,7 +212,7 @@ async function openIfVisible(page: Page, testId: string) {
   return null;
 }
 
-test("字体资产与像素字：序章/地图墙 + 长文 Noto + 字体真加载", async ({ page }) => {
+test("字体资产：像素装饰字 + MiSans 正文 + 长文 + 字体真加载", async ({ page }) => {
   const fontResponses: Array<{ url: string; status: number }> = [];
   const fontFailures: string[] = [];
   page.on("response", (response) => {
@@ -222,27 +224,33 @@ test("字体资产与像素字：序章/地图墙 + 长文 Noto + 字体真加�
 
   await page.goto("/");
 
-  // 1) 首次进入：序章长文是 Noto Sans SC，按钮仍是像素字。
+  // 1) 首次进入：序章正文 MiSans，角色名/按钮像素字。
   await expect(page.getByTestId("prologue-overlay")).toBeVisible();
+  // 2026-11-02 用户要求：序章/幕/关开场方框里的横向金色装饰线必须不存在。
+  await expect(page.locator(".stage-lines")).toHaveCount(0);
+  // 2026-11-02 用户要求：有充足文本时，序言/幕/关开场正文两端对齐（短行/末行保持自然左对齐）。
+  const stageAlign = await page.locator('[data-testid="prologue-overlay"] .stage-lines-text p').first().evaluate((element) => getComputedStyle(element).textAlign);
+  expect(stageAlign, "序言正文未两端对齐").toBe("justify");
   const loadState = await fontLoadState(page);
-  expect(loadState.noto, 'Noto Sans SC 未加载（document.fonts.check("16px \\"Noto Sans SC\\"") = false）').toBe(true);
+  expect(loadState.misans, "MiSans VF 未加载").toBe(true);
   expect(loadState.zpix, "Zpix 未加载").toBe(true);
   expect(loadState.departure, "Departure Mono 未加载").toBe(true);
-  await expectLongTextNoto(page, "序章", '[data-testid="prologue-overlay"]');
+  await expectLongTextMiSans(page, "序章", '[data-testid="prologue-overlay"]');
+  await expectFamilies(page, '[data-testid="prologue-overlay"] .stage-speaker', PIXEL, "角色名（艾拉）");
   await expectFamilies(page, '[data-testid="prologue-overlay"] .btn', PIXEL, "序章按钮");
   await page.screenshot({ path: resolve(EVIDENCE, "01-prologue-long-text.png") });
 
-  // 2) 跳过序章 → 地图墙：标题像素字 / 引导长文 Noto / 按钮像素字。
+  // 2) 跳过序章 → 地图墙：标题/按钮像素字 / 引导长文 MiSans。
   await page.getByTestId("onboarding-skip").click();
   await expect(page.getByRole("heading", { name: "关卡墙" })).toBeVisible();
   await settleFonts(page);
-  await expectFamilies(page, ".map-head h1", /Zpix/, "地图墙主标题");
-  await expectFamilies(page, ".map-head .lede", NOTO, "地图墙引导长文");
+  await expectFamilies(page, ".map-head h1", PIXEL, "地图墙主标题");
+  await expectFamilies(page, ".map-head .lede", MISANS, "地图墙引导长文");
   await expectFamilies(page, ".btn", PIXEL, "地图墙按钮");
-  await expectLongTextNoto(page, "地图墙");
+  await expectLongTextMiSans(page, "地图墙");
   await page.screenshot({ path: resolve(EVIDENCE, "02-map-wall.png"), fullPage: true });
 
-  // 3) 进关：幕/关开场的多行长文是 Noto Sans SC，开始按钮像素字。
+  // 3) 进关：幕/关开场正文 MiSans，开始按钮像素字。
   // 回访玩家：教材已读，避免首次自动弹出教材窗口抢走 Esc/点击（教材字体有独立 spec）。
   await page.evaluate(() =>
     localStorage.setItem(
@@ -255,7 +263,7 @@ test("字体资产与像素字：序章/地图墙 + 长文 Noto + 字体真加�
   const actOverlay = await openIfVisible(page, "act-overlay");
   if (actOverlay) {
     await settleFonts(page);
-    await expectLongTextNoto(page, "幕开场", '[data-testid="act-overlay"]');
+    await expectLongTextMiSans(page, "幕开场", '[data-testid="act-overlay"]');
     await expectFamilies(page, '[data-testid="act-overlay"] .btn', PIXEL, "幕开场按钮");
     await page.screenshot({ path: resolve(EVIDENCE, "03-act-intro.png") });
     await page.getByTestId("act-skip").click();
@@ -263,18 +271,18 @@ test("字体资产与像素字：序章/地图墙 + 长文 Noto + 字体真加�
   const openingOverlay = await openIfVisible(page, "opening-overlay");
   if (openingOverlay) {
     await settleFonts(page);
-    await expectLongTextNoto(page, "关开场", '[data-testid="opening-overlay"]');
+    await expectLongTextMiSans(page, "关开场", '[data-testid="opening-overlay"]');
     await expectFamilies(page, '[data-testid="opening-overlay"] .btn', PIXEL, "关开场按钮");
     await page.screenshot({ path: resolve(EVIDENCE, "04-level-opening.png") });
     await page.getByTestId("opening-start").click();
   }
   await expect(page.getByTestId("code-editor")).toBeVisible();
 
-  // 4) 手记：长文正文 Noto Sans SC（含展开名词解释）。
+  // 4) 手记：正文 MiSans（含展开名词解释）。
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("journal-overlay")).toBeVisible();
   await settleFonts(page);
-  await expectLongTextNoto(page, "旅途手记", '[data-testid="journal-overlay"]');
+  await expectLongTextMiSans(page, "旅途手记", '[data-testid="journal-overlay"]');
   await expectFamilies(page, '[data-testid="journal-overlay"] .btn', PIXEL, "手记按钮");
   await page.screenshot({ path: resolve(EVIDENCE, "05-journal.png"), fullPage: true });
   await page.getByTestId("journal-close").click();
@@ -287,7 +295,7 @@ test("字体资产与像素字：序章/地图墙 + 长文 Noto + 字体真加�
   report.fontLoad = { ...loadState, responses: fontResponses };
 });
 
-test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + 长文 Noto", async ({ page }) => {
+test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + 长文 MiSans", async ({ page }) => {
   await seedProgress(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "关卡墙" })).toBeVisible();
@@ -299,9 +307,8 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   const loadState = await fontLoadState(page);
   expect(loadState.maple, 'Maple Mono 未加载（document.fonts.check("16px \\"Maple Mono\\"") = false）').toBe(true);
   await expectFamilies(page, ".monaco-editor .view-lines", MAPLE, "Monaco 编辑器");
-  await expectFamilies(page, ".coach-line", NOTO, "教练卡正文");
-  expect(loadState.noto, "Noto Sans SC 未加载").toBe(true);
-  await expectLongTextNoto(page, "工作台");
+  await expectFamilies(page, ".coach-line", MISANS, "教练卡正文");
+  await expectLongTextMiSans(page, "工作台");
   await expectFamilies(page, ".btn", PIXEL, "工作台按钮");
   await page.screenshot({ path: resolve(EVIDENCE, "06-workbench.png"), fullPage: true });
 
@@ -320,16 +327,16 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await page.screenshot({ path: resolve(EVIDENCE, "07-solution-viewer.png") });
   await page.getByTestId("btn-solution-close").click();
 
-  // 3) 指令手册：API 签名/示例/坐标是代码；说明长文是 Noto Sans SC。
+  // 3) 指令手册：API 签名/示例/坐标是代码；说明长文是 MiSans。
   await page.getByTestId("btn-manual").click();
   await expect(page.getByTestId("api-manual")).toBeVisible();
   await settleFonts(page);
   await expectFamilies(page, ".gd-signature", MAPLE, "手册 API 签名");
   await expectFamilies(page, ".gd-example", MAPLE, "手册示例代码");
   await expectFamiliesIfPresent(page, ".gd-pos", MAPLE, "手册坐标");
-  await expectFamilies(page, ".gd-summary", NOTO, "手册说明长文");
+  await expectFamilies(page, ".gd-summary", MISANS, "手册说明长文");
   await expectFamilies(page, CODE_SELECTOR, MAPLE, "指令手册内代码元素");
-  await expectLongTextNoto(page, "指令手册", '[data-testid="api-manual"]');
+  await expectLongTextMiSans(page, "指令手册", '[data-testid="api-manual"]');
   await page.screenshot({ path: resolve(EVIDENCE, "08-guidance-manual.png") });
   await page.getByTestId("btn-manual-close").click();
 
@@ -343,19 +350,19 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await expectFamilies(page, ".repl-input", MAPLE, "试符台输入框");
   await expectFamilies(page, ".repl-example code", MAPLE, "试符台示例代码");
   await expectFamilies(page, CODE_SELECTOR, MAPLE, "试符台内代码元素");
-  await expectFamilies(page, ".repl-hint", NOTO, "试符台说明文字");
+  await expectFamilies(page, ".repl-hint", MISANS, "试符台说明文字");
   await page.screenshot({ path: resolve(EVIDENCE, "09-repl.png") });
   await page.getByTestId("btn-repl-back").click();
 
-  // 5) 织典：跨语言代码块 Maple Mono，正文说明 Noto Sans SC。
+  // 5) 织典：跨语言代码块 Maple Mono，正文说明 MiSans。
   await page.getByTestId("btn-codex").click();
   await expect(page.getByTestId("codex-screen")).toBeVisible();
   await expect(page.getByTestId("codex-code")).toBeVisible();
   await settleFonts(page);
   await expectFamilies(page, ".codex-code", MAPLE, "织典代码块");
-  await expectFamilies(page, ".codex-section p", NOTO, "织典正文长文");
+  await expectFamilies(page, ".codex-section p", MISANS, "织典正文长文");
   await expectFamilies(page, CODE_SELECTOR, MAPLE, "织典内代码元素");
-  await expectLongTextNoto(page, "织典", '[data-testid="codex-screen"]');
+  await expectLongTextMiSans(page, "织典", '[data-testid="codex-screen"]');
   await page.screenshot({ path: resolve(EVIDENCE, "10-codex.png") });
 
   report.codeFamilies = await visibleFamilies(page, CODE_SELECTOR);

@@ -1,18 +1,20 @@
+@import "./assets/fonts/misans/MiSansVF.min.css";
+
 /* =============================================================================
  * 字体系统（task-2 / docs/48 §1.7）
  *
  * 用户反馈：像素字（Zpix / Departure Mono）看长段中文太累；代码散落在 UI 各处时
  * 字体也不统一。本文件把「字体用途」收敛成三个语义变量（变量本体在 styles.css :root）：
  *
- *   --font-pixel  像素字：Zpix（中文）/ Departure Mono（英文数字）
- *                 用于短标题、按钮、标签、chip、tiny caption、键帽、文件名、术语按钮。
- *   --font-text   可读正文：Noto Sans SC（随包 woff2，OFL-1.1）
+ *   --font-pixel  像素/装饰字：Zpix（中文）/ Departure Mono（英文数字）
+ *                 用于章节标题、按钮、标签、chip、tiny caption、键帽、文件名、角色名（“艾拉”）。
+ *   --font-text   非像素正文：MiSans VF（随包切片，Apache-2.0；Noto Sans SC 作为 fallback）
  *                 用于长段正文：剧情叙述、幕/关开场、手记、教练卡长句、手册说明。
  *   --font-code   代码：Maple Mono（随包 CN 变体，@font-face 在 styles.css）
  *                 用于所有 code / pre / kbd(elem) / .mono / .inline-code 与代码片段。
  *
  * 口径（Lead 复核结论）：
- *  - `--mono` 不改语义，仍是既有像素标签栈（Departure Mono 优先），
+ *  - `--mono` 不改语义，仍是像素短标签栈（Departure Mono 优先），
  *    .kbd / .file-chip / .card-order / .phase-chip / .mode-chip / .kicker / .term-button
  *    等短标签继续用它，不迁到 --font-code；
  *  - 只把「渲染代码」的选择器迁到 --font-code（含 guidance.css 里写死 --mono 的类）；
@@ -72,8 +74,8 @@ body .mono {
   font-family: var(--font-code);
 }
 
-/* ---------- 2. 正文：长段中文用可读非衬线（Noto Sans SC） ----------
- * body 已在 styles.css 改成 --font-text；这里把「明确属于长文本、但父级可能带像素字体」
+/* ---------- 2. 正文：非像素中文正文用 MiSans VF（Noto Sans SC fallback） ----------
+ * body 已在 styles.css 用 --font-text；这里把「明确属于长文本、但父级可能带像素字体」
  * 的容器再点名一次，防止后续重构把它们带回像素字。 */
 .lede,
 .map-hero-copy p,
@@ -136,10 +138,9 @@ body,
   font-family: var(--font-text);
 }
 
-/* ---------- 3. 像素字收口：短标题 / 按钮 / 标签 / chip / tiny caption ----------
- * h1-h3 的像素字体在 styles.css 的 h1,h2,h3 规则里；这里补齐 h4-h6 与按钮。
- * 其余「短标签」保持 --mono（Departure Mono 优先、Zpix 的中文像素 fallback），
- * 与 task-2 之前完全一致，不把像素标签迁成正文/代码字体。 */
+/* ---------- 3. 像素装饰字收口：短标题 / 按钮 / 标签 / chip / tiny caption ----------
+ * h1-h3 的字体在 styles.css 的 h1,h2,h3 规则里；这里补齐 h4-h6 与按钮。
+ * 其余短标签用 --mono（Departure Mono 优先、Zpix 中文 fallback），不把短标签迁成正文/代码字体。 */
 h4,
 h5,
 h6,
