@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-11-01T13:05:51.016Z",
+  "studioUrl": "http://127.0.0.1:5188",
+  "entries": [
+    {
+      "levelId": "L10",
+      "sessionStatus": 201,
+      "sessionMs": 3309,
+      "workbenchMs": 4762,
+      "errorBanner": false,
+      "visible": true,
+      "studioErrorText": null
+    },
+    {
+      "levelId": "L01",
+      "sessionStatus": 201,
+      "sessionMs": 1146,
+      "workbenchMs": 2480,
+      "errorBanner": false,
+      "visible": true,
+      "studioErrorText": null
+    },
+    {
+      "levelId": "L10",
+      "sessionStatus": 201,
+      "sessionMs": 3166,
+      "workbenchMs": 4514,
+      "errorBanner": false,
+      "visible": true,
+      "studioErrorText": null
+    }
+  ],
+  "modeChip": "织机在线",
+  "pageErrors": [],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "failures": [],
+  "ok": true,
+  "slowEntries": [],
+  "oldTimeoutWouldFail": false
+}

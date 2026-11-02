@@ -423,7 +423,7 @@ await world.keystone()
   ],
   // 名副其实（docs/48 §1.9）：本关必须真的用多 agent 消息协议 + Promise 并发协调。
   codeRequirements: [
-    { id: "l10-promise", text: "用 Promise.all 让两只织偶同时开工，而不是顺序 await", kind: "promise-combinator", min: 1 },
+    { id: "l10-promise", text: "用 `Promise.all` 让两只织偶同时开工，而不是顺序 `await`", kind: "promise-combinator", min: 1 },
     { id: "l10-async", text: "写 async/await 把 send / receive / collect / place 的等待串成协议", kind: "async", min: 8 },
   ],
   phases: ["单织偶失败与先发后等", "双织偶协议与合龙"],

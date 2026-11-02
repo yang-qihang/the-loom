@@ -1,0 +1,173 @@
+/* =============================================================================
+ * 字体系统（task-2 / docs/48 §1.7）
+ *
+ * 用户反馈：像素字（Zpix / Departure Mono）看长段中文太累；代码散落在 UI 各处时
+ * 字体也不统一。本文件把「字体用途」收敛成三个语义变量（变量本体在 styles.css :root）：
+ *
+ *   --font-pixel  像素字：Zpix（中文）/ Departure Mono（英文数字）
+ *                 用于短标题、按钮、标签、chip、tiny caption、键帽、文件名、术语按钮。
+ *   --font-text   可读正文：Noto Sans SC（随包 woff2，OFL-1.1）
+ *                 用于长段正文：剧情叙述、幕/关开场、手记、教练卡长句、手册说明。
+ *   --font-code   代码：Maple Mono（随包 CN 变体，@font-face 在 styles.css）
+ *                 用于所有 code / pre / kbd(elem) / .mono / .inline-code 与代码片段。
+ *
+ * 口径（Lead 复核结论）：
+ *  - `--mono` 不改语义，仍是既有像素标签栈（Departure Mono 优先），
+ *    .kbd / .file-chip / .card-order / .phase-chip / .mode-chip / .kicker / .term-button
+ *    等短标签继续用它，不迁到 --font-code；
+ *  - 只把「渲染代码」的选择器迁到 --font-code（含 guidance.css 里写死 --mono 的类）；
+ *  - 只做字体映射，不改字号 / 行高 / 颜色 / 间距 / 布局；
+ *  - narrative overlay 的布局归 narrative.css（task-1），本文件不碰；
+ *  - 覆盖 guidance.css 时用 `body` 前缀提高优先级，不依赖 main.tsx 的 import 顺序。
+ *  - 本文件由 main.tsx 在 styles.css / guidance.css 之后 import。
+ * ============================================================================= */
+
+/* ---------- 随包 Noto Sans SC（子集化产物，见 noto-sans-sc-coverage.json） ----------
+ * 子集 = GB2312 全部字符 + ASCII + 仓库文本实际用字（共 7557 码点）；
+ * 两个权重 400/700 合计约 2.2MB，随 Vite 打进 dist/assets，跨平台一致。 */
+@font-face {
+  font-family: "Noto Sans SC";
+  src: url("./assets/fonts/noto-sans-sc-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  src: url("./assets/fonts/noto-sans-sc-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- 1. 代码：所有渲染代码的位置统一 Maple Mono ---------- */
+code,
+pre,
+kbd,
+.mono,
+.inline-code {
+  font-family: var(--font-code);
+}
+
+/* guidance.css / styles.css 里用类名单独指定字体的代码元素（body 前缀保证优先级）。
+ * 覆盖点：guidance.css:138 .gd-signature、:192 .gd-example、:224 .gd-pos/.gd-coord-list code、
+ * :274 .hud-value、:431 .repl-point code；styles.css 的 .codex-code / .solution-code /
+ * .repl-input / .inline-code 已就地迁到 --font-code，这里再兜一层防回归。 */
+body .gd-signature,
+body code.gd-pos,
+body .gd-points code,
+body .gd-coord-list code,
+body .repl-point code,
+body .gd-example,
+body .gd-example code,
+body .repl-example code,
+body .repl-entry code,
+body code.repl-value,
+body code.hud-value,
+body .codex-code,
+body .solution-code,
+body .repl-input,
+body .inline-code,
+body .mono {
+  font-family: var(--font-code);
+}
+
+/* ---------- 2. 正文：长段中文用可读非衬线（Noto Sans SC） ----------
+ * body 已在 styles.css 改成 --font-text；这里把「明确属于长文本、但父级可能带像素字体」
+ * 的容器再点名一次，防止后续重构把它们带回像素字。 */
+.lede,
+.map-hero-copy p,
+.stage-lines-text,
+.stage-lines-text p,
+.opening-line,
+.opening-copy,
+.journal-section p,
+.term-explain,
+.journal-body,
+.coach-line,
+.coach-hint,
+.coach-guide-text,
+.concept-text,
+.awaiting-line,
+.criterion,
+.code-req-item,
+.settle-detail,
+.settle-goal,
+.log-lines li,
+.gd-summary,
+.gd-details,
+.gd-coord-list li,
+.gd-empty,
+.codex-section p,
+.codex-detail-sub,
+.codex-subtitle,
+.codex-locked-hint,
+.about-lead,
+.about-panel p,
+.about-list li,
+.system-lede,
+.settings-row p,
+.world-strip-text span,
+.solution-hint,
+.solution-note,
+.repl-hint,
+.repl-error,
+.repl-notice,
+.repl-entry,
+.repl-subtitle,
+.repl-input-label,
+.repl-example-gloss,
+.player-beat-guide li,
+.mc-help p,
+.mc-help ol,
+.mc-help li,
+.challenge p,
+.error-reason,
+.card.waiting p,
+.map-foot,
+.map-status {
+  font-family: var(--font-text);
+}
+
+/* 正文根字体：body 已在 styles.css:62 设置；这两个容器兜底，防止被组件内联样式覆盖。 */
+body,
+.page,
+.workbench {
+  font-family: var(--font-text);
+}
+
+/* ---------- 3. 像素字收口：短标题 / 按钮 / 标签 / chip / tiny caption ----------
+ * h1-h3 的像素字体在 styles.css 的 h1,h2,h3 规则里；这里补齐 h4-h6 与按钮。
+ * 其余「短标签」保持 --mono（Departure Mono 优先、Zpix 的中文像素 fallback），
+ * 与 task-2 之前完全一致，不把像素标签迁成正文/代码字体。 */
+h4,
+h5,
+h6,
+.btn {
+  font-family: var(--font-pixel);
+}
+
+/* 以前从 body 继承像素字、本身没有 font-family 的短标签：显式钉在像素标签栈上，
+ * 避免 body 改成 Noto 之后它们跟着变成正文（信息量少，仍应是像素字）。 */
+.card-tag,
+.codex-badge,
+.codex-tab,
+.card-meta,
+.card-status,
+.hint-level,
+.opening-label,
+.narrative-note,
+.stage-scene,
+.settle-caption,
+.term-button,
+.error-line,
+.criterion-state,
+.sky-chip,
+.repl-level-chip,
+.repl-who,
+.solution-count,
+.mc-help summary,
+.card.challenge summary,
+.settings-row b {
+  font-family: var(--mono);
+}

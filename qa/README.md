@@ -100,6 +100,11 @@ npx tsx scripts/check-copy.mjs --self-test                                # 分�
 
 **新增功能协议（FAP）检查**：`qa-gates.json.fap` 逐功能检查 spec 文档 + 测试 + 证据三者齐全；缺一律 blocked。新增功能不得降低 `qa-regression.json` 的测试数。
 
+**Windows（win32）补充**：同一入口 `npx tsx qa/gates.mjs` 在 Windows 上自动改跑 `node qa/desktop-smoke-win.mjs`（不 spawn bash、不读 Linux rpm/AppImage/Xvfb/Wayland 证据）：
+- `G-DESKTOP-WIN`：校验 HEAD `target/release/loomcraft-desktop.exe` + NSIS 安装包 size/sha256、`%LOCALAPPDATA%\Loomcraft` 安装目录与 `runtime/real` 布局/hash/版本、headless e2e 证据（`tmp/audit/packaged-e2e.json`，若存在），证据写 `qa/evidence/qa-desktop-win.json`。
+- `G-TOP-WIN`：校验 Alt+Z / Win32 前台切换 / 置顶 / 伴玩 / 重启记忆 / Ctrl+Shift+L / pointer focus-follow 的**代码存在性**，证据写 `qa/evidence/qa-top-win.json`。
+- 缺 Windows GUI 启动/向导/截图/Alt+Z 行为/退出清理证据时两个门保持 **blocked**（本轮禁止 GUI 自动化）；Linux-only 的 `G-DESKTOP`/`G-TOP` 在 Windows 显式 blocked，不假绿。GUI 证据目录约定 `evidence/desktop-win/` + `apps/desktop/EVIDENCE-WIN.md`。
+
 ## 7. UOS（用户操作模拟）
 
 - `bash scripts/verify.sh --layers l0,l1,l2,l3,lg,ux`（**默认不跑**；彩排前必跑）。

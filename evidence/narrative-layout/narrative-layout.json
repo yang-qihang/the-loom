@@ -1,0 +1,889 @@
+{
+  "ts": "2026-11-01T14:37:29.222Z",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 960,
+      "label": "1440x960"
+    },
+    {
+      "width": 1280,
+      "height": 840,
+      "label": "1280x840"
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "label": "1024x600"
+    },
+    {
+      "width": 896,
+      "height": 603,
+      "label": "896x603"
+    },
+    {
+      "width": 720,
+      "height": 560,
+      "label": "720x560"
+    }
+  ],
+  "overlays": [
+    "prologue",
+    "act",
+    "opening",
+    "journal"
+  ],
+  "cases": [
+    {
+      "viewport": "1440x960",
+      "overlay": "prologue",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 370,
+        "clientHeight": 370,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1440x960",
+      "overlay": "act",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 330,
+        "clientHeight": 330,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1440x960",
+      "overlay": "opening",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 80,
+          "right": 80
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 533,
+        "clientHeight": 533,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1440x960",
+      "overlay": "journal",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 33,
+          "right": 33
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 792,
+        "clientHeight": 760,
+        "offsetWidth": 758,
+        "clientWidth": 758,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 32,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1280x840",
+      "overlay": "prologue",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 370,
+        "clientHeight": 370,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1280x840",
+      "overlay": "act",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 330,
+        "clientHeight": 330,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1280x840",
+      "overlay": "opening",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 80,
+          "right": 80
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 533,
+        "clientHeight": 533,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1280x840",
+      "overlay": "journal",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 33,
+          "right": 33
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 792,
+        "clientHeight": 640,
+        "offsetWidth": 758,
+        "clientWidth": 758,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 152,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1024x600",
+      "overlay": "prologue",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 370,
+        "clientHeight": 370,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1024x600",
+      "overlay": "act",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 330,
+        "clientHeight": 330,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1024x600",
+      "overlay": "opening",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 80,
+          "right": 80
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 533,
+        "clientHeight": 366,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 167,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "1024x600",
+      "overlay": "journal",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 33,
+          "right": 33
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 792,
+        "clientHeight": 400,
+        "offsetWidth": 758,
+        "clientWidth": 758,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 392,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "896x603",
+      "overlay": "prologue",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 370,
+        "clientHeight": 370,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "896x603",
+      "overlay": "act",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 100,
+          "right": 100
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 330,
+        "clientHeight": 330,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "896x603",
+      "overlay": "opening",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 80,
+          "right": 80
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 533,
+        "clientHeight": 369,
+        "offsetWidth": 718,
+        "clientWidth": 718,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 164,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "896x603",
+      "overlay": "journal",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 33,
+          "right": 33
+        },
+        "primary": {
+          "left": 33,
+          "right": 33
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 792,
+        "clientHeight": 403,
+        "offsetWidth": 758,
+        "clientWidth": 758,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 389,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "720x560",
+      "overlay": "prologue",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 21,
+          "right": 21
+        },
+        "primary": {
+          "left": 88,
+          "right": 88
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 364,
+        "clientHeight": 364,
+        "offsetWidth": 694,
+        "clientWidth": 694,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "720x560",
+      "overlay": "act",
+      "canScroll": false,
+      "gaps": {
+        "content": {
+          "left": 21,
+          "right": 21
+        },
+        "primary": {
+          "left": 88,
+          "right": 88
+        }
+      },
+      "textWidthSpread": 0,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 324,
+        "clientHeight": 324,
+        "offsetWidth": 694,
+        "clientWidth": 694,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": false,
+        "maxScroll": 0,
+        "dataScrollable": "false"
+      },
+      "interactions": [
+        "lastPage",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "720x560",
+      "overlay": "opening",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 21,
+          "right": 21
+        },
+        "primary": {
+          "left": 68,
+          "right": 68
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": 0,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 527,
+        "clientHeight": 366,
+        "offsetWidth": 694,
+        "clientWidth": 694,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 161,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    },
+    {
+      "viewport": "720x560",
+      "overlay": "journal",
+      "canScroll": true,
+      "gaps": {
+        "content": {
+          "left": 21,
+          "right": 21
+        },
+        "primary": {
+          "left": 21,
+          "right": 21
+        }
+      },
+      "textWidthSpread": null,
+      "titleCenterOffset": -0.0078125,
+      "scroll": {
+        "scrollTop": 0,
+        "scrollHeight": 1203,
+        "clientHeight": 400,
+        "offsetWidth": 694,
+        "clientWidth": 694,
+        "overflowY": "auto",
+        "scrollbarWidth": "none",
+        "scrollbarGutter": "auto",
+        "canScroll": true,
+        "maxScroll": 803,
+        "dataScrollable": "true"
+      },
+      "interactions": [
+        "wheel",
+        "PageDown",
+        "End",
+        "Home",
+        "drag",
+        "scrollToBottom",
+        "ctaClick"
+      ]
+    }
+  ],
+  "similarOverlays": [
+    {
+      "name": "织典",
+      "viewport": "896x603",
+      "gaps": {
+        "left": 38,
+        "right": 38
+      },
+      "canScroll": true,
+      "scrollTopAfter": 1031,
+      "lastChildBottomGap": 144.19,
+      "actions": 1
+    },
+    {
+      "name": "试符台",
+      "viewport": "896x603",
+      "gaps": {
+        "left": 34,
+        "right": 34
+      },
+      "canScroll": true,
+      "scrollTopAfter": 207,
+      "lastChildBottomGap": 23.45,
+      "actions": 2
+    },
+    {
+      "name": "指令手册",
+      "viewport": "896x603",
+      "gaps": {
+        "left": 30,
+        "right": 30
+      },
+      "canScroll": true,
+      "scrollTopAfter": 1274,
+      "lastChildBottomGap": 20.17,
+      "actions": 2
+    },
+    {
+      "name": "完整解查看器",
+      "viewport": "896x603",
+      "gaps": null,
+      "canScroll": true,
+      "scrollTopAfter": 244,
+      "lastChildBottomGap": null,
+      "actions": 2
+    },
+    {
+      "name": "结算页",
+      "viewport": "896x603",
+      "gaps": {
+        "left": 43,
+        "right": 43
+      },
+      "canScroll": true,
+      "scrollTopAfter": 386,
+      "lastChildBottomGap": 155.45,
+      "actions": 4
+    },
+    {
+      "name": "织典",
+      "viewport": "720x560",
+      "gaps": {
+        "left": 38,
+        "right": 38
+      },
+      "canScroll": true,
+      "scrollTopAfter": 1104,
+      "lastChildBottomGap": 143.19,
+      "actions": 1
+    },
+    {
+      "name": "试符台",
+      "viewport": "720x560",
+      "gaps": {
+        "left": 34,
+        "right": 34
+      },
+      "canScroll": true,
+      "scrollTopAfter": 286,
+      "lastChildBottomGap": 23.66,
+      "actions": 2
+    },
+    {
+      "name": "指令手册",
+      "viewport": "720x560",
+      "gaps": {
+        "left": 30,
+        "right": 30
+      },
+      "canScroll": true,
+      "scrollTopAfter": 1358,
+      "lastChildBottomGap": 19.83,
+      "actions": 2
+    },
+    {
+      "name": "完整解查看器",
+      "viewport": "720x560",
+      "gaps": null,
+      "canScroll": true,
+      "scrollTopAfter": 287,
+      "lastChildBottomGap": null,
+      "actions": 2
+    },
+    {
+      "name": "结算页",
+      "viewport": "720x560",
+      "gaps": {
+        "left": 43,
+        "right": 43
+      },
+      "canScroll": true,
+      "scrollTopAfter": 429,
+      "lastChildBottomGap": 155.45,
+      "actions": 4
+    }
+  ],
+  "blocked": [],
+  "summary": {
+    "total": 20,
+    "canScroll": 8,
+    "canScrollCases": [
+      "journal@1440x960",
+      "journal@1280x840",
+      "opening@1024x600",
+      "journal@1024x600",
+      "opening@896x603",
+      "journal@896x603",
+      "opening@720x560",
+      "journal@720x560"
+    ],
+    "maxGapDeltaPx": 0,
+    "textWidthSpreadPx": 0
+  }
+}

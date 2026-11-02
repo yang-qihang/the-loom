@@ -48,9 +48,43 @@ const stripComment = (line: string): string => {
   return line;
 };
 
+/**
+ * 去掉块注释（可跨行），保留行号：
+ * 内容层 starter/参考解都以 JSDoc 块注释开头（见 content/levels/L01.content.ts），
+ * 本地演示解释器原来只处理行注释，会把块注释起始符当成一句代码 → 参考解必报「第 1 行没写完」。
+ */
+export function stripBlockComments(source: string): string {
+  let inBlock = false;
+  return source
+    .split(/\r?\n/)
+    .map((line) => {
+      let out = "";
+      let i = 0;
+      while (i < line.length) {
+        if (inBlock) {
+          const end = line.indexOf("*/", i);
+          if (end < 0) return out;
+          inBlock = false;
+          i = end + 2;
+        } else {
+          const start = line.indexOf("/*", i);
+          if (start < 0) {
+            out += line.slice(i);
+            break;
+          }
+          out += line.slice(i, start);
+          inBlock = true;
+          i = start + 2;
+        }
+      }
+      return out;
+    })
+    .join("\n");
+}
+
 export function parseL01(source: string): ParseResult {
   const statements: Statement[] = [];
-  const lines = source.split(/\r?\n/);
+  const lines = stripBlockComments(source).split(/\r?\n/);
   for (let index = 0; index < lines.length; index += 1) {
     const lineNo = index + 1;
     const raw = stripComment(lines[index]).trim();

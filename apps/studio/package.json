@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:mock": "VITE_MOCK=1 vite",
+    "dev:mock": "vite --mode mock",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -13,8 +13,8 @@
     "test:e2e:local": "playwright test -c playwright.mock.config.ts",
     "check:copy": "node scripts/check-pure-zh.mjs",
     "verify:engine": "node scripts/verify-engine.mjs --out evidence/engine-verify.json",
-    "build:e2e": "VITE_E2E=1 vite build",
-    "build:mock": "VITE_MOCK=1 VITE_E2E=1 vite build"
+    "build:e2e": "vite build --mode e2e",
+    "build:mock": "vite build --mode mock"
   },
   "dependencies": {
     "monaco-editor": "0.57.0",

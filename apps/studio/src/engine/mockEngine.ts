@@ -108,6 +108,8 @@ interface MockSession {
   listeners: Set<(event: StudioEvent) => void>;
   cancelled: boolean;
   runToken: number;
+  /** 与真引擎 sessionEpoch 对齐（快照防重放/目标同步用）。 */
+  epoch: number;
 }
 
 /** 本地演示引擎（无织机时兜底）：复用 packages/mockworld + packages/grading 的 L01。 */
@@ -158,17 +160,19 @@ export class MockEngine implements StudioEngine {
       listeners: new Set(),
       cancelled: false,
       runToken: 0,
+      epoch: 0,
     };
     this.sessions.set(id, session);
     session.phase = "ready";
     return id;
   }
 
-  async run(sessionId: string, source: string): Promise<void> {
+  async run(sessionId: string, source: string): Promise<string | null> {
     const session = this.get(sessionId);
     session.cancelled = false;
     session.runToken += 1;
     const token = session.runToken;
+    const runId = `mock-run-${token}`;
     this.setPhase(session, "running");
     this.emit(session, { type: "log", line: WORKBENCH.runStarted });
 
@@ -176,8 +180,8 @@ export class MockEngine implements StudioEngine {
     // 本地演示解释器只认数字参数，先展开再解析（旧的全数字写法原样通过）。
     const parsed = parseL01(expandNamedPointArgs(source));
     if ("error" in parsed) {
-      this.fail(session, parsed.error);
-      return;
+      this.fail(session, parsed.error, runId);
+      return runId;
     }
 
     void (async () => {
@@ -187,7 +191,7 @@ export class MockEngine implements StudioEngine {
       });
       if (session.cancelled || session.runToken !== token) return;
       if (error) {
-        this.fail(session, error);
+        this.fail(session, error, runId);
         return;
       }
       this.emitGoals(session);
@@ -196,9 +200,10 @@ export class MockEngine implements StudioEngine {
       const ready = this.isPlayerBeatReady(progress);
       // 与真引擎一致：run 结束发布一次失败结果（含 progress/playerBeatReady）。
       // 只有织偶部分真的做完，才进入「轮到你」；否则回到 ready，Studio 显示还没完成的目标。
-      this.emit(session, { type: "result", result: this.resultOf(session) });
+      this.emit(session, { type: "result", result: this.resultOf(session, runId) });
       this.setPhase(session, ready ? "awaiting-player-beat" : "ready");
     })();
+    return runId;
   }
 
   async stop(sessionId: string): Promise<void> {
@@ -213,6 +218,7 @@ export class MockEngine implements StudioEngine {
     const session = this.get(sessionId);
     session.cancelled = true;
     session.runToken += 1;
+    session.epoch += 1;
     session.world = new MockWorld({ ...LEVEL.world.vars });
     this.setPhase(session, "ready");
     this.emitGoals(session);
@@ -239,7 +245,7 @@ export class MockEngine implements StudioEngine {
     session.world.playerPlace("lantern", LAMPS[3] as [number, number, number]);
     this.emit(session, { type: "log", line: fill(WORKBENCH.logPlacePlayer, { 序号: 4 }) });
     this.emitGoals(session);
-    this.emit(session, { type: "result", result: this.resultOf(session) });
+    this.emit(session, { type: "result", result: this.resultOf(session, `mock-beat-${session.runToken}`) });
     this.setPhase(session, "graded");
   }
 
@@ -272,6 +278,8 @@ export class MockEngine implements StudioEngine {
       if (names && names.length > 0) for (const name of names) containers[name] = items;
       else containers[key] = items;
     }
+    const progress = this.progressReport(session);
+    const declared = LEVEL.progress ?? [];
     return {
       agents: snapshot.agents,
       npcs: snapshot.npcs,
@@ -279,6 +287,27 @@ export class MockEngine implements StudioEngine {
       points: NAMED_POINTS,
       containers,
       tick: snapshot.tick,
+      // 与真引擎 /api/session/:id/snapshot 同形的进度字段（docs/49 §2.3）：本地 demo 也能自动同步目标。
+      progress: progress.steps.map((step, index) => ({
+        id: step.id,
+        text: step.text,
+        passed: step.passed,
+        player: step.player,
+        ...(declared[index]?.hint ? { hint: declared[index]!.hint } : {}),
+      })),
+      playerBeatReady: progress.steps.length > 0 ? progress.playerBeatReady : false,
+      allPassed: progress.steps.length > 0 && progress.steps.every((step) => step.passed),
+      playerBeatRequired: typeof LEVEL.task?.playerBeat === "string" && LEVEL.task.playerBeat.trim().length > 0,
+      playerBeatDone: snapshot.events.some((event) => event.type === "block.place" && event.actorType === "player"),
+      sessionEpoch: session.epoch,
+      state:
+        session.phase === "graded"
+          ? "PASSED"
+          : session.phase === "running"
+            ? "RUNNING"
+            : session.phase === "loading"
+              ? "PREPARING"
+              : "READY",
     };
   }
 
@@ -357,8 +386,8 @@ export class MockEngine implements StudioEngine {
     this.emit(session, { type: "state", state: phase });
   }
 
-  private fail(session: MockSession, error: RunnerError): void {
-    this.emit(session, { type: "error", line: error.line, message: errorMessage(error) });
+  private fail(session: MockSession, error: RunnerError, runId?: string): void {
+    this.emit(session, { type: "error", line: error.line, message: errorMessage(error), ...(runId ? { runId } : {}) });
     this.setPhase(session, "ready");
   }
 
@@ -409,11 +438,12 @@ export class MockEngine implements StudioEngine {
   }
 
   /** 与真引擎 ResultEvent 对齐的 RunResult（progress/playerBeatReady 供 Studio 目标面板与门控）。 */
-  private resultOf(session: MockSession): RunResult {
+  private resultOf(session: MockSession, runId?: string): RunResult {
     const snapshot = session.world.snapshot("L01");
     const graded = grade(LEVEL, snapshot);
     const progress = evaluateProgress(LEVEL, snapshot);
     return {
+      ...(runId ? { runId } : {}),
       passed: graded.passed,
       stars: graded.stars,
       criteria: graded.criteria,

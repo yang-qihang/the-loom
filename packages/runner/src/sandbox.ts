@@ -1,6 +1,6 @@
 import { Worker } from "node:worker_threads";
 import { transformSync } from "esbuild";
-import { transformStudentCode } from "./transform";
+import { firstStudentSyntaxIssue, transformStudentCode } from "./transform";
 import { assertExplicitAwait, MissingAwaitError } from "./explicit";
 import { resolveTarget, type SemanticAgentActions } from "../../worldport/src/index";
 import type { Golem, NamedPoint, PointLike } from "../../sdk/src/index";
@@ -320,6 +320,9 @@ try {
 const WRAPPER_LINES = 1;
 
 function compileForSandbox(source: string, mode: "auto-await" | "explicit"): { code: string; studentLineCount: number } {
+  // P0：ts parser 容错恢复会把缺括号的半截代码补全后执行（真的改了世界）。先按 parser 诊断拦下。
+  const syntaxIssue = firstStudentSyntaxIssue(source);
+  if (syntaxIssue) throw new StudentCodeError(`[SyntaxError] ${syntaxIssue.message}`, syntaxIssue.line);
   const wrapped = transformStudentCode(source, mode);
   try {
     const output = transformSync(wrapped, { loader: "ts", target: "es2022", format: "cjs" });
@@ -569,6 +572,9 @@ export async function runStudentSandboxed(sdk: RunSdk, source: string, options: 
   if (typeof source !== "string" || source.trim().length === 0) {
     throw new StudentCodeError("[SyntaxError] 学生代码为空");
   }
+  // 先做纯语法检查：断括号/断引号不进入后续任何执行路径（含 explicit await 检查）。
+  const syntaxIssue = firstStudentSyntaxIssue(source);
+  if (syntaxIssue) throw new StudentCodeError(`[SyntaxError] ${syntaxIssue.message}`, syntaxIssue.line);
   const mode = options.mode ?? "auto-await";
   if (mode === "explicit") {
     // Act III：不自动插 await；漏 await 的异步调用在运行前给出 2588 中文提示。

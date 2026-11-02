@@ -35,6 +35,8 @@ test("首次进入：序章 → 跳过 → L01 开场三句 → 开始 → Esc �
       localStorage.clear();
       sessionStorage.setItem("loom.e2e.cleared", "1");
     }
+    // 已读教材：本 spec 验证的是序章/开场/手记流程，教材自动弹窗会拦截点击，按「回访玩家」预置。
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10"]));
   });
   await page.goto("/");
 

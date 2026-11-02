@@ -11,7 +11,7 @@
 import { spawn } from "node:child_process";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync, readdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 import { deflateSync } from "node:zlib";
@@ -37,10 +37,12 @@ function run(command, args, options = {}) {
 }
 
 async function buildStudio() {
-  const vite = join(studioDir, "node_modules", ".bin", "vite");
+  // 不能用 node_modules/.bin/vite 直接 spawn：Windows 上它是无扩展名的 sh 脚本，spawn 会 ENOENT。
+  // 用当前 Node 执行 vite.js，两个平台行为一致。
+  const vite = join(studioDir, "node_modules", "vite", "bin", "vite.js");
   if (!existsSync(vite)) throw new Error("apps/studio 未安装依赖（缺少 vite）");
   log("构建 studio（vite build --base=./）…");
-  await run(vite, ["build", "--base", "./"], { cwd: studioDir });
+  await run(process.execPath, [vite, "build", "--base", "./"], { cwd: studioDir });
   const index = join(studioDir, "dist", "index.html");
   if (!existsSync(index)) throw new Error("studio 构建产物缺少 index.html");
   const html = await readFile(index, "utf8");
@@ -117,6 +119,8 @@ export class GolemBot {
 
 async function buildEngine() {
   log("打包 engine 单文件（esbuild bundle → engine.mjs + engine.cjs 启动器）…");
+  // 干净 clone 里 runtime/ 是空目录，Git 不跟踪；不先创建会写 stub 时 ENOENT。
+  await mkdir(runtimeDir, { recursive: true });
   const paperStub = join(runtimeDir, "paper-port.stub.ts");
   const botStub = join(runtimeDir, "bot-manager.stub.ts");
   await writeFile(paperStub, PAPER_STUB, "utf8");
@@ -208,8 +212,8 @@ async function smokeTestEngine() {
   }
 }
 
-// ---- 图标：暖色织纹 PNG（纯 zlib，无图像依赖） ----
-function crc32(buffer) {
+// ---- 图标：暖色织纹 PNG（纯 zlib，无图像依赖；C 工具存在时优先用原生实现） ----
+export function crc32(buffer) {
   let crc = 0xffffffff;
   for (const byte of buffer) {
     crc ^= byte;
@@ -218,7 +222,7 @@ function crc32(buffer) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-function pngChunk(type, data) {
+export function pngChunk(type, data) {
   const length = Buffer.alloc(4);
   length.writeUInt32BE(data.length);
   const typeBuffer = Buffer.from(type, "ascii");
@@ -228,7 +232,7 @@ function pngChunk(type, data) {
 }
 
 /** 暖色底 + 金色织线菱形纹样的正方形图标。 */
-function makeIcon(size) {
+export function makeIcon(size) {
   const raw = Buffer.alloc((size * 4 + 1) * size);
   const bg = [22, 17, 12];
   const warm = [214, 168, 92];
@@ -267,19 +271,44 @@ function makeIcon(size) {
   ]);
 }
 
-async function generateIcons() {
+const ICON_SPECS = [
+  [32, "32x32.png"],
+  [128, "128x128.png"],
+  [256, "128x128@2x.png"],
+  [512, "icon.png"],
+  [1024, "icon-1024.png"],
+];
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** 校验 5 个图标存在、PNG 签名有效、IHDR 尺寸正确。 */
+async function verifyGeneratedIcons(source) {
+  for (const [size, name] of ICON_SPECS) {
+    const file = join(iconDir, name);
+    if (!existsSync(file)) throw new Error(`${source} 未生成 ${name}`);
+    const buffer = await readFile(file);
+    if (buffer.length < 24 || !buffer.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
+      throw new Error(`${source} 生成的 ${name} 不是 PNG（签名校验失败）`);
+    }
+    const width = buffer.readUInt32BE(16);
+    const height = buffer.readUInt32BE(20);
+    if (width !== size || height !== size) {
+      throw new Error(`${source} 生成的 ${name} 为 ${width}x${height}，期望 ${size}x${size}`);
+    }
+  }
+}
+
+export async function generateIcons() {
+  // 保持既有行为：创建一个未使用的 icons/icons 子目录（同时保证 iconDir 存在）。
   await mkdir(join(iconDir, "icons"), { recursive: true });
-  const sizes = [
-    [32, "32x32.png"],
-    [128, "128x128.png"],
-    [256, "128x128@2x.png"],
-    [512, "icon.png"],
-    [1024, "icon-1024.png"],
-  ];
-  for (const [size, name] of sizes) {
+  log("生成 Tauri 图标（JS makeIcon）…");
+  for (const [size, name] of ICON_SPECS) {
     await writeFile(join(iconDir, name), makeIcon(size));
   }
-  log(`图标生成完成（${sizes.length} 个 PNG）sha256=${createHash("sha256").update(makeIcon(512)).digest("hex").slice(0, 12)}`);
+  await verifyGeneratedIcons("JS makeIcon");
+  const icon = await readFile(join(iconDir, "icon.png"));
+  log(
+    `图标生成完成（${ICON_SPECS.length} 个 PNG）sha256=${createHash("sha256").update(icon).digest("hex").slice(0, 12)}`,
+  );
 }
 
 async function main() {
@@ -291,7 +320,15 @@ async function main() {
   log("全部资源准备完成");
 }
 
-main().catch(error => {
-  console.error(`[desktop/assets] FAILED: ${error.message}`);
-  process.exit(1);
-});
+const isDirectRun =
+  process.argv[1] !== undefined &&
+  (process.platform === "win32"
+    ? resolve(process.argv[1]).toLowerCase() === fileURLToPath(import.meta.url).toLowerCase()
+    : resolve(process.argv[1]) === fileURLToPath(import.meta.url));
+
+if (isDirectRun) {
+  main().catch(error => {
+    console.error(`[desktop/assets] FAILED: ${error.message}`);
+    process.exit(1);
+  });
+}

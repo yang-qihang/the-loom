@@ -15,7 +15,8 @@ import {
 import { isDesktopShell, setAlwaysOnTop, setCompanionMode } from "../desktop";
 import type { LevelCard } from "../copy";
 import type { GoalState } from "./GoalList";
-import type { LevelView, RunResult, SessionPhase, StudioEngine, StudioEvent } from "../types";
+import type { LevelView, RunResult, SessionPhase, SnapshotView, StudioEngine, StudioEvent } from "../types";
+import { EngineUnavailableError } from "../types";
 import { CoachCard } from "./CoachCard";
 import { CodeEditor, type CodeEditorHandle } from "./CodeEditor";
 import { ConceptRevealCard } from "./ConceptRevealCard";
@@ -49,6 +50,27 @@ interface WorkbenchProps {
 interface WorkbenchError {
   message: string;
   line?: number;
+  /** 后端给的可操作建议（docs/49 §2.4）：和 message 一起显示，不再只有泛化错误。 */
+  hint?: string;
+  /** 后端错误码（INVALID_STATE / MC_UNAVAILABLE / ENGINE_OFFLINE …）。 */
+  code?: string;
+  /** 可恢复错误：错误卡给「重置本关后重试」动作。 */
+  recoverable?: boolean;
+}
+
+/** 触发一次 run 的客户端兜底超时：避免 POST 挂住后按钮永远转圈。 */
+const RUN_REQUEST_TIMEOUT_MS = 45_000;
+
+function readableEngineError(cause: unknown, levelId: string): WorkbenchError {
+  if (cause instanceof EngineUnavailableError) {
+    return {
+      message: cause.message.trim().length > 0 ? cause.message : chrome.workbench.errorGeneric,
+      ...(cause.hint ? { hint: cause.hint } : {}),
+      ...(cause.code ? { code: cause.code } : {}),
+      recoverable: cause.recoverable,
+    };
+  }
+  return { message: humanizeError(cause instanceof Error ? cause.message : undefined, levelId) };
 }
 
 function phaseLabel(phase: SessionPhase, result: RunResult | null, waitingForPlayer: boolean): string {
@@ -105,6 +127,18 @@ export function Workbench({
   const [worldOpen, setWorldOpen] = useState(() => !(typeof window !== "undefined" && window.matchMedia("(max-width: 1100px)").matches));
   const [settleOpen, setSettleOpen] = useState(false);
   const errorHoldRef = useRef(false);
+  /** 同步守卫：双击「运行」/回车连发时，第二次请求直接拦掉（渲染闭包里的 phase 可能还没更新）。 */
+  const runInFlightRef = useRef(false);
+  /** 当前结果（快照轮询回调里读最新值，不依赖渲染闭包）。 */
+  const resultRef = useRef<RunResult | null>(null);
+  /** 自动确认玩家节拍：同一「epoch + 进度签名」只触发一次；失败后冷却重试。 */
+  const autoBeatKeyRef = useRef<string | null>(null);
+  const beatInFlightRef = useRef(false);
+  const beatCooldownUntilRef = useRef(0);
+  /** reset 后的抑制窗口：旧 epoch 的轮询结果可能晚到，别让它触发自动确认。 */
+  const suppressBeatUntilRef = useRef(0);
+  /** 快照里的会话 epoch（防重放/去重用；顶层 epoch 可能被插件快照覆盖）。 */
+  const sessionEpochRef = useRef<number | null>(null);
   const desktop = useMemo(() => isDesktopShell(), []);
   useEffect(() => {
     const query = window.matchMedia("(max-width: 1100px)");
@@ -180,6 +214,13 @@ export function Workbench({
         });
       } else if (event.type === "result") {
         const hasResult = event.result.criteria.length > 0 || (event.result.progress?.length ?? 0) > 0;
+        // 新一轮的真实评分结果到达 → 上一轮的「错误保持」与红条立即作废（P1-3：
+        // 旧实现只在 run 开头/reset 清 error，会出现「正确结果 + 红条」同时显示）。
+        if (hasResult) {
+          errorHoldRef.current = false;
+          setError(null);
+        }
+        resultRef.current = hasResult ? event.result : null;
         setResult(hasResult ? event.result : null);
         if (event.result.passed) {
           void engine.inGame(sessionId, "灯河亮了。");
@@ -211,6 +252,7 @@ export function Workbench({
         const text = String(event.text ?? "").trim();
         if (text) setEngineHint((previous) => (previous === text ? previous : text));
       } else if (event.type === "error") {
+        resultRef.current = null;
         setResult(null);
         setPhase("error");
         errorHoldRef.current = true;
@@ -218,12 +260,17 @@ export function Workbench({
         const syntaxLike = typeof event.line === "number" || /SyntaxError|Unexpected token|Unexpected end|Unexpected identifier|Unterminated/i.test(raw);
         if (syntaxLike) {
           const authored = copy?.errors.syntax ?? "这一行还没写完：先看括号、引号和逗号，改完再运行一次。";
-          void engine.inGame(sessionId, "第 " + String(event.line ?? 1) + " 行还没写完。看看括号和数字。", "actionbar");
-          setError({ message: resolveCopy(authored), line: typeof event.line === "number" ? event.line : 1 });
-          if (typeof event.line === "number") editorRef.current?.revealLine(event.line);
+          if (typeof event.line === "number") {
+            void engine.inGame(sessionId, "第 " + String(event.line) + " 行还没写完。看看括号和数字。", "actionbar");
+            editorRef.current?.revealLine(event.line);
+          }
+          // 没有行号时不要伪造「第 1 行」：error 卡会按「运行出错」展示（P1-3）。
+          setError({ message: resolveCopy(authored), ...(typeof event.line === "number" ? { line: event.line } : {}) });
         } else {
           // 沙箱/运行时错误不是语法错误，不能伪装成「第 1 行没写完」。
-          setError({ message: humanizeError(raw, levelId) });
+          // 引擎消息本身是中文人话（可能夹英文 API 名）：有中文就原样展示，别被 humanize 吞成泛化文案。
+          const readable = /[\u4e00-\u9fff]/.test(raw) ? raw : humanizeError(raw, levelId);
+          setError({ message: readable });
         }
         setLogs([]);
       }
@@ -238,11 +285,17 @@ export function Workbench({
   }, [onCompleted, result]);
 
   const resetWorkbench = useCallback(async () => {
-    if (sessionId) void engine.inGame(sessionId, "这一关已经重置。");
     if (!sessionId) return;
+    void engine.inGame(sessionId, "这一关已经重置。");
     await engine.reset(sessionId);
     errorHoldRef.current = false;
+    // 重置后旧 epoch 的快照可能晚到：抑制窗口 + 清自动确认签名，避免旧进度把新会话自动结算。
+    autoBeatKeyRef.current = null;
+    beatCooldownUntilRef.current = 0;
+    suppressBeatUntilRef.current = Date.now() + 2000;
+    sessionEpochRef.current = null;
     setPhase("ready");
+    resultRef.current = null;
     setResult(null);
     setError(null);
     setLogs([]);
@@ -255,27 +308,33 @@ export function Workbench({
     if (level) {
       goalIndexRef.current = new Map(level.objectives.map((goal, index) => [goal.id, index]));
       setGoals(level.objectives.map((goal) => ({ text: goal.text, done: false, id: goal.id })));
-      editorRef.current?.setValue(level.starterCode);
-      codeRef.current = level.starterCode;
+      // 重置世界但保留编辑器里的代码：用户粘过来的参考解不能被清掉（docs/49 §2.4）。
     }
   }, [engine, level, sessionId]);
 
   const runProgram = useCallback(async () => {
-    if (!sessionId || phase === "running") return;
+    // 同步守卫：双击/回车连发时第二次请求在 setState 生效前就被拦掉，不会两个 run 抢同一会话。
+    if (!sessionId || runInFlightRef.current || phase === "running") return;
+    runInFlightRef.current = true;
+    resultRef.current = null;
+    autoBeatKeyRef.current = null;
     setResult(null);
     setError(null);
     setLogs([chrome.workbench.runStarted]);
     setEngineHint(null);
     setResultHint(null);
     setCompletedNotice(null);
+    setSettleOpen(false);
     errorHoldRef.current = false;
     setPhase("running");
     try {
       await engine.run(sessionId, codeRef.current);
     } catch (cause) {
-      setError({ message: humanizeError(cause instanceof Error ? cause.message : undefined, levelId) });
+      setError(readableEngineError(cause, levelId));
       errorHoldRef.current = false;
-    setPhase("ready");
+      setPhase("ready");
+    } finally {
+      runInFlightRef.current = false;
     }
   }, [engine, levelId, phase, sessionId]);
 
@@ -284,11 +343,92 @@ export function Workbench({
     await engine.stop(sessionId);
   }, [engine, sessionId]);
 
+  /**
+   * 请求确认玩家节拍（手动兜底/自动确认共用）。
+   * auto=true 时失败不弹红条（下个轮询周期静默重试）；手动失败展示真实原因。
+   */
+  const requestPlayerBeat = useCallback(
+    async (auto: boolean) => {
+      if (!sessionId || beatInFlightRef.current) return;
+      beatInFlightRef.current = true;
+      try {
+        // 不传 simulate：paper 世界引擎只按真实世界评分（confirm-only），mock 世界自动模拟。
+        await engine.playerBeat(sessionId);
+      } catch (cause) {
+        if (auto) {
+          // 允许下个轮询重试（比如引擎刚好在重连/恢复场景）。
+          autoBeatKeyRef.current = null;
+          beatCooldownUntilRef.current = Date.now() + 3000;
+        } else {
+          setError(readableEngineError(cause, levelId));
+        }
+      } finally {
+        beatInFlightRef.current = false;
+      }
+    },
+    [engine, levelId, sessionId],
+  );
+
   const playerBeat = useCallback(async () => {
-    if (!sessionId) return;
-    // 由引擎决定模拟还是真实确认：mock 世界模拟，paper 世界只确认真人亲手完成的结果。
-    await engine.playerBeat(sessionId);
-  }, [engine, sessionId]);
+    // 手动兜底：paper 下真人右键后若自动检测没触发，玩家仍可自己点「我已在游戏里完成」。
+    autoBeatKeyRef.current = "manual";
+    beatCooldownUntilRef.current = Date.now() + 2000;
+    await requestPlayerBeat(false);
+  }, [requestPlayerBeat]);
+
+  /**
+   * 快照轮询回调（docs/49 §2.3 自动检测）：
+   * ① 按 id 实时同步目标面板（解决「世界 3/3 完成但面板只打勾 2/3」）；
+   * ② 当 state=READY、progress 全部通过（含玩家步骤）、本关确有玩家任务、且还没通过时，
+   *    一次性自动确认玩家节拍 → SSE result 到达后现有逻辑自动打开结算浮层。
+   */
+  const handleSnapshot = useCallback(
+    (snapshot: SnapshotView) => {
+      const progress = Array.isArray(snapshot.progress) ? snapshot.progress : [];
+      if (typeof snapshot.sessionEpoch === "number") sessionEpochRef.current = snapshot.sessionEpoch;
+      if (progress.length > 0) {
+        setGoals((previous) => {
+          if (previous.length === 0) return previous;
+          let changed = false;
+          const next = previous.map((goal) => {
+            const step = progress.find((item) => item.id === goal.id);
+            if (!step) return goal;
+            if (step.passed === goal.done && step.text === goal.text) return goal;
+            changed = true;
+            return { ...goal, text: step.text, done: step.passed };
+          });
+          return changed ? next : previous;
+        });
+      }
+      // ---- 自动确认玩家节拍 ----
+      if (!sessionId || beatInFlightRef.current) return;
+      if (snapshot.state !== "READY") return;
+      if (resultRef.current?.passed) return;
+      // 「本关有玩家任务」：优先用快照里的 playerBeatRequired；旧引擎回退到目标里的 player 标记。
+      const hasPlayerStepInProgress = progress.some((step) => step.player === true);
+      const beatRequired =
+        snapshot.playerBeatRequired ?? (hasPlayerStepInProgress || level?.objectives.some((goal) => goal.player) === true);
+      if (!beatRequired) return;
+      const allPassed = snapshot.allPassed ?? (progress.length > 0 && progress.every((step) => step.passed));
+      if (!allPassed) return;
+      // progress 里有玩家步骤时，allPassed 已经包含「玩家亲手完成」；
+      // 否则（如 L02/L09）必须看到快照里的 player 放置事件，避免织偶一跑完就自动确认。
+      if (!hasPlayerStepInProgress && snapshot.playerBeatDone !== true) return;
+      const now = Date.now();
+      if (now < beatCooldownUntilRef.current || now < suppressBeatUntilRef.current) return;
+      const signature = `${snapshot.sessionEpoch ?? "?"}|${progress.map((step) => (step.passed ? "1" : "0")).join("")}`;
+      if (autoBeatKeyRef.current === signature) return;
+      autoBeatKeyRef.current = signature;
+      void requestPlayerBeat(true);
+    },
+    [level, requestPlayerBeat, sessionId],
+  );
+
+  /** 可恢复错误（INVALID_STATE 等）的「重置本关后重试」动作。 */
+  const recoverFromError = useCallback(async () => {
+    await resetWorkbench();
+    await runProgram();
+  }, [resetWorkbench, runProgram]);
 
   const showHint = useCallback(() => {
     if (!copy) return;
@@ -359,7 +499,11 @@ export function Workbench({
   const coachMessage = useMemo(() => {
     if (loadError) return chrome.workbench.loadFailed;
     if (!copy) return labels.loading;
-    if (error) return `先改第 ${error.line ?? 1} 行，再点一次「运行」。`;
+    if (error) {
+      return typeof error.line === "number"
+        ? `先改第 ${error.line} 行，再点一次「运行」。`
+        : "先按错误提示改一改，再点一次「运行」。";
+    }
     if (phase === "running") return copy.coachOpen[1] ?? copy.firstStep;
     if (result?.passed) return copy.coachReact[3] ?? copy.settle.stars;
     if (waitingForPlayer) return `轮到你了：${copy.playerBeatUI}`;
@@ -535,10 +679,25 @@ export function Workbench({
               ) : null}
               {error ? (
                 <div className="error-banner" role="alert" data-testid="error-banner">
-                  <span className="error-line">{fill(chrome.workbench.errorLinePrefix, { 行: error.line ?? 1 })}</span>
+                  <span className="error-line">
+                    {typeof error.line === "number" ? fill(chrome.workbench.errorLinePrefix, { 行: error.line }) : "运行出错："}
+                  </span>
                   <span className="error-reason">
                     <RichText text={error.message} />
                   </span>
+                  {error.hint ? (
+                    <span className="error-reason muted small" data-testid="error-hint">
+                      <RichText text={error.hint} />
+                    </span>
+                  ) : null}
+                  {error.code ? (
+                    <span className="muted small" data-testid="error-code">错误码：{error.code}</span>
+                  ) : null}
+                  {error.recoverable ? (
+                    <button type="button" className="btn" onClick={() => void recoverFromError()} data-testid="btn-error-reset">
+                      重置本关后重试
+                    </button>
+                  ) : null}
                 </div>
               ) : null}
               {level ? (
@@ -575,7 +734,7 @@ export function Workbench({
                 </div>
               ) : null}
             </section>
-            <PositionHud engine={engine} sessionId={sessionId} level={level} onOpenManual={onOpenManual} />
+            <PositionHud engine={engine} sessionId={sessionId} level={level} onOpenManual={onOpenManual} onSnapshot={handleSnapshot} />
             <SceneIllustration levelId={levelId} />
             {copy?.challenge ? (
               <details className="card challenge" data-testid="challenge-card">

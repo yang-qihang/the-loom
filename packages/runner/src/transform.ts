@@ -10,6 +10,33 @@ export function isAsyncSdkCall(node: ts.CallExpression): boolean {
   return ASYNC_SDK_METHODS.has(callee.name.text) && ASYNC_SDK_RECEIVERS.has(receiver.text);
 }
 
+/** 学生源码的语法问题（parser 诊断；行号从 1 开始）。 */
+export interface StudentSyntaxIssue {
+  message: string;
+  line?: number;
+}
+
+/**
+ * 语法检查：ts.createSourceFile 对缺括号等错误会「容错恢复」出一棵可打印的 AST，
+ * 直接交给 printer/esbuild 会把半截代码补全后真的执行（P0：缺右括号的 collect 收走了蛋）。
+ * 这里读取 parser 诊断，有错就不进入执行路径；与 analysis.ts 的 parseDiagnostics 写法一致。
+ */
+export function firstStudentSyntaxIssue(source: string): StudentSyntaxIssue | null {
+  const text = String(source ?? "");
+  let file: ts.SourceFile;
+  try {
+    file = ts.createSourceFile("student.ts", text, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TS);
+  } catch (error) {
+    return { message: error instanceof Error ? error.message : String(error) };
+  }
+  const diagnostics = (file as unknown as { parseDiagnostics?: readonly ts.Diagnostic[] }).parseDiagnostics ?? [];
+  const first = diagnostics[0];
+  if (!first) return null;
+  const message = ts.flattenDiagnosticMessageText(first.messageText, "\n");
+  const line = typeof first.start === "number" ? file.getLineAndCharacterOfPosition(first.start).line + 1 : undefined;
+  return { message, line };
+}
+
 /**
  * 顺序门面：把学生代码里的异步 SDK 调用自动变成 await。
  * Act I–II 使用 "auto-await"；L9 使用 "explicit"（学生自己写 await）。

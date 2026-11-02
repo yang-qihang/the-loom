@@ -9,6 +9,8 @@ if (scale) document.documentElement.style.zoom = scale;
 import { installNativeGuard } from "./native-guard";
 import "./styles.css";
 import "./guidance.css";
+import "./narrative.css";
+import "./typography.css";
 
 if (isDesktopShell()) installNativeGuard();
 

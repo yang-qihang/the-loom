@@ -33,8 +33,19 @@
   --paper-2: #e8d6b2;
   --paper-ink: #2f2417;
   --radius: 14px;
-  --serif: "Zpix", "Departure Mono", "Noto Serif SC", serif;
-  --sans: "Departure Mono", "Zpix", "Noto Sans SC", ui-monospace, monospace;
+  /* ===== 字体系统（task-2 / docs/48 §1.7，详见 typography.css 顶部注释） =====
+     三个语义变量决定「同一段文字该用什么字」：
+       --font-pixel 像素字（Zpix 中文 / Departure Mono 英文数字）→ 短标题、按钮、标签、chip
+       --font-text  可读正文（随包 Noto Sans SC，OFL-1.1）      → 长段正文/叙述/说明
+       --font-code  代码（随包 Maple Mono）                     → code/pre/kbd/.mono 与代码片段 */
+  --font-pixel: "Zpix", "Departure Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-text: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-reading: var(--font-text); /* 长文正文别名（教材窗口 textbook.css 等下游用这个拼写） */
+  --font-code: "Maple Mono", "Maple Mono CN", "Noto Sans CJK SC", "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  /* 旧变量保留为别名/字面栈：既有规则按 --serif/--sans/--mono 写，逐个迁移成本高，
+     这里先让别名指向新体系（--mono 保留 Departure Mono 优先，因为它是既有标签/短数字的等宽像素栈）。 */
+  --serif: var(--font-pixel);
+  --sans: var(--font-text);
   --mono: "Departure Mono", "Zpix", "JetBrains Mono", "Fira Code", "Noto Sans Mono", ui-monospace, monospace;
 }
 
@@ -49,7 +60,7 @@ body {
     radial-gradient(900px 600px at 95% 0%, rgba(217, 164, 65, 0.06), transparent 55%),
     linear-gradient(180deg, var(--bg-2), var(--bg) 55%);
   color: var(--ink);
-  font-family: var(--sans);
+  font-family: var(--font-text);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -67,14 +78,14 @@ body::before {
 
 #root { position: relative; z-index: 1; }
 
-h1, h2, h3 { font-family: var(--serif); font-weight: 600; letter-spacing: 0.02em; margin: 0; }
+h1, h2, h3 { font-family: var(--font-pixel); font-weight: 600; letter-spacing: 0.02em; margin: 0; }
 h1 { font-size: 40px; line-height: 1.2; }
 h2 { font-size: 26px; line-height: 1.3; }
 h3 { font-size: 18px; }
 p { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 button { font: inherit; color: inherit; }
-code, .mono { font-family: var(--mono); }
+code, pre, kbd, .mono, .inline-code { font-family: var(--font-code); }
 
 :focus-visible { outline: 2px solid var(--amber-strong); outline-offset: 2px; border-radius: 6px; }
 
@@ -121,6 +132,7 @@ code, .mono { font-family: var(--mono); }
 .btn-ghost:hover:not(:disabled) { border-color: var(--line-soft); color: var(--ink-dim); }
 
 .kbd {
+  /* 键盘键帽是「短标签」，按任务口径保留像素等宽字（Departure Mono），不属于代码。 */
   font-family: var(--mono);
   font-size: 16px;
   color: var(--ink-faint);
@@ -310,6 +322,7 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 }
 .pane-title { font-family: var(--serif); font-size: 17px; color: var(--amber); }
 .file-chip {
+  /* 文件名是短标签，按任务口径保留像素等宽字；真正的代码内容用 --font-code。 */
   font-family: var(--mono);
   font-size: 16px;
   color: var(--ink-dim);
@@ -511,7 +524,7 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 
 /* T2：纯中文 UI 的补充样式 */
 .inline-code {
-  font-family: var(--mono);
+  font-family: var(--font-code);
   font-size: 0.94em;
   color: var(--amber-strong);
   background: rgba(232, 180, 106, 0.10);
@@ -942,7 +955,7 @@ body.has-overlay { overflow: hidden; }
 .repl-input {
   flex: 1;
   min-width: 0;
-  font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
+  font-family: var(--font-code);
   font-size: 18px;
   color: var(--ink);
   background: #120d09;
@@ -1105,7 +1118,7 @@ body.has-overlay { overflow: hidden; }
   border: 1px solid var(--line-soft);
   background: #120d09;
   overflow-x: auto;
-  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-family: var(--font-code);
   font-size: 15px;
   line-height: 1.7;
   color: var(--ink);
@@ -1282,7 +1295,7 @@ body::before {
 
 /* 标题：块状无衬线 + 硬阴影，替代玻璃/塑料渐变感；字号与行高不变 */
 h1, h2, h3 {
-  font-family: var(--sans);
+  font-family: var(--font-pixel);
   letter-spacing: 0.04em;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
 }
@@ -1352,7 +1365,7 @@ h1, h2, h3 {
 
 /* 纸面区域保持可读性，只换硬边框；正文/代码字体和字号完全不动 */
 .codex-code, .editor-host, .monaco-editor, .inline-code, code, pre {
-  font-family: var(--mono);
+  font-family: var(--font-code);
   text-shadow: none;
 }
 .codex-code, .codex-section, .error-panel, .repl-output {
@@ -1572,7 +1585,7 @@ body.desktop-shell .map-wall { padding-top: 84px; }
 }
 .coach .rune-avatar .rune-seal-ring { display: none; }
 .coach .rune-avatar .rune-seal-text {
-  font-family: var(--sans);
+  font-family: var(--font-pixel);
   font-size: 14px;
   color: var(--amber-strong);
   line-height: 1;
@@ -1633,7 +1646,7 @@ body.desktop-shell code {
   height: 44px;
   box-sizing: border-box;
   padding: 8px 12px;
-  font-family: var(--mono);
+  font-family: var(--font-code);
   font-size: 16px;
   line-height: 24px;
   border-radius: 2px;
@@ -1736,7 +1749,7 @@ button.map-card:hover {
 .mode-chip::before { border-radius: 0; box-shadow: none; }
 
 /* 主页：可读性要求较低的展示文字更大胆地用中文像素字；正文/说明仍用无衬线可读字体。 */
-:root { --pixel: "Zpix", "Departure Mono", "JetBrains Mono", ui-monospace, monospace; }
+:root { --pixel: var(--font-pixel); }
 .map-head h1,
 .act-head h2,
 .map-card h3,
@@ -2159,7 +2172,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   border: 1px solid var(--line-soft);
   border-radius: 8px;
   color: var(--ink);
-  font-family: var(--mono);
+  font-family: var(--font-code);
   font-size: 15px;
   line-height: 1.65;
   tab-size: 2;

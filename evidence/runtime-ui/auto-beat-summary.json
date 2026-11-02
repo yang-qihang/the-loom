@@ -1,0 +1,11 @@
+{
+  "ts": "2026-11-01T14:36:16.684Z",
+  "level": "L01",
+  "mode": "mock-engine + 快照改写模拟真实玩家完成",
+  "autoSettle": true,
+  "stars": 3,
+  "playerBeatRequests": 1,
+  "goalsAllDoneAt": 3182.5999999940395,
+  "settleAt": 3220,
+  "consoleErrors": []
+}

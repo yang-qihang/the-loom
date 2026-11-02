@@ -50,7 +50,17 @@ export interface ApiReferenceView {
   points: Record<string, NamedPointView>;
 }
 
-/** 位置 HUD 用世界快照（引擎 /api/session/:id/snapshot，形状为 WorldSnapshot 的子集）。 */
+/** 位置 HUD / 自动检测用世界快照（引擎 /api/session/:id/snapshot，形状为 WorldSnapshot 的子集）。 */
+export interface SnapshotProgressStep {
+  id: string;
+  text: string;
+  passed: boolean;
+  /** true = 需要玩家在世界里亲手完成的一步。 */
+  player: boolean;
+  /** 这一步的详细引导（教练卡「下一步怎么做」）。 */
+  hint?: string;
+}
+
 export interface SnapshotView {
   agents?: Record<string, { pos: number[] }>;
   npcs?: Record<string, { pos: number[] }>;
@@ -58,6 +68,21 @@ export interface SnapshotView {
   points?: Record<string, NamedPointView>;
   containers?: Record<string, Record<string, number>>;
   tick?: number;
+  /**
+   * 引擎每秒轮询快照附带的任务进度（docs/49 §2.3）：Workbench 据此实时勾选目标，
+   * 并在进度全部通过时自动确认玩家节拍。旧引擎没有这些字段 → UI 静默降级。
+   */
+  progress?: SnapshotProgressStep[];
+  playerBeatReady?: boolean;
+  allPassed?: boolean;
+  /** 本关是否声明了玩家节拍（task.playerBeat）。 */
+  playerBeatRequired?: boolean;
+  /** 快照里是否已有玩家亲手完成的动作（与评分同源：block.place + actorType=player）。 */
+  playerBeatDone?: boolean;
+  /** 会话 epoch：顶层 epoch 可能被插件快照覆盖，Studio 的防重放只认这个字段。 */
+  sessionEpoch?: number;
+  /** 引擎会话状态（READY/PASSED/…）：自动确认玩家节拍只在 READY 时触发。 */
+  state?: string;
 }
 
 export interface LevelView {
@@ -82,6 +107,8 @@ export interface Criterion {
 }
 
 export interface RunResult {
+  /** 这次结果属于哪一次运行（SSE 旧事件过滤依据；旧引擎没有此字段）。 */
+  runId?: string;
   passed: boolean;
   stars: number;
   criteria: Criterion[];
@@ -101,7 +128,7 @@ export type StudioEvent =
   | { type: "objective"; id: string; text: string; done: boolean }
   | { type: "result"; result: RunResult }
   | { type: "hint"; level: number; text: string }
-  | { type: "error"; message: string; line?: number };
+  | { type: "error"; message: string; line?: number; runId?: string };
 
 export type ReplKind = "value" | "action" | "error";
 
@@ -126,7 +153,8 @@ export interface StudioEngine {
   listLevels(): Promise<import("./copy").LevelCard[]>;
   loadLevel(id: string): Promise<LevelView>;
   createSession(levelId: string): Promise<string>;
-  run(sessionId: string, source: string): Promise<void>;
+  /** 提交运行；返回引擎的 runId（旧引擎没有 runId 时返回 null）。 */
+  run(sessionId: string, source: string): Promise<string | null>;
   stop(sessionId: string): Promise<void>;
   reset(sessionId: string): Promise<void>;
   playerBeat(sessionId: string, simulate?: boolean): Promise<void>;
@@ -144,10 +172,44 @@ export interface StudioEngine {
   apiReference?(levelId: string): Promise<ApiReferenceView | null>;
 }
 
-/** 引擎不可用（没起服务/断网）时抛这个，UI 用它决定展示「切 Mock」提示。 */
+/** 引擎请求返回的错误体（docs/21 §3：`{ error: { code, message, hint? } }`）。 */
+export interface EngineErrorInfo {
+  code?: string;
+  hint?: string;
+  /** HTTP 状态码（网络不可达时没有）。 */
+  status?: number;
+}
+
+/**
+ * 引擎不可用 / 引擎明确拒绝请求时抛这个。
+ * 保留原类名以兼容既有调用方；新增 code/hint/status 让错误卡能显示真实原因与可操作建议
+ * （不再统一显示「织机回了一个错(409)」）。
+ */
 export class EngineUnavailableError extends Error {
-  constructor(message: string) {
+  readonly code?: string;
+  readonly hint?: string;
+  readonly status?: number;
+
+  constructor(message: string, info: EngineErrorInfo = {}) {
     super(message);
     this.name = "EngineUnavailableError";
+    this.code = info.code;
+    this.hint = info.hint;
+    this.status = info.status;
+  }
+
+  /** 可恢复错误（重置会话/重进关卡后能继续玩）：错误卡给「重置本关后重试」动作。 */
+  get recoverable(): boolean {
+    return (
+      this.code === "INVALID_STATE" ||
+      this.code === "STALE_SNAPSHOT" ||
+      this.code === "NOT_FOUND" ||
+      this.code === "DISPOSED"
+    );
+  }
+
+  /** 引擎完全联系不上（没起服务/断网）。 */
+  get offline(): boolean {
+    return this.code === "ENGINE_OFFLINE";
   }
 }

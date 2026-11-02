@@ -1,0 +1,61 @@
+/* 教材常驻入口（工作台右下角悬浮 pills）：非模态、不挡自动结算/结算按钮。 */
+.tb-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 96px;
+  z-index: 45;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border-color: var(--line);
+  background: linear-gradient(180deg, rgba(43, 32, 21, 0.96), rgba(30, 23, 16, 0.96));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-pixel, "Zpix", "Departure Mono", ui-monospace, monospace);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  opacity: 0.92;
+}
+.tb-launcher:hover {
+  opacity: 1;
+  border-color: #6b5233;
+  transform: translateY(-1px);
+}
+.tb-launcher-rune {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #6b5233;
+  background: rgba(232, 180, 106, 0.14);
+  color: var(--amber-strong, #ffcf7d);
+  font-size: 13px;
+}
+.tb-launcher-label {
+  white-space: nowrap;
+}
+.tb-launcher-hint {
+  font-size: 12px;
+  color: var(--ink-faint, #8f7d64);
+  border: 1px solid var(--line, #3c2d1e);
+  border-radius: 5px;
+  padding: 0 5px;
+  line-height: 16px;
+}
+
+@media (max-width: 1100px) {
+  .tb-launcher {
+    right: 12px;
+    bottom: 88px;
+    padding: 8px 12px;
+  }
+  .tb-launcher-hint {
+    display: none;
+  }
+}
+
+/* 桌面壳（Tauri）有 36px 自绘标题栏；入口下移避免与标题栏的窗口按钮视觉冲突。 */
+body.desktop-shell .tb-launcher {
+  bottom: 96px;
+}

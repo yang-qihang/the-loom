@@ -8,6 +8,9 @@
     "test": "vitest run",
     "demo:l01": "tsx packages/runner/src/demo-l01.ts",
     "verify": "bash scripts/verify.sh",
+    "verify:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify.ps1",
+    "desktop:runtime:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-real-runtime.ps1",
+    "desktop:package:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-desktop.ps1",
     "dev:engine": "tsx apps/engine/src/server.ts",
     "dev:studio": "npm --prefix apps/studio run dev:mock",
     "mc:up": "bash scripts/mc-up.sh",
@@ -15,6 +18,8 @@
     "mc:reset": "bash scripts/mc-reset.sh",
     "it:real": "tsx it/l1-real.ts",
     "desktop:assets": "node apps/desktop/scripts/build-assets.mjs",
+    "build:textbook": "tsx scripts/build-textbook.ts --write",
+    "check:textbook": "tsx scripts/build-textbook.ts",
     "desktop:dev": "npm --prefix apps/desktop run dev",
     "desktop:build": "npm --prefix apps/desktop run build",
     "desktop:run": "apps/desktop/src-tauri/target/release/loomcraft-desktop",
@@ -30,6 +35,7 @@
     "esbuild": "0.28.2",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "yaml": "^2.8.1"
   }
 }

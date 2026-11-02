@@ -1,75 +1,90 @@
 # HANDOFF — 项目续跑快照（新 conversation / 新 agent 从这里开始）
 
-> 更新时间：2026-11-01 13:40（Asia/Shanghai）｜当前 commit：`git log -1`（工作区有未提交改动；**不要自行 git commit**，Lead 统一提交）
+> 更新时间：2026-11-01 22:5x（Asia/Shanghai）｜当前 commit：`git log -1`（Round 4 已推送 main；工作区在 Round 4 收尾时可能有 docs/evidence 的未提交改动；**不要自行 git commit**，Lead 统一提交）
 > 用户要求：**全权由 AI 推进整个项目；用户不参与测试/操作；必须美观、精致、coherent、层层递进、易用、文字清晰无 AI 味。**
-> 本文件是「断点续跑」入口：新会话先读 `README.md` → `STATUS.md` → `docs/46-playtest-fix-plan.md`（上一轮事实源）→ `docs/48-round2-guidance-api-visual-plan.md`（Round 2 契约）→ `AGENTS.md` → `docs/41-ai-contributor-guide.md`，再跑验证命令。
+> 本文件是「断点续跑」入口：新会话先读 `README.md` → `STATUS.md`（顶部 Round 4）→ `docs/49-round4-teaching-ux-and-textbook-plan.md`（本轮契约/结果）→ `docs/46`/`docs/48`（前两轮事实源）→ `AGENTS.md` → `docs/41-ai-contributor-guide.md`，再跑验证命令。
 
-## 0. 当前交付快照（2026-11-01，v1.4）
+## 0. 当前交付快照（2026-11-01，Round 4 完成）
 
-- **可玩**：L01–L10 全部可玩；真实 Paper e2e 全 PASS（`it/l1-real.ts`–`it/l10-real.ts`，L01 21 项 / L02–L09 各 13 项 / L10 19 项；L10 额外有 Studio 会话注入 11 项）。
-- **今天修复的 4 类试玩问题**（详见 `docs/46-playtest-fix-plan.md` §5）：① 目标面板由 `LevelDef.progress` 单一真值驱动、逐条打勾；② 严格线性玩家节拍（`playerBeatReady` 门控 + 插件拦截提前右键）；③ 切关/reset 的 sandbox 纯净（清场景/实体/背包，全区域 checkpoint 还原）；④ 第 4 盏灯容错右键（站地面、手持灯笼对柱子右键即可，不用看柱顶）。
-- **桌面**：AppImage ≈429MB / RPM ≈436MB，内置 Node 22 + Java 25 + Paper 26.1.2 + 插件 + 干净世界 + 真实引擎 + mineflayer 织偶；用户只需安装 Minecraft 26.1.2。旧 `~/.loomcraft/runtime/paper/world` 会按世界布局版本 marker 自动换干净世界（进度/星级存 Studio，不存世界）。
-- **质量（Round 1 验收快照；Round 2 收尾后由 Lead 更新）**：`npx tsc --noEmit` 0；`npm test` 235/235（25 files）；Studio `test:e2e` 6/6、`test:e2e:local` 2/2；`bash scripts/verify.sh` exit 0（lg 有 tracked warn）；文案门禁（自然中文 + 术语白名单）0 违规。
-- **Round 2（2026-11-01 第二轮试玩反馈，实施中）**：语义 API（collect/deposit/count/world.container/goTo/place(block,point)）与命名坐标点；指令手册/位置 HUD/REPL 当前关卡；progress hint + 概念揭晓；codeRequirements 名实相符；Maple Mono 与 Monaco 菜单不透明；真实客户端高清截图与起始点验收。契约/验收见 `docs/48`，最终数字/包路径以 Lead 集成后为准。
-- **明确边界**：挑战层是说明卡非可玩会话；真人（非 AI 代理）多背景盲测未执行；Fresh Reader Round 4 未清零（G-FRESH-READER 仍 tracked fail）。L03/L05 出生点已修（README 边界 5）；L03 钟本体在钟楼结构内不可见属美术边界；Round 2 截图/字体验收待最终回归。
+- **可玩**：L01–L10 全部可玩；真实 Paper e2e 全 PASS（本轮 Windows 原生复跑 L01/L10 + 引擎 P0 回归；完整 L01–L10 由 `it/l1-real.ts`–`it/l10-real.ts` 串行覆盖）。
+- **Round 4 交付**（提交 `715b8e5`/`31580e3`/`1d87085`/`c1ba514`/`4227b5d`，详见 `STATUS.md` 顶部）：
+  ① 玩家任务自动检测/自动结算（引擎 snapshot 附带 progress，Studio 轮询同步目标 + 自动 confirm → 自动结算；手动按钮兜底）；
+  ② 运行鲁棒性（失败重试自动恢复场景、真语法检查、runId/SSE 旧事件过滤、后端错误原因透传、双击防重入）；
+  ③ 剧情浮层排版（固定头/滚动内容/固定底、对称留白、小视口不裁切、同类浮层同修）；
+  ④ 字体系统（代码=Maple Mono、长文=Noto Sans SC 随包子集、短标题/按钮=像素）；
+  ⑤ 10 章配套教材（76,429 汉字）+ 可拖动/缩放/置顶教材窗口（首次进关自动打开、随时回看）；
+  - **质量（Round 4 验收）**：`tsc --noEmit` 0；`npm test` 28 files / 251 tests；Studio real-config e2e **37/37**、mock-config e2e 4/4；教材校验 0 error；C 等价 8/8；真实 Paper e2e L01/L10 + 引擎回归 PASS（`evidence/l*-real-latest.json`、`evidence/engine-paper-regressions-latest.json`）。
+- **桌面**：AppImage ≈429MB / RPM ≈436MB（上一轮产物）；内置 Node/Java/Paper/插件/世界/引擎/织偶；**新桌面包需同学在原生 Linux 重新打包**（本轮源码含新字体/教材/引擎，未在 Linux 侧打包验证）。
+- **明确边界**：挑战层仍是说明卡；真人多背景盲测未执行；Fresh Reader Round 4 未清零；教材为长文阅读、真人学习效果未测；L09 取金苹果仍用旧写法 `place("air", chest)`（内容侧待改）；L01 hidden `h1` 的 `agent.move` 采样边界仍偶发（判星公平性问题，见 STATUS 顶部 Round 3 段）。
+- **Windows 原生验证栈（canonical 端口）**：Paper `25567` / 插件 RPC `8765` / engine `4317` / Studio `5173`；`it/.mc-server/server.properties` 为 25567；Paper 用 `.tools/win/paper-host.mjs` 托管。Fedora VM 已清理（`loom-vm` 仅 3 份报告 md），AppImage/RPM 由同学原生 Linux 打包。
+- **下一轮建议先做**：① L01 hidden `h1` 采样边界（判星公平性）；② 挑战层从说明卡升级为可玩会话；③ L09 取苹果改 `collect`/语义 API；④ 真人多背景盲测 + Fresh Reader Round 4；⑤ Linux 侧重新打包并复验字体/桌面壳。
 
 ## 1. 现在可直接跑的命令
 
 ```bash
 # 质量门（typecheck / 单测 / 契约 / 内容 / 专项 gate）
 npm ci
-npm test                       # 25 files / 235 tests
+npm test                       # 28 files / 251 tests
 npm run typecheck
 bash scripts/verify.sh         # 默认 l0,l1,l2,l3,lg；exit 0
-bash scripts/verify.sh --layers l0,l1,l2,l3,lg,ux   # 彩排前跑 UOS
 
-# Studio 验收（Playwright 自动起引擎与静态站；用系统 Chrome）
-npm --prefix apps/studio run test:e2e        # 6/6
-npm --prefix apps/studio run test:e2e:local  # 2/2
+# Studio 验收（Playwright 自动起引擎与静态站；用系统 Chrome；Windows 可直接跑）
+npm --prefix apps/studio run test:e2e        # 37/37（含 narrative-layout/typography/textbook-window/auto-beat/runtime-recovery）
+npm --prefix apps/studio run test:e2e:local  # 4/4（mock 构建）
 node scripts/check-copy.mjs --self-test     # 文案分类器 14/14
+
+# 配套教材（10 章 Markdown → 结构化数据；--check 只校验）
+npx tsx scripts/build-textbook.ts --write
 
 # 真实 Paper（无头；同一服务端串行）
 bash scripts/mc-up.sh
 npx tsx it/l1-real.ts          # … l2 … l10 逐关串行
+npx tsx it/engine-paper-regressions.ts   # 引擎 P0 回归（会话重入/L10 双织偶/bot 复用）
 bash scripts/mc-reset.sh       # 单独测 world.reset
 bash scripts/mc-down.sh
 
-# 桌面 App（自包含真实运行时）
+# 桌面 App / 重新打包（唯一入口；Linux 原生环境）
 bash scripts/launch-desktop.sh
-
-# 重新打包（唯一入口）
 bash scripts/package-desktop.sh
 ```
 
 ## 2. 当前正在跑的进程
 
-- **无必须常驻的进程**。桌面 App/`launch-desktop.sh` 会自己拉起内置 Paper + 真实引擎，并在启动前清理旧实例；手跑真实 e2e 时 `mc-up.sh` 起的 Paper 用完 `mc-down.sh` 停掉。
-- 端口约定：HTTP 引擎 `4317`（可用 `PORT` 覆盖）、Paper `25565`、插件 RPC `8765`；Studio dev `5173`；真实 e2e 的 Studio/引擎用 `4399`/`5186`；自动化 GUI 只允许 `:98`/`:99`，禁止 `:0`。
+- **无必须常驻的进程**。手跑真实 e2e 时 Paper 用 `.tools/win/paper-host.mjs`（Windows）或 `scripts/mc-up.sh`（Linux）起，用完停掉。
+- 端口约定：HTTP 引擎 `4317`（`PORT` 可覆盖）、Paper `25565`（本机开发用 `25567`，25565 曾被旧 Prograft 占用）、插件 RPC `8765`；Studio dev `5173`；真实 e2e 的 Studio/引擎用 `4399`/`5186`（跨平台 env 已在 playwright.config 配好）、mock 用 `5185`。
 - 日志：`~/.loomcraft/logs/`（桌面/内置 Paper/引擎）、`it/.mc-server/console.log`（手跑 Paper）。
+
 
 ## 3. 下一轮优先级（按用户价值）
 
-1. **Round 2 收尾**：等 api-runtime/api-engine/content-act1/content-late/guidance-ui/monaco-font/visual 各线合入后，按 `docs/48` §3 跑完整验收（语义 API 回归、指令手册/HUD/REPL、Maple Mono/右键菜单、10 关高清截图与起始点）、重新打包；文档里未确认的数字不要填（包体积/截图尺寸）。
+1. **L01 hidden `h1` 的 `agent.move` 采样边界**（`it/l1-real.ts` 负例 `l1.starter.report-equals-mock`：Mock 判 `h1` 过、真实 Paper 偶发不过，差 1 星；属判星公平性已知问题，需改成容差/事件顺序判定）。
 2. **挑战层从说明卡升级为可玩会话**（当前所有关卡「挑战层」只是可阅读说明卡）。
-3. **真人多背景盲测**：目前所有玩家路径证据都是 AI 自动化（真实 Paper e2e + Studio e2e + UOS）。
-4. **Fresh Reader Round 4**：用全新 2 个 fresh agent 复读，清零前不写「完成」。
-5. **文案后续批次**：L05–L10 引导与织典页文案继续覆盖（docs/22），按新政策「自然中文 + 必要英文术语」复核。
+3. **L09 语义化收尾**：内容侧「取金苹果」仍用旧写法 `place("air", chest)`（教材已标注为旧写法，代码侧建议改 `collect`/`deposit` 语义 API 并同步参考解/教程）。
+4. **真人多背景盲测 + Fresh Reader Round 4**：目前玩家路径证据都是 AI 自动化（真实 Paper e2e + Studio e2e + UOS）；Fresh Reader 清零前不写「完成」。
+5. **Linux 侧重新打包并复验**：本轮新增字体（Noto 子集）、教材内容、引擎/会话改动；需在原生 Linux 重新打包 AppImage/RPM，复验桌面壳字体/滚动/教材窗口（WebKitGTK）。
+6. **文案后续批次**：L05–L10 引导与织典页文案继续覆盖（docs/22），按新政策「自然中文 + 必要英文术语」复核。
+7. **`it/engine-paper.ts:191` 旧 testMode 断言**：仍按旧 testMode 逻辑断言，建议改成显式 `simulate`/confirm 语义（不属于本轮必修）。
 
 ## 4. 关键约束（所有 agent）
 
 1. 不越 write scope；不改别人文件；**不要 git commit**（Lead 统一提交）；不改测试/断言变绿。
 2. 版本锁：MC/Paper **26.1.2 build 74**、Java **25**、mineflayer **4.39.0**、minecraft-protocol 1.68.0、pathfinder 2.4.5、TS **6.0.3**、esbuild 0.28.2、Monaco 0.57.0。升级 = ADR + Lead 签字。
-3. 学生 API 只能来自 `docs/12`；语法不越级；类型错误不阻断、语法错误阻断。
-4. 文案遵守 `docs/20` §3/§3b（无 AI 味、动词按钮、错误=哪里错+怎么改）：自然中文 + 必要英文计算机术语保留英文，概念统一「中文名（English term）」；UI 英文标签仍禁止。
-5. 真实 e2e 同一 Paper 串行；GUI 自动化只用 `:98/:99`；改插件必须冷启动，不 `/reload`。
-6. 事实/完成标准：命令 + exit 0 + 产物路径；`STATUS.md` 每个集成点更新；不要用「应该可以」代替证据。
+3. 学生 API 只能来自 `docs/12`；语法不越级；类型错误不阻断、语法错误阻断（Round 4 起：语法错误在执行前拦截，半截代码不执行）。
+4. 文案遵守 `docs/20` §3/§3b/§3b4（无 AI 味、动词按钮、错误=哪里错+怎么改）：自然中文 + 必要英文计算机术语保留英文，概念统一「中文名（English term）」；UI 英文标签仍禁止。
+5. 字体红线（Round 4）：代码 = Maple Mono；长段正文 = Noto Sans SC；短标题/按钮/标签 = 像素字体；不得把长文换回像素字，也不得把短标题按钮换成正文/代码字体（见 `docs/20` §3b4 + e2e/typography.spec.ts）。
+6. 真实 e2e 同一 Paper 串行；GUI 自动化只用 `:98/:99`；改插件必须冷启动，不 `/reload`。
+7. 事实/完成标准：命令 + exit 0 + 产物路径；`STATUS.md` 每个集成点更新；不要用「应该可以」代替证据。
+8. **提交规范（2026-11-01 用户确认）**：任务完成并验证后由 Lead **直接提交到 `main`**（不再单开 fix 分支）；提交前过质量门（`tsc`、`npm test`、涉及面 e2e/验收）；**Windows 侧改动只能改善跨平台一致性，不得破坏 Linux 上建立的基线**（版本锁、真实 Paper e2e、AppImage/RPM 打包流程）；**完成一个阶段就及时 commit + push**。
+9. 教材内容红线：`apps/studio/src/textbook/content/*.md` 的代码块只用该关及之前 API（`scripts/build-textbook.ts` 会校验 API 白名单/语法）；改 README/类型/校验器后须重跑 `npx tsx scripts/build-textbook.ts --write` 并提交 `library.generated.ts`。
+10. 原生模块红线：C 工具是**可选**构建路径（无 cmake/编译器自动 SKIP）；不得让 `npm ci`/`npm test`/Tauri 打包强依赖 C 工具链；图标契约是「像素 + PNG 结构一致」，不是文件字节 hash。
 
 ## 5. 文档地图（新 agent 按需读）
 
-- 当前事实源：`docs/46-playtest-fix-plan.md`（上一轮）、`docs/48-round2-guidance-api-visual-plan.md`（Round 2 契约）、`STATUS.md`、`README.md`、`docs/41-ai-contributor-guide.md`。
+- 当前事实源：`STATUS.md`（顶部 Round 4）、`docs/49-round4-teaching-ux-and-textbook-plan.md`（本轮契约/结果）、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`、`README.md`、`docs/41-ai-contributor-guide.md`。
+- 本轮新增：`docs/50-native-build-system.md`（C 图标生成器 + CMake/Make，含等价性证据/回退/风险）；教材写作规范 `apps/studio/src/textbook/README.md`。
 - 架构/契约：`docs/07-architecture.md`、`docs/21-t1-contracts.md`（T1 基线，2026-11-01 的 RPC/进度变更见 docs/46 §2）。
 - 设计期历史（结论保留、当前实现以代码为准）：`docs/00`–`docs/18`、`docs/24`。
-- 质量/流程：`docs/20`、`docs/28`、`docs/29`、`docs/30`、`qa/README.md`。
+- 质量/流程：`docs/20`（§3b4 字体策略）、`docs/28`、`docs/29`、`docs/30`、`qa/README.md`。
 - 玩法/交接：`docs/42-player-guide.md`、`docs/43-environment-and-bundling.md`、`docs/36-github-handoff.md`、`docs/40-development-history.md`。
 - 文档审计：`docs/47-docs-audit-2026-11-01.md`（本次审计的判定表与删除清单）。
 

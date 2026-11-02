@@ -156,6 +156,8 @@ class PaperRuntime implements WorldRuntime {
   private readonly log: (line: string) => void;
   private client: WsJsonRpcClient | null = null;
   private bot: GolemBotLike | null = null;
+  /** L10 等多织偶关卡的额外 bot；按插件里的真实玩家名索引。 */
+  private readonly namedBots = new Map<string, GolemBotLike>();
   private ready = false;
 
   constructor(config: PaperConfig, log: (line: string) => void) {
@@ -184,16 +186,44 @@ class PaperRuntime implements WorldRuntime {
 
   private async ensureBot(): Promise<GolemBotLike> {
     if (this.bot?.connected) return this.bot;
+    const bot = await this.createBot(this.config.botName);
+    this.bot = bot;
+    return bot;
+  }
+
+  /** L10 双织偶：按关卡 vars 里的 leftAgent/rightAgent 懒创建真实 bot。 */
+  private async ensureNamedBot(name: string): Promise<GolemBotLike> {
+    if (name === this.config.botName) return this.ensureBot();
+    const cached = this.namedBots.get(name);
+    if (cached?.connected) return cached;
+    const bot = await this.createBot(name);
+    this.namedBots.set(name, bot);
+    return bot;
+  }
+
+  /** 离开双织偶关卡时回收额外 bot，避免它们以普通玩家身份留在后续关卡。 */
+  private async closeNamedBots(): Promise<void> {
+    for (const bot of this.namedBots.values()) {
+      try {
+        await bot.disconnect();
+      } catch {
+        /* ignore */
+      }
+    }
+    this.namedBots.clear();
+  }
+
+  private async createBot(name: string): Promise<GolemBotLike> {
     // bot/manager.mjs 是纯 JS（由 MC 线维护、不带类型声明）；engine 只依赖它的结构化子集，
     // 所以在这一个边界用 unknown 断言成 GolemBotLike（不是 any 污染）。
     const { GolemBot } = (await import("../../../bot/manager.mjs")) as unknown as {
       GolemBot: new (opts: Record<string, unknown>) => GolemBotLike;
     };
     const bot = new GolemBot({
-      name: this.config.botName,
+      name,
       host: this.config.mcHost,
       port: this.config.mcPort,
-      log: (line: string) => this.log(`[bot] ${line}`),
+      log: (line: string) => this.log(`[bot:${name}] ${line}`),
     });
     try {
       await bot.connect(this.config.waitMs);
@@ -205,13 +235,12 @@ class PaperRuntime implements WorldRuntime {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         throw new WorldUnavailableError(
-          `织偶 ${this.config.botName} 无法进入真实 MC（${this.config.mcHost}:${this.config.mcPort}）：${message}`,
+          `织偶 ${name} 无法进入真实 MC（${this.config.mcHost}:${this.config.mcPort}）：${message}`,
           "排查顺序：① Paper 的 server.properties 必须是 online-mode=false + enforce-secure-profile=false；② 看 Paper 日志是否有该玩家断线/被踢；③ 同名 bot 残留时先重启 Paper（npm run mc:down && npm run mc:up）；④ 检查 LOOM_MC_HOST/LOOM_MC_PORT。",
           error instanceof Error ? error : firstError,
         );
       }
     }
-    this.bot = bot;
     return bot;
   }
 
@@ -222,7 +251,27 @@ class PaperRuntime implements WorldRuntime {
 
   async createPort(content: LevelContent): Promise<WorldPort> {
     const client = await this.ensureClient();
+    const vars = content.def.world.vars as Record<string, unknown>;
+    const leftAgent = typeof vars.leftAgent === "string" ? vars.leftAgent : undefined;
+    const rightAgent = typeof vars.rightAgent === "string" ? vars.rightAgent : undefined;
+    // L10 双织偶：主 bot 必须以插件登记名 LeftWeaver 出现，右织作为额外 agent bot；
+    // 否则 agent("左织")/agent("右织") 会同时回退到 Golem，桥面必然铺不满。
+    if (leftAgent && rightAgent && leftAgent !== rightAgent) {
+      const left = await this.ensureNamedBot(leftAgent);
+      const right = await this.ensureNamedBot(rightAgent);
+      return new PaperWorldPort({
+        rpc: client,
+        bot: left,
+        agents: { [rightAgent]: right },
+        def: content.def,
+        scene: PAPER_SCENE_HINTS[content.def.id],
+        log: (line: string) => this.log(`[port:${content.def.id}] ${line}`),
+        closeRpcOnDispose: false,
+        disposeBot: false,
+      });
+    }
     const bot = await this.ensureBot();
+    await this.closeNamedBots();
     return new PaperWorldPort({
       rpc: client,
       bot,
@@ -230,6 +279,8 @@ class PaperRuntime implements WorldRuntime {
       scene: PAPER_SCENE_HINTS[content.def.id],
       log: (line: string) => this.log(`[port:${content.def.id}] ${line}`),
       closeRpcOnDispose: false,
+      // 引擎只保留一个 Golem bot，跨会话复用；由 PaperRuntime.close() 收尾时断开。
+      disposeBot: false,
     });
   }
 
@@ -273,6 +324,7 @@ class PaperRuntime implements WorldRuntime {
   }
 
   async close(): Promise<void> {
+    await this.closeNamedBots();
     try {
       await this.bot?.disconnect();
     } catch {

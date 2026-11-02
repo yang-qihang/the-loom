@@ -17,6 +17,8 @@ test("本地演示兜底：选关 → 运行 → 玩家节拍 → 3 星 → 重�
       "loom.studio.progress.v1",
       JSON.stringify({ prologueSeen: true, actsSeen: [1, 2, 3], levelsStarted: ["L01"], lastCompletedLevelId: null }),
     );
+    // 回访玩家：教材已读，避免首次自动弹出教材窗口拦截工作台点击。
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10"]));
   });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "关卡墙" })).toBeVisible();

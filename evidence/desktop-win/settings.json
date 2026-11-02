@@ -1,0 +1,13 @@
+{
+  "alwaysOnTop": true,
+  "focusFollow": false,
+  "mode": "workbench",
+  "page": "workbench",
+  "prismCommand": null,
+  "window": {
+    "x": 206,
+    "y": 85,
+    "width": 1280,
+    "height": 840
+  }
+}

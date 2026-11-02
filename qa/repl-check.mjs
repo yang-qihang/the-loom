@@ -25,10 +25,14 @@ const server = exists("apps/engine/src/server.ts") ? read("apps/engine/src/serve
 const endpoints = ["/api/repl", "/api/repl/history", "/api/repl/reset"].filter(e => server.includes(e));
 add("R4", "HTTP 端点 3 个已接线（repl/history/reset）", endpoints.length === 3, { endpoints });
 
-// 实跑 repl 测试
+// 实跑 repl 测试（Windows：npx 实为 npx.cmd，直接 spawn 会 ENOENT；优先 node + 本地 vitest CLI）
 let testOk = false, stats = null;
 if (tests.length) {
-  const r = spawnSync("npx", ["vitest", "run", "packages/session/src/repl.test.ts", "--reporter=json", "--outputFile=qa/evidence/qa-repl-tests.json"], { cwd: ROOT, encoding: "utf8", timeout: 180000 });
+  const vitestArgs = ["run", "packages/session/src/repl.test.ts", "--reporter=json", "--outputFile=qa/evidence/qa-repl-tests.json"];
+  const vitestCli = path.join(ROOT, "node_modules/vitest/vitest.mjs");
+  const r = fs.existsSync(vitestCli)
+    ? spawnSync(process.execPath, [vitestCli, ...vitestArgs], { cwd: ROOT, encoding: "utf8", timeout: 180000 })
+    : spawnSync(process.platform === "win32" ? "npx.cmd" : "npx", ["vitest", ...vitestArgs], { cwd: ROOT, encoding: "utf8", timeout: 180000, shell: process.platform === "win32" });
   testOk = r.status === 0;
   try { const j = JSON.parse(read("qa/evidence/qa-repl-tests.json")); stats = { total: j.numTotalTests, failed: j.numFailedTests, passed: j.numPassedTests }; } catch {}
   if (r.status !== 0) fs.writeFileSync(path.join(EV, "qa-repl-tests-failure.log"), `${r.stdout ?? ""}\n${r.stderr ?? ""}\n`);

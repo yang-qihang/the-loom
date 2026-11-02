@@ -1,5 +1,39 @@
 # STATUS — 项目状态（Lead 维护，每个集成点更新）
 
+## 2026-11-01 Round 4（教学体验 / 配套教材 / 工程化，已完成并推送 main）
+
+> 上游：用户 2026-11-01 的 10 项反馈；契约与分工见 `docs/49-round4-teaching-ux-and-textbook-plan.md`。
+> 提交：`715b8e5`（剧情浮层+字体）、`31580e3`（自动结算+运行鲁棒性）、`1d87085`（教材窗口+内容+接入）、`c1ba514`（教材 L01–L05）。
+
+- **玩家任务自动检测/自动结算（任务 1/7/9）**：引擎 `GET /api/session/:id/snapshot` 附带 `progress`（含 `player` 标志）/`playerBeatReady`/`allPassed`/`playerBeatRequired`/`playerBeatDone`/`sessionEpoch`（顶层+嵌套）；Studio 轮询每秒按 id 同步 GoalList（解决「世界 3/3、面板 2/3」），世界侧全部完成时一次性自动 confirm 玩家节拍并自动打开结算（paper 保持 confirm-only、mock 模拟语义不变；手动按钮保留兜底）。
+- **运行状态鲁棒性（用户 bug 真根因）**：同一 `GameSession` 内每次 run 前不恢复场景——第一次失败前已执行的语句把世界改脏（L02 蛋被收走 / L04 田被种乱 / L09 两坛已开酿），参考解按干净世界执行必失败。修复：`session.run()` 前条件恢复（上一轮失败 && !playerBeatReady && 确有世界写动作 → port.reset + epoch+1，已通过/已轮到玩家不回滚）；runner 执行前检查 TS `parseDiagnostics`（半截代码不再偷偷执行）；事件带 runId、SSE 帧带 id + `Last-Event-ID`（新连接不回放旧 error/hint）；后端 `{code,message,hint}` 透传到 Studio 错误卡并给「重置本关后重试」；双击运行同步防重入；本地 mock 支持块注释。
+- **剧情浮层排版（任务 2/5）**：序章/幕开场/关开场/旅途手记重构为「固定头 / 可滚内容 / 固定底」，隐藏原生滚动条 + 自绘悬浮滑轨 + 滚轮/键盘/拖拽/触屏 + 上下渐隐；左右留白恒对称（不依赖 `scrollbar-gutter`）；1024×600 / 896×603 / 720×560 不再裁切；同类长内容浮层（结算/手册/织典/试符台/完整解）同修；桌面壳 36px 标题栏避让。
+- **字体系统（任务 3/4）**：所有【代码】统一 **Maple Mono**（编辑器/参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；长段正文统一 **Noto Sans SC**（OFL-1.1，随包子集 woff2 400/700 共 2.21MB、7554 码点、缺字 0）；短标题/按钮/标签保留像素字体（Zpix/Departure Mono）。策略见 `docs/20` §3b4，实现 `apps/studio/src/typography.css`。
+- **配套教材（任务 6）**：**10 章、合计 76,429 汉字**（L01 7188 / L02 9713 / L03 8743 / L04 8895 / L05 9168 / L06 6504 / L07 6564 / L08 6547 / L09 6544 / L10 6563；每章 5–8 代码块、10–12 术语、warn callout、goals，只用本关及之前 API）。内容源 `apps/studio/src/textbook/content/*.md`，构建校验 `npx tsx scripts/build-textbook.ts --write`（0 error）；独立浮动窗口可拖动/缩放/置顶/持久化/章内目录/代码复制；进入关卡首次自动打开、关闭即记已读、工作台常驻「读本关教材/回看教材」入口。
+- **基础设施（任务 10）**：Playwright `webServer` 的 POSIX 环境变量前缀改为 `env` 注入 + `vite --mode e2e/mock`，`npm run test:e2e` / `test:e2e:local` 在 Windows 可直接运行；既有多份 spec 增加「教材已读」预置（回访玩家），与教材首次自动打开兼容。
+
+**Round 4 验收**：`tsc --noEmit` 0；`npm test` 28 files / **251 tests**（含新增引擎回归 16 条）；Studio real-config e2e **37/37**（新增 narrative-layout 22、typography 2、textbook-window 1、auto-beat 2、runtime-recovery 3）；mock-config e2e 4/4；教材内容校验 0 error；C 等价 8/8；真实 Paper e2e：L01 PASS（3 星、report/digest 与 Mock 一致、reset 稳定）、L10 PASS、`it/engine-paper-regressions.ts` PASS（见 `evidence/l*-real-latest.json`、`evidence/engine-paper-regressions-latest.json`）。证据：`evidence/narrative-layout/`、`evidence/typography/`、`evidence/runtime-ui/`、`evidence/textbook-window/`。
+
+**Round 4 已知边界/遗留**（详见 docs/49 §5）：教材为长文阅读界面，**真人阅读/学习效果盲测未做**（Fresh Reader Round 4 仍未清零）；挑战层仍是说明卡；L09「取金苹果」仍用旧写法 `place("air", chest)`（内容侧语义 API 待修，教材已标注为旧写法）；`it/engine-paper.ts:191` 仍按旧 testMode 断言（待改成显式 simulate）；Zpix 字体许可证未核实；Noto 子集按 GB2312 + 仓库文本生成（新增生僻字需重跑 `scripts/build-font-subset.py`）；桌面壳 WebKitGTK 的字体/滚动需 Linux 实机复验；`build-assets.mjs` 在 Windows 仍有既有 `spawn .bin/vite` 平台限制（图标路径已单测）。
+
+## 2026-11-01 P0 修复与独立验证（Windows 原生，已完成）
+
+**背景**：Windows/VM 环境报告（`loom-vm/环境问题总结-给同学.md`；本地副本 `.tools/ISSUES-2026-11-01.md`）列出 3 个 P0：Studio 固定 5s 超时在 VM 环境误判离线、换关/重进 503 `STALE_SESSION`、浏览器 Studio 的 L10 双织偶回退成同一只 `Golem`。修复已提交 **`1345989`**（`fix(engine): L10 multi-agent bots, serialized session creation, studio timeout`）：engine 多织偶、session 创建/销毁串行队列、Studio 30s 可配置超时、`PaperWorldPort.disposeBot`、`build-assets.mjs` 先建 `runtime/`。本轮由 Lead 在 Windows 原生栈独立复验，并新增回归脚本 `it/engine-paper-regressions.ts`。
+
+**验证环境**：Windows 11 + Node 22.23.4 + Java 25 + Paper 26.1.2 build 74 + LoomCraft 0.1.0；本机验证栈用 Paper `25568` / engine `4318` / Studio `5188`（当时避开 Fedora VM 的 SSH 隧道）。**2026-11-01 晚已按用户要求关机并清理 VM**：`D:\VScode_code\loom-vm` 仅保留 3 份报告 md（约 15KB）；本机恢复 canonical 端口 Paper `25567` / 插件 RPC `8765` / engine `4317` / Studio `5173`，`it/.mc-server/server.properties` 已改回 25567。Paper 用 `.tools/win/paper-host.mjs` 托管。
+
+**复验结果**（命令与产物均可复跑）：
+
+1. `it/engine-paper-regressions.ts` **PASS 20/20**：顺序重进 L01→L01→L02→L01 全 201（旧缺陷第二次必 503）；并发 2 个 `POST /api/session` 均 201、最终只留 1 个会话；L10 插件登记 `LeftWeaver`+`RightWeaver` 两只真实 bot，参考解后 `playerBeatReady=true`（尚未通过），模拟玩家节拍 → 3 星；离开 L10 后插件 bots 只剩 `Golem`、主 bot 全程只登录 1 次、无「另一处登录」顶号、无 `STALE_SESSION`。证据 `evidence/engine-paper-regressions-latest.json`。
+2. **Studio 真实 UI 回归**（Playwright + 系统 Chrome + 真引擎 + 真 Paper）：L10→返回→L01→返回→L10 共 3 次进关，`POST /api/session` 3/3 均 201、工作台全部打开、无错误横幅、无 4xx/5xx；L10 会话实测 3.1–3.3s（本机未触发旧 5s 阈值；VM 环境此前常态 >5s，30s 可配置超时作防御）。证据 `evidence/p0-fixes/studio-entry-check-latest.json` + 截图。
+3. **真机 e2e**：`it/l10-real.ts` **PASS**（双 bot 在线、参考解 3 星、report/digest 与 Mock 一致、reset 稳定）；`it/l1-real.ts` 主流程 **PASS**（3 星、h1/h2、report/digest 与 Mock 一致、reset ≤2s 哈希稳定）。运行产物 `evidence/p0-fixes/l1-real-windows-native.json`、`l10-real-windows-native.json`；canonical `evidence/l*-real-latest.json` 保持上一轮基线未改动。
+4. **`build-assets.mjs` 缺 `runtime/` 场景**：该脚本在 Windows 有既有平台限制（`spawn node_modules/.bin/vite` ENOENT），改在 Fedora 44 VM 复验：`rm -rf apps/desktop/src-tauri/runtime && npm run desktop:assets` → `NPM_EXIT=0`，`runtime/` 自动重建（engine.mjs 1.2MB / engine.cjs / stubs / node_modules，冒烟健康检查通过）。日志 `evidence/p0-fixes/desktop-assets-build-linux.log`。
+5. **质量门**：`tsc --noEmit` exit 0；`vitest` 25 files / **235 tests 全绿**（期间一次 timing 测试因并发构建抖动失败，单独重跑 PASS，属既有 flaky）。
+
+**顺带发现（未在本轮修，建议下一轮处理）**：L01 hidden `h1`「每次放置前织偶到灯柱 2 格内」依赖插件 `agent.move` 采样点。starter 负向对照里 `moveTo(lamp1)` 结束后最后一个采样点可能落在灯柱 2.83 格（x/z）外，导致 real-vs-mock 偶发不一致（主流程参考解 2 次运行均过；no-beat 对照 1 过 1 败）。属既有判据/采样边界（Round 3 命名点 + 灯位抬高后更易触发），与 P0 修复无关；但会影响真实学生判星公平性，建议下一轮把 h1 改为「moveTo 结束位置判定 / 放宽容差 / 采样补点」。
+
+**环境结论**：VM 已清理、不再需要。Windows 原生栈已覆盖开发 + 单测 + 真 Paper e2e + Studio UI 回归；AppImage/RPM 由同学在原生 Linux 侧打包。
+
 ## 2026-11-01 Round 2（v1.5，已完成）
 
 第二轮试玩反馈的修复与增强已全部落地并终验，契约/验收清单与实施结果见 `docs/48-round2-guidance-api-visual-plan.md` §6。

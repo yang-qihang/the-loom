@@ -4,7 +4,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   outputDir: ".pw-out/mock",
-  testMatch: /mock-flow\.spec\.ts/,
+  testMatch: /(mock-flow|typography)\.spec\.ts/,
   timeout: 120_000,
   expect: { timeout: 20_000 },
   fullyParallel: false,

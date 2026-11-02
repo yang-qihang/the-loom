@@ -89,10 +89,15 @@ async function runAndWaitResult(base, sessionId, source, timeoutMs = 240_000) {
       buffer += decoder.decode(value, { stream: true });
       let index;
       while ((index = buffer.indexOf("\n\n")) >= 0) {
-        const chunk = buffer.slice(0, index).trim();
+        const chunk = buffer.slice(0, index);
         buffer = buffer.slice(index + 2);
-        if (!chunk.startsWith("data:")) continue;
-        const payload = chunk.slice(5).trim();
+        // SSE 帧可能包含 `id:`/`retry:`/注释行；标准 EventSource 会忽略，这里同样只取 data 行。
+        const dataLines = chunk
+          .split("\n")
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.slice(5).trimStart());
+        if (dataLines.length === 0) continue;
+        const payload = dataLines.join("\n").trim();
         if (!payload) continue;
         let event;
         try {

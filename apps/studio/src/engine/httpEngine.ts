@@ -17,6 +17,11 @@ import type {
 import { EngineUnavailableError } from "../types";
 
 const DEFAULT_BASE = "http://127.0.0.1:4317";
+/**
+ * Paper 切关/铺场景要清区域、生成方块、恢复 bot 路径，5s 经常不够；
+ * 太短会让 Studio 在准备阶段误判离线（进而显示“连上又断开”）。
+ */
+const REQUEST_TIMEOUT_MS = Number(import.meta.env.VITE_ENGINE_TIMEOUT_MS ?? 30_000);
 
 /** 旧引擎（无 /api/levels/:id progress）回退 copy.goals 时用的历史目标 id，保持既有 DOM 契约。 */
 const LEGACY_GOAL_IDS = ["lamps", "fourth", "home"];
@@ -62,6 +67,8 @@ interface RawEvent {
   progress?: Criterion[];
   playerBeatReady?: boolean;
   codeCriteria?: Criterion[];
+  /** 事件所属运行（docs/49 §2.4：Studio 只接受当前活跃 run 的 error/result）。 */
+  runId?: string;
 }
 
 const criteriaOf = (value: unknown): Criterion[] =>
@@ -88,6 +95,7 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
     return {
       type: "result",
       result: {
+        ...(typeof payload.runId === "string" ? { runId: payload.runId } : {}),
         passed: Boolean(payload.passed),
         stars: Number(payload.stars ?? 0),
         criteria: criteriaOf(payload.criteria),
@@ -101,7 +109,12 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
     };
   }
   if (raw.type === "error") {
-    return { type: "error", message: String(raw.message ?? ""), line: typeof raw.line === "number" ? raw.line : undefined };
+    return {
+      type: "error",
+      message: String(raw.message ?? ""),
+      line: typeof raw.line === "number" ? raw.line : undefined,
+      ...(typeof raw.runId === "string" ? { runId: raw.runId } : {}),
+    };
   }
   return null;
 }
@@ -109,23 +122,50 @@ function normalizeEvent(raw: RawEvent): StudioEvent | null {
 /** 与 apps/engine 的 docs/21 §3 HTTP API 对接（T2 真实联调）。 */
 export class HttpEngine implements StudioEngine {
   readonly mode: EngineMode = "http";
+  /**
+   * 当前活跃 run 的 id（POST /api/run 的 202 runId）。
+   * SSE 里 error/result 事件都带 runId：对不上的一律丢弃（旧 run 的迟到事件/断线回放不会再污染界面）。
+   */
+  private activeRunId: string | null = null;
+  /** 玩家节拍请求在途：beat-* 结果不属于 activeRunId，看到对应的 beat 结果后自动放行。 */
+  private beatPending = false;
+
   constructor(private readonly base: string = runtimeBase()) {}
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
+    let response: Response;
     try {
-      const response = await fetch(`${this.base}${path}`, {
+      response = await fetch(`${this.base}${path}`, {
         headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         ...init,
       });
-      if (!response.ok) {
-        throw new EngineUnavailableError(fill(chrome.workbench.errorStatus, { 状态: response.status }));
-      }
-      return (await response.json()) as T;
-    } catch (error) {
-      if (error instanceof EngineUnavailableError) throw error;
-      throw new EngineUnavailableError(chrome.workbench.errorOffline);
+    } catch {
+      throw new EngineUnavailableError(chrome.workbench.errorOffline, {
+        code: "ENGINE_OFFLINE",
+        hint: "确认织机在跑：在仓库根目录执行 npm run dev:engine（真实 MC 用 npm run dev:engine:paper）；如果改过端口，检查 Studio 的 VITE_ENGINE_URL。",
+      });
     }
+    if (!response.ok) {
+      // docs/49 §2.4：解析后端 { error: { code, message, hint } }，错误卡展示真实原因；
+      // 解析失败再退回「织机回了一个错（状态码）」。
+      interface ErrorBody {
+        error?: { code?: unknown; message?: unknown; hint?: unknown };
+      }
+      let payload: ErrorBody | null = null;
+      try {
+        payload = (await response.json()) as ErrorBody;
+      } catch {
+        payload = null;
+      }
+      const error = payload?.error;
+      const code = typeof error?.code === "string" ? error.code : `HTTP_${response.status}`;
+      const rawMessage = typeof error?.message === "string" ? error.message.trim() : "";
+      const message = rawMessage.length > 0 ? rawMessage : fill(chrome.workbench.errorStatus, { 状态: response.status });
+      const hint = typeof error?.hint === "string" && error.hint.trim().length > 0 ? error.hint : undefined;
+      throw new EngineUnavailableError(message, { code, hint, status: response.status });
+    }
+    return (await response.json()) as T;
   }
 
   async listLevels(): Promise<ReturnType<typeof levelCards>> {
@@ -188,8 +228,10 @@ export class HttpEngine implements StudioEngine {
     return data.sessionId;
   }
 
-  async run(sessionId: string, source: string): Promise<void> {
-    await this.request("/api/run", { method: "POST", body: JSON.stringify({ sessionId, source }) });
+  async run(sessionId: string, source: string): Promise<string | null> {
+    const data = await this.request<{ runId?: string }>("/api/run", { method: "POST", body: JSON.stringify({ sessionId, source }) });
+    this.activeRunId = typeof data.runId === "string" && data.runId.length > 0 ? data.runId : null;
+    return this.activeRunId;
   }
 
   async createReplSession(levelId?: string): Promise<string> {
@@ -259,17 +301,29 @@ export class HttpEngine implements StudioEngine {
 
   async stop(sessionId: string): Promise<void> {
     await this.request("/api/stop", { method: "POST", body: JSON.stringify({ sessionId }) });
+    this.activeRunId = null;
+    this.beatPending = false;
   }
 
   async reset(sessionId: string): Promise<void> {
     await this.request("/api/reset", { method: "POST", body: JSON.stringify({ sessionId }) });
+    // 重置后旧 run 的结果/错误一律作废：清掉活跃 runId，迟到的旧事件会被下方 subscribe 丢弃。
+    this.activeRunId = null;
+    this.beatPending = false;
   }
 
   async playerBeat(sessionId: string, simulate?: boolean): Promise<void> {
     // 不传 simulate → 由引擎按其世界模式决定（mock 模拟 / paper 只确认真实世界）；显式传才带上。
     const body: Record<string, unknown> = { sessionId };
     if (typeof simulate === "boolean") body.simulate = simulate;
-    await this.request("/api/player-beat", { method: "POST", body: JSON.stringify(body) });
+    // 玩家节拍结果（beat-N）不属于当前 run 的 runId：允许它通过订阅过滤，直到该结果到达。
+    this.beatPending = true;
+    try {
+      await this.request("/api/player-beat", { method: "POST", body: JSON.stringify(body) });
+    } catch (error) {
+      this.beatPending = false;
+      throw error;
+    }
   }
 
   async inGame(sessionId: string, text: string, kind: "title" | "actionbar" = "title"): Promise<void> {
@@ -285,7 +339,17 @@ export class HttpEngine implements StudioEngine {
     source.onmessage = (message) => {
       try {
         const event = normalizeEvent(JSON.parse(message.data) as RawEvent);
-        if (event) listener(event);
+        if (!event) return;
+        // docs/49 §2.4：只接受当前活跃 run 的 error/result；旧 run 的迟到事件/断线回放直接丢弃。
+        // 例外：玩家节拍（beat-*）结果由 Engine.playerBeat 单独标记放行。
+        const runId =
+          event.type === "result" ? event.result.runId : event.type === "error" ? event.runId : undefined;
+        if (this.activeRunId && typeof runId === "string" && runId !== this.activeRunId) {
+          const beatResult = this.beatPending && event.type === "result" && runId.startsWith("beat-");
+          if (!beatResult) return;
+          this.beatPending = false;
+        }
+        listener(event);
       } catch {
         listener({ type: "log", line: chrome.workbench.eventMalformed });
       }

@@ -1,0 +1,122 @@
+{
+  "fontLoad": {
+    "noto": true,
+    "maple": false,
+    "zpix": true,
+    "departure": true,
+    "loadedFamilies": [
+      "Departure Mono",
+      "Noto Sans SC",
+      "Zpix"
+    ],
+    "responses": [
+      {
+        "url": "http://127.0.0.1:5185/assets/noto-sans-sc-400-BMBUuRtC.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/DepartureMono-Regular-2BZob_Zz.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/zpix-ByAf9pOZ.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/assets/noto-sans-sc-700-Dv9RFWQN.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/fonts/MapleMono-CN-Italic.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/fonts/MapleMono-CN-Regular.woff2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:5185/fonts/MapleMono-CN-SemiBold.woff2",
+        "status": 200
+      }
+    ]
+  },
+  "codeFamilies": [
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(0，0)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(0，6)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(-12，10)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(-12，-2)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(2，-2)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(2，16)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "(2，24)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "golem.moveTo(-12, 10); // 1 golem.pl",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "golem.moveTo(-12, 10); // 1 golem.pl",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "golem.moveTo(lamp1)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "golem.place(\"lantern\", lamp1)",
+      "visible": true
+    },
+    {
+      "family": "\"Maple Mono\", \"Maple Mono CN\", \"Noto Sans CJK SC\", \"JetBrains Mono\", \"Fira Code\", ui-monospace, monospace",
+      "text": "lamp1",
+      "visible": true
+    }
+  ],
+  "codeFontLoad": {
+    "noto": true,
+    "maple": true,
+    "zpix": true,
+    "departure": true,
+    "loadedFamilies": [
+      "Departure Mono",
+      "Maple Mono",
+      "Maple Mono",
+      "Maple Mono",
+      "Noto Sans SC",
+      "Noto Sans SC",
+      "Zpix",
+      "codicon"
+    ]
+  },
+  "ts": "2026-11-01T14:39:20.855Z"
+}

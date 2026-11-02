@@ -6,7 +6,7 @@ import { pathToFileURL } from "node:url";
 import type { AddressInfo } from "node:net";
 import { MockWorldPort } from "../../../packages/worldport/src/mock-port";
 import type { WorldSnapshot } from "../../../packages/protocol/src/index";
-import { pointsView, progressView } from "../../../packages/level-spec/src/index";
+import { evaluateProgress, pointsView, progressView } from "../../../packages/level-spec/src/index";
 import { registryForLevel } from "../../../packages/sdk/src/api-registry";
 import { GameSession, SessionError, type EngineEvent, type ResultEvent } from "../../../packages/session/src/index";
 import { findLevelContent, listLevels } from "./catalog";
@@ -67,6 +67,8 @@ function ssePayload(event: EngineEvent): unknown {
     return {
       ...event,
       result: {
+        // Studio 按 runId 过滤旧事件（docs/49 §2.4）：嵌套 result 里也必须带上。
+        runId: event.runId,
         passed: event.passed,
         stars: event.stars,
         criteria: event.criteria,
@@ -107,12 +109,35 @@ function errorStatus(error: SessionError): number {
       return 400;
     case "INVALID_STATE":
       return 409;
+    case "STALE_SNAPSHOT":
+      return 409;
     case "NOT_FOUND":
       return 404;
     case "DISPOSED":
       return 410;
     default:
       return 500;
+  }
+}
+
+/**
+ * 可操作错误提示（docs/49 §2.4）：Studio 错误卡直接展示后端原因 + 这条提示，
+ * 不再统一显示「织机回了一个错(409)」这种泛化文案。
+ */
+function sessionErrorHint(error: SessionError): string | undefined {
+  switch (error.code) {
+    case "INVALID_STATE":
+      return "会话当前状态不允许这个操作：先点「重置本关」再试一次；如果仍失败，重启织机（npm run dev:engine）后重新进入这一关。";
+    case "STALE_SNAPSHOT":
+      return "这一轮的结果已经过期：点「重置本关」后重新运行。";
+    case "NOT_FOUND":
+      return "会话可能已经换关或被重置：回到关卡墙重新进入这一关。";
+    case "DISPOSED":
+      return "会话已关闭：回到关卡墙重新进入这一关。";
+    case "INVALID_ARGUMENT":
+      return "请求缺少必要参数：刷新 Studio 后重新进入这一关；反复出现请把这条消息发给维护者。";
+    default:
+      return undefined;
   }
 }
 
@@ -148,9 +173,43 @@ function requireString(body: Record<string, unknown>, key: string): string {
   return value;
 }
 
+/**
+ * 会话快照附带的「玩家可见任务进度」（docs/49 §2.3 自动检测）：
+ * 用与评分同源的 evaluateProgress 在同一次快照上逐条评估，Studio 每秒轮询即可自动勾目标、
+ * 自动确认玩家节拍。评分真值仍只在引擎侧计算，前端只拿到通过与否的展示视图。
+ */
+function snapshotProgressView(session: GameSession, snapshot: WorldSnapshot): {
+  progress: Array<{ id: string; text: string; passed: boolean; player: boolean; hint?: string }>;
+  playerBeatReady: boolean;
+  allPassed: boolean;
+  playerBeatRequired: boolean;
+  playerBeatDone: boolean;
+} {
+  const def = session.level.def;
+  const declared = def.progress ?? [];
+  const report = evaluateProgress(def, snapshot);
+  const progress = report.steps.map((step, index) => ({
+    id: step.id,
+    text: step.text,
+    passed: step.passed,
+    player: step.player,
+    ...(declared[index]?.hint ? { hint: declared[index]!.hint } : {}),
+  }));
+  const allPassed = progress.length > 0 && progress.every(step => step.passed);
+  // 有的关卡玩家步骤没有写进 progress（如 L02 放蛋糕、L09 泼药水+敲钟），
+  // 但通过判定仍然要求「玩家亲手做过」：与评分同源看快照里的玩家 block.place 事件。
+  const playerBeatDone = snapshot.events.some(event => event.type === "block.place" && event.actorType === "player");
+  return {
+    progress,
+    playerBeatReady: report.playerBeatReady,
+    allPassed,
+    playerBeatRequired: typeof def.task?.playerBeat === "string" && def.task.playerBeat.trim().length > 0,
+    playerBeatDone,
+  };
+}
+
 /** 端点校验/错误映射之后的最小工具：把会话语义状态里的容器计数映射成 HUD 用的命名点视图。 */
-function sessionContainers(
-  session: GameSession,
+function sessionContainers(  session: GameSession,
   points: ReturnType<typeof pointsView>,
 ): Record<string, Record<string, number>> {
   const containers: Record<string, Record<string, number>> = {};
@@ -181,6 +240,19 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
   const runtime = world ?? createWorldRuntime();
   const sessions = new Map<string, GameSession>();
   const startedAt = Date.now();
+  /**
+   * Paper 模式只有一套 arena/一个插件 sessionId：dispose 旧会话和 create 新会话必须串行，
+   * 否则旧会话的 prepare/finalize 会和新会话交错，插件报 STALE_SESSION（Studio 表现为 503）。
+   */
+  let sessionCreateQueue: Promise<void> = Promise.resolve();
+  const withSessionCreateLock = <T>(fn: () => Promise<T>): Promise<T> => {
+    const next = sessionCreateQueue.then(fn, fn);
+    sessionCreateQueue = next.then(
+      () => undefined,
+      () => undefined,
+    );
+    return next;
+  };
 
   /** paper 模式同一时间只允许一个真实会话（一个世界/一只织偶）；新建前一并释放旧会话。 */
   const disposePaperSessions = async (): Promise<void> => {
@@ -277,16 +349,18 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       // 试符台是「练一句」的沙箱：用内存 Mock 世界准备本关场景，既不动真实世界/关卡进度，
       // 也不再 dispose 玩家正在玩的关卡会话（Studio 文案承诺「不会动这一关的进度」）。
       const replInPaper = mode === "repl" && runtime.mode === "paper";
-      if (runtime.mode === "paper" && !replInPaper) await disposePaperSessions();
       let session: GameSession;
       try {
-        const port = replInPaper ? new MockWorldPort() : await runtime.createPort(content);
-        const runTimeoutMs =
-          runtime.mode === "paper" && !replInPaper ? Number(process.env.LOOM_RUN_TIMEOUT_MS ?? 240_000) : undefined;
-        if (process.env.LOOM_DEBUG_ENGINE === "1") {
-          console.log(`[debug] session create level=${levelId} world=${runtime.mode} runTimeoutMs=${runTimeoutMs}`);
-        }
-        session = await GameSession.create(content, port, { mode, runTimeoutMs });
+        session = await withSessionCreateLock(async () => {
+          if (runtime.mode === "paper" && !replInPaper) await disposePaperSessions();
+          const port = replInPaper ? new MockWorldPort() : await runtime.createPort(content);
+          const runTimeoutMs =
+            runtime.mode === "paper" && !replInPaper ? Number(process.env.LOOM_RUN_TIMEOUT_MS ?? 240_000) : undefined;
+          if (process.env.LOOM_DEBUG_ENGINE === "1") {
+            console.log(`[debug] session create level=${levelId} world=${runtime.mode} runTimeoutMs=${runTimeoutMs}`);
+          }
+          return GameSession.create(content, port, { mode, runTimeoutMs });
+        });
       } catch (error) {
         if (error instanceof WorldUnavailableError) throw error;
         const message = error instanceof Error ? error.message : String(error);
@@ -319,17 +393,32 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       const snapshot = await session.snapshot();
       const points = pointsView(session.level.def);
       const containers = sessionContainers(session, points);
+      const progressView = snapshotProgressView(session, snapshot);
       const envelope = {
         ok: true,
+        // 插件 world.snapshot 也带 sessionId/epoch：先展开再写本引擎的值，避免被插件值覆盖
+        // （docs/49 §2.3：顶层 epoch 不作 Studio 去重依据，去重用 sessionEpoch）。
+        ...snapshot,
         sessionId: session.id,
         state: session.state,
         epoch: session.epoch,
+        sessionEpoch: session.epoch,
         port: session.portKind,
         mode: session.mode,
-        ...snapshot,
+        ...progressView,
         points,
         containers,
-        snapshot: { ...snapshot, points, containers },
+        // HttpEngine.snapshot() 取嵌套 snapshot（`data.snapshot ?? data`）：进度/状态/epoch
+        // 两处都带，避免取值路径丢字段。
+        snapshot: {
+          ...snapshot,
+          ...progressView,
+          sessionId: session.id,
+          state: session.state,
+          sessionEpoch: session.epoch,
+          points,
+          containers,
+        },
       };
       sendJson(res, 200, envelope);
       return;
@@ -423,13 +512,39 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
         connection: "keep-alive",
         "x-accel-buffering": "no",
       });
+      /** SSE 帧统一带 id：浏览器断线重连会带 Last-Event-ID，只补发缺口，不再回放整段旧事件。 */
+      const sendWithId = (id: number, event: EngineEvent): void => {
+        res.write(`id: ${id}\ndata: ${JSON.stringify(ssePayload(event))}\n\n`);
+      };
       const send = (event: EngineEvent): void => {
         res.write(`data: ${JSON.stringify(ssePayload(event))}\n\n`);
       };
       res.write("retry: 1000\n\n");
-      for (const event of session.recentEvents().slice(-40)) send(event);
+      const entries = session.recentEventEntries();
+      /**
+       * 无 Last-Event-ID 的新连接（首连 / 浏览器没记住游标）：只回放「最近结果 + 少量日志」，
+       * 当前状态在下面单独补发。**绝不回放旧 error/hint/objective**：它们属于旧 run，
+       * 回放会让 Studio 把上一轮的红条重新弹出来（用户反馈 7 的真实观感来源之一）。
+       */
+      const replayForNewConnection = (): Array<{ id: number; event: EngineEvent }> => {
+        const latestResult = [...entries].reverse().find(entry => entry.event.type === "result");
+        const logs = entries.filter(entry => entry.event.type === "log").slice(-5);
+        const picked = [...(latestResult ? [latestResult] : []), ...logs];
+        picked.sort((a, b) => a.id - b.id);
+        return picked;
+      };
+      const header = req.headers["last-event-id"];
+      const lastEventId = typeof header === "string" && header.trim() !== "" ? Number(header) : Number.NaN;
+      const replay = Number.isFinite(lastEventId)
+        ? entries.filter(entry => entry.id > lastEventId)
+        : replayForNewConnection();
+      for (const entry of replay) sendWithId(entry.id, entry.event);
+      // 当前状态永远补一条（不推进 event id 游标）：即使历史被 reset 清空，Studio 也能校准状态。
       send({ type: "state", state: session.state, epoch: session.epoch });
-      const unsubscribe = session.subscribe(send);
+      const unsubscribe = session.subscribe((event, id) => {
+        if (typeof id === "number") sendWithId(id, event);
+        else send(event);
+      });
       const heartbeat = setInterval(() => {
         res.write(": ping\n\n");
       }, 15000);
@@ -477,11 +592,16 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
         return;
       }
       if (error instanceof SessionError) {
-        sendJson(res, errorStatus(error), { error: { code: error.code, message: error.message } });
+        const hint = sessionErrorHint(error);
+        sendJson(res, errorStatus(error), { error: { code: error.code, message: error.message, ...(hint ? { hint } : {}) } });
         return;
       }
       sendJson(res, 500, {
-        error: { code: "INTERNAL", message: error instanceof Error ? error.message : String(error) },
+        error: {
+          code: "INTERNAL",
+          message: error instanceof Error ? error.message : String(error),
+          hint: "这是织机内部错误：把这条消息发给维护者；也可以重启织机（npm run dev:engine）后重新进入这一关。",
+        },
       });
     });
   });

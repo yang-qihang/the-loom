@@ -105,6 +105,7 @@ struct AppState {
     logs_dir: PathBuf,
     resource_dir: Mutex<PathBuf>,
     repo_root: Option<PathBuf>,
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     kde_wayland: bool,
 }
 
@@ -147,8 +148,17 @@ fn timestamp() -> String {
 }
 
 fn loom_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
-    Path::new(&home).join(".loomcraft")
+    #[cfg(windows)]
+    let base = std::env::var("USERPROFILE")
+        .or_else(|_| {
+            let drive = std::env::var("HOMEDRIVE")?;
+            let path = std::env::var("HOMEPATH")?;
+            Ok::<String, std::env::VarError>(format!("{drive}{path}"))
+        })
+        .unwrap_or_else(|_| std::env::temp_dir().to_string_lossy().into_owned());
+    #[cfg(not(windows))]
+    let base = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
+    Path::new(&base).join(".loomcraft")
 }
 
 fn load_settings(path: &Path) -> Settings {
@@ -158,13 +168,46 @@ fn load_settings(path: &Path) -> Settings {
         .unwrap_or_default()
 }
 
+fn process_alive(pid: u32) -> bool {
+    #[cfg(target_os = "linux")]
+    {
+        Path::new(&format!("/proc/{pid}")).exists()
+    }
+    #[cfg(target_os = "windows")]
+    {
+        #[link(name = "kernel32")]
+        extern "system" {
+            fn OpenProcess(access: u32, inherit: i32, pid: u32) -> *mut std::ffi::c_void;
+            fn GetExitCodeProcess(handle: *mut std::ffi::c_void, code: *mut u32) -> i32;
+            fn CloseHandle(handle: *mut std::ffi::c_void) -> i32;
+        }
+        const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
+        const STILL_ACTIVE: u32 = 259;
+        unsafe {
+            let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
+            if handle.is_null() {
+                return false;
+            }
+            let mut code = 0u32;
+            let ok = GetExitCodeProcess(handle, &mut code);
+            CloseHandle(handle);
+            ok != 0 && code == STILL_ACTIVE
+        }
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    {
+        let _ = pid;
+        false
+    }
+}
+
 fn acquire_single_instance() -> PathBuf {
     let dir = loom_dir();
     let _ = fs::create_dir_all(&dir);
     let lock = dir.join("desktop.lock");
     if let Ok(content) = fs::read_to_string(&lock) {
         if let Ok(pid) = content.trim().parse::<u32>() {
-            if Path::new(&format!("/proc/{pid}")).exists() {
+            if process_alive(pid) {
                 eprintln!("[织界] 已有实例在运行（pid {pid}），本实例退出。");
                 std::process::exit(0);
             }
@@ -198,7 +241,21 @@ fn wait_for_port(port: u16, timeout_ms: u64) -> bool {
     false
 }
 
+fn no_console(command: &mut Command) {
+    // GUI 壳拉起的 java/node/powershell/taskkill 不能弹控制台窗口，否则会闪窗并抢焦点。
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x0800_0000);
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = command;
+    }
+}
+
 fn run_capture(command: &mut Command) -> (bool, String) {
+    no_console(command);
     match command.output() {
         Ok(output) => {
             let mut text = String::from_utf8_lossy(&output.stdout).to_string();
@@ -266,23 +323,48 @@ fn probe_prism(configured: Option<&str>) -> Probe {
             return Probe { ok: true, detail: format!("使用自定义 Prism 命令：{command}"), hint: None };
         }
     }
-    let (flatpak_ok, _) = run_capture(Command::new("flatpak").arg("--version"));
-    if flatpak_ok {
-        let (found, _) = run_capture(Command::new("flatpak").args(["info", "org.prismlauncher.PrismLauncher"]));
-        if found {
+    if cfg!(target_os = "linux") {
+        let (flatpak_ok, _) = run_capture(Command::new("flatpak").arg("--version"));
+        if flatpak_ok {
+            let (found, _) = run_capture(Command::new("flatpak").args(["info", "org.prismlauncher.PrismLauncher"]));
+            if found {
+                return Probe {
+                    ok: true,
+                    detail: "已找到 Prism Launcher（flatpak）。".into(),
+                    hint: Some("在 Prism 里选 26.1.2 实例；建议设为无边框窗口或窗口化全屏（F11）。".into()),
+                };
+            }
             return Probe {
-                ok: true,
-                detail: "已找到 Prism Launcher（flatpak）。".into(),
-                hint: Some("在 Prism 里选 26.1.2 实例；建议设为无边框窗口或窗口化全屏（F11）。".into()),
+                ok: false,
+                detail: "flatpak 已安装，但没有找到 Prism Launcher。".into(),
+                hint: Some("flatpak install flathub org.prismlauncher.PrismLauncher，装好后点「重新检测」。".into()),
             };
+        }
+        let (which_ok, path) = run_capture(Command::new("sh").args(["-lc", "command -v prismlauncher || command -v PrismLauncher"]));
+        if which_ok && !path.is_empty() {
+            return Probe { ok: true, detail: format!("已找到 Prism：{path}"), hint: None };
         }
         return Probe {
             ok: false,
-            detail: "flatpak 已安装，但没有找到 Prism Launcher。".into(),
-            hint: Some("flatpak install flathub org.prismlauncher.PrismLauncher，装好后点「重新检测」。".into()),
+            detail: "没有找到 Prism Launcher。".into(),
+            hint: Some("安装 Prism 后点「重新检测」；也可以手动打开 MC，织界会等待世界连接。".into()),
         };
     }
-    let (which_ok, path) = run_capture(Command::new("sh").args(["-lc", "command -v prismlauncher || command -v PrismLauncher"]));
+    // Windows：常见安装位置 / PATH 中的 prismlauncher.exe。
+    let mut candidates: Vec<PathBuf> = Vec::new();
+    if let Ok(local) = std::env::var("LOCALAPPDATA") {
+        candidates.push(Path::new(&local).join("Programs/PrismLauncher/prismlauncher.exe"));
+        candidates.push(Path::new(&local).join("PrismLauncher/prismlauncher.exe"));
+    }
+    if let Ok(program_files) = std::env::var("PROGRAMFILES") {
+        candidates.push(Path::new(&program_files).join("PrismLauncher/prismlauncher.exe"));
+    }
+    for candidate in candidates {
+        if candidate.exists() {
+            return Probe { ok: true, detail: format!("已找到 Prism：{}", candidate.display()), hint: None };
+        }
+    }
+    let (which_ok, path) = run_capture(Command::new("where").arg("prismlauncher.exe"));
     if which_ok && !path.is_empty() {
         Probe { ok: true, detail: format!("已找到 Prism：{path}"), hint: None }
     } else {
@@ -330,18 +412,72 @@ fn probe_paper(repo_root: Option<&Path>, java_ok: bool) -> Probe {
     }
 }
 
-fn find_real_runtime(state: &AppState) -> Option<PathBuf> {
-    let resource = state.resource_dir().join("runtime").join("real");
-    if resource.join("engine.mjs").exists() && resource.join("node/bin/node").exists() {
-        return Some(resource);
+fn native_path(path: &Path) -> PathBuf {
+    // Tauri 的 resource_dir 在 Windows 上会返回 \\?\D:\... 扩展路径。
+    // Java 能接受，但 Node 的 argv 解析会把它误判成 D:（EISDIR: lstat 'D:'），必须还原普通路径。
+    #[cfg(windows)]
+    {
+        let text = path.to_string_lossy();
+        if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+            return PathBuf::from(format!(r"\\{rest}"));
+        }
+        if let Some(rest) = text.strip_prefix(r"\\?\") {
+            return PathBuf::from(rest);
+        }
     }
-    if let Some(root) = &state.repo_root {
-        let dev = root.join("apps/desktop/src-tauri/runtime/real");
-        if dev.join("engine.mjs").exists() && dev.join("node/bin/node").exists() {
-            return Some(dev);
+    path.to_path_buf()
+}
+
+fn bundled_node_path(real: &Path) -> PathBuf {
+    real.join("node")
+        .join("bin")
+        .join(if cfg!(windows) { "node.exe" } else { "node" })
+}
+
+fn bundled_java_path(real: &Path) -> PathBuf {
+    real.join("java")
+        .join("bin")
+        .join(if cfg!(windows) { "java.exe" } else { "java" })
+}
+
+fn find_real_runtime(state: &AppState) -> Option<PathBuf> {
+    let candidates = {
+        let mut paths = vec![state.resource_dir().join("runtime").join("real")];
+        if let Some(root) = &state.repo_root {
+            paths.push(root.join("apps/desktop/src-tauri/runtime/real"));
+        }
+        paths
+    };
+    for candidate in candidates {
+        if candidate.join("engine.mjs").exists() && bundled_node_path(&candidate).exists() {
+            return Some(native_path(&candidate));
         }
     }
     None
+}
+
+fn probe_bundled_node(real: &Path) -> Probe {
+    let node = bundled_node_path(real);
+    if !node.exists() {
+        return Probe { ok: false, detail: "包内缺少 Node 运行时。".into(), hint: Some("重新构建 runtime/real。".into()) };
+    }
+    let (ok, text) = run_capture(Command::new(&node).arg("--version"));
+    if !ok {
+        return Probe { ok: false, detail: "包内 Node 无法执行。".into(), hint: Some("检查 runtime/real/node/bin/node(.exe)。".into()) };
+    }
+    Probe { ok: true, detail: format!("包内 Node {text} 已就绪。"), hint: None }
+}
+
+fn probe_bundled_java(real: &Path) -> Probe {
+    let java = bundled_java_path(real);
+    if !java.exists() {
+        return Probe { ok: false, detail: "包内缺少 Java 运行时。".into(), hint: Some("重新构建 runtime/real。".into()) };
+    }
+    let (ok, text) = run_capture(Command::new(&java).arg("-version"));
+    if !ok && text.is_empty() {
+        return Probe { ok: false, detail: "包内 Java 无法执行。".into(), hint: Some("检查 runtime/real/java/bin/java(.exe)。".into()) };
+    }
+    Probe { ok: true, detail: "包内 Java 25 已就绪。".into(), hint: None }
 }
 
 fn copy_dir_all(from: &Path, to: &Path) -> Result<(), String> {
@@ -405,7 +541,7 @@ fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
             let _ = fs::copy(&from, paper_dir.join(rel));
         }
     }
-    let java = real.join("java/bin/java");
+    let java = bundled_java_path(&real);
     let jar = paper_dir.join("paper.jar");
     if !java.exists() || !jar.exists() {
         return Err("安装包缺少 Java/Paper 运行时。".into());
@@ -413,12 +549,15 @@ fn spawn_bundled_paper(state: &AppState) -> Result<OpStatus, String> {
     let _ = fs::create_dir_all(&state.logs_dir);
     let log_file = File::create(state.logs_dir.join("paper.log")).map_err(|error| error.to_string())?;
     let log_file_err = log_file.try_clone().map_err(|error| error.to_string())?;
-    let child = Command::new(&java)
+    let mut paper_command = Command::new(&java);
+    paper_command
         .args(["-Xms384M", "-Xmx1024M", "-XX:+UseG1GC", "-jar", "paper.jar", "--nogui"])
         .current_dir(&paper_dir)
         .stdin(Stdio::piped())
         .stdout(Stdio::from(log_file))
-        .stderr(Stdio::from(log_file_err))
+        .stderr(Stdio::from(log_file_err));
+    no_console(&mut paper_command);
+    let child = paper_command
         .spawn()
         .map_err(|error| format!("启动内置 Paper 失败：{error}"))?;
     state.children.lock().map_err(|_| "子进程状态锁失效".to_string())?.insert("paper".into(), child);
@@ -476,27 +615,40 @@ fn spawn_engine_child(state: &AppState) -> Result<OpStatus, String> {
     }
     // 打包版优先启动包内真实引擎（Node + bot + 真实 Paper 适配器）。
     if let Some(real) = find_real_runtime(state) {
-        let node = real.join("node/bin/node");
+        let node = bundled_node_path(&real);
         let engine = real.join("engine.mjs");
+        #[cfg(target_os = "linux")]
         let lib = real.join("node/lib");
+        state.log(
+            "lifecycle",
+            &format!(
+                "engine spawn node={} engine={} cwd={} resource={}",
+                node.display(),
+                engine.display(),
+                real.display(),
+                state.resource_dir().display()
+            ),
+        );
         let _ = fs::create_dir_all(&state.logs_dir);
         let log_file = File::create(state.logs_dir.join("engine.log")).map_err(|error| format!("创建引擎日志失败：{error}"))?;
         let log_file_err = log_file.try_clone().map_err(|error| error.to_string())?;
-        let child = Command::new(&node)
+        let mut command = Command::new(&node);
+        command
             .arg(&engine)
             .current_dir(&real)
             .env("PORT", engine_port().to_string())
             .env("LOOM_WORLD", "paper")
             .env("LOOM_MC_WAIT_MS", "60000")
             .env("LOOM_BOT_NAME", "Golem")
-            .env("LD_LIBRARY_PATH", &lib)
             .env("NODE_PATH", real.join("node_modules"))
             .env("LOOM_STUDIO_DIR", real.join("studio"))
             .stdin(Stdio::null())
             .stdout(Stdio::from(log_file))
-            .stderr(Stdio::from(log_file_err))
-            .spawn()
-            .map_err(|error| format!("启动内置真实引擎失败：{error}"))?;
+            .stderr(Stdio::from(log_file_err));
+        #[cfg(target_os = "linux")]
+        command.env("LD_LIBRARY_PATH", &lib);
+        no_console(&mut command);
+        let child = command.spawn().map_err(|error| format!("启动内置真实引擎失败：{error}"))?;
         state.children.lock().map_err(|_| "子进程状态锁失效".to_string())?.insert("engine".into(), child);
         return Ok(OpStatus { ok: true, detail: format!("开箱真实引擎已启动：127.0.0.1:{}", engine_port()) });
     }
@@ -517,6 +669,7 @@ fn spawn_engine_child(state: &AppState) -> Result<OpStatus, String> {
         .stdout(Stdio::from(log_file))
         .stderr(Stdio::from(log_file_err));
     if !port_open(engine_port()) {
+        no_console(&mut command);
         let child = command.spawn().map_err(|error| format!("启动引擎失败：{error}"))?;
         if let Ok(mut children) = state.children.lock() {
             children.insert("engine".into(), child);
@@ -527,10 +680,57 @@ fn spawn_engine_child(state: &AppState) -> Result<OpStatus, String> {
 
 fn kill_children(state: &AppState) {
     if let Ok(mut children) = state.children.lock() {
-        for (name, child) in children.iter_mut() {
-            state.log("lifecycle", &format!("停止子进程 {name}（pid {}）", child.id()));
+        // 先停 engine，再给 Paper 通过 stdin 发 stop 让世界落盘；最后才强杀/清进程树。
+        for name in ["engine", "paper"] {
+            let Some(child) = children.get_mut(name) else { continue; };
+            let pid = child.id();
+            state.log("lifecycle", &format!("停止子进程 {name}（pid {pid}）"));
+            #[cfg(target_os = "windows")]
+            if name == "paper" {
+                use std::io::Write;
+                if let Some(stdin) = child.stdin.as_mut() {
+                    let _ = stdin.write_all(b"stop\n");
+                    let _ = stdin.flush();
+                }
+                let deadline = Instant::now() + Duration::from_secs(8);
+                loop {
+                    if matches!(child.try_wait(), Ok(Some(_))) {
+                        break;
+                    }
+                    if Instant::now() >= deadline {
+                        break;
+                    }
+                    std::thread::sleep(Duration::from_millis(200));
+                }
+            }
             let _ = child.kill();
             let _ = child.wait();
+            #[cfg(target_os = "windows")]
+            {
+                let pid_text = pid.to_string();
+                let mut taskkill = Command::new("taskkill");
+                taskkill.args(["/PID", &pid_text, "/T", "/F"]);
+                no_console(&mut taskkill);
+                let _ = taskkill.output();
+            }
+        }
+        // 其它子进程（例如 Prism）直接回收。
+        for (name, child) in children.iter_mut() {
+            if name == "engine" || name == "paper" {
+                continue;
+            }
+            let pid = child.id();
+            state.log("lifecycle", &format!("停止子进程 {name}（pid {pid}）"));
+            let _ = child.kill();
+            let _ = child.wait();
+            #[cfg(target_os = "windows")]
+            {
+                let pid_text = pid.to_string();
+                let mut taskkill = Command::new("taskkill");
+                taskkill.args(["/PID", &pid_text, "/T", "/F"]);
+                no_console(&mut taskkill);
+                let _ = taskkill.output();
+            }
         }
         children.clear();
     }
@@ -634,17 +834,34 @@ fn set_pin(app: tauri::AppHandle, value: bool) -> Result<bool, String> {
 fn focus_workbench(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         // 显式双向切换：织界在前 → 交给 Minecraft；Minecraft 在前 → Escape 松鼠标 + 拉起织界。
+        // X11 的精确窗口查找只在 Linux 编译；Windows 先退化为最小化/还原，MC 侧用 Alt+Tab。
         if window.is_focused().unwrap_or(false) {
-            if let Some(display) = x11_focus::DisplayHandle::open() {
-                if display.focus_minecraft() {
+            #[cfg(target_os = "linux")]
+            {
+                if let Some(display) = x11_focus::DisplayHandle::open() {
+                    if display.focus_minecraft() {
+                        return;
+                    }
+                }
+            }
+            #[cfg(target_os = "windows")]
+            {
+                if win_focus::focus_minecraft() {
                     return;
                 }
             }
             let _ = window.minimize();
             return;
         }
-        if let Some(display) = x11_focus::DisplayHandle::open() {
-            display.send_escape();
+        #[cfg(target_os = "linux")]
+        {
+            if let Some(display) = x11_focus::DisplayHandle::open() {
+                display.send_escape();
+            }
+        }
+        #[cfg(target_os = "windows")]
+        {
+            win_focus::send_escape();
         }
         let _ = window.unminimize();
         let _ = window.show();
@@ -706,11 +923,18 @@ fn set_mode(app: tauri::AppHandle, mode: String) -> Result<bool, String> {
 #[tauri::command]
 fn env_probe(app: tauri::AppHandle) -> EnvReport {
     let state = app.state::<AppState>();
-    let java = probe_java();
-    let node = probe_node();
+    let real = find_real_runtime(&state);
+    let java = match real.as_deref() {
+        Some(runtime) => probe_bundled_java(runtime),
+        None => probe_java(),
+    };
+    let node = match real.as_deref() {
+        Some(runtime) => probe_bundled_node(runtime),
+        None => probe_node(),
+    };
     let prism_command = state.settings.lock().ok().and_then(|guard| guard.prism_command.clone());
     let prism = probe_prism(prism_command.as_deref());
-    let paper = if find_real_runtime(&state).is_some() {
+    let paper = if real.is_some() {
         if port_open(MC_PORT) {
             Probe { ok: true, detail: "内置 Paper 世界已在运行（127.0.0.1:25565）。".into(), hint: None }
         } else {
@@ -804,28 +1028,66 @@ fn start_paper(app: tauri::AppHandle) -> Result<OpStatus, String> {
 fn launch_prism(app: tauri::AppHandle) -> Result<OpStatus, String> {
     let state = app.state::<AppState>();
     let configured = state.settings.lock().ok().and_then(|guard| guard.prism_command.clone());
-    let command = std::env::var("LOOM_PRISM").ok().or(configured).unwrap_or_else(|| "flatpak run org.prismlauncher.PrismLauncher".to_string());
+    #[cfg(target_os = "linux")]
+    let default_command = "flatpak run org.prismlauncher.PrismLauncher".to_string();
+    #[cfg(not(target_os = "linux"))]
+    let default_command = "prismlauncher.exe".to_string();
+    let command = std::env::var("LOOM_PRISM").ok().or(configured).unwrap_or(default_command);
     let _ = fs::create_dir_all(&state.logs_dir);
     let log_file = File::create(state.logs_dir.join("prism.log")).map_err(|error| error.to_string())?;
     let log_file_err = log_file.try_clone().map_err(|error| error.to_string())?;
-    Command::new("sh")
+    #[cfg(target_os = "linux")]
+    let spawned = Command::new("sh")
         .args(["-lc", &format!("{command} >/dev/null 2>&1 &")])
-        .current_dir(state.repo_root.clone().unwrap_or_else(|| loom_dir()))
+        .current_dir(state.repo_root.clone().unwrap_or_else(loom_dir))
         .stdout(Stdio::from(log_file))
         .stderr(Stdio::from(log_file_err))
-        .spawn()
-        .map_err(|error| format!("拉起 Prism 失败：{error}"))?;
+        .spawn();
+    #[cfg(not(target_os = "linux"))]
+    let spawned = {
+        let mut cmd = Command::new("cmd");
+        cmd.args(["/C", "start", "", &command])
+            .current_dir(state.repo_root.clone().unwrap_or_else(loom_dir))
+            .stdout(Stdio::from(log_file))
+            .stderr(Stdio::from(log_file_err));
+        no_console(&mut cmd);
+        cmd.spawn()
+    };
+    spawned.map_err(|error| format!("拉起 Prism 失败：{error}"))?;
     state.log("lifecycle", &format!("拉起 Prism：{command}"));
     Ok(OpStatus { ok: true, detail: "已请求拉起 Minecraft（Prism）。若没有出现，请手动打开 Prism 并进入 26.1.2 实例。".into() })
 }
 
 #[tauri::command]
 fn client_running() -> bool {
-    std::process::Command::new("pgrep")
-        .args(["-f", "net.minecraft.client.main.Main"])
-        .output()
-        .map(|out| out.status.success())
-        .unwrap_or(false)
+    #[cfg(target_os = "linux")]
+    {
+        // 不 spawn pgrep（8 秒一次会阻塞）；直接读 /proc。
+        if let Ok(entries) = fs::read_dir("/proc") {
+            for entry in entries.flatten() {
+                let name = entry.file_name();
+                if !name.to_string_lossy().chars().all(|c| c.is_ascii_digit()) {
+                    continue;
+                }
+                let cmdline = entry.path().join("cmdline");
+                if let Ok(bytes) = fs::read(cmdline) {
+                    if String::from_utf8_lossy(&bytes).contains("net.minecraft.client.main.Main") {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    #[cfg(target_os = "windows")]
+    {
+        // EnumWindows 命中 Minecraft 窗口即可，避免每次刷新启动 PowerShell/Get-CimInstance。
+        return win_focus::minecraft_window_exists();
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    {
+        false
+    }
 }
 
 #[tauri::command]
@@ -843,7 +1105,11 @@ fn runtime_status() -> RuntimeStatus {
 #[tauri::command]
 fn open_logs(app: tauri::AppHandle) -> Result<(), String> {
     let state = app.state::<AppState>();
-    Command::new("xdg-open")
+    #[cfg(target_os = "linux")]
+    let mut command = Command::new("xdg-open");
+    #[cfg(not(target_os = "linux"))]
+    let mut command = Command::new("explorer");
+    command
         .arg(&state.logs_dir)
         .spawn()
         .map_err(|error| format!("打开日志目录失败：{error}"))?;
@@ -868,9 +1134,21 @@ fn apply_saved_window(app: &tauri::AppHandle) {
     }
 }
 
-fn save_window_geometry(app: &tauri::AppHandle) {
+fn save_window_geometry(app: &tauri::AppHandle, force: bool) {
     let Some(window) = app.get_webview_window("main") else { return };
     let state = app.state::<AppState>();
+    if !force {
+        let throttled = state
+            .settings
+            .lock()
+            .ok()
+            .and_then(|settings| settings.last_save)
+            .map(|instant| instant.elapsed() < Duration::from_millis(800))
+            .unwrap_or(false);
+        if throttled {
+            return;
+        }
+    }
     if let (Ok(scale), Ok(position), Ok(size)) = (window.scale_factor(), window.outer_position(), window.inner_size()) {
         let geometry = WindowGeom {
             x: (position.x as f64 / scale).round() as i32,
@@ -882,23 +1160,14 @@ fn save_window_geometry(app: &tauri::AppHandle) {
             if let Ok(mut settings) = state.settings.lock() {
                 settings.window = Some(geometry);
             }
-            let throttled = state
-                .settings
-                .lock()
-                .ok()
-                .and_then(|settings| settings.last_save)
-                .map(|instant| instant.elapsed() < Duration::from_millis(800))
-                .unwrap_or(false);
-            if !throttled {
-                state.save();
-            }
+            state.save();
         }
     }
 }
 
 fn cleanup(app: &tauri::AppHandle) {
     let state = app.state::<AppState>();
-    save_window_geometry(app);
+    save_window_geometry(app, true);
     kill_children(&state);
     state.save();
     if let Ok(contents) = fs::read_to_string(loom_dir().join("desktop.lock")) {
@@ -912,6 +1181,7 @@ fn cleanup(app: &tauri::AppHandle) {
 // ---------------- X11 焦点跟随鼠标 ----------------
 // Tauri 在 Wayland 下无法可靠地做全局指针/窗口焦点；桌面壳强制 XWayland，
 // 这里直接用 libX11 查询根指针并激活 Minecraft 的 XWayland 窗口。
+#[cfg(target_os = "linux")]
 mod x11_focus {
     use std::ffi::{CStr, CString, c_char, c_int, c_uint, c_ulong, c_void};
 
@@ -1054,6 +1324,7 @@ mod x11_focus {
     }
 }
 
+#[cfg(target_os = "linux")]
 fn install_kwin_focus_script(state: &AppState) -> bool {
     let home = std::env::var("HOME").unwrap_or_else(|_| "/tmp".into());
     let dir = Path::new(&home).join(".local/share/kwin/scripts/loom-focus/contents/code");
@@ -1095,6 +1366,122 @@ registerShortcut('LoomToggleFocus', 'Loom: toggle focus', 'Alt+Z', toggleLoomFoc
     ok
 }
 
+#[cfg(target_os = "windows")]
+mod win_focus {
+    use std::ffi::c_void;
+
+    type Hwnd = *mut c_void;
+    type Bool = i32;
+    type Dword = u32;
+
+    const SW_RESTORE: i32 = 9;
+    const VK_ESCAPE: u8 = 0x1B;
+    const KEYEVENTF_KEYUP: u32 = 0x0002;
+
+    #[link(name = "user32")]
+    extern "system" {
+        fn EnumWindows(
+            callback: Option<unsafe extern "system" fn(Hwnd, isize) -> Bool>,
+            lparam: isize,
+        ) -> Bool;
+        fn IsWindowVisible(hwnd: Hwnd) -> Bool;
+        fn GetWindowTextLengthW(hwnd: Hwnd) -> i32;
+        fn GetWindowTextW(hwnd: Hwnd, buffer: *mut u16, max: i32) -> i32;
+        fn IsIconic(hwnd: Hwnd) -> Bool;
+        fn ShowWindow(hwnd: Hwnd, command: i32) -> Bool;
+        fn SetForegroundWindow(hwnd: Hwnd) -> Bool;
+        fn GetForegroundWindow() -> Hwnd;
+        fn GetWindowThreadProcessId(hwnd: Hwnd, pid: *mut Dword) -> Dword;
+        fn AttachThreadInput(attach: Dword, attach_to: Dword, enabled: Bool) -> Bool;
+        fn keybd_event(vk: u8, scan: u8, flags: u32, extra: usize);
+    }
+
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn GetCurrentThreadId() -> Dword;
+    }
+
+    struct Search {
+        found: Hwnd,
+    }
+
+    unsafe extern "system" fn enum_proc(hwnd: Hwnd, lparam: isize) -> Bool {
+        if IsWindowVisible(hwnd) == 0 {
+            return 1;
+        }
+        let len = GetWindowTextLengthW(hwnd);
+        if len <= 0 || len > 512 {
+            return 1;
+        }
+        let mut buffer = vec![0u16; (len + 1) as usize];
+        let got = GetWindowTextW(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);
+        if got <= 0 {
+            return 1;
+        }
+        let title = String::from_utf16_lossy(&buffer[..got as usize]).to_lowercase();
+        if title.contains("minecraft") {
+            let context = &mut *(lparam as *mut Search);
+            context.found = hwnd;
+            return 0;
+        }
+        1
+    }
+
+    fn find_minecraft_window() -> Hwnd {
+        let mut search = Search {
+            found: std::ptr::null_mut(),
+        };
+        unsafe {
+            EnumWindows(Some(enum_proc), &mut search as *mut Search as isize);
+        }
+        search.found
+    }
+
+    pub fn minecraft_window_exists() -> bool {
+        !find_minecraft_window().is_null()
+    }
+
+    /// 尝试把 Minecraft 窗口提到前台。Windows 前台锁允许“当前前台进程”切换，
+    /// 所以从织界出发通常可行；如果游戏在独占全屏/被系统阻止，返回 false，调用方回退 Alt+Tab。
+    pub fn focus_minecraft() -> bool {
+        let hwnd = find_minecraft_window();
+        if hwnd.is_null() {
+            return false;
+        }
+        unsafe {
+            if IsIconic(hwnd) != 0 {
+                ShowWindow(hwnd, SW_RESTORE);
+            }
+            let foreground = GetForegroundWindow();
+            let foreground_thread = if foreground.is_null() {
+                0
+            } else {
+                GetWindowThreadProcessId(foreground, std::ptr::null_mut())
+            };
+            let current_thread = GetCurrentThreadId();
+            let attached = foreground_thread != 0
+                && foreground_thread != current_thread
+                && AttachThreadInput(current_thread, foreground_thread, 1) != 0;
+            let focused = SetForegroundWindow(hwnd) != 0;
+            if attached {
+                AttachThreadInput(current_thread, foreground_thread, 0);
+            }
+            if !focused {
+                ShowWindow(hwnd, SW_RESTORE);
+            }
+            focused
+        }
+    }
+
+    pub fn send_escape() {
+        unsafe {
+            keybd_event(VK_ESCAPE, 0, 0, 0);
+            keybd_event(VK_ESCAPE, 0, KEYEVENTF_KEYUP, 0);
+        }
+    }
+}
+
+#[cfg(target_os = "linux")]
 fn start_focus_follow(app: tauri::AppHandle) {
     std::thread::spawn(move || {
         let Some(display) = x11_focus::DisplayHandle::open() else { return; };
@@ -1109,7 +1496,6 @@ fn start_focus_follow(app: tauri::AppHandle) {
             let inside = px >= position.x && px < position.x + size.width as i32
                 && py >= position.y && py < position.y + size.height as i32;
             if inside == was_inside { continue; }
-            // 仅在指针真正跨过窗口边界时动作，避免反复抢焦点造成卡顿/焦点抖动。
             if last_action.elapsed() < Duration::from_millis(320) { continue; }
             let follow_game = app
                 .state::<AppState>()
@@ -1122,8 +1508,6 @@ fn start_focus_follow(app: tauri::AppHandle) {
                 let _ = window.show();
                 let _ = window.set_focus();
             } else if follow_game && window.is_focused().unwrap_or(false) {
-                // 默认行为：鼠标离开织界就交给 Minecraft。游戏会捕获并隐藏鼠标，
-                // 这是 Minecraft 正常操作；按 Ctrl+Shift+K 会先 Escape 释放鼠标再回到织界。
                 let _ = display.focus_minecraft();
             }
             was_inside = inside;
@@ -1133,11 +1517,15 @@ fn start_focus_follow(app: tauri::AppHandle) {
 }
 
 fn main() {
+    #[cfg(target_os = "linux")]
     let kde_wayland = std::env::var("XDG_SESSION_TYPE").map(|v| v == "wayland").unwrap_or(false)
         && std::env::var("KDE_FULL_SESSION").map(|v| v == "true").unwrap_or(false);
+    #[cfg(not(target_os = "linux"))]
+    let kde_wayland = false;
     // KDE/GNOME 的 Wayland 会话下，GTK 窗口的 always-on-top 与全局快捷键都不可靠；
     // 去掉 WAYLAND_DISPLAY / 把 session type 设为 x11，让 Tauri 的 global-shortcut 走 X11，
     // 而不是弹出 xdg-desktop-portal 的全局快捷键授权框（授权状态损坏后 Alt+Z 会完全失效）。
+    #[cfg(target_os = "linux")]
     if std::env::var_os("WAYLAND_DISPLAY").is_some() {
         std::env::remove_var("WAYLAND_DISPLAY");
         std::env::set_var("XDG_SESSION_TYPE", "x11");
@@ -1182,16 +1570,19 @@ fn main() {
                 state.log("lifecycle", &format!("织界启动，repo_root={:?}", state.repo_root));
             }
             apply_saved_window(&app.handle().clone());
+            #[cfg(target_os = "linux")]
             let kde_script = {
                 let state = app.state::<AppState>();
                 state.kde_wayland && install_kwin_focus_script(&state)
             };
+            #[cfg(not(target_os = "linux"))]
+            let kde_script = false;
             let window = app.get_webview_window("main").expect("main window");
             let app_handle = app.handle().clone();
             window.on_window_event(move |event| match event {
-                tauri::WindowEvent::Moved(_) | tauri::WindowEvent::Resized(_) => save_window_geometry(&app_handle),
+                tauri::WindowEvent::Moved(_) | tauri::WindowEvent::Resized(_) => save_window_geometry(&app_handle, false),
                 tauri::WindowEvent::CloseRequested { .. } => {
-                    save_window_geometry(&app_handle);
+                    save_window_geometry(&app_handle, true);
                     let state = app_handle.state::<AppState>();
                     kill_children(&state);
                     state.save();

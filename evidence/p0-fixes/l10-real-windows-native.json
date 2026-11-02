@@ -1,0 +1,591 @@
+{
+ "level": "L10",
+ "startedAt": "2026-11-01T13:10:37.682Z",
+ "bots": {
+  "left": "LeftWeaver",
+  "right": "RightWeaver"
+ },
+ "checks": {
+  "plugin.health": {
+   "ok": true,
+   "detail": null
+  },
+  "both-bots-online": {
+   "ok": true,
+   "detail": [
+    "LeftWeaver",
+    "RightWeaver"
+   ]
+  },
+  "session-level": {
+   "ok": true,
+   "detail": "L10"
+  },
+  "stale-session-rejected": {
+   "ok": true,
+   "detail": null
+  },
+  "give.LeftWeaver": {
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "gave": "minecraft:oak_planks",
+    "count": 4,
+    "players": 0,
+    "kit": {
+     "minecraft:lodestone": 4,
+     "minecraft:oak_planks": 4
+    },
+    "queued": true
+   }
+  },
+  "give.RightWeaver": {
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "gave": "minecraft:oak_planks",
+    "count": 4,
+    "players": 0,
+    "kit": {
+     "minecraft:lodestone": 4,
+     "minecraft:oak_planks": 4
+    },
+    "queued": true
+   }
+  },
+  "give.HumanLike": {
+   "ok": true,
+   "detail": {
+    "ok": true,
+    "gave": "minecraft:lodestone",
+    "count": 1,
+    "players": 1,
+    "kit": {
+     "minecraft:lodestone": 1,
+     "minecraft:oak_planks": 4
+    }
+   }
+  },
+  "playerBeat.armed": {
+   "ok": true,
+   "detail": {
+    "armed": true,
+    "beats": 1,
+    "items": [
+     "minecraft:lodestone"
+    ],
+    "ok": true
+   }
+  },
+  "playerBeat.activate": {
+   "ok": true,
+   "detail": {
+    "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+    "armed": true,
+    "active": true,
+    "hint": "手持合龙石，对准中央基座按右键",
+    "beats": [
+     {
+      "pos": [
+       12,
+       65,
+       0
+      ],
+      "block": "minecraft:lodestone",
+      "done": false
+     }
+    ],
+    "items": [
+     "minecraft:lodestone"
+    ],
+    "done": false,
+    "ok": true
+   }
+  },
+  "keystone.human-player": {
+   "ok": true,
+   "detail": {
+    "seq": 50,
+    "type": "block.place",
+    "tick": 1746,
+    "actor": "HumanLike",
+    "actorType": "player",
+    "pos": [
+     12,
+     65,
+     0
+    ],
+    "data": {
+     "block": "minecraft:lodestone"
+    }
+   }
+  },
+  "reference.passed": {
+   "ok": true,
+   "detail": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "deck-full",
+      "passed": true
+     },
+     {
+      "id": "both-weavers",
+      "passed": true
+     },
+     {
+      "id": "materials-exact",
+      "passed": true
+     },
+     {
+      "id": "keystone-by-player",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "h-bridge-ok",
+      "passed": true
+     },
+     {
+      "id": "h-both-ok",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  },
+  "reference.stars-3": {
+   "ok": true,
+   "detail": 3
+  },
+  "reference.failures-empty": {
+   "ok": true,
+   "detail": []
+  },
+  "no-virtual-fallback": {
+   "ok": true,
+   "detail": []
+  },
+  "report-equals-mock": {
+   "ok": true,
+   "detail": {
+    "real": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "deck-full",
+       "passed": true
+      },
+      {
+       "id": "both-weavers",
+       "passed": true
+      },
+      {
+       "id": "materials-exact",
+       "passed": true
+      },
+      {
+       "id": "keystone-by-player",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "h-bridge-ok",
+       "passed": true
+      },
+      {
+       "id": "h-both-ok",
+       "passed": true
+      }
+     ],
+     "failures": []
+    },
+    "mock": {
+     "passed": true,
+     "stars": 3,
+     "criteria": [
+      {
+       "id": "deck-full",
+       "passed": true
+      },
+      {
+       "id": "both-weavers",
+       "passed": true
+      },
+      {
+       "id": "materials-exact",
+       "passed": true
+      },
+      {
+       "id": "keystone-by-player",
+       "passed": true
+      }
+     ],
+     "hidden": [
+      {
+       "id": "h-bridge-ok",
+       "passed": true
+      },
+      {
+       "id": "h-both-ok",
+       "passed": true
+      }
+     ],
+     "failures": []
+    }
+   }
+  },
+  "digest-equals-mock": {
+   "ok": true,
+   "detail": {
+    "places": 4
+   }
+  },
+  "reset.under-2s": {
+   "ok": true,
+   "detail": {
+    "resetA": {
+     "ok": true,
+     "ms": 16,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 1761,
+     "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+     "epoch": 3,
+     "checkpointSize": 1146,
+     "restoredBlocks": 1,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
+    },
+    "resetB": {
+     "ok": true,
+     "ms": 14,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 1767,
+     "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+     "epoch": 3,
+     "checkpointSize": 1146,
+     "restoredBlocks": 0,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
+    }
+   }
+  },
+  "reset.hash-stable": {
+   "ok": true,
+   "detail": {
+    "resetA": {
+     "ok": true,
+     "ms": 16,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 1761,
+     "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+     "epoch": 3,
+     "checkpointSize": 1146,
+     "restoredBlocks": 1,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
+    },
+    "resetB": {
+     "ok": true,
+     "ms": 14,
+     "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+     "tick": 1767,
+     "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+     "epoch": 3,
+     "checkpointSize": 1146,
+     "restoredBlocks": 0,
+     "removedEntities": 5,
+     "playerKit": {
+      "minecraft:lodestone": 1,
+      "minecraft:oak_planks": 4
+     }
+    }
+   }
+  },
+  "reset.clears-events": {
+   "ok": true,
+   "detail": {
+    "events": 0
+   }
+  }
+ },
+ "reports": {
+  "reference": {
+   "real": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "deck-full",
+      "passed": true
+     },
+     {
+      "id": "both-weavers",
+      "passed": true
+     },
+     {
+      "id": "materials-exact",
+      "passed": true
+     },
+     {
+      "id": "keystone-by-player",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "h-bridge-ok",
+      "passed": true
+     },
+     {
+      "id": "h-both-ok",
+      "passed": true
+     }
+    ],
+    "failures": []
+   },
+   "mock": {
+    "passed": true,
+    "stars": 3,
+    "criteria": [
+     {
+      "id": "deck-full",
+      "passed": true
+     },
+     {
+      "id": "both-weavers",
+      "passed": true
+     },
+     {
+      "id": "materials-exact",
+      "passed": true
+     },
+     {
+      "id": "keystone-by-player",
+      "passed": true
+     }
+    ],
+    "hidden": [
+     {
+      "id": "h-bridge-ok",
+      "passed": true
+     },
+     {
+      "id": "h-both-ok",
+      "passed": true
+     }
+    ],
+    "failures": []
+   }
+  }
+ },
+ "errors": [],
+ "actions": [
+  {
+   "action": "moveTo(10,-1)",
+   "ms": 1857
+  },
+  {
+   "action": "place(minecraft:oak_planks@10,65,0)",
+   "ms": 279
+  },
+  {
+   "action": "moveTo(13,1)",
+   "ms": 2352
+  },
+  {
+   "action": "place(minecraft:oak_planks@13,65,0)",
+   "ms": 129
+  },
+  {
+   "action": "moveTo(14,1)",
+   "ms": 111
+  },
+  {
+   "action": "place(minecraft:oak_planks@14,65,0)",
+   "ms": 36
+  },
+  {
+   "action": "say(右岸铺好了)",
+   "ms": 0
+  },
+  {
+   "action": "moveTo(11,-1)",
+   "ms": 865
+  },
+  {
+   "action": "place(minecraft:oak_planks@11,65,0)",
+   "ms": 48
+  },
+  {
+   "action": "say(左岸铺好了)",
+   "ms": 0
+  },
+  {
+   "action": "say(桥面铺好了，最后一块交给织者)",
+   "ms": 0
+  },
+  {
+   "action": "reset",
+   "ms": 287
+  },
+  {
+   "action": "reset",
+   "ms": 282
+  }
+ ],
+ "prepareMs": 3829,
+ "plugin": {
+  "levelId": "L10",
+  "bots": [
+   "LeftWeaver",
+   "RightWeaver"
+  ],
+  "region": [
+   [
+    -8,
+    60,
+    -3
+   ],
+   [
+    36,
+    84,
+    9
+   ]
+  ],
+  "playerSpawn": [
+   14,
+   65,
+   6
+  ],
+  "agentSpawn": [
+   0,
+   65,
+   0
+  ]
+ },
+ "messages": [
+  {
+   "kind": "send",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "send",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "send",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "send",
+   "actor": "RightWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "LeftWeaver",
+   "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "RightWeaver",
+   "text": "2"
+  }
+ ],
+ "referenceRunMs": 3358,
+ "snapshot": {
+  "agentPlaceCount": 4,
+  "playerPlaceCount": 1,
+  "actors": [
+   "LeftWeaver:agent",
+   "RightWeaver:agent",
+   "HumanLike:player"
+  ],
+  "bridge": {
+   "deck": 28,
+   "gap": 5,
+   "gapStart": 10,
+   "bridgeWidth": 3,
+   "deckY": 65,
+   "keystone": [
+    12,
+    65,
+    0
+   ],
+   "leftBank": [
+    1,
+    65,
+    0
+   ],
+   "rightBank": [
+    26,
+    65,
+    0
+   ],
+   "materialsTotal": 4,
+   "leftAgent": "LeftWeaver",
+   "rightAgent": "RightWeaver"
+  }
+ },
+ "reset": {
+  "resetA": {
+   "ok": true,
+   "ms": 16,
+   "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+   "tick": 1761,
+   "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+   "epoch": 3,
+   "checkpointSize": 1146,
+   "restoredBlocks": 1,
+   "removedEntities": 5,
+   "playerKit": {
+    "minecraft:lodestone": 1,
+    "minecraft:oak_planks": 4
+   }
+  },
+  "resetB": {
+   "ok": true,
+   "ms": 14,
+   "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
+   "tick": 1767,
+   "sessionId": "f1424a05-85bb-4642-881d-9aef56eaf5d2",
+   "epoch": 3,
+   "checkpointSize": 1146,
+   "restoredBlocks": 0,
+   "removedEntities": 5,
+   "playerKit": {
+    "minecraft:lodestone": 1,
+    "minecraft:oak_planks": 4
+   }
+  }
+ },
+ "finishedAt": "2026-11-01T13:10:49.946Z",
+ "ok": true
+}

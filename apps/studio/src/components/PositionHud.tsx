@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { chrome } from "../copy";
 import type { LevelView, SnapshotView, StudioEngine } from "../types";
 import { pointRows, xzText, type PointRow } from "./guidance-data";
@@ -8,14 +8,23 @@ interface PositionHudProps {
   sessionId: string | null;
   level: LevelView | null;
   onOpenManual?: () => void;
+  /**
+   * 每次轮询拿到快照时回调（docs/49 §2.3）：Workbench 用它实时同步目标面板、自动确认玩家节拍。
+   * 用 ref 保存回调，轮询 effect 的依赖保持不变（不会因父组件重渲染重建 EventSource/定时器）。
+   */
+  onSnapshot?: (snapshot: SnapshotView) => void;
 }
 
 /** 位置 HUD（docs/48 §1.6）：每秒轮询引擎快照显示灰崽/关键点坐标；页面隐藏时暂停。 */
-export function PositionHud({ engine, sessionId, level, onOpenManual }: PositionHudProps) {
+export function PositionHud({ engine, sessionId, level, onOpenManual, onSnapshot }: PositionHudProps) {
   const copy = chrome.hud;
   const [snapshot, setSnapshot] = useState<SnapshotView | null>(null);
   const [paused, setPaused] = useState(false);
   const points: PointRow[] = useMemo(() => pointRows(level, snapshot?.points), [level, snapshot?.points]);
+  const onSnapshotRef = useRef(onSnapshot);
+  useEffect(() => {
+    onSnapshotRef.current = onSnapshot;
+  }, [onSnapshot]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -38,6 +47,7 @@ export function PositionHud({ engine, sessionId, level, onOpenManual }: Position
         if (!disposed) {
           setSnapshot(next);
           setPaused(false);
+          if (next) onSnapshotRef.current?.(next);
         }
       } catch {
         /* 引擎暂时不可用：保留上一次读数，不打断游戏。 */

@@ -609,7 +609,7 @@ await golem.say("三坛一起出坛，节日药水备齐")
   ],
   // 名副其实（docs/48 §1.9）：本关必须真的用 async/await + Promise.all 并发等待。
   codeRequirements: [
-    { id: "l09-promise-all", text: "用 Promise.all 一起等两坛药，而不是一坛等完再一坛", kind: "promise-combinator", min: 1 },
+    { id: "l09-promise-all", text: "用 `Promise.all` 一起等两坛药，而不是一坛等完再一坛", kind: "promise-combinator", min: 1 },
     { id: "l09-higher-order", text: "用 map/filter 把多座酿造台当成一组处理（每座台 map 成一个 Promise）", kind: "higher-order", min: 1 },
   ],
   phases: ["顺序版到并发版", "缺料降级"],

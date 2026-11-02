@@ -499,7 +499,7 @@ golem.say("账清了，塔卡。")
   // 名副其实（docs/48 §1.9）：本关必须真的用记录（对象）与可辨识联合的分支，不能靠字符串硬记。
   codeRequirements: [
     { id: "l06-record", text: "用记录（对象字面量）把货/桶的字段绑在一起，而不是散装字符串", kind: "object", min: 2 },
-    { id: "l06-branch", text: "用 switch/if 按 kind 分路（分支至少 2 处），漏一类要能看出来", kind: "branch", min: 2 },
+    { id: "l06-branch", text: "用 `switch` / `if` 按 `kind` 分路（分支至少 2 处），漏一类要能看出来", kind: "branch", min: 2 },
     { id: "l06-function", text: "把「这件货该进哪个桶」写成可复用的 function", kind: "function", min: 2 },
   ],
   phases: ["记录与清点", "三桶分拣与配工具", "新工具与对账"],

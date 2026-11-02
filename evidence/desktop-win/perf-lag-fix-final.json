@@ -1,0 +1,43 @@
+{
+  "ts": "2026-11-02T11:56:00+08:00",
+  "scope": "Windows installed Tauri desktop shell responsiveness",
+  "head": "2c7b635 (worktree lag-fix uncommitted at measurement)",
+  "package": {
+    "path": "apps/desktop/src-tauri/target/release/bundle/nsis/Loomcraft_0.1.0_x64-setup.exe",
+    "bytes": 427231249,
+    "sha256": "CF5DBD83033D422802FAD495D573E06148A08BE314B491BC4DC50B89E8DF2473",
+    "installedExe": "C:\\Users\\Alami\\AppData\\Local\\Loomcraft\\loomcraft-desktop.exe",
+    "installedExeBytes": 39937536
+  },
+  "symptom": "click a few times, multi-second stalls every ~8s; shell appears frozen",
+  "rootCause": {
+    "trigger": "shell.js setInterval(refreshStatus, 8000) -> invoke client_running",
+    "oldWindowsImplementation": "powershell.exe -NoProfile -Command Get-CimInstance Win32_Process ... via Command::output()",
+    "powershellColdStartMs": [721, 553, 561],
+    "uiaLatencyBeforeMs": [2028, 3840, 2080, 3431, 2090, 2073, 5331, 8, 8, 10, 11, 2227],
+    "uiaBeforeMaxMs": 5331,
+    "uiaBeforeAvgMs": 1761,
+    "powershellChildrenBefore": "1-2 every 8s",
+    "secondary": "all child processes lacked CREATE_NO_WINDOW; window geometry saved on every moved/resized before throttle"
+  },
+  "fixes": [
+    "Windows client_running uses EnumWindows Minecraft window lookup; Linux reads /proc/*/cmdline; no process spawn",
+    "CREATE_NO_WINDOW on Paper/engine/taskkill/Prism cmd/run_capture children",
+    "save_window_geometry throttles before window APIs; force save on close"
+  ],
+  "measurementsAfter": {
+    "uiaLatencyMs": [266, 30, 51, 19, 136, 71, 43, 29, 70, 71, 24, 30, 27, 45, 21, 172, 27, 125, 44, 44],
+    "uiaMaxMs": 266,
+    "uiaAvgMs": 67,
+    "powershellChildrenOfAppMax": 0,
+    "javaConsoleWindows": 0,
+    "nodeConsoleWindows": 0,
+    "cleanClose": {
+      "appExited": true,
+      "lifecycleStopLines": 2,
+      "portsReleased": true,
+      "desktopLockRemoved": true
+    }
+  },
+  "conclusion": "periodic multi-second stalls eliminated in installed package; Linux baseline cargo check also passed in WSL, native Linux package verification still requested from classmate"
+}

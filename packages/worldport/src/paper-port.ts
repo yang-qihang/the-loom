@@ -69,6 +69,12 @@ export interface PaperWorldPortOptions {
   scene?: SceneHint;
   log?: (line: string) => void;
   closeRpcOnDispose?: boolean;
+  /**
+   * dispose() 是否断开 bot。默认 true（e2e harness 自己拥有 bot）。
+   * engine 复用同一个 bot 服务多个会话时必须传 false，否则每次换关都会断线重连，
+   * Paper 侧旧实体还没掉线，新连接会被 "You logged in from another location" 踢掉。
+   */
+  disposeBot?: boolean;
 }
 
 // ---------------------------------------------------------------- WebSocket JSON-RPC client
@@ -240,6 +246,7 @@ export class PaperWorldPort implements WorldPort {
   private readonly sceneHint?: SceneHint;
   private readonly log: (line: string) => void;
   private readonly closeRpcOnDispose: boolean;
+  private readonly disposeBot: boolean;
 
   private sessionId = "";
   private epoch = 0;
@@ -275,6 +282,7 @@ export class PaperWorldPort implements WorldPort {
     this.sceneHint = options.scene;
     this.log = options.log ?? (() => {});
     this.closeRpcOnDispose = options.closeRpcOnDispose ?? false;
+    this.disposeBot = options.disposeBot ?? true;
   }
 
   get session(): { sessionId: string; epoch: number } {
@@ -775,7 +783,9 @@ export class PaperWorldPort implements WorldPort {
       }
     }
     try {
-      await this.bot.disconnect();
+      if (this.disposeBot) {
+        await this.bot.disconnect();
+      }
     } catch {
       /* ignore */
     }

@@ -1,0 +1,39 @@
+﻿{
+    "ts":  "2026-11-02T03:26:52.6279745Z",
+    "suite":  "windows-desktop-gui",
+    "head":  "497172dbacf45738b4b8d344dacb2183b8d34c13",
+    "package":  "Loomcraft_0.1.0_x64-setup.exe",
+    "packageSha256":  "C823062DFDB5FCFC11C5F8D88DD20F2A82575C8EDDC09760092D76350CD569BD",
+    "windowTitle":  "织界",
+    "foregroundTitleSequence":  [
+                                    "Minecraft 26.1.2",
+                                    "织界",
+                                    "Minecraft 26.1.2"
+                                ],
+    "altZ":  {
+                 "fromLoom":  "Minecraft 26.1.2",
+                 "fromMinecraft":  "织界",
+                 "result":  "pass"
+             },
+    "singleInstance":  {
+                           "after":  1,
+                           "before":  1,
+                           "secondPidExited":  true
+                       },
+    "exitCleanup":  {
+                        "desktopLockRemoved":  true,
+                        "portsReleased":  true,
+                        "lifecycleStopLines":  2,
+                        "appExited":  true,
+                        "method":  "WM_CLOSE",
+                        "paperStopped":  true,
+                        "engineStopped":  true
+                    },
+    "screenshots":  [
+                        "01-wizard.png",
+                        "02-workbench.png",
+                        "03-map.png",
+                        "04-companion.png",
+                        "05-workbench.png"
+                    ]
+}

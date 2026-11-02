@@ -1,0 +1,12 @@
+{
+  "ts": "2026-11-01T14:37:46.362Z",
+  "case": "dirty-world-auto-restore",
+  "epochs": [
+    0,
+    0,
+    1
+  ],
+  "dirtyWorldErrorGone": true,
+  "settled": true,
+  "consoleErrors": []
+}

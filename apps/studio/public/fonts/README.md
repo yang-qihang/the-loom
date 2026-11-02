@@ -1,6 +1,6 @@
 # 字体资产（Studio / 桌面壳共用）
 
-> 2026-11-01 第三轮修正：字体范围按用户要求回退——**代码编辑器 + 编辑器右键/补全/悬停/查找**用本目录的 **Maple Mono（CN 变体）**；**其余 Studio/桌面壳 UI 保留上一版中文像素字体**（`src/assets/fonts` 的 Departure Mono + Zpix，构建时复制到 `dist/assets`；桌面壳用的副本也在本目录）。
+> 2026-11-01 第四轮修正：字体范围按用户要求扩展——**所有【代码】渲染点**统一本目录的 **Maple Mono（CN 变体）**（不只是编辑器：参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；**长段正文**用随包 **Noto Sans SC**（`src/assets/fonts/noto-sans-sc-*.woff2`，OFL-1.1，子集）；**短标题/按钮/标签**保留中文像素字体 **Zpix + Departure Mono**。实现与验收见 `docs/20` §3b4、`apps/studio/src/typography.css`、`apps/studio/e2e/typography.spec.ts`。
 
 ## Maple Mono（CN 变体）
 

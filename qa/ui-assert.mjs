@@ -11,7 +11,7 @@ const add = (id, name, ok, detail, status = "fail") => checks.push({ id, name, s
 
 const screens = [
   { id: "map", file: "apps/studio/src/components/MapWall.tsx", shot: "apps/studio/evidence/01-map-wall.png" },
-  { id: "workbench", file: "apps/studio/src/components/Workbench.tsx", shot: "apps/studio/evidence/03-workbench.png" },
+  { id: "workbench", file: "apps/studio/src/components/Workbench.tsx", shot: "apps/studio/evidence/02-workbench.png" },
   { id: "result", file: "apps/studio/src/components/ResultCard.tsx", shot: "apps/studio/evidence/05-result-3stars.png" },
 ];
 add("U1", "3 屏组件存在（MapWall/Workbench/ResultCard）", screens.every(s => exists(s.file)), { missing: screens.filter(s => !exists(s.file)).map(s => s.file) });
@@ -28,8 +28,17 @@ for (const c of cssChecks) add(c.id, c.name, c.ok, { checkedFile: "apps/studio/s
 
 // 真实渲染证据：优先用 UOS（Playwright + system Chrome channel）产生的 ux-contract.json / ux-happy.json
 const readEv = f => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, f), "utf8")); } catch { return null; } };
-const sysChrome = ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium"].some(f => fs.existsSync(f));
-add("U7", "system Chrome 可用（Playwright channel: chrome）", sysChrome, { sysChrome, note: "Studio 的 Playwright 配置使用 channel: chrome，不依赖 ms-playwright 下载" }, "blocked");
+// system Chrome 探测跨平台（Windows 不能只查 /usr/bin）
+const chromeCandidates = process.platform === "win32"
+  ? [
+    process.env.ProgramFiles && path.join(process.env.ProgramFiles, "Google/Chrome/Application/chrome.exe"),
+    process.env["ProgramFiles(x86)"] && path.join(process.env["ProgramFiles(x86)"], "Google/Chrome/Application/chrome.exe"),
+    process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, "Google/Chrome/Application/chrome.exe"),
+  ].filter(Boolean)
+  : ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium"];
+const sysChromePath = chromeCandidates.find(f => fs.existsSync(f)) ?? null;
+const sysChrome = sysChromePath != null;
+add("U7", "system Chrome 可用（Playwright channel: chrome）", sysChrome, { sysChrome, chromePath: sysChromePath, candidates: chromeCandidates, note: "Studio 的 Playwright 配置使用 channel: chrome，不依赖 ms-playwright 下载；Edge 不能替代 chrome channel" }, "blocked");
 const contract = readEv("qa/evidence/ux-contract.json");
 if (contract) {
   const renderOk = (contract.centerDiff ?? 99) <= 2 && contract.horizontalScroll === false && (contract.consoleErrors || []).length === 0 && (contract.shots || []).length >= 1;

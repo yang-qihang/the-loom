@@ -8,6 +8,9 @@ import { ReplScreen } from "./components/ReplScreen";
 import { CodexScreen } from "./components/CodexScreen";
 import { GuidanceManual } from "./components/GuidanceManual";
 import { SolutionViewer } from "./components/SolutionViewer";
+import { TextbookLauncher } from "./components/textbook/TextbookLauncher";
+import { TextbookWindow } from "./components/textbook/TextbookWindow";
+import { TEXTBOOK, isTextbookRead, markTextbookRead } from "./textbook";
 import { levelCards, levelCopy } from "./copy";
 import {
   EMPTY_PROGRESS,
@@ -49,6 +52,8 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
   const [solutionLoading, setSolutionLoading] = useState(false);
   const [solutionError, setSolutionError] = useState<string | null>(null);
   const [codexOpen, setCodexOpen] = useState(false);
+  /** 配套教材：当前打开的章节（levelId）；null = 关闭。开合由挂载/卸载控制。 */
+  const [textbookLevelId, setTextbookLevelId] = useState<string | null>(null);
   const [cards, setCards] = useState<LevelCard[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +140,27 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
     setProgress((current) => markLevelCompleted(current, levelId));
   }, []);
 
+  // 配套教材（用户任务 6）：入口常驻工作台；关闭时把本章记为已读。
+  const openTextbook = useCallback((levelId: string) => {
+    if (!TEXTBOOK[levelId]) return;
+    setTextbookLevelId(levelId);
+  }, []);
+  const closeTextbook = useCallback(() => {
+    setTextbookLevelId((current) => {
+      if (current) markTextbookRead(current);
+      return null;
+    });
+    // 已读状态会影响入口文案（读本关教材 / 回看教材），触发一次重渲染。
+    setProgress((current) => ({ ...current }));
+  }, []);
+  // 首次进入某关时自动打开本章教材；之后可从常驻入口随时回看。
+  useEffect(() => {
+    if (screen.kind !== "workbench") return;
+    const levelId = screen.levelId;
+    if (!TEXTBOOK[levelId] || isTextbookRead(levelId)) return;
+    setTextbookLevelId(levelId);
+  }, [screen]);
+
   const nextPlayableLevel = useMemo(() => {
     if (!cards) return null;
     const current = screen.kind === "workbench" ? screen.levelId : null;
@@ -209,6 +235,11 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      // 教材窗口在最上层（body portal）；Esc 先关它，避免同时触发旅途手记。
+      if (textbookLevelId !== null) {
+        closeTextbook();
+        return;
+      }
       if (solutionLevelId !== null) {
         setSolutionLevelId(null);
         return;
@@ -239,7 +270,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [codexOpen, finishAct, finishPrologue, journalOpen, manualLevelId, overlay, progress.prologueSeen, replOpen, solutionLevelId]);
+  }, [closeTextbook, codexOpen, finishAct, finishPrologue, journalOpen, manualLevelId, overlay, progress.prologueSeen, replOpen, solutionLevelId, textbookLevelId]);
 
   const overlays = (
     <>
@@ -322,6 +353,15 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
       {overlay?.kind === "opening" ? (
         <LevelOpeningOverlay levelId={overlay.levelId} onStart={() => startLevel(overlay.levelId)} />
       ) : null}
+      {/* 配套教材：非模态浮动窗口（portal 到 body）；不参与 has-overlay 滚动锁。 */}
+      {textbookLevelId !== null ? (
+        <TextbookWindow
+          chapters={TEXTBOOK}
+          currentId={textbookLevelId}
+          onNavigate={(levelId) => setTextbookLevelId(levelId)}
+          onClose={closeTextbook}
+        />
+      ) : null}
     </>
   );
 
@@ -358,6 +398,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
             startLevelFlow(levelId, act);
           }}
         />
+        <TextbookLauncher levelId={screen.levelId} onOpen={openTextbook} />
         {overlays}
       </>
     );

@@ -89,12 +89,12 @@ export class StaleSnapshotError extends SessionError {
 }
 
 export type EngineEvent =
-  | { type: "state"; state: SessionState; epoch: number }
-  | { type: "log"; line: string }
-  | { type: "objective"; id: string; text: string; done: boolean }
+  | { type: "state"; state: SessionState; epoch: number; runId?: string }
+  | { type: "log"; line: string; runId?: string }
+  | { type: "objective"; id: string; text: string; done: boolean; runId?: string }
   | ResultEvent
-  | { type: "hint"; level: 1 | 2 | 3; text: string }
-  | { type: "error"; message: string; line?: number };
+  | { type: "hint"; level: 1 | 2 | 3; text: string; runId?: string }
+  | { type: "error"; message: string; line?: number; runId?: string };
 
 export interface SessionRunOptions {
   /** 幂等键：同一 commandId 重复提交返回同一 runId（REQ-CMD-01 的会话层实现）。 */
@@ -108,6 +108,11 @@ interface RunTicket {
 
 const MAX_EVENT_HISTORY = 100;
 const MAX_COMMAND_INDEX = 200;
+/**
+ * #makeSdk 的动作日志里「写世界」的动词（moveTo/place/collect/…）。
+ * count() 只是读取，不算写 → 只读了世界的一轮不需要在下次 run 前恢复场景。
+ */
+const WORLD_WRITE_LOG_RE = /\.(?:moveTo|goTo|moveToPoint|place|placePoint|collect|deposit|harvest|plant|say)\(/;
 
 /** 稳定序列化（键排序），用于 WorldDigest 与 REQ-RESET-01 的规范化比较。 */
 function stableStringify(value: unknown): string {
@@ -143,8 +148,16 @@ export class GameSession {
   #runSeq = 0;
   #activeRun: (RunTicket & { aborted: boolean }) | null = null;
   #lastResult: ResultEvent | null = null;
-  #listeners = new Set<(event: EngineEvent) => void>();
-  #history: EngineEvent[] = [];
+  /**
+   * 事件订阅者：第二个参数是事件 id（单调递增），SSE 用它写 `id:` 帧、
+   * 断线重连时浏览器带 `Last-Event-ID` 只补发缺口。
+   */
+  #listeners = new Set<(event: EngineEvent, id: number) => void>();
+  /** 事件历史带单调递增 id：SSE 断线重连用 `Last-Event-ID` 续传，不再整段回放旧事件。 */
+  #history: Array<{ id: number; event: EngineEvent }> = [];
+  #eventSeq = 0;
+  /** 当前 run/beat 的 id：运行期事件（error/log/objective/hint/state）统一带上，Studio 据此过滤旧事件。 */
+  #eventRunId: string | null = null;
   #commandIndex = new Map<string, string>();
   #issuedSnapshots = new Map<string, { epoch: number; digest: string }>();
   #disposed = false;
@@ -155,6 +168,10 @@ export class GameSession {
   #playerBeatReady = false;
   /** 最近一次 run 的学生源码：player-beat 没有新源码时，代码要求沿用这份（reset 清零）。 */
   #lastRunSource: string | null = null;
+  /** 本轮 run 是否改过世界（moveTo/place/collect/deposit/…）；下一次 run 前据此决定是否自动恢复场景。 */
+  #runWroteWorld = false;
+  /** 上一次 run 是否改过世界（失败后下一次 run 前自动 port.reset，避免「脏世界」污染参考解）。 */
+  #lastRunWroteWorld = false;
 
   constructor(
     id: string,
@@ -211,16 +228,21 @@ export class GameSession {
     return this.port.kind;
   }
 
-  subscribe(listener: (event: EngineEvent) => void): () => void {
+  subscribe(listener: (event: EngineEvent, id?: number) => void): () => void {
     this.#listeners.add(listener);
     return () => {
       this.#listeners.delete(listener);
     };
   }
 
-  /** 供 SSE 断线重连时回放（最近 MAX_EVENT_HISTORY 条）。 */
-  recentEvents(): EngineEvent[] {
+  /** 供 SSE 断线重连时回放（最近 MAX_EVENT_HISTORY 条，带单调递增事件 id）。 */
+  recentEventEntries(): Array<{ id: number; event: EngineEvent }> {
     return [...this.#history];
+  }
+
+  /** 兼容旧调用：只要事件本体。 */
+  recentEvents(): EngineEvent[] {
+    return this.#history.map(entry => entry.event);
   }
 
   async snapshot(): Promise<WorldSnapshot> {
@@ -254,13 +276,23 @@ export class GameSession {
     if (typeof source !== "string" || source.trim().length === 0) {
       throw new SessionError("source 不能为空", "INVALID_ARGUMENT");
     }
+    // P0（用户反馈 7）：同一会话里上一轮失败、且上一轮真的改过世界时，世界已经被改脏
+    // （蛋被收走/田被种乱/坛子开了酿），第二次照着「干净起点」写的参考解会莫名不通过。
+    // 这里在开跑前自动恢复场景（等价于玩家手动点「重置本关」）；已进入玩家节拍、或已通过的
+    // 会话不恢复（不能把玩家亲手完成的那一步回滚）。
+    await this.#restoreSceneIfDirty();
+    if (this.#state !== "READY" && this.#state !== "PASSED") {
+      throw new SessionError(`当前状态 ${this.#state} 不能运行；请先 reset 回到 READY`, "INVALID_STATE");
+    }
     const runId = `run-${++this.#runSeq}`;
     if (commandId) {
       if (this.#commandIndex.size >= MAX_COMMAND_INDEX) this.#commandIndex.clear();
       this.#commandIndex.set(commandId, runId);
     }
+    this.#runWroteWorld = false;
     const ticket = this.#ticket;
     this.#activeRun = { runId, ticket, aborted: false };
+    this.#eventRunId = runId;
     this.#transition("COMPILING");
     void this.#executeRun(runId, source, ticket);
     return { runId };
@@ -306,7 +338,46 @@ export class GameSession {
       this.#settle();
       this.#toReady();
     } finally {
-      if (this.#activeRun?.runId === runId) this.#activeRun = null;
+      if (this.#activeRun?.runId === runId) {
+        // 记住「这一轮改过世界没有」：下一轮 run 前若上一轮失败且改过世界 → 自动恢复场景。
+        this.#lastRunWroteWorld = this.#runWroteWorld;
+        this.#activeRun = null;
+        this.#eventRunId = null;
+      }
+    }
+  }
+
+  /**
+   * P0（用户反馈 7：第一次失败后粘正确参考解仍报错）：
+   * 同一 GameSession 内，上一轮失败可能已经把世界改脏（L02 蛋被收走、L04 田被种乱、L09 坛子开酿），
+   * 第二次照着「干净起点」写的参考解会莫名不通过/报错。这里在开跑前自动恢复场景。
+   *
+   * 触发条件（全部满足才恢复）：
+   * - 上一次 run/playerBeat 的结果存在，且未通过；
+   * - 上一次结果不处于「等玩家亲手完成」状态（playerBeatReady=true 的会话不能回滚玩家进度）；
+   * - 上一轮学生代码真的写过世界（只读代码不浪费一次 paper 场景重建）；
+   * - 会话当前允许运行（READY/PASSED）。
+   * 恢复失败只发 log，不阻断本次 run（学生仍可手动点「重置本关」）。
+   */
+  async #restoreSceneIfDirty(): Promise<void> {
+    const last = this.#lastResult;
+    if (!last || last.passed || last.playerBeatReady) return;
+    if (!this.#lastRunWroteWorld) return;
+    if (this.#state !== "READY" && this.#state !== "PASSED") return;
+    const previousEpoch = this.#epoch;
+    this.#runWroteWorld = false;
+    this.#lastRunWroteWorld = false;
+    try {
+      await this.reset();
+      this.#emit({
+        type: "log",
+        line: `上次运行失败后世界已被改动，已自动恢复场景（epoch ${previousEpoch} → ${this.#epoch}），再跑一次试试。`,
+      });
+    } catch (error) {
+      this.#emit({
+        type: "log",
+        line: `上次运行失败后世界已被改动，自动恢复场景失败：${messageOf(error)}；请手动点「重置本关」再试。`,
+      });
     }
   }
 
@@ -374,11 +445,16 @@ export class GameSession {
     }
     const ticket = this.#ticket;
     const runId = `beat-${++this.#runSeq}`;
-    if (!confirmOnly && this.level.playerBeat) {
-      await this.level.playerBeat(this.port);
+    this.#eventRunId = runId;
+    try {
+      if (!confirmOnly && this.level.playerBeat) {
+        await this.level.playerBeat(this.port);
+      }
+      const result = await this.#verifyAndPublish({ runId, ticket, studentSource: this.#lastRunSource }, "player-beat");
+      return { state: this.#state, result };
+    } finally {
+      this.#eventRunId = null;
     }
-    const result = await this.#verifyAndPublish({ runId, ticket, studentSource: this.#lastRunSource }, "player-beat");
-    return { state: this.#state, result };
   }
 
   async #verifyAndPublish(
@@ -521,6 +597,7 @@ export class GameSession {
     }
     this.#ticket += 1;
     this.#activeRun = null;
+    this.#eventRunId = null;
     this.#transition("STOPPED");
     this.#emit({ type: "log", line: "已停止当前运行（能力已撤销）" });
   }
@@ -533,11 +610,16 @@ export class GameSession {
     }
     this.#ticket += 1;
     this.#activeRun = null;
+    this.#eventRunId = null;
     this.#lastResult = null;
     this.#playerBeatReady = false;
     this.#lastRunSource = null;
+    this.#lastRunWroteWorld = false;
+    this.#runWroteWorld = false;
     this.#commandIndex.clear();
     this.#issuedSnapshots.clear();
+    // SSE 断线重连只回放当前会话历史：reset 后旧 epoch 的事件一律作废，不能回灌 Studio。
+    this.#history = [];
     this.#transition("PREPARING");
     this.#epoch += 1;
     await this.port.reset(this.level);
@@ -796,7 +878,10 @@ export class GameSession {
   /** 学生 SDK 注入：每次写操作校验当前运行的 capability，并把调用写入 log 事件流。 */
   #makeSdk(runId: string, ticket: number): RunSdk {
     const log = (line: string): void => {
-      if (this.#isCapabilityValid(runId, ticket)) this.#emit({ type: "log", line });
+      if (!this.#isCapabilityValid(runId, ticket)) return;
+      // 写世界动作留痕：失败后下一轮 run 前据此自动恢复场景（P0：脏世界让参考解莫名不通过）。
+      if (WORLD_WRITE_LOG_RE.test(line)) this.#runWroteWorld = true;
+      this.#emit({ type: "log", line });
     };
     const makeActions = (actor: string, label: string): RichAgentActions =>
       this.#makeActionsProxy(
@@ -857,11 +942,19 @@ export class GameSession {
   }
 
   #emit(event: EngineEvent): void {
-    this.#history.push(event);
+    // 运行期事件自动带当前 runId（result 事件本身已带）：Studio 只接受「当前活跃 run」的
+    // error/result，旧 run 的迟到事件/断线回放一律丢弃（docs/49 §2.4）。
+    const scoped: EngineEvent =
+      event.type === "result" || !this.#eventRunId || (event as { runId?: string }).runId
+        ? event
+        : ({ ...event, runId: this.#eventRunId } as EngineEvent);
+    this.#eventSeq += 1;
+    const id = this.#eventSeq;
+    this.#history.push({ id, event: scoped });
     if (this.#history.length > MAX_EVENT_HISTORY) this.#history.splice(0, this.#history.length - MAX_EVENT_HISTORY);
     for (const listener of this.#listeners) {
       try {
-        listener(event);
+        listener(scoped, id);
       } catch {
         // 单个订阅者异常不影响会话
       }

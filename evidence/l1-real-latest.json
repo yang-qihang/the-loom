@@ -1,19 +1,19 @@
 {
  "task": "task-30 / T2-MC real L01 e2e",
  "level": "L01",
- "startedAt": "2026-11-01T06:37:39.862Z",
+ "startedAt": "2026-11-01T14:41:20.215Z",
  "environment": {
-  "node": "v22.23.1",
+  "node": "v22.23.4",
   "host": "127.0.0.1",
-  "mcPort": 25565,
+  "mcPort": 25567,
   "rpcPort": 8765,
-  "botName": "Golem26",
+  "botName": "Golem9300",
   "plugin": {
    "ok": true,
    "plugin": "loomcraft-mc",
    "version": "0.1.0",
    "mc": "26.1.2",
-   "tick": 125,
+   "tick": 437,
    "phase": "idle",
    "prepared": false,
    "levelId": "L01",
@@ -73,7 +73,7 @@
   "L01.scene-ready": {
    "ok": true,
    "detail": {
-    "prepareMs": 4050,
+    "prepareMs": 5194,
     "scene": {
      "groundY": 11,
      "arena": {
@@ -111,7 +111,7 @@
   "L01.stale-session-rejected": {
    "ok": true,
    "detail": {
-    "sessionId": "f84efa2f-ee36-4743-b241-afa919215ca5",
+    "sessionId": "27a50eab-6a90-4ec4-b8d3-a5296b8b08e2",
     "epoch": 1
    }
   },
@@ -119,11 +119,11 @@
    "ok": true,
    "detail": {
     "first": {
-     "sessionId": "f84efa2f-ee36-4743-b241-afa919215ca5",
+     "sessionId": "27a50eab-6a90-4ec4-b8d3-a5296b8b08e2",
      "epoch": 1
     },
     "second": {
-     "sessionId": "370c103f-4d2c-426b-a287-997d39d031ba",
+     "sessionId": "265e5dcd-f612-4239-b6ef-79400f6d0668",
      "epoch": 2
     }
    }
@@ -175,7 +175,7 @@
   "L01.actions": {
    "ok": true,
    "detail": {
-    "referenceRunMs": 13046
+    "referenceRunMs": 13854
    }
   },
   "L01.report-equals-mock": {
@@ -260,15 +260,15 @@
   "L01.reset-under-2s": {
    "ok": true,
    "detail": {
-    "a": 18,
-    "b": 13
+    "a": 36,
+    "b": 25
    }
   },
   "L01.reset-hash-stable": {
    "ok": true,
    "detail": {
-    "a": "sha256:862160c635af58820cfcbb223634a7fe02bf4ccc9fab53a62ef2ddeea4ef2cbe",
-    "b": "sha256:862160c635af58820cfcbb223634a7fe02bf4ccc9fab53a62ef2ddeea4ef2cbe"
+    "a": "sha256:1847780e663468d061ffac9877ec34f6e424718b8187fe988550cfe3a4061f6c",
+    "b": "sha256:1847780e663468d061ffac9877ec34f6e424718b8187fe988550cfe3a4061f6c"
    }
   },
   "L01.reset-clears-events": {
@@ -281,7 +281,7 @@
    "ok": true,
    "detail": {
     "passed": false,
-    "stars": 2,
+    "stars": 1,
     "criteria": [
      {
       "id": "four-lamps-lit",
@@ -303,7 +303,7 @@
     "hidden": [
      {
       "id": "h1",
-      "passed": true
+      "passed": false
      },
      {
       "id": "h2",
@@ -313,16 +313,17 @@
     "failures": [
      "1→2→3 号灯顺序正确",
      "4 盏路灯全部点亮",
+     "每次放置前，织偶都到达过灯柱 2 格内",
      "灰崽回到艾拉身边"
     ]
    }
   },
   "l1.starter.report-equals-mock": {
-   "ok": true,
+   "ok": false,
    "detail": {
     "real": {
      "passed": false,
-     "stars": 2,
+     "stars": 1,
      "criteria": [
       {
        "id": "four-lamps-lit",
@@ -344,7 +345,7 @@
      "hidden": [
       {
        "id": "h1",
-       "passed": true
+       "passed": false
       },
       {
        "id": "h2",
@@ -354,6 +355,7 @@
      "failures": [
       "1→2→3 号灯顺序正确",
       "4 盏路灯全部点亮",
+      "每次放置前，织偶都到达过灯柱 2 格内",
       "灰崽回到艾拉身边"
      ]
     },
@@ -405,7 +407,8 @@
    "detail": [
     "4 盏路灯全部点亮",
     "灰崽回到艾拉身边",
-    "1→2→3 号灯顺序正确"
+    "1→2→3 号灯顺序正确",
+    "每次放置前，织偶都到达过灯柱 2 格内"
    ]
   },
   "l1.no-beat.not-passed": {
@@ -605,21 +608,21 @@
  },
  "sessions": {
   "first": {
-   "sessionId": "f84efa2f-ee36-4743-b241-afa919215ca5",
+   "sessionId": "27a50eab-6a90-4ec4-b8d3-a5296b8b08e2",
    "epoch": 1
   },
   "second": {
-   "sessionId": "370c103f-4d2c-426b-a287-997d39d031ba",
+   "sessionId": "265e5dcd-f612-4239-b6ef-79400f6d0668",
    "epoch": 2
   }
  },
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 18,
-   "hash": "sha256:862160c635af58820cfcbb223634a7fe02bf4ccc9fab53a62ef2ddeea4ef2cbe",
-   "tick": 499,
-   "sessionId": "370c103f-4d2c-426b-a287-997d39d031ba",
+   "ms": 36,
+   "hash": "sha256:1847780e663468d061ffac9877ec34f6e424718b8187fe988550cfe3a4061f6c",
+   "tick": 832,
+   "sessionId": "265e5dcd-f612-4239-b6ef-79400f6d0668",
    "epoch": 2,
    "checkpointSize": 3130,
    "restoredBlocks": 4,
@@ -630,10 +633,10 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 13,
-   "hash": "sha256:862160c635af58820cfcbb223634a7fe02bf4ccc9fab53a62ef2ddeea4ef2cbe",
-   "tick": 502,
-   "sessionId": "370c103f-4d2c-426b-a287-997d39d031ba",
+   "ms": 25,
+   "hash": "sha256:1847780e663468d061ffac9877ec34f6e424718b8187fe988550cfe3a4061f6c",
+   "tick": 836,
+   "sessionId": "265e5dcd-f612-4239-b6ef-79400f6d0668",
    "epoch": 2,
    "checkpointSize": 3130,
    "restoredBlocks": 0,
@@ -646,91 +649,93 @@
  "actions": [
   {
    "action": "moveTo(-12,10)",
-   "ms": 6729
+   "ms": 7274
   },
   {
    "action": "place(minecraft:lantern@-12,14,10)",
-   "ms": 112
+   "ms": 164
   },
   {
    "action": "moveTo(-12,-2)",
-   "ms": 2137
+   "ms": 2086
   },
   {
    "action": "place(minecraft:lantern@-12,14,-2)",
-   "ms": 40
+   "ms": 52
   },
   {
    "action": "moveTo(2,-2)",
-   "ms": 2511
+   "ms": 2447
   },
   {
    "action": "place(minecraft:lantern@2,14,-2)",
-   "ms": 46
+   "ms": 34
   },
   {
    "action": "moveTo(0,6)",
-   "ms": 1454
+   "ms": 1517
   },
   {
    "action": "reset",
-   "ms": 144
+   "ms": 172
   },
   {
    "action": "reset",
-   "ms": 45
+   "ms": 74
   },
   {
    "action": "reset",
-   "ms": 60
+   "ms": 69
   },
   {
    "action": "moveTo(-12,10)",
-   "ms": 6184
+   "ms": 11421
   },
   {
    "action": "place(minecraft:lantern@-12,14,10)",
-   "ms": 50
+   "ms": 6
   },
   {
    "action": "reset",
-   "ms": 149
+   "ms": 178
   },
   {
    "action": "moveTo(-12,10)",
-   "ms": 6737
+   "ms": 6940
   },
   {
    "action": "place(minecraft:lantern@-12,14,10)",
-   "ms": 16
+   "ms": 66
   },
   {
    "action": "moveTo(-12,-2)",
-   "ms": 2134
+   "ms": 2094
   },
   {
    "action": "place(minecraft:lantern@-12,14,-2)",
-   "ms": 21
+   "ms": 68
   },
   {
    "action": "moveTo(2,-2)",
-   "ms": 2529
+   "ms": 2484
   },
   {
    "action": "place(minecraft:lantern@2,14,-2)",
-   "ms": 27
+   "ms": 19
   },
   {
    "action": "moveTo(0,6)",
-   "ms": 1423
+   "ms": 1328
   },
   {
    "action": "reset",
-   "ms": 150
+   "ms": 166
   }
  ],
- "errors": [],
- "prepareMs": 4050,
+ "errors": [
+  "l1.starter.report-equals-mock"
+ ],
+ "prepareMs": 5194,
  "scene": {
   "groundY": 11,
   "arena": {
@@ -763,7 +768,7 @@
    "villager-2"
   ]
  },
- "referenceRunMs": 13046,
+ "referenceRunMs": 13854,
  "snapshot": {
   "blocks": {
    "-12,14,10": "minecraft:lantern",
@@ -2173,6 +2178,6 @@
    "block.place:player"
   ]
  },
- "finishedAt": "2026-11-01T06:38:19.672Z",
- "ok": true
+ "finishedAt": "2026-11-01T14:42:07.474Z",
+ "ok": false
 }

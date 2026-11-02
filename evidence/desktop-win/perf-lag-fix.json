@@ -1,0 +1,57 @@
+{
+  "ts": "2026-11-02T11:40:00+08:00",
+  "scope": "Windows Tauri desktop shell responsiveness",
+  "head": "2c7b635",
+  "workingTree": "lag-fix uncommitted at measurement",
+  "issue": "periodic multi-second input stalls / clicks delayed then frozen",
+  "rootCause": {
+    "primary": "shell.js setInterval(refreshStatus, 8000) invokes Tauri client_running; old Windows implementation spawned powershell.exe -NoProfile -Command Get-CimInstance Win32_Process synchronously via Command::output() on every refresh",
+    "measurementsBefore": {
+      "powershellColdStartMs": [721, 553, 561],
+      "uiaInvokeLatencyMs": [2028, 3840, 2080, 3431, 2090, 2073, 5331, 8, 8, 10, 11, 2227],
+      "uiaMaxMs": 5331,
+      "uiaAvgMs": 1761,
+      "powershellChildrenObserved": "1-2 every 8s",
+      "consoleWindows": "powershell child process created by GUI without CREATE_NO_WINDOW"
+    },
+    "secondary": [
+      "all Windows background children (java/node/taskkill/powershell) spawned without CREATE_NO_WINDOW",
+      "save_window_geometry performed scale/outer_position/inner_size and settings lock/disk save on every Moved/Resized event before throttle"
+    ]
+  },
+  "fix": {
+    "clientRunning": "Windows: EnumWindows finds visible Minecraft window; Linux: read /proc/*/cmdline; no process spawn",
+    "noConsole": "CommandExt::creation_flags(0x08000000) for Paper/engine/taskkill/prism cmd and run_capture",
+    "geometry": "throttle before window APIs; force save only on close",
+    "files": [
+      "apps/desktop/src-tauri/src/main.rs",
+      "qa/desktop-smoke-win.mjs"
+    ]
+  },
+  "measurementsAfter": {
+    "uiaInvokeLatencyMs": [169, 74, 42, 68, 72, 55, 41, 60, 53, 58],
+    "uiaMaxMs": 169,
+    "uiaAvgMs": 69,
+    "powershellChildrenOfApp": 0,
+    "javaWindowTitles": 0,
+    "nodeWindowTitles": 0,
+    "cleanClose": {
+      "appExited": true,
+      "lifecycleStopLines": 2,
+      "engineStopped": true,
+      "paperStopped": true,
+      "desktopLockRemoved": true
+    }
+  },
+  "commands": [
+    "Start-Process apps/desktop/src-tauri/target/release/loomcraft-desktop.exe",
+    "UIAutomation InvokePattern on 设置/完成 toggles",
+    "Get-CimInstance Win32_Process parent=app",
+    "PostMessage WM_CLOSE"
+  ],
+  "conclusion": "fixed for measured scenario; final NSIS rebuild/install pending",
+  "remaining": [
+    "CSS zoom + WebView2 rendering performance still to profile under long textbook/Monaco use",
+    "add automated Windows perf smoke gate to prevent regression"
+  ]
+}

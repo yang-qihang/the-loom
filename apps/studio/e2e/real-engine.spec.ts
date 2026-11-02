@@ -32,6 +32,8 @@ const PROGRESS = {
 async function seedProgress(page: Page) {
   await page.addInitScript((progress) => {
     localStorage.setItem("loom.studio.progress.v1", JSON.stringify(progress));
+    // 回访玩家：教材已读，避免首次自动弹出教材窗口拦截工作台点击（教材本身有独立 spec）。
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10"]));
   }, PROGRESS);
 }
 

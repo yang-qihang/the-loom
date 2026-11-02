@@ -14,7 +14,8 @@ const add = (id, name, ok, detail, severity = "fail") => checks.push({ id, name,
 function read(p) { return fs.readFileSync(path.join(ROOT, p), "utf8"); }
 const doc = read("docs/22-copy-deck.md");
 const i = doc.indexOf("### 2.5");
-const m = doc.slice(i).match(/```json\n([\s\S]*?)```/);
+// Windows 工作树是 CRLF（core.autocrlf=true）：```json 后是 \r\n，这里必须容忍 \r
+const m = doc.slice(i).match(/```json\s*\r?\n([\s\S]*?)```/);
 if (!m) { console.error("docs/22 §2.5 JSON 未找到"); process.exit(1); }
 const copy = JSON.parse(m[1]);
 

@@ -145,13 +145,18 @@
 - **Demo Review**：完整 7 分钟彩排 2 次；每次记录「观众抬头/困惑」时间点；彩排不过不允许冻结。
 - 以上任一条不过，`STATUS.md` 不得写「完成」。
 
-## 3b4. 字体策略（全平台统一，2026-11-01 第三轮修正）
+## 3b4. 字体策略（全平台统一，2026-11-01 第四轮修正）
 
-用户第三轮反馈明确：**只替换代码编辑器及其配套浮层，其余 UI 保留上一版的中文像素字体**。当前规则：
+用户第四轮反馈推翻第三轮的「仅编辑器 Maple」范围：**所有【代码】统一 Maple Mono；长段正文换统一可读中文字体；像素字体只留给信息量少的标题/按钮/标签**。当前规则（实现见 `apps/studio/src/typography.css`、`apps/studio/src/assets/fonts/`、`apps/studio/e2e/typography.spec.ts`）：
 
-- **代码编辑器（Monaco）**：嵌包 **Maple Mono CN**（OFL，`apps/studio/public/fonts/`），16px、开启 ligature；代码/中文注释都用它。
-- **编辑器配套浮层**（右键菜单、补全/suggest、悬停/hover、查找/find、参数提示）：用**清晰可读的普通字体**（Maple Mono → Noto Sans CJK → system-ui 的栈），**不得**用像素字体；背景必须不透明。
-- **其余 Studio / 桌面壳 UI**：保留上一版字体——标题/叙事/卡片标题用 **Zpix（中文像素字）**，正文/说明用 `Departure Mono → Zpix` 栈（英文像素、中文像素回退），代码感标签沿用原 `--mono` 栈。不要把这些 UI 换成 Maple Mono。
-- **不依赖系统 font fallback 假一致**：Zpix / Departure / Maple 都是随包字体（Studio `public/fonts` + `src/assets/fonts`），桌面 App 与浏览器吃同一份。
-- **验收**：Playwright 断言 UI computed font-family 含 Zpix/Departure；`.monaco-editor .view-lines` 含 Maple Mono 且 `document.fonts.check('16px "Maple Mono"')` 为 true；右键菜单 font-family 不为像素字体、背景 alpha=1；截图人工核对中英文代码/注释不混淆、不裁切。
-- 历史背景：Round 2 初版曾把全站字体换成 Maple Mono（改过头），第三轮已按用户要求回退，仅保留编辑器及其浮层。
+| 用途 | 字体 | 范围 |
+|---|---|---|
+| **代码（全部）** | Maple Mono CN（OFL，随包；`--font-code`） | Monaco 编辑器、参考解查看器、指令手册的签名/示例、织典代码、试符台输入/历史、教练卡/结算/日志里的代码片段、inline-code、教材代码块、错误条行号 |
+| **长段正文** | **Noto Sans SC**（OFL-1.1，随包子集 woff2 400/700，约 2.21MB；`--font-text`/`--font-reading`） | 序章/幕/关开场叙述、旅途手记正文、教练长句、结算说明、日志、手册说明、织典正文、系统页长文、教材正文 |
+| **短标题 / 按钮 / 标签** | Zpix + Departure Mono（`--font-pixel` / `--serif` 别名） | h1–h3、`.btn`、chip/标签、卡片标题、kicker、结算标题、一句话说明 |
+
+- **原则**：代码 = 代码字体；长文 = 可读正文字体；短标题/按钮 = 风格像素字体。三者不混用；不靠系统 fallback 假一致（三种字体都随包，桌面 App 与浏览器同一份）。
+- **验收**：`apps/studio/e2e/typography.spec.ts` 断言 —— 代码元素 computed font-family 含 `Maple Mono`、长文（≥24 字正文）含 `Noto Sans SC`、`h1–h3`/`.btn` 含 `Zpix`/`Departure Mono`；`document.fonts.check` 三字体均为 true；字体请求无 4xx；截图人工核对。
+- **体积/覆盖**：Maple Mono 三档约 16.9MB；Noto 子集 400/700 共 2.21MB（7554 码点，`scripts/check-font-coverage.mjs` 缺字 0）；新增生僻字需重跑 `scripts/build-font-subset.py`，覆盖检查会先红。
+- 历史背景：Round 2 初版全站 Maple（改过头）→ Round 3 回退为仅编辑器 → Round 4 按用户要求重定义为「代码全 Maple + 正文 Noto + 像素仅短标题/按钮」。
+

@@ -1,0 +1,458 @@
+{
+  "task": "2026-11-01 P0 fixes — engine paper regression",
+  "startedAt": "2026-11-01T14:50:20.184Z",
+  "environment": {
+    "node": "v22.23.4",
+    "mc": "127.0.0.1:25567",
+    "rpc": "ws://127.0.0.1:8765",
+    "engine": "in-process (paper)",
+    "plugin": {
+      "ok": true,
+      "plugin": "loomcraft-mc",
+      "version": "0.1.0",
+      "mc": "26.1.2",
+      "tick": 6002,
+      "phase": "ready",
+      "prepared": true,
+      "levelId": "L10",
+      "sessionId": "f75833a6-ef73-441d-9351-053f7130953e",
+      "epoch": 7,
+      "groundY": 65,
+      "bots": [
+        "LeftWeaver",
+        "RightWeaver"
+      ],
+      "npcs": [],
+      "regionFrom": [
+        -8,
+        60,
+        -3
+      ],
+      "regionTo": [
+        36,
+        84,
+        9
+      ],
+      "agentSpawn": [
+        0,
+        65,
+        0
+      ],
+      "playerSpawn": [
+        14,
+        65,
+        6
+      ],
+      "center": [
+        14,
+        65,
+        3
+      ],
+      "tracked": 415,
+      "events": 49,
+      "checkpointSize": 1142,
+      "playerKit": {
+        "minecraft:lodestone": 4
+      },
+      "playerBeat": {
+        "sessionId": "f75833a6-ef73-441d-9351-053f7130953e",
+        "armed": false,
+        "active": false,
+        "hint": "",
+        "beats": [],
+        "items": [],
+        "done": false,
+        "ok": true
+      },
+      "lastResetHash": "",
+      "lastResetMs": 0
+    }
+  },
+  "checks": {
+    "paper.plugin-ready": {
+      "ok": true,
+      "detail": {
+        "mc": "26.1.2",
+        "version": "0.1.0"
+      }
+    },
+    "engine.started-paper": {
+      "ok": true,
+      "detail": {
+        "url": "http://127.0.0.1:53131",
+        "ms": 2067
+      }
+    },
+    "engine.health-paper": {
+      "ok": true,
+      "detail": {
+        "port": "paper",
+        "mc": true,
+        "bot": {
+          "name": "Golem",
+          "connected": true
+        }
+      }
+    },
+    "reentry.1.L01.created": {
+      "ok": true,
+      "detail": {
+        "order": 1,
+        "levelId": "L01",
+        "status": 201,
+        "ms": 902,
+        "sessionId": "sess-mvxy5rmp-6vph2n",
+        "epoch": 0
+      }
+    },
+    "reentry.2.L01.created": {
+      "ok": true,
+      "detail": {
+        "order": 2,
+        "levelId": "L01",
+        "status": 201,
+        "ms": 945,
+        "sessionId": "sess-mvxy5si9-isxj5e",
+        "epoch": 0
+      }
+    },
+    "reentry.3.L02.created": {
+      "ok": true,
+      "detail": {
+        "order": 3,
+        "levelId": "L02",
+        "status": 201,
+        "ms": 799,
+        "sessionId": "sess-mvxy5te7-16b7d0",
+        "epoch": 0
+      }
+    },
+    "reentry.4.L01.created": {
+      "ok": true,
+      "detail": {
+        "order": 4,
+        "levelId": "L01",
+        "status": 201,
+        "ms": 930,
+        "sessionId": "sess-mvxy5u5z-krjlue",
+        "epoch": 0
+      }
+    },
+    "reentry.no-503": {
+      "ok": true,
+      "detail": [
+        "L01:201",
+        "L01:201",
+        "L02:201",
+        "L01:201"
+      ]
+    },
+    "reentry.single-live-session": {
+      "ok": true,
+      "detail": {
+        "sessions": 1
+      }
+    },
+    "concurrent.both-created": {
+      "ok": true,
+      "detail": {
+        "ms": 1705,
+        "statuses": [
+          201,
+          201
+        ],
+        "sessionIds": [
+          "sess-mvxy5v3b-qv2mmk",
+          "sess-mvxy5vse-dk3mj3"
+        ]
+      }
+    },
+    "concurrent.single-live-session": {
+      "ok": true,
+      "detail": {
+        "sessions": 1
+      }
+    },
+    "l10.session-created": {
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "ms": 3005,
+        "epoch": 0
+      }
+    },
+    "l10.both-agents-registered": {
+      "ok": true,
+      "detail": [
+        "LeftWeaver",
+        "RightWeaver"
+      ]
+    },
+    "l10.reference-solution-exists": {
+      "ok": true,
+      "detail": {
+        "chars": 1893
+      }
+    },
+    "l10.run-waits-for-player": {
+      "ok": true,
+      "detail": {
+        "passed": false,
+        "stars": 0,
+        "playerBeatReady": true,
+        "failures": [
+          "全桥面（预铺 + 织偶补 + 合龙石）没有缺口",
+          "合龙石由玩家亲手落位（测试模式等价）",
+          "缺口随机时桥面仍无缺口、合龙石落位"
+        ],
+        "criteria": [
+          {
+            "id": "deck-full",
+            "passed": false
+          },
+          {
+            "id": "both-weavers",
+            "passed": true
+          },
+          {
+            "id": "materials-exact",
+            "passed": true
+          },
+          {
+            "id": "keystone-by-player",
+            "passed": false
+          },
+          {
+            "id": "l10-promise",
+            "passed": true
+          },
+          {
+            "id": "l10-async",
+            "passed": true
+          }
+        ],
+        "hidden": [
+          {
+            "id": "h-bridge-ok",
+            "passed": false
+          },
+          {
+            "id": "h-both-ok",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "l10.run-weaver-criteria-pass": {
+      "ok": true,
+      "detail": {
+        "both-weavers": true,
+        "materials-exact": true,
+        "deck-full": false
+      }
+    },
+    "l10.player-beat-3stars": {
+      "ok": true,
+      "detail": {
+        "passed": true,
+        "stars": 3,
+        "failures": []
+      }
+    },
+    "l10.engine-extra-bots-online": {
+      "ok": true,
+      "detail": {
+        "left": [
+          "[bot:LeftWeaver] online as LeftWeaver at (0.5, 65.0, 10.5)"
+        ],
+        "right": [
+          "[bot:RightWeaver] online as RightWeaver at (0.5, 65.0, 10.5)"
+        ]
+      }
+    },
+    "leave-l10.back-to-l01": {
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "ms": 3005
+      }
+    },
+    "leave-l10.named-bots-cleared": {
+      "ok": true,
+      "detail": [
+        "Golem"
+      ]
+    },
+    "bot-reuse.single-login": {
+      "ok": true,
+      "detail": {
+        "golemOnline": 1
+      }
+    },
+    "bot-reuse.no-duplicate-login-kick": {
+      "ok": true,
+      "detail": {
+        "kicked": 0
+      }
+    },
+    "bot-reuse.no-stale-session": {
+      "ok": true,
+      "detail": {
+        "stale": 0
+      }
+    },
+    "prepare.max-ms-recorded": {
+      "ok": true,
+      "detail": {
+        "max": 945,
+        "samples": [
+          902,
+          945,
+          799,
+          930
+        ]
+      }
+    }
+  },
+  "sessions": [
+    {
+      "order": 1,
+      "levelId": "L01",
+      "status": 201,
+      "ms": 902,
+      "sessionId": "sess-mvxy5rmp-6vph2n",
+      "epoch": 0
+    },
+    {
+      "order": 2,
+      "levelId": "L01",
+      "status": 201,
+      "ms": 945,
+      "sessionId": "sess-mvxy5si9-isxj5e",
+      "epoch": 0
+    },
+    {
+      "order": 3,
+      "levelId": "L02",
+      "status": 201,
+      "ms": 799,
+      "sessionId": "sess-mvxy5te7-16b7d0",
+      "epoch": 0
+    },
+    {
+      "order": 4,
+      "levelId": "L01",
+      "status": 201,
+      "ms": 930,
+      "sessionId": "sess-mvxy5u5z-krjlue",
+      "epoch": 0
+    }
+  ],
+  "l10": {
+    "createMs": 3005,
+    "pluginSessionId": "b467a454-9318-4f06-bdf2-239613145b2b",
+    "pluginBots": [
+      "LeftWeaver",
+      "RightWeaver"
+    ],
+    "runMs": 2998,
+    "afterRun": {
+      "passed": false,
+      "stars": 0,
+      "playerBeatReady": true,
+      "failures": [
+        "全桥面（预铺 + 织偶补 + 合龙石）没有缺口",
+        "合龙石由玩家亲手落位（测试模式等价）",
+        "缺口随机时桥面仍无缺口、合龙石落位"
+      ],
+      "criteria": [
+        {
+          "id": "deck-full",
+          "passed": false
+        },
+        {
+          "id": "both-weavers",
+          "passed": true
+        },
+        {
+          "id": "materials-exact",
+          "passed": true
+        },
+        {
+          "id": "keystone-by-player",
+          "passed": false
+        },
+        {
+          "id": "l10-promise",
+          "passed": true
+        },
+        {
+          "id": "l10-async",
+          "passed": true
+        }
+      ],
+      "hidden": [
+        {
+          "id": "h-bridge-ok",
+          "passed": false
+        },
+        {
+          "id": "h-both-ok",
+          "passed": true
+        }
+      ]
+    },
+    "afterBeat": {
+      "passed": true,
+      "stars": 3,
+      "failures": []
+    },
+    "botsAfterLeave": [
+      "Golem"
+    ]
+  },
+  "botReuse": {
+    "golemOnlineLines": 1,
+    "kickedLines": 0,
+    "staleLines": 0
+  },
+  "engineLog": [
+    "[bot:Golem] online as Golem at (14.5, 65.0, 6.5)",
+    "真实 MC 已连接：Paper 26.1.2 / 插件 0.1.0，织偶 Golem 已进服",
+    "[port:L01] prepared L01 session=1b883f33 epoch=8",
+    "[port:L01] prepared L01 session=f10b5d5c epoch=9",
+    "[port:L02] prepared L02 session=f7da090d epoch=10",
+    "[port:L01] prepared L01 session=4934b9c2 epoch=11",
+    "[port:L01] prepared L01 session=a758e59f epoch=12",
+    "[port:L02] prepared L02 session=93b19dbc epoch=13",
+    "[bot:LeftWeaver] online as LeftWeaver at (0.5, 65.0, 10.5)",
+    "[bot:RightWeaver] online as RightWeaver at (0.5, 65.0, 10.5)",
+    "[port:L10] prepared L10 session=b467a454 epoch=14",
+    "[bot:RightWeaver] end: disconnect.quitting",
+    "[bot:LeftWeaver] end: disconnect.quitting",
+    "[port:L01] prepared L01 session=e0254c4f epoch=15"
+  ],
+  "errors": [],
+  "ok": true,
+  "prepareMs": {
+    "max": 945,
+    "samples": [
+      902,
+      945,
+      799,
+      930
+    ]
+  },
+  "concurrent": {
+    "ms": 1705,
+    "statuses": [
+      201,
+      201
+    ],
+    "sessionIds": [
+      "sess-mvxy5v3b-qv2mmk",
+      "sess-mvxy5vse-dk3mj3"
+    ]
+  },
+  "finishedAt": "2026-11-01T14:50:35.808Z"
+}

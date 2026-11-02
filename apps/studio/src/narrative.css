@@ -1,0 +1,433 @@
+/* 剧情浮层布局修复（task-1）：序章 / 幕开场 / 关开场 / 旅途手记。
+ *
+ * 目标：
+ * 1) 卡片改为「固定头 / 可滚动内容 / 固定底」三段式；父级 flex 只收缩中间滚动层，
+ *    内容本身不再被 flex 压缩裁切，底部按钮任何时候都可达。
+ * 2) 原生滚动条彻底隐藏（scrollbar-width:none + ::-webkit-scrollbar 兜底，不依赖
+ *    scrollbar-gutter），左右内边距由结构保证恒对称；另给不占布局的悬浮自定义滚动条。
+ * 3) 滚轮 / PageUp·PageDown·上下·Home·End / 拖拽滑块 / 触屏均可用；上下渐隐提示可滚动方向。
+ *
+ * 为什么不用 scrollbar-gutter：Tauri/WebKitGTK 等壳不保证支持 `scrollbar-gutter`，
+ * 一旦不支持，经典滚动条只占右侧 → 内容整体右移、左右留白不对称。隐藏滚动条后
+ * 内容宽度与滚动状态无关，任何内核下都对称。
+ *
+ * 本文件只新增/覆盖引导层 + 同类长内容浮层的样式，不改 styles.css 里的字体与像素皮肤规则。
+ */
+
+/* ------------------------------------------------------------------ 卡片外壳 */
+.narrative-card,
+.journal-card {
+  width: min(720px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  /* 覆盖 styles.css 里的 old scrollbar-gutter：滚动交给内部内容区，外壳不滚。 */
+  overflow-y: hidden;
+  scrollbar-gutter: auto;
+}
+
+.journal-card {
+  width: min(760px, calc(100vw - 48px));
+  text-align: center;
+}
+
+/* 桌面壳：body 有 desktop-shell 类时，自绘标题栏固定 36px 盖在视口顶部（z-index 300）。
+   所有浮层把顶边距让出标题栏高度，否则卡片顶部会被压住 12px。 */
+body.desktop-shell .narrative-overlay,
+body.desktop-shell .gd-overlay,
+body.desktop-shell .repl-overlay,
+body.desktop-shell .codex-overlay,
+body.desktop-shell .settle-overlay {
+  padding-top: calc(24px + 36px);
+}
+
+body.desktop-shell .narrative-card,
+body.desktop-shell .journal-card,
+body.desktop-shell .gd-card,
+body.desktop-shell .repl-card,
+body.desktop-shell .settle-card,
+body.desktop-shell .solution-panel {
+  max-height: calc(100vh - 48px - 36px);
+  max-height: calc(100dvh - 48px - 36px);
+}
+
+body.desktop-shell .codex-card {
+  height: calc(100vh - 48px - 36px);
+  height: calc(100dvh - 48px - 36px);
+}
+
+/* ------------------------------------------------------------------ 固定头 */
+.narrative-head {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 32px 12px;
+  text-align: center;
+}
+
+.narrative-head .narrative-dots {
+  margin-top: 2px;
+}
+
+/* 标题允许换行：styles.css 里 `.narrative-card h2 { white-space: nowrap }` 在窄屏会让
+   长标题横向溢出（720px 视口 + 28px 像素字）。这里覆盖成可换行并保持居中。 */
+.narrative-card h2,
+.journal-card h2 {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+/* ------------------------------------------------------------------ 可滚动内容 */
+.narrative-scroll-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.narrative-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* 上下留白给渐变提示让位；左右 padding 两侧相同，保证内容恒居中。 */
+  padding: 8px 32px 20px;
+  /* 原生滚动条不占布局、不可见（Chromium/WebKit + Firefox 双保险）。 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-gutter: auto;
+  outline: none;
+}
+
+.narrative-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.narrative-scroll:focus-visible {
+  outline: 2px solid rgba(232, 180, 106, 0.45);
+  outline-offset: -2px;
+}
+
+.narrative-scroll-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+/* 序章/幕开场的说明文字按最大宽度居中，不影响左右留白对称。 */
+.narrative-scroll-content > .narrative-note {
+  margin-inline: auto;
+}
+
+/* 文字块固定宽度：翻页时不会因为某页句子短而 shrink-to-fit 左右跳。
+   短句仍居中（舞台说明/台词），长句在固定宽度内自然折行。 */
+.narrative-scroll-content .stage-content {
+  width: 100%;
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.narrative-scroll-content .stage-lines-text {
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------------ 上下渐隐提示 */
+.narrative-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease;
+  z-index: 2;
+}
+
+.narrative-fade.is-on {
+  opacity: 1;
+}
+
+/* 渐隐色跟卡片面板同源（var(--panel)），不再写死棕色；color-mix 不可用时退回纯色渐变。 */
+.narrative-fade-top {
+  top: 0;
+  background: linear-gradient(180deg, var(--panel), transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, transparent), transparent);
+}
+
+.narrative-fade-bottom {
+  bottom: 0;
+  background: linear-gradient(0deg, var(--panel), transparent);
+  background: linear-gradient(0deg, color-mix(in srgb, var(--panel) 96%, transparent), transparent);
+}
+
+/* ------------------------------------------------------------------ 悬浮自定义滚动条（不占布局） */
+.narrative-scrollbar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  bottom: 6px;
+  width: 10px;
+  z-index: 3;
+  opacity: 0.6;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.16);
+  transition: opacity 140ms ease;
+  touch-action: none;
+}
+
+.narrative-scrollbar:hover,
+.narrative-scrollbar.is-dragging {
+  opacity: 1;
+}
+
+.narrative-scrollbar-thumb {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 2px;
+  background: rgba(232, 180, 106, 0.66);
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+  cursor: grab;
+  touch-action: none;
+}
+
+.narrative-scrollbar-thumb:hover {
+  background: rgba(255, 207, 125, 0.86);
+}
+
+.narrative-scrollbar-thumb:active {
+  cursor: grabbing;
+}
+
+/* ------------------------------------------------------------------ 固定底 */
+.narrative-foot {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 32px 22px;
+}
+
+.narrative-actions {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.narrative-actions .btn {
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ 内容块微调（配合新外壳） */
+.narrative-scroll-content .narrative-stage {
+  flex: none;
+}
+
+.narrative-scroll-content .journal-body {
+  width: 100%;
+}
+
+.narrative-scroll-content .journal-footer {
+  width: 100%;
+}
+
+/* ===================================================================
+ * 同类长内容浮层（任务 9「全量同类修复」）。
+ *
+ * 这些浮层由别的组件渲染，不在本任务的组件写范围内，所以只在这里用覆盖式
+ * CSS 修（不动组件）：
+ *   .settle-card  —— 结算卡（整卡 overflow-y:auto + flex center）
+ *   .gd-body      —— 指令手册内容区
+ *   .codex-list ul / .codex-detail —— 织典列表 / 详情
+ *   .repl-body    —— 试符台两栏（低窗口 overflow:hidden 会直接裁掉左栏）
+ *   .solution-code / .solution-panel —— 完整解查看器
+ *
+ * 策略：默认（含不支持 scrollbar-gutter 的 WebKitGTK）彻底隐藏原生滚动条，
+ * 滚动能力保留（滚轮/键盘/触屏），内容区左右 padding 对称 → 任何内核都不歪。
+ * 支持 scrollbar-gutter 的内核里恢复一条细窄的自绘滚动条，并用 both-edges
+ * 同时占两侧，左右仍然对称（这是替换 scrollbar-gutter 的兜底补偿，而不是依赖它）。
+ * =================================================================== */
+.gd-body,
+.codex-list ul,
+.codex-detail,
+.repl-body,
+.solution-code,
+.settle-card {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-gutter: auto;
+}
+
+.gd-body::-webkit-scrollbar,
+.codex-list ul::-webkit-scrollbar,
+.codex-detail::-webkit-scrollbar,
+.repl-body::-webkit-scrollbar,
+.solution-code::-webkit-scrollbar,
+.settle-card::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@supports (scrollbar-gutter: stable) {
+  .gd-body,
+  .codex-list ul,
+  .codex-detail,
+  .solution-code,
+  .settle-card {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 180, 106, 0.62) rgba(0, 0, 0, 0.18);
+    scrollbar-gutter: stable both-edges;
+  }
+
+  .gd-body::-webkit-scrollbar,
+  .codex-list ul::-webkit-scrollbar,
+  .codex-detail::-webkit-scrollbar,
+  .solution-code::-webkit-scrollbar,
+  .settle-card::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    display: block;
+  }
+
+  .gd-body::-webkit-scrollbar-track,
+  .codex-list ul::-webkit-scrollbar-track,
+  .codex-detail::-webkit-scrollbar-track,
+  .solution-code::-webkit-scrollbar-track,
+  .settle-card::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .gd-body::-webkit-scrollbar-thumb,
+  .codex-list ul::-webkit-scrollbar-thumb,
+  .codex-detail::-webkit-scrollbar-thumb,
+  .solution-code::-webkit-scrollbar-thumb,
+  .settle-card::-webkit-scrollbar-thumb {
+    background: rgba(232, 180, 106, 0.62);
+    border: 1px solid rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* 结算卡：按钮固定在卡片底部（sticky），内容在按钮后面滚；短内容时按钮仍在底部。 */
+.settle-card {
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  padding-bottom: 0;
+  scroll-padding-block: 8px 4px;
+}
+
+.settle-card .settle-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  width: 100%;
+  justify-content: center;
+  margin: 0;
+  padding: 12px 32px 24px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 82%, transparent), var(--panel) 52%);
+}
+
+/* 试符台：低窗口让两栏整体可滚（原来 overflow:hidden 会裁掉左栏按钮）。 */
+@media (max-height: 830px) {
+  .repl-body {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-gutter: auto;
+  }
+
+  .repl-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+}
+
+@supports (scrollbar-gutter: stable) {
+  @media (max-height: 830px) {
+    .repl-body {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(232, 180, 106, 0.62) rgba(0, 0, 0, 0.18);
+      scrollbar-gutter: stable both-edges;
+    }
+
+    .repl-body::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      display: block;
+    }
+
+    .repl-body::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .repl-body::-webkit-scrollbar-thumb {
+      background: rgba(232, 180, 106, 0.62);
+      border: 1px solid rgba(0, 0, 0, 0.45);
+    }
+  }
+}
+
+/* 完整解查看器：面板自身限高，代码区先收缩（min-height 归零），按钮不被裁。 */
+.solution-panel {
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+}
+
+.solution-code {
+  min-height: 0;
+}
+
+/* 窄屏：卡片贴边、日志单列；只影响 ≤720px，三档验收视口（896 起）不受影响。 */
+@media (max-width: 720px) {
+  .narrative-overlay,
+  .gd-overlay,
+  .repl-overlay,
+  .codex-overlay,
+  .settle-overlay {
+    padding: 12px;
+  }
+
+  .narrative-card,
+  .journal-card {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .narrative-head {
+    padding: 18px 20px 10px;
+  }
+
+  .narrative-scroll {
+    padding: 6px 20px 16px;
+  }
+
+  .narrative-foot {
+    padding: 10px 20px 16px;
+  }
+
+  .narrative-scroll-content .journal-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

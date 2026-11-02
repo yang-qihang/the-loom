@@ -1,40 +1,37 @@
 // qa/spec-check.mjs — 13 份关卡 spec（设计期 Markdown）的 meta 机器校验 + 报告渲染。
-// 用 python3 的 PyYAML 解析 meta 块（不依赖网络/外部服务），再用 zod LevelMetaSchema 校验。
+// 用跨平台 `yaml` 包解析 meta 块（Windows/Linux 一致，不依赖 python3/PyYAML），再用 zod LevelMetaSchema 校验。
 // 运行：npx tsx qa/spec-check.mjs
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { parse as parseYaml } from "yaml";
 import { LevelMetaSchema, nowIso, writeEvidence } from "./_lib.mjs";
 
 const ROOT = process.cwd();
 const LEVELS_DIR = path.join(ROOT, "content/levels");
 const EXPECTED_COUNT = 13;
 
-const PY = String.raw`
-import sys, json, re, glob
-import yaml
-root = sys.argv[1]
-out = []
-for f in sorted(glob.glob(root + "/content/levels/*.md")):
-    s = open(f, encoding="utf-8").read()
-    meta = None
-    err = None
-    for m in re.finditer(r"\`\`\`yaml\n(.*?)\`\`\`", s, re.S):
-        try:
-            d = yaml.safe_load(m.group(1))
-        except Exception as e:
-            err = str(e)
-            continue
-        if isinstance(d, dict) and isinstance(d.get("meta"), dict):
-            meta = d["meta"]
-            break
-    out.append({"file": f.replace(root + "/", ""), "meta": meta, "yamlError": err})
-print(json.dumps(out, ensure_ascii=False))
-`;
-
 function parseSpecs() {
-  const raw = execFileSync("python3", ["-c", PY, ROOT], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
-  return JSON.parse(raw);
+  return fs
+    .readdirSync(LEVELS_DIR)
+    .filter(file => file.endsWith(".md"))
+    .sort()
+    .map(file => {
+      const source = fs.readFileSync(path.join(LEVELS_DIR, file), "utf8");
+      let meta = null;
+      let yamlError = null;
+      for (const match of source.matchAll(/```yaml\r?\n([\s\S]*?)```/g)) {
+        try {
+          const parsed = parseYaml(match[1]);
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && typeof parsed.meta === "object") {
+            meta = parsed.meta;
+            break;
+          }
+        } catch (error) {
+          yamlError = error instanceof Error ? error.message : String(error);
+        }
+      }
+      return { file: path.posix.join("content/levels", file), meta, yamlError };
+    });
 }
 
 const specs = parseSpecs();
