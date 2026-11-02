@@ -54,6 +54,73 @@
 
 html, body, #root { height: 100%; }
 
+/* ===== 像素滚动条（全站 token） =====
+   一级页面（工作台）锁在一屏内不出现文档滚动条；二级滚动区（右栏、日志、REPL 历史、
+   地图/文档、织典/手册/结算等浮层）统一成直角像素滚动条。
+   narrative.css 里主动隐藏原生滚动条的浮层（序章/手记/手册正文等）用它自己的更高
+   优先级规则覆盖，不受这里影响。 */
+:root {
+  --scrollbar-thumb: rgba(232, 180, 106, 0.62);
+  --scrollbar-thumb-hover: var(--amber-strong);
+  --scrollbar-track: rgba(0, 0, 0, 0.18);
+}
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+html::-webkit-scrollbar { width: 10px; height: 10px; }
+html::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+html::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 1px solid rgba(0, 0, 0, 0.45);
+}
+html::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+html::-webkit-scrollbar-corner { background: var(--scrollbar-track); }
+
+/* 二级滚动面板：同样的像素皮肤（WebView2/Chromium 用 scrollbar-width/color，
+   其余内核用 ::-webkit-scrollbar 兜底）。 */
+.rail,
+.log-lines,
+.repl-history-list,
+.repl-body,
+.card.result .card-body,
+.solution-code,
+.wb-menu {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+.rail::-webkit-scrollbar,
+.log-lines::-webkit-scrollbar,
+.repl-history-list::-webkit-scrollbar,
+.repl-body::-webkit-scrollbar,
+.card.result .card-body::-webkit-scrollbar,
+.solution-code::-webkit-scrollbar,
+.wb-menu::-webkit-scrollbar { width: 10px; height: 10px; }
+.rail::-webkit-scrollbar-track,
+.log-lines::-webkit-scrollbar-track,
+.repl-history-list::-webkit-scrollbar-track,
+.repl-body::-webkit-scrollbar-track,
+.card.result .card-body::-webkit-scrollbar-track,
+.solution-code::-webkit-scrollbar-track,
+.wb-menu::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+.rail::-webkit-scrollbar-thumb,
+.log-lines::-webkit-scrollbar-thumb,
+.repl-history-list::-webkit-scrollbar-thumb,
+.repl-body::-webkit-scrollbar-thumb,
+.card.result .card-body::-webkit-scrollbar-thumb,
+.solution-code::-webkit-scrollbar-thumb,
+.wb-menu::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 1px solid rgba(0, 0, 0, 0.45);
+}
+.rail::-webkit-scrollbar-thumb:hover,
+.log-lines::-webkit-scrollbar-thumb:hover,
+.repl-history-list::-webkit-scrollbar-thumb:hover,
+.repl-body::-webkit-scrollbar-thumb:hover,
+.card.result .card-body::-webkit-scrollbar-thumb:hover,
+.solution-code::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+
 body {
   margin: 0;
   background:
@@ -273,7 +340,10 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 }
 
 /* ---------- workbench ---------- */
-.workbench { height: 100vh; display: flex; flex-direction: column; }
+/* 高度一律用 % 链（html/body/#root 已是 100%）。桌面壳用 CSS zoom 做界面缩放，
+   zoom 下的 100vh 会被二次缩放（100vh 先按未缩放视口算，再乘 zoom），
+   内容只能铺到约 scale 比例高、底部留下死空白；height:100% 链不受影响。 */
+.workbench { height: 100%; display: flex; flex-direction: column; }
 .wb-top {
   display: flex;
   align-items: center;
@@ -287,14 +357,32 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 .wb-title h2 { font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wb-act { color: var(--amber); font-size: 16px; white-space: nowrap; }
 .wb-status { display: flex; align-items: center; gap: 12px; }
+/* 状态胶囊：只表达状态（不是按钮）——左侧色点 + 文本，无边框/无按钮语义。 */
 .phase-chip {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 4px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  padding: 0 10px;
+  background: transparent;
   color: var(--ink-dim);
   font-size: 16px;
   white-space: nowrap;
 }
+.phase-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  background: var(--ink-faint);
+  box-shadow: 0 0 0 1px #070b07;
+}
+.phase-chip.is-busy .phase-dot { background: var(--amber); }
+.phase-chip.is-pass .phase-dot { background: var(--green); }
+.phase-chip.is-error .phase-dot { background: var(--red); }
+.phase-chip.is-busy { color: var(--amber); }
+.phase-chip.is-error { color: var(--red); }
+.phase-chip.is-pass { color: var(--green); }
 .wb-body {
   flex: 1;
   min-height: 0;
@@ -474,7 +562,7 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 .mock-tools-label { color: var(--ink-faint); font-size: 16px; margin-right: 4px; }
 
 /* ---------- preview ---------- */
-.preview-screen { min-height: 100vh; display: flex; flex-direction: column; }
+.preview-screen { min-height: 100%; display: flex; flex-direction: column; }
 .preview-body {
   flex: 1;
   display: grid;
@@ -680,7 +768,9 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 }
 .settle-card {
   width: min(560px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
+  /* 浮层是 inset:0 的 fixed flex 容器；百分比 max-height 相对它的内容区，
+     zoom 下仍等于「视口 - 上下 padding」，不会像 100vh 那样被二次缩放。 */
+  max-height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -739,7 +829,7 @@ button.map-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgb
 .journal-card {
   width: min(720px, calc(100vw - 48px));
   scrollbar-gutter: stable both-edges;
-  max-height: calc(100vh - 48px);
+  max-height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -908,7 +998,7 @@ body.has-overlay { overflow: hidden; }
 }
 .repl-card {
   width: min(1120px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   border-radius: var(--radius);
@@ -1029,7 +1119,7 @@ body.has-overlay { overflow: hidden; }
 }
 .codex-card {
   width: min(1180px, calc(100vw - 48px));
-  height: calc(100vh - 48px);
+  height: 100%;
   display: flex;
   flex-direction: column;
   border-radius: var(--radius);
@@ -1116,7 +1206,7 @@ body.has-overlay { overflow: hidden; }
 }
 .codex-section.is-warn h4 { display: flex; align-items: center; gap: 8px; }
 .codex-warn-badge { font-size: 12px; color: #2a1512; background: var(--bad); border-radius: 999px; padding: 1px 8px; }
-.codex-locked { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; gap: 8px; text-align: center; }
+.codex-locked { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50%; gap: 8px; text-align: center; }
 .codex-locked h3 { font-size: 24px; color: var(--ink); white-space: nowrap; }
 .codex-locked-hint { color: var(--amber); font-size: 18px; }
 .codex-foot { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: 14px; }
@@ -1568,8 +1658,12 @@ button.map-card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 
 .dtitle-btn:hover { background: var(--panel-3); color: var(--ink); }
 .dtitle-btn:active { background: var(--panel-2); }
 .dtitle-btn.is-close:hover { background: #8c3f2e; color: #fff; }
-body.desktop-shell .workbench { height: calc(100vh - 36px); margin-top: 36px; }
-body.desktop-shell .map-wall { padding-top: 84px; }
+/* 顶层 Tauri 旧场景（直接打开 Studio）：36px 自绘标题栏的占位放在 #root 的 padding 上。
+   不用 .workbench{margin-top:36px}：margin 会穿透 #root/body 折叠，把 body 顶出视口 36px
+   （文档多出 36px 滚动）；padding 不会折叠，工作台正好铺满剩余高度。 */
+body.desktop-shell #root { height: 100%; padding-top: 36px; }
+body.desktop-shell .workbench { height: 100%; }
+body.desktop-shell .map-wall { padding-top: 48px; }
 
 /* 教练头像：从“带环圆圈+字”改成 28px 像素小方章，给 44px 的卡片头留呼吸；只保留「艾」 */
 .coach .rune-avatar {
@@ -1772,6 +1866,10 @@ button.map-card:hover {
 .mode-chip.is-mock { border-color: #7a6237; color: var(--amber); background: rgba(232, 180, 106, 0.08); }
 .mode-chip::before { border-radius: 0; box-shadow: none; }
 
+/* EnvState（壳顶栏四灯）派生出的模式/环境胶囊：busy=暖金、error=砖红、online=苔绿。 */
+.mode-chip.is-busy { border-color: #7a6237; color: var(--amber); background: rgba(232, 180, 106, 0.08); }
+.mode-chip.is-error { border-color: #6b4130; color: var(--red); background: rgba(224, 138, 106, 0.10); }
+
 /* 主页：可读性要求较低的展示文字更大胆地用中文像素字；正文/说明仍用无衬线可读字体。 */
 :root { --pixel: var(--font-pixel); }
 .map-head h1,
@@ -1802,9 +1900,9 @@ button.map-card:hover {
   max-width: 980px;
   margin: 0 auto;
   padding: 30px 40px 64px;
-  min-height: 100vh;
+  min-height: 100%;
 }
-body.desktop-shell .system-page { padding-top: 66px; }
+/* 系统页：36px 标题栏占位已由 body.desktop-shell #root 的 padding-top 提供。 */
 .system-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .system-kicker { font-family: var(--mono); color: var(--amber); font-size: 14px; letter-spacing: 0.16em; }
 .system-title { font-family: var(--pixel); font-size: 46px; line-height: 1.15; margin-top: 28px; color: var(--ink); }
@@ -1949,15 +2047,16 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .btn-run-top { min-height: 32px; padding: 4px 12px; font-size: 13px; margin-left: auto; }
 .pane-head .editor-font-controls { margin-left: 0; }
 
-/* 窄窗工作台：六颗次要按钮折叠进「更多」，标题栏不再占三行。 */
-.wb-more-wrap { position: relative; }
-.wb-more-menu {
+/* 关卡页顶栏下拉菜单（帮助 / 关卡）：像素面板 + 硬阴影，与「更多」菜单同一套视觉。 */
+.wb-menu-wrap { position: relative; }
+.wb-menu {
   position: absolute; right: 0; top: calc(100% + 6px); z-index: 60;
   display: flex; flex-direction: column; align-items: stretch; gap: 4px;
-  min-width: 190px; padding: 6px; background: #131c13;
+  min-width: 200px; padding: 6px; background: #131c13;
   border: 2px solid var(--line); box-shadow: 4px 4px 0 #070b07;
 }
-.wb-more-menu .btn { text-align: left; justify-content: flex-start; }
+.wb-menu .btn { text-align: left; justify-content: flex-start; }
+.wb-menu .btn:focus-visible { outline-offset: -2px; }
 .card-collapse { margin-left: auto; padding: 2px 8px; font-size: 12px; min-height: 26px; }
 /* 位置卡：标题居中，右侧「查坐标点 + 收起/展开」放同一组；窄窗默认收起只留 44px 卡片头。 */
 .hud .card-head { padding-left: 10px; }
@@ -1996,13 +2095,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .goals .card-tag { margin-left: auto; position: relative; z-index: 1; }
 .goals .card-collapse { margin-left: 8px; flex: 0 0 auto; }
 
-/* 窄布局：代码编辑器尽量占满首屏，其余卡片在下面滚动。 */
-@media (max-width: 1100px) {
-  .wb-body { display: flex; flex-direction: column; }
-  .editor-pane { height: calc(100vh - 215px); min-height: 480px; flex: 0 0 auto; }
-  .rail { flex: 0 0 auto; }
-}
-
+/* 窄布局细则：编辑器占首屏固定比例、其余卡片在 .wb-body 内滚动（规则见文件上方 responsive 段）。 */
 .player-beat-guide {
   margin: 10px 0 12px; padding: 10px 12px; border: 1px solid var(--line);
   border-left: 3px solid var(--amber); background: rgba(232,180,106,.08);
@@ -2186,7 +2279,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .solution-overlay { align-items: center; justify-content: center; }
 .solution-panel {
   width: min(980px, calc(100vw - 48px));
-  max-height: calc(100vh - 64px);
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2203,7 +2296,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .solution-code {
   flex: 1 1 auto;
   min-height: 160px;
-  max-height: 58vh;
   overflow: auto;
   margin: 0;
   padding: 14px 16px;
@@ -2221,3 +2313,8 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .solution-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .solution-count { color: var(--ink-faint); font-size: 14px; }
 .solution-actions { display: flex; gap: 10px; }
+
+/* 窄窗（≤1100）：右栏底部预留底部操作条 / 教材浮动入口的高度，保证最后一张卡能完整滚出。 */
+@media (max-width: 1100px) {
+  .rail { padding-bottom: 96px; scroll-padding-bottom: 96px; }
+}

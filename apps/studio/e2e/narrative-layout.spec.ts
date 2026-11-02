@@ -521,13 +521,14 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-// ------------------------------------------------------------------ 案例：桌面壳标题栏
-// Tauri 壳里 body 有 desktop-shell 类，自绘标题栏固定 36px 高（z-index 300）；
-// 浮层顶边距必须让出标题栏，否则卡片顶部会被压住 12px。
-test.describe("桌面壳标题栏", () => {
+// ------------------------------------------------------------------ 案例：桌面壳标题栏（顶层兼容分支）
+// 打包路径里 Studio 由壳 iframe 加载，标题栏唯一归壳（嵌入场景见 real-engine.spec「桌面壳嵌入」）；
+// 这里保留「顶层 Tauri 直接打开 Studio」的旧开发场景：body 挂 desktop-shell、自绘标题栏固定 36px，
+// 浮层顶边距必须让出标题栏，且整页只能有一条标题栏。
+test.describe("桌面壳标题栏（顶层兼容分支）", () => {
   test.use({ viewport: { width: 896, height: 603 } });
 
-  test("序章浮层不被 36px 自绘标题栏压住", async ({ page }) => {
+  test("序章浮层不被 36px 自绘标题栏压住、且只有一条标题栏", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem("loom.studio.progress.v1");
       (window as unknown as { __TAURI_INTERNALS__: { invoke: () => Promise<null> } }).__TAURI_INTERNALS__ = {
@@ -536,6 +537,7 @@ test.describe("桌面壳标题栏", () => {
     });
     await page.goto("/");
     await expect(page.getByTestId("desktop-titlebar")).toBeVisible();
+    await expect(page.getByTestId("desktop-titlebar"), "顶层只允许一条标题栏").toHaveCount(1);
     await expect(page.getByTestId("prologue-overlay")).toBeVisible();
     await expect
       .poll(async () => page.evaluate(() => document.body.classList.contains("desktop-shell")), { message: "desktop-shell 类未挂载" })
@@ -704,15 +706,13 @@ function assertRegionLayout(snapshot: RegionSnapshot, name: string, viewport: Vi
   }
 }
 
-/** 工作台顶栏按钮：窄窗口（≤1100px）收进「更多」菜单，两种入口都兼容。 */
-async function openWorkbenchAction(page: Page, directTestId: string, menuTestId: string): Promise<void> {
-  const direct = page.getByTestId(directTestId);
-  if (await direct.isVisible().catch(() => false)) {
-    await direct.click();
-    return;
-  }
-  await page.getByTestId("btn-more").click();
-  await page.getByTestId(menuTestId).click();
+/** 工作台顶栏：新设计一级动作只有「返回 / 帮助▾ / 关卡▾ / 状态」，
+    手册/完整解等动作收在「帮助」菜单里（不再有窄窗「更多」菜单）。 */
+async function openWorkbenchAction(page: Page, testId: string): Promise<void> {
+  await page.getByTestId("btn-help-menu").click();
+  await expect(page.getByTestId("help-menu")).toBeVisible();
+  await page.getByTestId(testId).click();
+  await expect(page.getByTestId("help-menu")).toBeHidden();
 }
 
 /** 低窗口下同类浮层：打开 → 量对称/按钮 → 滚到底看最后内容 → 截图。 */
@@ -835,13 +835,13 @@ for (const viewport of [
       await page.getByTestId("level-card-L01").click();
       await expect(page.getByTestId("code-editor")).toBeVisible();
 
-      await openWorkbenchAction(page, "btn-manual", "btn-manual-menu");
+      await openWorkbenchAction(page, "btn-manual");
       await expect(page.getByTestId("api-manual")).toBeVisible();
       await checkRegion(page, manual, viewport);
       await page.getByTestId("btn-manual-done").click();
       await expect(page.getByTestId("api-manual")).toBeHidden();
 
-      await openWorkbenchAction(page, "btn-solution", "btn-solution-menu");
+      await openWorkbenchAction(page, "btn-solution");
       await expect(page.getByTestId("solution-viewer")).toBeVisible();
       await expect(page.getByTestId("solution-code")).toBeVisible();
       await checkRegion(page, solution, viewport);

@@ -18,8 +18,10 @@
 .narrative-card,
 .journal-card {
   width: min(720px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
-  max-height: calc(100dvh - 48px);
+  /* 父级 .narrative-overlay 是 inset:0 的 fixed flex 容器（有确定高度）；
+     百分比 max-height 相对它的内容区，在 CSS zoom 下仍等于「视口 - 上下 padding」，
+     不会像 100vh 那样被二次缩放。 */
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -46,20 +48,7 @@ body.desktop-shell .settle-overlay {
   padding-top: calc(24px + 36px);
 }
 
-body.desktop-shell .narrative-card,
-body.desktop-shell .journal-card,
-body.desktop-shell .gd-card,
-body.desktop-shell .repl-card,
-body.desktop-shell .settle-card,
-body.desktop-shell .solution-panel {
-  max-height: calc(100vh - 48px - 36px);
-  max-height: calc(100dvh - 48px - 36px);
-}
-
-body.desktop-shell .codex-card {
-  height: calc(100vh - 48px - 36px);
-  height: calc(100dvh - 48px - 36px);
-}
+/* 卡片高度：浮层 padding 已经让出标题栏，卡片用 100% 内容区高度即可（见上）。 */
 
 /* ------------------------------------------------------------------ 固定头 */
 .narrative-head {
@@ -332,8 +321,7 @@ body.desktop-shell .codex-card {
 
 /* 结算卡：按钮固定在卡片底部（sticky），内容在按钮后面滚；短内容时按钮仍在底部。 */
 .settle-card {
-  max-height: calc(100vh - 48px);
-  max-height: calc(100dvh - 48px);
+  max-height: 100%;
   padding-bottom: 0;
   scroll-padding-block: 8px 4px;
 }
@@ -392,8 +380,7 @@ body.desktop-shell .codex-card {
 
 /* 完整解查看器：面板自身限高，代码区先收缩（min-height 归零），按钮不被裁。 */
 .solution-panel {
-  max-height: calc(100vh - 48px);
-  max-height: calc(100dvh - 48px);
+  max-height: 100%;
   overflow: hidden;
 }
 
@@ -414,8 +401,7 @@ body.desktop-shell .codex-card {
   .narrative-card,
   .journal-card {
     width: calc(100vw - 24px);
-    max-height: calc(100vh - 24px);
-    max-height: calc(100dvh - 24px);
+    max-height: 100%;
   }
 
   .narrative-head {

@@ -95,8 +95,10 @@
 ## 3b2b. 顶栏/控件不得重叠（自动检查）
 
 - 顶栏采用**对称三列网格**：左返回、中标题、右状态；标题严格对齐全屏中线，不随右侧按钮宽度漂移。
-- 右侧按钮/状态区允许换行，但不能与标题相交；窄屏（伴玩 420px）标题用绝对中线并限制宽度。
-- Playwright 断言：任一顶栏按钮、状态胶囊与 `[data-ui-title]` 的 boundingBox 不得相交；同时保留「标题中心偏差 ≤2px」。
+- 右侧按钮/状态区允许换行，但不能与标题相交；窄屏标题用绝对中线并限制宽度。
+- **一级动作 ≤5**：关卡页顶栏只有「返回 / 帮助▾ / 关卡▾ / 状态」；系统级控制（置顶/伴玩/连接灯/窗口三键）只属于桌面壳，Studio 内不得重复渲染；「未运行/运行中」等是 status（`span[role=status]`），不是按钮。
+- **标题栏唯一归壳**：桌面壳用 iframe 加载 Studio 时，Studio 不得再渲染 `DesktopTitlebar`；顶层 Tauri 直开 Studio（旧开发场景）才允许保留一条自绘标题栏。环境状态（织机/Paper/织偶/客户端四灯）唯一来源是壳下发的 `loom:env` EnvState，Studio 不自行探测 `/api/health`。
+- Playwright 断言：任一顶栏按钮、状态胶囊与 `[data-ui-title]` 的 boundingBox 不得相交；同时保留「标题中心偏差 ≤2px」。相关用例：`e2e/real-engine.spec.ts`「桌面壳嵌入」「顶层 Tauri 直开 Studio」、`e2e/narrative-layout.spec.ts`「桌面壳标题栏（顶层兼容分支）」、`e2e/typography.spec.ts`（帮助菜单入口）。
 - 用户截图审计：每次 UI 改动后检查 `workbench-v33` 等证据图，按钮压标题即打回。
 
 ## 3b3. 视觉对齐与细节（UI 小样检查）

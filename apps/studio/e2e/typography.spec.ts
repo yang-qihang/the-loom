@@ -338,14 +338,11 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await expectFamilies(page, ".btn", PIXEL, "工作台按钮");
   await page.screenshot({ path: resolve(EVIDENCE, "06-workbench.png"), fullPage: true });
 
-  // 2) 参考解查看器：<pre> 代码块必须 Maple Mono。
-  const solutionButton = page.getByTestId("btn-solution");
-  if (await solutionButton.isVisible().catch(() => false)) {
-    await solutionButton.click();
-  } else {
-    await page.getByTestId("btn-more").click();
-    await page.getByTestId("btn-solution-menu").click();
-  }
+  // 2) 参考解查看器：新顶栏把「完整解」收进「帮助」菜单；<pre> 代码块必须 Maple Mono。
+  await page.getByTestId("btn-help-menu").click();
+  await expect(page.getByTestId("help-menu")).toBeVisible();
+  await page.getByTestId("btn-solution").click();
+  await expect(page.getByTestId("help-menu")).toBeHidden();
   await expect(page.getByTestId("solution-viewer")).toBeVisible();
   await settleFonts(page);
   await expectFamilies(page, ".solution-code", MAPLE, "参考解代码块");
@@ -353,7 +350,8 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await page.screenshot({ path: resolve(EVIDENCE, "07-solution-viewer.png") });
   await page.getByTestId("btn-solution-close").click();
 
-  // 3) 指令手册：API 签名/示例/坐标是代码；说明长文是 MiSans。
+  // 3) 指令手册（帮助菜单）：API 签名/示例/坐标是代码；说明长文是 Noto Sans SC。
+  await page.getByTestId("btn-help-menu").click();
   await page.getByTestId("btn-manual").click();
   await expect(page.getByTestId("api-manual")).toBeVisible();
   await settleFonts(page);
@@ -366,7 +364,8 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await page.screenshot({ path: resolve(EVIDENCE, "08-guidance-manual.png") });
   await page.getByTestId("btn-manual-close").click();
 
-  // 4) 试符台（REPL）：输入框与历史里的代码是 Maple Mono。
+  // 4) 试符台（REPL，帮助菜单）：输入框与历史里的代码是 Maple Mono。
+  await page.getByTestId("btn-help-menu").click();
   await page.getByTestId("btn-repl-top").click();
   await expect(page.getByTestId("repl-screen")).toBeVisible();
   await page.getByTestId("repl-input").fill("golem.pos");
@@ -380,8 +379,12 @@ test("代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + �
   await page.screenshot({ path: resolve(EVIDENCE, "09-repl.png") });
   await page.getByTestId("btn-repl-back").click();
 
-  // 5) 织典：跨语言代码块 Maple Mono，正文说明 MiSans。
-  await page.getByTestId("btn-codex").click();
+  // 5) 织典：工作台顶栏不再单列「打开织典」，入口在「帮助 → 旅途手记」里的织典链接；
+  //    跨语言代码块 Maple Mono，正文说明 Noto Sans SC。
+  await page.getByTestId("btn-help-menu").click();
+  await page.getByTestId("btn-journal").click();
+  await expect(page.getByTestId("journal-overlay")).toBeVisible();
+  await page.getByTestId("journal-codex").click();
   await expect(page.getByTestId("codex-screen")).toBeVisible();
   await expect(page.getByTestId("codex-code")).toBeVisible();
   await settleFonts(page);

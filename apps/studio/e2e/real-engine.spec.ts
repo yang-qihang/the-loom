@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Frame, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -314,7 +314,9 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   await expect(page.getByTestId("level-card-L01")).toContainText("进入关卡");
   await expect(page.getByTestId("level-card-L04")).toBeVisible();
   await expect(page.getByTestId("level-card-L10")).toContainText("双织者");
-  await expect(page.locator(".mode-chip")).toContainText("织机在线");
+  // 浏览器直开（无桌面壳 EnvState）时模式胶囊用本地引擎结果兜底；系统级控制（置顶/伴玩/连接灯）
+  // 只属于桌面壳，Studio 内不再渲染（壳内 EnvState 驱动的断言见文末「桌面壳嵌入」用例）。
+  await expect(page.locator(".map-head .mode-chip")).toContainText("织机在线");
   await expect(page.getByTestId("btn-pin")).toHaveCount(0);
   await expect(page.getByTestId("btn-companion")).toHaveCount(0);
   measurements.push(await assertLayout(page, "地图墙"));
@@ -365,6 +367,23 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   await expect(page.getByTestId("btn-stop")).toBeVisible();
   await expect(page.getByTestId("btn-reset")).toBeVisible();
   await expect(page.getByTestId("btn-hint")).toBeVisible();
+  // 新顶栏：一级动作只有「返回 / 帮助 / 关卡」，无系统级置顶/伴玩、无「织机在线」胶囊；
+  // 「未运行」是状态（span）而不是按钮。
+  await expect(page.getByTestId("btn-pin")).toHaveCount(0);
+  await expect(page.getByTestId("btn-companion")).toHaveCount(0);
+  await expect(page.locator(".wb-top .mode-chip")).toHaveCount(0);
+  await expect(page.getByTestId("phase-chip")).toContainText("未运行");
+  await page.getByTestId("btn-help-menu").click();
+  await expect(page.getByTestId("help-menu")).toBeVisible();
+  await expect(page.getByTestId("help-menu").locator("[role='menuitem']")).toHaveCount(5);
+  await expect(page.getByTestId("help-menu")).toContainText("指令手册");
+  await expect(page.getByTestId("help-menu")).toContainText("试符台");
+  await expect(page.getByTestId("help-menu")).toContainText("旅途手记");
+  await expect(page.getByTestId("help-menu")).toContainText("配套教材");
+  await expect(page.getByTestId("help-menu")).toContainText("完整解");
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("help-menu")).toBeHidden();
+  await expect(page.getByTestId("journal-overlay"), "菜单打开时按 Esc 不应顺带打开旅途手记").toHaveCount(0);
   await measurements.push(await assertLayout(page, "工作台"));
   await page.evaluate(() => document.fonts.ready);
   const editorFont = await page.evaluate(() => {
@@ -479,39 +498,130 @@ test("T2 Studio：真实织机 L01 全流程 + 标题对齐", async ({ page }) =
   expect(consoleErrors, `console errors: ${consoleErrors.join(" | ")}`).toEqual([]);
 });
 
-test("桌面壳占位：置顶/伴玩按钮只在壳内出现，伴玩收窄仍保持标题居中", async ({ page }) => {
-  await page.addInitScript((progress) => {
-    localStorage.setItem("loom.studio.progress.v1", JSON.stringify(progress));
-    (window as unknown as { __TAURI_INTERNALS__: { invoke: (cmd: string, args?: unknown) => Promise<unknown> } }).__TAURI_INTERNALS__ = {
-      invoke: async (cmd: string, args?: unknown) => {
-        (window as unknown as { __invoked: unknown[] }).__invoked = [
-          ...(((window as unknown as { __invoked?: unknown[] }).__invoked) ?? []),
-          [cmd, args],
-        ];
-        return null;
-      },
+/** 把「壳 iframe」等一会儿等到 Studio 页面真的挂载（同源 wrapper 里只有一个 iframe）。 */
+async function waitForStudioFrame(page: Page): Promise<Frame> {
+  for (let i = 0; i < 120; i += 1) {
+    const found = page.frames().find((item) => item !== page.mainFrame() && item.url().includes("/index.html"));
+    if (found) return found;
+    await page.waitForTimeout(100);
+  }
+  throw new Error("Studio iframe 未加载");
+}
+
+type EnvLightState = "checking" | "starting" | "ready" | "needs_action" | "error";
+
+/** 与 docs/55-launcher-env-contract.md §2 同形的 EnvState 测试桩（只用于 headless 消息注入）。 */
+function envLight(state: EnvLightState, detail = "") {
+  return { state, detail, hint: null as string | null, canStart: false, canRetry: false, guide: null as string | null };
+}
+
+function envSnapshot(patch: Record<string, unknown> = {}) {
+  return {
+    engine: envLight("ready", "/api/health ok"),
+    paper: envLight("ready", "25565"),
+    bot: envLight("ready", "bot connected"),
+    client: envLight("ready", "Minecraft 窗口"),
+    allReady: true,
+    launching: [] as string[],
+    clientLost: false,
+    sessionActive: false,
+    clientAdapter: "reuse",
+    clientAvailableLauncher: "prism",
+    mock: false,
+    updatedAt: Date.now(),
+    ...patch,
+  };
+}
+
+test("桌面壳嵌入：Studio 不画第二套标题栏，EnvState 驱动状态（headless 模拟壳，不启动 GUI）", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => consoleErrors.push(`pageerror: ${error.message}`));
+  await page.setViewportSize({ width: 1280, height: 840 });
+  // 模拟 Tauri：初始化脚本注入所有 frame（与 WebView2/WebKitGTK 的行为一致）。
+  await page.addInitScript(() => {
+    (window as unknown as { __TAURI_INTERNALS__: { invoke: () => Promise<null> } }).__TAURI_INTERNALS__ = { invoke: async () => null };
+  });
+  await seedProgress(page);
+  // 同源 wrapper 模拟 apps/desktop/shell/index.html：一条壳标题栏 + 一个指向 Studio 的 iframe。
+  await page.route("**/e2e-shell.html", (route) =>
+    route.fulfill({
+      contentType: "text/html; charset=utf-8",
+      body: `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
+        html, body { margin: 0; background: #0d140f; color: #f0ead8; font: 14px sans-serif; }
+        #shell-titlebar { height: 36px; display: flex; align-items: center; padding: 0 12px; background: #101a11; border-bottom: 2px solid #4a5c42; }
+        #studio { border: 0; display: block; width: 100%; height: calc(100vh - 36px); }
+      </style></head><body>
+        <header id="shell-titlebar" data-testid="shell-titlebar">✦ 织界 THE LOOM（桌面壳标题栏 · 四灯）</header>
+        <iframe id="studio" title="Studio" src="/index.html?engine=${encodeURIComponent(ENGINE_BASE)}&amp;scale=0.8"></iframe>
+      </body></html>`,
+    }),
+  );
+  await page.goto("/e2e-shell.html");
+  const frame = await waitForStudioFrame(page);
+  await frame.getByTestId("level-card-L01").waitFor({ state: "visible", timeout: 30_000 });
+
+  // 1) 标题栏唯一归壳：整页只有壳那一条；iframe 内没有 DesktopTitlebar / body.desktop-shell。
+  await expect(page.getByTestId("shell-titlebar"), "壳自己仍有一条标题栏").toHaveCount(1);
+  const embedded = await frame.evaluate(() => ({
+    studioTitlebars: document.querySelectorAll("[data-testid='desktop-titlebar']").length,
+    desktopClass: document.body.classList.contains("desktop-shell"),
+    windowButtons: document.querySelectorAll("[data-testid='btn-win-min'], [data-testid='btn-win-max'], [data-testid='btn-win-close']").length,
+  }));
+  expect(embedded.studioTitlebars, "Studio 在壳 iframe 内又画了一条标题栏（双标题栏 P0）").toBe(0);
+  expect(embedded.desktopClass, "Shell 内不应再挂 body.desktop-shell（否则多预留 36px）").toBe(false);
+  expect(embedded.windowButtons, "壳内不应出现第二套窗口按钮").toBe(0);
+
+  // 2) EnvState 唯一状态源：父壳 postMessage → Studio 顶部模式/状态，不再自己探测 health。
+  const sendEnv = async (patch: Record<string, unknown> = {}) => {
+    await page.evaluate((env) => {
+      const iframe = document.getElementById("studio") as HTMLIFrameElement | null;
+      iframe?.contentWindow?.postMessage({ type: "loom:env", env }, "*");
+    }, envSnapshot(patch));
+    await frame.waitForTimeout(250);
+  };
+  await sendEnv({ engine: envLight("starting", "正在启动 Paper"), allReady: false, launching: ["engine"] });
+  await expect(frame.locator(".map-head .mode-chip"), "地图页模式胶囊必须消费壳 EnvState").toContainText("织机启动中");
+  await sendEnv();
+  await expect(frame.locator(".map-head .mode-chip")).toContainText("织机在线");
+
+  // 3) 工作台：无系统控制、状态「未运行」，zoom + 100% 链铺满 iframe（无底部空白）。
+  await frame.getByTestId("level-card-L01").click();
+  await expect(frame.getByTestId("code-editor")).toBeVisible();
+  await expect(frame.getByTestId("btn-pin")).toHaveCount(0);
+  await expect(frame.getByTestId("btn-companion")).toHaveCount(0);
+  await expect(frame.locator(".wb-top .mode-chip")).toHaveCount(0);
+  await expect(frame.getByTestId("phase-chip")).toContainText("未运行");
+  const geometry = await frame.evaluate(() => {
+    const workbench = document.querySelector(".workbench")!.getBoundingClientRect();
+    return {
+      workbenchBottom: Math.round(workbench.bottom),
+      viewportHeight: window.innerHeight,
+      docScrollHeight: document.documentElement.scrollHeight,
+      docClientHeight: document.documentElement.clientHeight,
     };
-  }, PROGRESS);
-  await page.goto("/");
-  await page.getByTestId("level-card-L01").click();
-  await expect(page.getByTestId("code-editor")).toBeVisible();
-  await expect(page.getByTestId("btn-pin")).toBeVisible();
-  await expect(page.getByTestId("btn-companion")).toBeVisible();
-  await page.getByTestId("btn-pin").click();
-  await expect(page.getByTestId("btn-pin")).toContainText("取消置顶");
-  await page.getByTestId("btn-companion").click();
-  await expect(page.getByTestId("btn-companion")).toContainText("展开");
-  await expect(page.getByTestId("code-editor")).toBeHidden();
-  await expect(page.getByTestId("goal-list")).toBeVisible();
-  await expect(page.getByTestId("coach-line")).toBeVisible();
-  await expect(page.getByTestId("btn-hint")).toBeVisible();
-  await expect(page.getByText("世界日志")).toBeVisible();
-  await assertLayout(page, "伴玩");
-  await page.screenshot({ path: resolve(EVIDENCE, "08-companion.png"), fullPage: true });
-  await page.getByTestId("btn-companion").click();
-  await expect(page.getByTestId("code-editor")).toBeVisible();
-  await expect(page.getByTestId("desktop-titlebar")).toBeVisible();
-  const nativeGuard = await page.evaluate(() => {
+  });
+  expect(Math.abs(geometry.workbenchBottom - geometry.viewportHeight), `壳内 zoom 下工作台没铺满（底部空白）：${JSON.stringify(geometry)}`).toBeLessThanOrEqual(1.5);
+  expect(geometry.docScrollHeight, "壳内关卡页不应出现文档滚动").toBeLessThanOrEqual(geometry.docClientHeight + 1);
+
+  // 4) L2：clientLost 时 Studio 兜底禁用运行/切关（壳另有红色阻断层）。
+  await sendEnv({
+    client: envLight("needs_action", "客户端窗口消失"),
+    allReady: false,
+    clientLost: true,
+    sessionActive: true,
+  });
+  await expect(frame.getByTestId("phase-chip")).toContainText("客户端已断开");
+  await expect(frame.getByTestId("btn-run")).toBeDisabled();
+  await expect(frame.getByTestId("btn-back")).toBeDisabled();
+  await sendEnv();
+  await expect(frame.getByTestId("phase-chip")).toContainText("未运行");
+  await expect(frame.getByTestId("btn-run")).toBeEnabled();
+
+  // 5) 壳内 native guard 仍生效（右键菜单/Ctrl+R 屏蔽，输入框右键保留）。
+  const nativeGuard = await frame.evaluate(() => {
     const context = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
     document.body.dispatchEvent(context);
     const reload = new KeyboardEvent("keydown", { key: "r", ctrlKey: true, bubbles: true, cancelable: true });
@@ -526,15 +636,34 @@ test("桌面壳占位：置顶/伴玩按钮只在壳内出现，伴玩收窄仍�
   expect(nativeGuard.bodyContext, "桌面壳必须屏蔽浏览器右键菜单").toBe(true);
   expect(nativeGuard.reload, "桌面壳必须屏蔽 Ctrl+R 刷新").toBe(true);
   expect(nativeGuard.editorContext, "输入框里必须保留复制/粘贴右键菜单").toBe(false);
-  await page.getByTestId("btn-win-min").click();
-  await page.getByTestId("btn-win-max").click();
-  await page.screenshot({ path: resolve(EVIDENCE, "08b-desktop-shell.png"), fullPage: true });
-  const invoked = await page.evaluate(() => (window as unknown as { __invoked: Array<[string, unknown]> }).__invoked);
-  expect(invoked.map(([cmd]) => cmd)).toEqual([
-    "set_always_on_top",
-    "set_companion_mode",
-    "set_companion_mode",
-    "window_minimize",
-    "window_toggle_maximize",
-  ]);
+  await page.screenshot({ path: resolve(EVIDENCE, "08b-desktop-shell.png"), fullPage: false });
+  expect(consoleErrors, `console errors: ${consoleErrors.join(" | ")}`).toEqual([]);
+});
+
+test("顶层 Tauri 直开 Studio：保留唯一自绘标题栏与 36px 预留（旧开发场景兼容）", async ({ page }) => {
+  await page.addInitScript((progress) => {
+    localStorage.setItem("loom.studio.progress.v1", JSON.stringify(progress));
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10"]));
+    (window as unknown as { __TAURI_INTERNALS__: { invoke: () => Promise<null> } }).__TAURI_INTERNALS__ = { invoke: async () => null };
+  }, PROGRESS);
+  await page.goto("/");
+  await expect(page.getByTestId("desktop-titlebar"), "顶层 Tauri 旧场景仍需要自绘标题栏").toBeVisible();
+  await expect(page.getByTestId("desktop-titlebar"), "顶层只能有一条标题栏").toHaveCount(1);
+  await expect
+    .poll(async () => page.evaluate(() => document.body.classList.contains("desktop-shell")), { message: "desktop-shell 类未挂载" })
+    .toBe(true);
+  await page.getByTestId("level-card-L01").click();
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  // 36px 预留改成 % 链后仍正好铺满：标题栏 36 + 工作台 = 视口高，无文档滚动。
+  const geometry = await page.evaluate(() => {
+    const workbench = document.querySelector(".workbench")!.getBoundingClientRect();
+    return {
+      workbenchBottom: Math.round(workbench.bottom),
+      viewportHeight: window.innerHeight,
+      docScrollHeight: document.documentElement.scrollHeight,
+      docClientHeight: document.documentElement.clientHeight,
+    };
+  });
+  expect(Math.abs(geometry.workbenchBottom - geometry.viewportHeight)).toBeLessThanOrEqual(1.5);
+  expect(geometry.docScrollHeight).toBeLessThanOrEqual(geometry.docClientHeight + 1);
 });

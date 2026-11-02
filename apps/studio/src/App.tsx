@@ -12,6 +12,7 @@ import { TextbookLauncher } from "./components/textbook/TextbookLauncher";
 import { TextbookWindow } from "./components/textbook/TextbookWindow";
 import { TEXTBOOK, isTextbookRead, markTextbookRead } from "./textbook";
 import { levelCards, levelCopy } from "./copy";
+import { useShellEnv } from "./shell-env";
 import {
   EMPTY_PROGRESS,
   loadProgress,
@@ -37,6 +38,8 @@ interface AppProps {
 
 export default function App({ engine: injectedEngine }: AppProps = {}) {
   const engine = useMemo(() => injectedEngine ?? createEngine(), [injectedEngine]);
+  /** 桌面壳下发的 EnvState（唯一环境状态源）；浏览器直开/无壳时为 null。 */
+  const shellEnv = useShellEnv();
   const [progress, setProgress] = useState<StudioProgress>(() => (typeof localStorage === "undefined" ? { ...EMPTY_PROGRESS } : loadProgress()));
   const [screen, setScreen] = useState<Screen>({ kind: "map" });
   const [overlay, setOverlay] = useState<Overlay>(null);
@@ -235,6 +238,9 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      // 关卡页顶栏下拉菜单打开时，Esc 由菜单自己收起（Workbench 监听 document）；
+      // 这里不再顺带打开旅途手记，避免一次 Esc 触发两个面板。
+      if (document.body.classList.contains("has-open-menu")) return;
       // 教材窗口在最上层（body portal）；Esc 先关它，避免同时触发旅途手记。
       if (textbookLevelId !== null) {
         closeTextbook();
@@ -279,6 +285,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
         <ReplScreen
           engine={engine}
           levelId={replLevelId ?? latestLevelId}
+          env={shellEnv}
           onBack={() => setReplLevelId(null)}
           onOpenManual={() => setManualLevelId(replLevelId ?? latestLevelId)}
         />
@@ -382,6 +389,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
           key={screen.levelId}
           levelId={screen.levelId}
           engine={engine}
+          env={shellEnv}
           onBack={() => {
             setScreen({ kind: "map" });
             void loadLevels();
@@ -391,6 +399,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
           onOpenManual={() => setManualLevelId(screen.levelId)}
           onOpenRepl={() => openRepl(screen.levelId)}
           onOpenSolution={() => setSolutionLevelId(screen.levelId)}
+          onOpenTextbook={() => openTextbook(screen.levelId)}
           onCompleted={() => completeLevel(screen.levelId)}
           nextLevel={nextPlayableLevel}
           onNextLevel={(levelId) => {
@@ -411,6 +420,7 @@ export default function App({ engine: injectedEngine }: AppProps = {}) {
         loading={loading}
         error={error}
         engineMode={engine.mode}
+        shellEnv={shellEnv}
         journalEnabled={progress.prologueSeen}
         onOpenRepl={() => openRepl()}
         onOpenCodex={() => setCodexOpen(true)}

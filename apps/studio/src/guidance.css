@@ -18,7 +18,9 @@
   display: flex;
   flex-direction: column;
   width: min(1080px, 96vw);
-  max-height: min(86vh, 900px);
+  /* 用父级浮层内容区的百分比而不是 vh：CSS zoom 下 86vh 会被二次缩放，
+     卡片四周空一大圈；百分比与 zoom 无关。 */
+  max-height: min(86%, 900px);
   background: #161f16;
   border: 2px solid var(--line, #4a3a24);
   box-shadow: 8px 8px 0 #070b07;
@@ -499,7 +501,7 @@
     padding: 8px;
   }
   .gd-card {
-    max-height: 92vh;
+    max-height: 100%;
   }
   .gd-head {
     flex-wrap: wrap;

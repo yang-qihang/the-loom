@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { chrome, levelCopy } from "../copy";
 import type { LevelView, ReplHistoryEntry, StudioEngine } from "../types";
+import { summarizeEnv, type EnvState } from "../shell-env";
 import { pointRows, xzText, type PointRow } from "./guidance-data";
 import { RichText } from "./RichText";
 
@@ -8,6 +9,8 @@ interface ReplScreenProps {
   engine: StudioEngine;
   /** 当前关卡（修复「打开 REPL 跳回第一关」：用工作台/地图当前关卡建 REPL 会话）。 */
   levelId: string;
+  /** 桌面壳下发的 EnvState（与壳顶栏四灯同源）；无壳时为 null。 */
+  env: EnvState | null;
   onBack: () => void;
   /** 打开指令手册（App 统一渲染）。 */
   onOpenManual?: () => void;
@@ -52,7 +55,7 @@ function formatReplValue(raw: string | undefined): string {
   return text;
 }
 
-export function ReplScreen({ engine, levelId, onBack, onOpenManual }: ReplScreenProps) {
+export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplScreenProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [level, setLevel] = useState<LevelView | null>(null);
   const [entries, setEntries] = useState<ReplHistoryEntry[]>([]);
@@ -64,6 +67,17 @@ export function ReplScreen({ engine, levelId, onBack, onOpenManual }: ReplScreen
   const listRef = useRef<HTMLDivElement | null>(null);
   const levelTitle = level?.title ?? levelCopy(levelId)?.title ?? levelId;
   const points: PointRow[] = level ? pointRows(level) : [];
+  // 环境状态只认壳下发的 EnvState；浏览器直开时退回本地 engine.mode。
+  const envSummary = env ? summarizeEnv(env) : null;
+  const modeClass = envSummary
+    ? envSummary.tone === "mock"
+      ? "mode-chip is-mock"
+      : `mode-chip is-${envSummary.tone}`
+    : engine.mode === "mock"
+      ? "mode-chip is-mock"
+      : "mode-chip";
+  const modeText = envSummary ? envSummary.text : engine.mode === "mock" ? chrome.mode.local : chrome.mode.real;
+  const modeTitle = envSummary?.title ?? (engine.mode === "mock" ? chrome.mode.local : chrome.mode.real);
 
   useEffect(() => {
     let disposed = false;
@@ -201,8 +215,8 @@ export function ReplScreen({ engine, levelId, onBack, onOpenManual }: ReplScreen
                 {chrome.runeBench.manual}
               </button>
             ) : null}
-            <span className={engine.mode === "mock" ? "mode-chip is-mock" : "mode-chip"}>
-              {engine.mode === "mock" ? chrome.mode.local : chrome.mode.real}
+            <span className={modeClass} title={modeTitle} data-engine-state={env?.engine.state ?? undefined}>
+              {modeText}
             </span>
           </div>
         </header>

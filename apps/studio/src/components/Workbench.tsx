@@ -12,7 +12,6 @@ import {
   sanitizeLog,
   states,
 } from "../copy";
-import { isDesktopShell, setAlwaysOnTop, setCompanionMode } from "../desktop";
 import type { LevelCard } from "../copy";
 import type { GoalState } from "./GoalList";
 import type { LevelView, RunResult, SessionPhase, SnapshotView, StudioEngine, StudioEvent } from "../types";
@@ -27,21 +26,26 @@ import { SceneIllustration } from "./SceneIllustration";
 import { skyFor } from "./scene-sky";
 import { RichText } from "./RichText";
 import { RuneGlyph } from "./RuneGlyph";
+import { summarizeEnv, type EnvState } from "../shell-env";
 import { Stars } from "./Stars";
 import { WorldLog } from "./WorldLog";
 
 interface WorkbenchProps {
   levelId: string;
   engine: StudioEngine;
+  /** 桌面壳下发的 EnvState（环境状态唯一来源，与壳顶栏四灯同源）；无壳时为 null。 */
+  env: EnvState | null;
   onBack: () => void;
   onOpenJournal: () => void;
   onOpenCodex: () => void;
-  /** 打开指令手册（顶栏按钮/教练卡链接；App 统一渲染模态）。 */
+  /** 打开指令手册（顶栏菜单/教练卡链接；App 统一渲染模态）。 */
   onOpenManual: () => void;
   /** 用当前关卡打开试符台（REPL 不再强制跳回第一关）。 */
   onOpenRepl: () => void;
-  /** 查看本关完整解（调试按钮，和指令手册/试符台同一区域）。 */
+  /** 查看本关完整解（调试工具，收在「帮助」菜单里）。 */
   onOpenSolution: () => void;
+  /** 打开本关配套教材（与右下角常驻入口共用 App 的 TextbookWindow）。 */
+  onOpenTextbook: () => void;
   onCompleted: () => void;
   nextLevel: LevelCard | null;
   onNextLevel: (levelId: string) => void;
@@ -85,12 +89,14 @@ function phaseLabel(phase: SessionPhase, result: RunResult | null, waitingForPla
 export function Workbench({
   levelId,
   engine,
+  env,
   onBack,
   onOpenJournal,
   onOpenCodex,
   onOpenManual,
   onOpenRepl,
   onOpenSolution,
+  onOpenTextbook,
   onCompleted,
   nextLevel,
   onNextLevel,
@@ -110,7 +116,6 @@ export function Workbench({
   /** 目标完成提示（✓ 目标完成 + 下一步）。 */
   const [completedNotice, setCompletedNotice] = useState<{ goal: string; next: string | null } | null>(null);
   const [hintIndex, setHintIndex] = useState(0);
-  const [pinned, setPinned] = useState(false);
   const [annotationsOn, setAnnotationsOn] = useState(() => {
     try { return localStorage.getItem("loom.annotations") !== "off"; } catch { return true; }
   });
@@ -120,9 +125,8 @@ export function Workbench({
       return Number.isFinite(saved) && saved >= 13 && saved <= 22 ? saved : 16;
     } catch { return 16; }
   });
-  const [companion, setCompanion] = useState(false);
-  const [narrow, setNarrow] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1100px)").matches);
-  const [moreOpen, setMoreOpen] = useState(false);
+  /** 顶栏菜单：同一时间只开一个（帮助 / 关卡），避免两个下拉叠在一起。 */
+  const [openMenu, setOpenMenu] = useState<"help" | "levels" | null>(null);
   const [goalsOpen, setGoalsOpen] = useState(true);
   const [worldOpen, setWorldOpen] = useState(() => !(typeof window !== "undefined" && window.matchMedia("(max-width: 1100px)").matches));
   const [settleOpen, setSettleOpen] = useState(false);
@@ -139,14 +143,6 @@ export function Workbench({
   const suppressBeatUntilRef = useRef(0);
   /** 快照里的会话 epoch（防重放/去重用；顶层 epoch 可能被插件快照覆盖）。 */
   const sessionEpochRef = useRef<number | null>(null);
-  const desktop = useMemo(() => isDesktopShell(), []);
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 1100px)");
-    const update = () => setNarrow(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
   const editorRef = useRef<CodeEditorHandle | null>(null);
   const codeRef = useRef("");
   /** progress id → 目标面板下标（loadLevel/reset 时由 level.objectives 重建；不再按事件到达顺序猜）。 */
@@ -157,6 +153,10 @@ export function Workbench({
   const isNightLevel = levelId === "L03" && !!copy?.trialUI;
   // 只有当引擎真值说「织偶部分已完成、轮到玩家」且这一轮还没通过时，才进入玩家节拍。
   const waitingForPlayer = !!result?.playerBeatReady && !result.passed;
+  /** 四灯压缩成一条状态（与壳顶栏同源）：四灯全绿时让位给会话状态，否则优先报环境异常。 */
+  const envSummary = env ? summarizeEnv(env) : null;
+  /** L2：关卡会话进行中客户端掉线（壳下发 clientLost）→ 壳会盖红色阻断层，Studio 内同步禁用操作兜底。 */
+  const clientLost = env?.clientLost === true;
 
   useEffect(() => {
     let disposed = false;
@@ -315,6 +315,8 @@ export function Workbench({
   const runProgram = useCallback(async () => {
     // 同步守卫：双击/回车连发时第二次请求在 setState 生效前就被拦掉，不会两个 run 抢同一会话。
     if (!sessionId || runInFlightRef.current || phase === "running") return;
+    // L2 客户端丢失：壳已用红色阻断层兜底，Studio 内也不允许再提交运行。
+    if (clientLost) return;
     runInFlightRef.current = true;
     resultRef.current = null;
     autoBeatKeyRef.current = null;
@@ -336,7 +338,7 @@ export function Workbench({
     } finally {
       runInFlightRef.current = false;
     }
-  }, [engine, levelId, phase, sessionId]);
+  }, [clientLost, engine, levelId, phase, sessionId]);
 
   const stopProgram = useCallback(async () => {
     if (!sessionId) return;
@@ -350,6 +352,8 @@ export function Workbench({
   const requestPlayerBeat = useCallback(
     async (auto: boolean) => {
       if (!sessionId || beatInFlightRef.current) return;
+      // L2 客户端丢失期间不允许确认玩家节拍（否则会把「没做到」误当完成）。
+      if (clientLost) return;
       beatInFlightRef.current = true;
       try {
         // 不传 simulate：paper 世界引擎只按真实世界评分（confirm-only），mock 世界自动模拟。
@@ -366,7 +370,7 @@ export function Workbench({
         beatInFlightRef.current = false;
       }
     },
-    [engine, levelId, sessionId],
+    [clientLost, engine, levelId, sessionId],
   );
 
   const playerBeat = useCallback(async () => {
@@ -450,23 +454,38 @@ export function Workbench({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [runProgram]);
 
-  const togglePinned = useCallback(async () => {
-    const next = !pinned;
-    try {
-      if (await setAlwaysOnTop(next)) setPinned(next);
-    } catch {
-      setPinned(pinned);
-    }
-  }, [pinned]);
+  /** 「关卡」菜单：世界标注开关（成功写 localStorage，并同步给引擎）。 */
+  const toggleAnnotations = useCallback(() => {
+    const next = !annotationsOn;
+    setAnnotationsOn(next);
+    try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ }
+    if (sessionId) void engine.setAnnotations(sessionId, next);
+  }, [annotationsOn, engine, sessionId]);
 
-  const toggleCompanion = useCallback(async () => {
-    const next = !companion;
-    try {
-      if (await setCompanionMode(next)) setCompanion(next);
-    } catch {
-      setCompanion(companion);
-    }
-  }, [companion]);
+  // 菜单打开时：点菜单外 / 按 Esc 都收回（Esc 只收菜单，不触发其它面板）。
+  useEffect(() => {
+    if (!openMenu) return;
+    // 让 App 的全局 Esc 处理先让行（否则菜单开着按 Esc 会顺带打开旅途手记）。
+    document.body.classList.add("has-open-menu");
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest(".wb-menu-wrap")) return;
+      setOpenMenu(null);
+    };
+    const onMenuKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onMenuKeyDown, true);
+    return () => {
+      document.body.classList.remove("has-open-menu");
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onMenuKeyDown, true);
+    };
+  }, [openMenu]);
 
   useEffect(() => {
     if (import.meta.env.VITE_E2E !== "1") return;
@@ -524,10 +543,28 @@ export function Workbench({
   const progressHint = engineHint ?? resultHint;
   const hint = copy && hintIndex > 0 ? resolveCopy(copy.hints[hintIndex - 1]) : null;
 
+  const phaseText = phaseLabel(phase, result, waitingForPlayer);
+  /** 会话状态配色：只表达状态，不承担按钮职责。 */
+  const phaseTone = result?.passed || phase === "graded"
+    ? (result?.passed ? "is-pass" : "is-error")
+    : phase === "error"
+      ? "is-error"
+      : phase === "running" || waitingForPlayer
+        ? "is-busy"
+        : "is-idle";
+  /**
+   * 顶栏只显示一条状态：环境异常（四灯非全绿 / L2 客户端丢失）优先于会话状态，
+   * 保证 Studio 与壳顶栏四灯不会各说各话；四灯全绿时才显示「未运行/运行中/…」。
+   */
+  const envOverridesStatus = envSummary !== null && envSummary.tone !== "online" && envSummary.tone !== "mock";
+  const statusText = envOverridesStatus ? envSummary!.text : phaseText;
+  const statusTone = envOverridesStatus ? `is-${envSummary!.tone}` : phaseTone;
+  const statusTitle = envSummary?.title ?? "";
+
   return (
-    <div className={companion ? "workbench is-companion" : "workbench"}>
+    <div className="workbench">
       <header className="wb-top">
-        <button type="button" className="btn btn-quiet" onClick={onBack} data-testid="btn-back">
+        <button type="button" className="btn btn-quiet" onClick={onBack} disabled={clientLost} data-testid="btn-back">
           {buttons.back}
         </button>
         <div className="wb-title">
@@ -538,48 +575,79 @@ export function Workbench({
           </span>
         </div>
         <div className="wb-status">
-          {narrow ? (
-            <div className="wb-more-wrap">
-              <button type="button" className="btn btn-quiet" onClick={() => setMoreOpen((open) => !open)} aria-expanded={moreOpen} data-testid="btn-more">
-                更多
-              </button>
-              {moreOpen ? (
-                <div className="wb-more-menu" onClick={(event) => { if ((event.target as HTMLElement).closest("button")) setMoreOpen(false); }}>
-                  {desktop ? (
-                    <>
-                      <button type="button" className="btn btn-quiet" onClick={() => void togglePinned()}>{pinned ? chrome.shell.unpin : chrome.shell.pin}</button>
-                      <button type="button" className="btn btn-quiet" onClick={() => void toggleCompanion()}>{companion ? chrome.shell.expand : chrome.shell.companion}</button>
-                    </>
-                  ) : null}
-                  <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
-                  <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-manual-menu">{chrome.workbench.manualButton}</button>
-                  <button type="button" className="btn btn-quiet" onClick={onOpenRepl} data-testid="btn-repl-menu">{chrome.workbench.replButton}</button>
-                  <button type="button" className="btn btn-quiet" onClick={onOpenSolution} data-testid="btn-solution-menu">{chrome.workbench.solutionButton}</button>
-                  <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
-                  <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
-                  <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <>
-              {desktop ? (
-                <>
-                  <button type="button" className="btn btn-quiet btn-shell" onClick={() => void togglePinned()} data-testid="btn-pin">{pinned ? chrome.shell.unpin : chrome.shell.pin}</button>
-                  <button type="button" className="btn btn-quiet btn-shell" onClick={() => void toggleCompanion()} data-testid="btn-companion">{companion ? chrome.shell.expand : chrome.shell.companion}</button>
-                </>
-              ) : null}
-              <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-reset-top">重置本关</button>
-              <button type="button" className="btn btn-quiet" onClick={onOpenManual} data-testid="btn-manual">{chrome.workbench.manualButton}</button>
-              <button type="button" className="btn btn-quiet" onClick={onOpenRepl} data-testid="btn-repl-top">{chrome.workbench.replButton}</button>
-              <button type="button" className="btn btn-quiet" onClick={onOpenSolution} data-testid="btn-solution">{chrome.workbench.solutionButton}</button>
-              <button type="button" className="btn btn-quiet" onClick={() => { const next = !annotationsOn; setAnnotationsOn(next); try { localStorage.setItem("loom.annotations", next ? "on" : "off"); } catch { /* ignore */ } if (sessionId) void engine.setAnnotations(sessionId, next); }} title="世界里的中文浮空字是路标，帮你认第几盏灯、谁是艾拉和灰崽；不想看可以随时关掉。" data-testid="btn-annotations">世界标注：{annotationsOn ? "开" : "关"}</button>
-              <button type="button" className="btn btn-quiet" onClick={onOpenJournal} data-testid="btn-journal">{journalLabels.open}</button>
-              <button type="button" className="btn btn-quiet" onClick={onOpenCodex} data-testid="btn-codex">{chrome.codex.open}</button>
-              <span className={engine.mode === "mock" ? "mode-chip is-mock" : "mode-chip"}>{engine.mode === "mock" ? chrome.mode.local : chrome.mode.real}</span>
-            </>
-          )}
-          <span className="phase-chip" data-testid="phase-chip">{phaseLabel(phase, result, waitingForPlayer)}</span>
+          {/* 一级动作只保留「帮助 / 关卡」两个菜单 + 状态；系统级控制（置顶/伴玩/连接）归桌面壳。 */}
+          <div className="wb-menu-wrap">
+            <button
+              type="button"
+              className="btn btn-quiet"
+              aria-haspopup="menu"
+              aria-expanded={openMenu === "help"}
+              onClick={() => setOpenMenu(openMenu === "help" ? null : "help")}
+              data-testid="btn-help-menu"
+            >
+              {chrome.workbench.helpMenu} ▾
+            </button>
+            {openMenu === "help" ? (
+              <div className="wb-menu" role="menu" aria-label={chrome.workbench.helpMenu} data-testid="help-menu">
+                <button type="button" role="menuitem" className="btn btn-quiet" onClick={() => { setOpenMenu(null); onOpenManual(); }} data-testid="btn-manual">
+                  {chrome.workbench.manualButton}
+                </button>
+                <button type="button" role="menuitem" className="btn btn-quiet" onClick={() => { setOpenMenu(null); onOpenRepl(); }} data-testid="btn-repl-top">
+                  {chrome.workbench.replButton}
+                </button>
+                <button type="button" role="menuitem" className="btn btn-quiet" onClick={() => { setOpenMenu(null); onOpenJournal(); }} data-testid="btn-journal">
+                  {journalLabels.title}
+                </button>
+                <button type="button" role="menuitem" className="btn btn-quiet" onClick={() => { setOpenMenu(null); onOpenTextbook(); }} data-testid="btn-textbook-menu">
+                  {chrome.workbench.textbookButton}
+                </button>
+                <button type="button" role="menuitem" className="btn btn-quiet" onClick={() => { setOpenMenu(null); onOpenSolution(); }} data-testid="btn-solution">
+                  {chrome.workbench.solutionButton}
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <div className="wb-menu-wrap">
+            <button
+              type="button"
+              className="btn btn-quiet"
+              aria-haspopup="menu"
+              aria-expanded={openMenu === "levels"}
+              onClick={() => setOpenMenu(openMenu === "levels" ? null : "levels")}
+              data-testid="btn-level-menu"
+            >
+              {chrome.workbench.levelMenu} ▾
+            </button>
+            {openMenu === "levels" ? (
+              <div className="wb-menu" role="menu" aria-label={chrome.workbench.levelMenu} data-testid="level-menu">
+                <button type="button" role="menuitem" className="btn btn-quiet" onClick={() => { setOpenMenu(null); void resetWorkbench(); }} data-testid="btn-reset-top">
+                  重置本关
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="btn btn-quiet"
+                  onClick={() => { setOpenMenu(null); toggleAnnotations(); }}
+                  title="世界里的中文浮空字是路标，帮你认第几盏灯、谁是艾拉和灰崽；不想看可以随时关掉。"
+                  data-testid="btn-annotations"
+                >
+                  {chrome.system.annotations}：{annotationsOn ? chrome.system.on : chrome.system.off}
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <span
+            className={`phase-chip ${statusTone}`}
+            data-phase={phase}
+            data-env-state={envSummary?.tone ?? undefined}
+            role="status"
+            aria-live="polite"
+            title={statusTitle}
+            data-testid="phase-chip"
+          >
+            <span className="phase-dot" aria-hidden="true" />
+            {statusText}
+          </span>
         </div>
       </header>
 
@@ -619,7 +687,7 @@ export function Workbench({
                 type="button"
                 className="btn btn-primary btn-run-top"
                 onClick={() => void runProgram()}
-                disabled={phase === "running" || !level}
+                disabled={phase === "running" || !level || clientLost}
                 data-testid="btn-run-top"
               >
                 {buttons.run}
@@ -766,6 +834,7 @@ export function Workbench({
                   type="button"
                   className="btn btn-primary"
                   onClick={() => void playerBeat()}
+                  disabled={clientLost}
                   data-testid="btn-player-beat"
                 >
                   {copy?.playerBeatAction ?? "我已在游戏里完成"}
@@ -836,9 +905,6 @@ export function Workbench({
               <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-settle-replay">
                 {buttons.replay}
               </button>
-              <button type="button" className="btn btn-quiet" onClick={() => void resetWorkbench()} data-testid="btn-settle-reset">
-                重置本关
-              </button>
               {nextLevel ? (
                 <button type="button" className="btn btn-primary" onClick={() => onNextLevel(nextLevel.id)} data-testid="btn-settle-next">
                   {buttons.nextLevel}
@@ -858,7 +924,7 @@ export function Workbench({
             type="button"
             className="btn btn-primary"
             onClick={() => void runProgram()}
-            disabled={phase === "running" || !level}
+            disabled={phase === "running" || !level || clientLost}
             data-testid="btn-run"
           >
             {buttons.run}

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { acts, buttons, chrome, fill, journalLabels, levelCards, STATUS_PLAYABLE } from "../copy";
 import type { EngineMode } from "../types";
+import { summarizeEnv, type EnvState } from "../shell-env";
 import { RuneGlyph } from "./RuneGlyph";
 import { RichText } from "./RichText";
 
@@ -9,6 +10,8 @@ interface MapWallProps {
   loading: boolean;
   error: string | null;
   engineMode: EngineMode;
+  /** 桌面壳下发的 EnvState；无壳（浏览器/Playwright）时为 null，回退到本地 engineMode。 */
+  shellEnv: EnvState | null;
   journalEnabled: boolean;
   onOpenJournal: () => void;
   onOpenAbout: () => void;
@@ -20,7 +23,22 @@ interface MapWallProps {
   onRetry: () => void;
 }
 
-export function MapWall({ cards, loading, error, engineMode, journalEnabled, onOpenJournal, onOpenAbout, onOpenSettings, onQuit, onOpenRepl, onOpenCodex, onSelect, onRetry }: MapWallProps) {
+export function MapWall({ cards, loading, error, engineMode, shellEnv, journalEnabled, onOpenJournal, onOpenAbout, onOpenSettings, onQuit, onOpenRepl, onOpenCodex, onSelect, onRetry }: MapWallProps) {
+  // 「织机在线/本地演示」与壳顶栏四灯同源：有 EnvState 就只用它，不再拿 Studio 自己的连接结果当状态。
+  const envSummary = shellEnv ? summarizeEnv(shellEnv) : null;
+  const modeClass = envSummary
+    ? envSummary.tone === "mock"
+      ? "mode-chip is-mock"
+      : `mode-chip is-${envSummary.tone}`
+    : engineMode === "mock"
+      ? "mode-chip is-mock"
+      : "mode-chip";
+  const modeText = envSummary
+    ? envSummary.text
+    : engineMode === "mock"
+      ? chrome.mode.local
+      : chrome.mode.real;
+  const modeTitle = envSummary?.title ?? (engineMode === "mock" ? chrome.mode.local : chrome.mode.real);
   const actEntries = useMemo(
     () => Object.entries(acts).map(([key, value]) => ({ act: Number(key.replace("act", "")), title: value.title })),
     [],
@@ -50,8 +68,8 @@ export function MapWall({ cards, loading, error, engineMode, journalEnabled, onO
                 {journalLabels.open}
               </button>
             ) : null}
-            <span className={engineMode === "mock" ? "mode-chip is-mock" : "mode-chip"}>
-              {engineMode === "mock" ? chrome.mode.local : chrome.mode.real}
+            <span className={modeClass} title={modeTitle} data-engine-state={shellEnv?.engine.state ?? undefined}>
+              {modeText}
             </span>
           </div>
         </div>
