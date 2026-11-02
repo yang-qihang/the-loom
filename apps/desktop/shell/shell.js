@@ -24,8 +24,6 @@ const els = {
 let settings = { alwaysOnTop: false, mode: "workbench", page: "wizard", uiScale: 0.8 };
 let currentSession = null;
 let currentLevel = null;
-/** 最近一次 EnvState（唯一环境状态源，见 docs/57）。 */
-let envState = null;
 // 迁移旧版开发地址：新自包含包内置引擎在 4317，旧的 4320 外部地址只会让 Studio 连错。
 try {
   const savedEngine = localStorage.getItem("loom.engineUrl");
@@ -154,64 +152,24 @@ function setConn(el, state, title) {
   el.dataset.state = state;
   el.title = title || "";
 }
-
-/** EnvState 灯态 → 顶栏四灯样式（ok/busy/bad/mock/off）。 */
-function connStateOf(light, mock) {
-  if (mock) return "mock";
-  switch (light?.state) {
-    case "ready": return "ok";
-    case "starting":
-    case "checking": return "busy";
-    case "needs_action":
-    case "error": return "bad";
-    default: return "off";
-  }
-}
-
-const ENV_CONNS = [
-  ["engine", "connEngine", "织机"],
-  ["paper", "connPaper", "Paper"],
-  ["bot", "connBot", "织偶"],
-  ["client", "connClient", "客户端"],
-];
-
-/** 应用 EnvState：壳顶栏四灯 + 把同一份快照转发给 iframe（L0 卡片消费）。 */
-function applyEnv(env) {
-  if (!env || typeof env !== "object") return;
-  envState = env;
-  const mock = !!env.mock;
-  for (const [kind, elKey, label] of ENV_CONNS) {
-    const light = env[kind] || {};
-    const detail = light.detail || light.state || "检测中";
-    const hint = light.hint ? `（${light.hint}）` : "";
-    setConn(els[elKey], connStateOf(light, mock), `${label}：${detail}${hint}`);
-  }
+async function refreshStatus() {
+  let health = null;
   try {
-    els.iframe?.contentWindow?.postMessage({ type: "loom:env", env }, "*");
-  } catch { /* iframe not ready */ }
-}
-
-/** 只读最近快照（env_state 不触发探测）；旧壳回退 env_refresh。 */
-async function refreshEnv() {
-  try {
-    applyEnv(await invoke("env_state"));
-  } catch {
-    try { applyEnv(await invoke("env_refresh")); } catch { /* 壳还在启动 */ }
-  }
-}
-
-/** L0「进入工坊」门控原因（docs/57 §2.5）。 */
-function envBlockReason(env) {
-  if (!env) return "正在读取四灯状态……";
-  if (env.versionBlocked) {
-    const server = env.serverVersion ? `服务端 ${env.serverVersion}` : "服务端版本未知";
-    const client = env.clientVersion ? `客户端 ${env.clientVersion}` : "客户端未运行";
-    return `版本不匹配：${client} / ${server}；需要 26.1.2（协议 775）`;
-  }
-  if (env.allReady) return "四盏灯都亮了。";
-  const names = { engine: "织机", paper: "世界服务端", bot: "织偶", client: "《我的世界》" };
-  const missing = ENV_CONNS.map(([kind]) => kind).filter((kind) => env[kind]?.state !== "ready").map((kind) => names[kind]);
-  return `还差：${missing.join("、")}${Array.isArray(env.launching) && env.launching.length ? "（正在启动…）" : ""}`;
+    const base = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
+    const response = await fetch(base + "/api/health", { signal: AbortSignal.timeout(1800) });
+    health = await response.json();
+  } catch { /* engine offline */ }
+  const engineOk = !!health?.ok;
+  const isMock = health?.port === "mock";
+  const paperOk = !isMock && health?.mc?.kind === "paper" && health?.mc?.connected === true;
+  const botOk = !isMock && health?.bot?.connected === true;
+  setConn(els.connEngine, engineOk ? "ok" : "off", engineOk ? "织机已连接" : "织机未连接");
+  setConn(els.connPaper, isMock ? "mock" : paperOk ? "ok" : "bad", isMock ? "Mock 试玩：未连接 Paper" : paperOk ? "Paper 26.1.2 已连接" : "Paper / 插件未连接");
+  setConn(els.connBot, isMock ? "mock" : botOk ? "ok" : "bad", isMock ? "Mock 试玩：没有真实织偶" : botOk ? "mineflayer 织偶已进服" : "mineflayer 织偶未连接");
+  let clientOk = false;
+  try { clientOk = !!(await invoke("client_running")); } catch { /* old shell */ }
+  setConn(els.connClient, clientOk ? "ok" : "off", clientOk ? "我的世界客户端正在运行" : "我的世界客户端未检测到");
+  try { els.iframe.contentWindow?.postMessage({ type: "loom:conn", client: clientOk }, "*"); } catch { /* ignore */ }
 }
 
 els.pin.addEventListener("click", async () => {
@@ -285,17 +243,6 @@ els.openLogs.addEventListener("click", async () => {
   }
 });
 
-/** iframe → 壳 IPC 白名单：Studio / wizard / companion 允许转发的 Tauri 命令（task-20 加 client_prepare）。 */
-const BRIDGE_COMMANDS = new Set([
-  "env_state", "env_refresh", "env_autostart", "env_start", "env_retry", "env_cancel",
-  "client_prepare", "launch_client", "restart_client_and_reconnect",
-  "open_launcher_download", "open_logs",
-  "get_settings", "save_settings", "set_pin", "toggle_pin", "set_mode",
-  "client_running", "env_probe", "runtime_status", "engine_ready", "show_main_window",
-  "window_state", "window_restore_main", "window_toggle_fullscreen", "window_toggle_maximize",
-  "window_minimize", "window_start_drag", "window_close", "snap_half",
-]);
-
 window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data !== "object") return;
@@ -303,12 +250,7 @@ window.addEventListener("message", event => {
     // iframe 里没有 window.__TAURI__（Tauri 只注入主 frame），由壳代发命令。
     const source = event.source;
     if (!source || typeof source.postMessage !== "function") return;
-    const command = String(data.command || "");
-    if (!BRIDGE_COMMANDS.has(command)) {
-      source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: `命令不在白名单：${command}` }, "*");
-      return;
-    }
-    invoke(command, data.args).then(
+    invoke(data.command, data.args).then(
       result => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: true, result }, "*"),
       error => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: String(error) }, "*"),
     );
@@ -316,11 +258,6 @@ window.addEventListener("message", event => {
   }
   if (data.type === "loom:navigate") {
     const page = data.page === "workbench" ? "workbench" : data.page;
-    // docs/57 §2.5：四灯未全绿 / 版本不匹配时，任何来源的「进入工坊」都拒绝并说明原因。
-    if (page === "workbench" && envState && (envState.allReady !== true || envState.versionBlocked === true)) {
-      toast(envBlockReason(envState));
-      return;
-    }
     // 伴玩里点「返回工作台」必须先把窗口尺寸恢复，否则 1280 宽的工作台会被塞进 420 小窗。
     if (page === "workbench" && settings.mode === "companion") {
       void invoke("set_mode", { mode: "workbench" }).then(() => {
@@ -335,12 +272,11 @@ window.addEventListener("message", event => {
   if (data.type === "loom:toast" && data.text) toast(String(data.text));
 });
 
-window.addEventListener("loom:status", () => void refreshEnv());
+window.addEventListener("loom:status", refreshStatus);
 
 applyTauriEvents();
 async function applyTauriEvents() {
   if (!tauri?.event) return;
-  await tauri.event.listen("loom://env", event => applyEnv(event.payload));
   await tauri.event.listen("loom://pin", event => {
     settings.alwaysOnTop = !!event.payload;
     renderPin();
@@ -355,12 +291,9 @@ async function applyTauriEvents() {
 await loadSettings();
 document.getElementById("boot-splash")?.classList.add("is-hidden");
 try { await invoke("show_main_window"); } catch { /* old shell */ }
-// 同一状态源：Rust 事件 + 每 2s 只读快照兜底（env_state 不触发探测，不形成第二数据源）。
-void refreshEnv();
-setInterval(() => {
-  if (!document.hidden) void refreshEnv();
-}, 2000);
-window.__loomShell = { show, toast, getEnv: () => envState, envBlockReason };
+void refreshStatus();
+setInterval(refreshStatus, 8000);
+window.__loomShell = { show, toast };
 
 /* ---- T9：自绘标题栏窗口控制（Rust 命令）+ 原生行为收口 ---- */
 const winBar = document.getElementById("loom-bar");
@@ -445,7 +378,5 @@ function guardFrame() {
 els.iframe.addEventListener("load", () => {
   applyUiScale();
   guardFrame();
-  // iframe 重载后上一份 loom:env 会丢：刷新一次并把最近的 EnvState 立即补发。
-  void refreshEnv().then(() => { if (envState) applyEnv(envState); });
 });
 guardFrame();

@@ -7,397 +7,184 @@
   @import url("./studio/fonts/misans/MiSansVF.min.css");
   @font-face { font-family:"Departure Mono"; src:url("./studio/fonts/DepartureMono-Regular.woff2") format("woff2"); font-display:swap; }
   @font-face { font-family:"Zpix"; src:url("./studio/fonts/zpix.woff2") format("woff2"); font-display:swap; }
-  :root {
-    --bg:#16110c; --panel:#221a12; --line:#4a3826; --warm:#d6a85c; --warm2:#f5cd80;
-    --text:#f1e5cd; --muted:#b8a488; --ok:#9fce8a; --bad:#e08a7a;
-    --font-pixel:"Departure Mono","Zpix",ui-monospace,monospace;
-    --font-body:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif;
-  }
-  * { box-sizing:border-box; border-radius:0; }
-  html, body { height:100%; }
-  body {
-    margin:0; overflow:hidden; background:
+  :root { --bg:#16110c; --panel:#221a12; --line:#4a3826; --warm:#d6a85c; --warm2:#f5cd80; --text:#f1e5cd; --muted:#b8a488; --ok:#9fce8a; --bad:#e08a7a; }
+  * { box-sizing:border-box; border-radius:0 !important; }
+  body { margin:0; min-height:100%; background:
       radial-gradient(1000px 380px at 50% -80px, rgba(214,168,92,0.18), transparent 70%), var(--bg);
-    color:var(--text); font-family:var(--font-body); font-size:14px; line-height:1.6;
-    display:flex; justify-content:center;
-  }
-  /* 高度链用 %/flex（壳会对 iframe 做 CSS zoom，100vh 会被二次缩放）。 */
-  .wrap {
-    width:min(2400px,100%); height:100%; display:flex; flex-direction:column;
-    padding:clamp(14px,2vh,30px) clamp(18px,2.4vw,48px) clamp(12px,1.8vh,26px);
-    gap:clamp(8px,1.2vh,18px);
-  }
-  .hero { flex:0 0 auto; display:flex; align-items:flex-end; justify-content:space-between; gap:clamp(16px,2vw,40px); }
-  .hero-main { min-width:0; }
-  .hero-status { flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end; gap:2px; text-align:right; padding-bottom:4px; }
-  #env-tag { margin:0; font-family:var(--font-pixel); font-size:clamp(12px,1vw,17px); letter-spacing:.12em; color:var(--warm2); }
-  #env-tag[data-state="ready"] { color:var(--ok); }
-  #env-tag[data-state="blocked"] { color:var(--bad); }
-  #env-count { margin:0; color:var(--muted); font-size:clamp(10px,.8vw,13px); }
-  .loom-wordmark {
-    font-family:var(--font-pixel); font-size:clamp(38px,4.2vw,84px); line-height:1;
-    letter-spacing:clamp(6px,.7vw,14px); color:var(--warm2); margin:0 0 2px;
-  }
-  .loom-wordmark-en { font-family:var(--font-pixel); color:var(--muted); font-size:clamp(9px,.75vw,12px); letter-spacing:.5em; margin:0 0 clamp(6px,.9vh,16px); }
-  h1 { font-family:var(--font-pixel); font-size:clamp(19px,1.5vw,30px); letter-spacing:2px; color:var(--warm2); margin:0 0 6px; font-weight:600; }
-  .sub { color:var(--muted); font-size:clamp(12px,.95vw,16px); line-height:1.8; margin:0; max-width:82ch; }
-
-  /* 四卡 2×2：原视觉（面板/描边/像素字标题），卡内多一个统一的小状态/动作按钮。 */
-  .grid {
-    flex:1 1 auto; min-height:0; display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr));
-    gap:clamp(10px,1.1vw,20px);
-  }
-  .card {
-    min-width:0; min-height:0; display:flex; flex-direction:column; gap:clamp(4px,.6vh,8px);
-    background:var(--panel); border:1px solid var(--line); padding:clamp(12px,1.4vw,24px);
-  }
-  .card-action {
-    align-self:flex-start; flex:0 0 auto; font-family:var(--font-body); cursor:pointer;
-    font-size:clamp(11px,.85vw,14px); line-height:1.2; padding:clamp(2px,.5vh,5px) clamp(8px,.9vw,14px);
-    border:1px solid var(--line); background:transparent; color:var(--muted);
-  }
-  .card-action:hover:not(:disabled) { border-color:var(--warm); color:var(--warm2); background:#2b2117; }
-  .card-action:disabled { cursor:default; }
-  .card-action[data-tone="ready"] { color:#1d2a16; background:var(--ok); border-color:var(--ok); opacity:1; }
-  .card-action[data-tone="blocked"] { color:#ffd9cf; border-color:var(--bad); background:#3a1f19; }
-  .card-action[data-tone="checking"], .card-action[data-tone="starting"] { color:var(--warm2); border-color:#6b5638; opacity:.85; }
-  .card h2 { font-family:var(--font-pixel); margin:0; font-size:clamp(14px,1.1vw,22px); color:var(--warm); letter-spacing:1px; }
-  /* 卡内正文块：在剩余高度里垂直居中（标题靠上、状态按钮靠上，正文居中、hint 紧随），
-     不同卡片高度下视觉重量一致，也不会把一行字顶在卡片最上方。 */
-  .card-body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:clamp(3px,.5vh,8px); overflow-y:auto; scrollbar-width:thin; }
-  .detail {
-    margin:0; font-size:clamp(12px,.95vw,17px); color:var(--muted); line-height:1.7; overflow-wrap:anywhere;
-  }
-  .hint { margin:0; font-size:clamp(11px,.82vw,14px); color:var(--muted); line-height:1.55; opacity:.9; }
-  .hint:empty { display:none; }
-
-  /* 唯一主 CTA：居中、明显大于卡内控件；未全绿禁用并显示原因。 */
-  .enter { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:clamp(3px,.6vh,8px); padding:clamp(2px,.5vh,6px) 0; }
-  #btn-enter {
-    min-width:min(480px,100%); font-family:var(--font-pixel); font-weight:600; cursor:pointer;
-    font-size:clamp(20px,1.85vw,34px); letter-spacing:.22em; line-height:1.15;
-    padding:clamp(12px,1.6vh,22px) clamp(34px,3.4vw,88px);
-    border:1px solid var(--warm); background:#6b5220; color:#ffe8b8;
-  }
-  #btn-enter:hover:not(:disabled) { background:#7d6127; color:#fff3cc; }
-  #btn-enter:disabled { opacity:.45; cursor:default; }
-  .enter-reason { margin:0; min-height:1.4em; text-align:center; color:var(--muted); font-size:clamp(11px,.9vw,15px); }
-  .enter-reason[data-tone="blocked"] { color:var(--bad); }
-  .enter-reason[data-tone="ready"] { color:var(--ok); }
-  .log { flex:0 0 auto; margin:0; min-height:1.2em; color:var(--muted); font-size:clamp(11px,.85vw,13px); white-space:pre-wrap; }
-  .log:empty { display:none; }
-
-  /* 页脚：怎么开始 / 高级设置（保留原 tip 视觉，收进 details 以免下半屏空白）。 */
-  .foot { flex:0 0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(8px,1vw,16px); align-items:start; }
-  .tip { border:2px solid var(--line); border-left:3px solid var(--warm); background:#17120e; color:var(--muted); }
-  .tip .tip-title {
-    display:block; cursor:pointer; list-style:none; margin:0;
-    font-family:var(--font-pixel); color:var(--warm2); font-size:clamp(12px,1vw,16px); letter-spacing:3px;
-    padding:clamp(5px,.9vh,10px) clamp(10px,1.2vw,16px);
-  }
-  .tip .tip-title::-webkit-details-marker { display:none; }
-  .tip .tip-title::before { content:"▸ "; color:var(--warm); }
-  .tip[open] .tip-title::before { content:"▾ "; }
-  .tip-list { margin:0; padding:0 clamp(10px,1.2vw,16px) clamp(8px,1.2vh,13px); list-style:none; display:flex; flex-direction:column; gap:clamp(3px,.5vh,7px); }
-  .tip-list li { position:relative; padding-left:14px; font-size:clamp(11px,.85vw,13px); line-height:1.7; }
-  .tip-list li::before { content:""; position:absolute; left:0; top:.7em; width:5px; height:5px; background:var(--warm); }
+    color:var(--text); font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif;
+    display:flex; justify-content:center; padding:34px 28px 28px; }
+  .wrap { width:min(860px,100%); }
+  h1 { font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:26px; letter-spacing:4px; color:var(--warm2); margin:0 0 6px; font-weight:600; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:22px; line-height:1.8; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card h2 { font-family:"Departure Mono","Zpix",ui-monospace,monospace; margin:0 0 6px; font-size:14px; color:var(--warm); letter-spacing:1px; }
+  .detail { font-size:12px; color:var(--muted); line-height:1.7; min-height:34px; }
+  .pill { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); margin-bottom:6px; }
+  .pill.ok { color:#1d2a16; background:var(--ok); border-color:var(--ok); }
+  .pill.bad { color:#2a1512; background:var(--bad); border-color:var(--bad); }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+  button { font-family:"Departure Mono","Zpix",ui-monospace,monospace; font-size:13px; padding:8px 16px; border-radius:7px; border:1px solid var(--line);
+    background:#2b2117; color:var(--text); cursor:pointer; }
+  button:hover { border-color:var(--warm); color:var(--warm2); }
+  button.primary { background:linear-gradient(180deg,#7a5a2e,#5c421f); border-color:var(--warm); color:#ffe8b8; }
+  button:disabled { opacity:.45; cursor:default; }
+  .tip { margin-top:22px; border:2px solid var(--line); border-left:3px solid var(--warm); padding:12px 16px 14px; background:#17120e; color:var(--muted); font-size:12px; line-height:1.85; }
+  .tip-title { font-family:"Departure Mono","Zpix",ui-monospace,monospace; color:var(--warm2); font-size:16px; letter-spacing:3px; margin:0 0 10px; }
+  .tip-list { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .tip-list li { position:relative; padding-left:16px; }
+  .tip-list li::before { content:""; position:absolute; left:0; top:8px; width:6px; height:6px; background:var(--warm); }
   .tip-list strong { color:var(--text); font-weight:600; }
-  .engine-mode { margin:0; padding:0 clamp(10px,1.2vw,16px) clamp(8px,1.2vh,13px); }
-  .engine-mode label { display:block; margin:0 0 8px; color:#d8c8a8; font-size:clamp(11px,.85vw,13px); line-height:1.6; }
+  .log { margin-top:16px; font-size:12px; color:var(--muted); white-space:pre-wrap; min-height:18px; }
+  .loom-wordmark {
+    font-family:"Departure Mono","Zpix",ui-monospace,monospace;
+    font-size:76px; line-height:1; letter-spacing:12px; color:var(--warm2);
+    margin:0 0 4px; image-rendering:pixelated; text-shadow:none;
+  }
+  .loom-wordmark-en {
+    font-family:"Departure Mono","Zpix",ui-monospace,monospace;
+    color:var(--muted); font-size:11px; letter-spacing:6px; margin:0 0 20px;
+  }
+  .engine-mode { margin:28px 0 0; padding:14px 14px 12px; border:2px solid #4a3a24; background:#17120e; }
+  .engine-mode label {
+    display:block; margin:0 0 10px; color:#d8c8a8; font-size:13px; line-height:1.6;
+    font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; letter-spacing:0.4px;
+  }
   .engine-row { display:flex; gap:8px; align-items:stretch; }
   .engine-row input {
-    flex:1; min-width:0; height:clamp(30px,4.2vh,38px); border:1px solid #6b5638; background:#211a12; color:#f0e6d2;
-    padding:0 10px; font-family:var(--font-body); font-size:clamp(12px,.9vw,14px);
+    flex:1; min-width:0; height:38px; border:2px solid #6b5638; background:#211a12; color:#f0e6d2;
+    padding:0 10px; font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; font-size:14px;
   }
   .engine-row button {
-    height:clamp(30px,4.2vh,38px); padding:0 clamp(10px,.9vw,16px); border:1px solid #6b5638; background:#211a12; color:#f0e6d2;
-    font-family:var(--font-body); font-size:clamp(12px,.9vw,14px); cursor:pointer;
+    height:38px; padding:0 12px; border:2px solid #6b5638; background:#211a12; color:#f0e6d2;
+    font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; font-size:13px; line-height:34px;
+    cursor:pointer; box-shadow:none;
   }
   .engine-row button:hover { border-color:var(--warm); color:var(--warm2); background:#2b2117; }
-
-  /* 响应式：窄屏/矮窗单列滚动；宽屏用流体字号避免“固定小盒”。 */
-  @media (max-width: 1100px), (max-height: 760px) {
-    body { overflow:auto; justify-content:stretch; }
-    .wrap { height:auto; min-height:100%; max-width:none; }
-    .grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; grid-auto-rows:minmax(150px,auto); }
-    .foot { grid-template-columns:1fr; }
-  }
-  @media (max-width: 760px) {
-    .grid { grid-template-columns:1fr; }
-    #btn-enter { width:100%; min-width:0; }
-  }
-  @media (max-height: 840px) {
-    .loom-wordmark { font-size:clamp(32px,3.2vw,56px); }
-    .sub { display:none; }
-  }
+  .sub, .detail, .log, .tip, .pill, button, input { font-family:"MiSans VF","MiSans","Noto Sans SC",system-ui,sans-serif; }
+  /* 与 Studio 一致：全部直角、去渐变塑料感 */
+  * { border-radius:0 !important; }
+  button.primary { background:#6b5220 !important; }
+  .speech, .tip { border-radius:0 !important; }
+  .log, .card { border-radius:0 !important; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="hero">
-    <div class="hero-main">
-      <div class="loom-wordmark" aria-hidden="true">织界</div>
-      <p class="loom-wordmark-en">THE LOOM</p>
-      <h1>欢迎来到织机旁</h1>
-      <div class="sub">这台织机会在窗口里直接运行你写的符文，并驱动《我的世界》里的灰崽。<br/>先确认四件事，就可以进入工坊。</div>
+  <div class="loom-wordmark" aria-hidden="true">织界</div>
+  <p class="loom-wordmark-en">THE LOOM</p>
+  <h1>欢迎来到织机旁</h1>
+  <div class="sub">这台织机会在窗口里直接运行你写的符文，并驱动《我的世界》里的灰崽。<br/>先确认四件事，就可以进入工坊。</div>
+  <div class="grid">
+    <div class="card"><span class="pill" id="pill-java">检测中</span><h2>运行环境</h2><div class="detail" id="detail-java">正在检测系统运行环境……</div></div>
+    <div class="card"><span class="pill" id="pill-node">检测中</span><h2>织机运行时</h2><div class="detail" id="detail-node">织机以后台进程运行……</div></div>
+    <div class="card"><span class="pill" id="pill-prism">检测中</span><h2>《我的世界》客户端</h2><div class="detail" id="detail-prism">正在检测启动器……</div></div>
+    <div class="card"><span class="pill" id="pill-paper">检测中</span><h2>世界服务端</h2><div class="detail" id="detail-paper">正在检测服务端与插件……</div></div>
+  </div>
+  <div class="engine-mode">
+    <label for="engine-url">真实织机地址（可选；安装包已内置，默认无需填写）</label>
+    <div class="engine-row">
+      <input id="engine-url" type="url" placeholder="默认使用内置织机：127.0.0.1:4317（留空即可）" autocomplete="off" />
+      <button id="btn-save-engine" type="button">保存地址</button>
+      <button id="btn-clear-engine" type="button">恢复内置</button>
     </div>
-    <div class="hero-status">
-      <p id="env-tag">准备中</p>
-      <p id="env-count">0 / 4 就绪</p>
-    </div>
-  </header>
-
-  <main class="grid" aria-label="四灯状态">
-    <section class="card" data-kind="engine">
-      <button class="card-action" type="button" data-kind="engine" disabled>检测中…</button>
-      <h2>织机</h2>
-      <div class="card-body">
-        <p class="detail">织机以后台进程运行，负责执行你写的符文。</p>
-        <p class="hint"></p>
-      </div>
-    </section>
-    <section class="card" data-kind="paper">
-      <button class="card-action" type="button" data-kind="paper" disabled>检测中…</button>
-      <h2>世界服务端</h2>
-      <div class="card-body">
-        <p class="detail">Paper 26.1.2 负责方块、村庄与灯。</p>
-        <p class="hint"></p>
-      </div>
-    </section>
-    <section class="card" data-kind="bot">
-      <button class="card-action" type="button" data-kind="bot" disabled>检测中…</button>
-      <h2>织偶</h2>
-      <div class="card-body">
-        <p class="detail">灰崽会替你跑腿、点灯、放方块。</p>
-        <p class="hint"></p>
-      </div>
-    </section>
-    <section class="card" data-kind="client">
-      <button class="card-action" type="button" data-kind="client" disabled>检测中…</button>
-      <h2>《我的世界》客户端</h2>
-      <div class="card-body">
-        <p class="detail">需要 26.1.2（协议 775）；已运行的兼容客户端会直接复用。</p>
-        <p class="hint"></p>
-      </div>
-    </section>
-  </main>
-
-  <section class="enter">
-    <button id="btn-enter" class="primary" type="button" disabled>进入工坊</button>
-    <p class="enter-reason" id="enter-reason">正在读取四灯状态……</p>
+  </div>
+  <div class="actions">
+    <button id="btn-probe" type="button">重新检测</button>
+    <button id="btn-engine" type="button">启动织机</button>
+    <button id="btn-paper" type="button">启动世界</button>
+    <button id="btn-prism" type="button">启动《我的世界》</button>
+    <button id="btn-enter" class="primary" type="button">进入工坊</button>
+  </div>
+  <div class="log" id="log"></div>
+  <section class="tip">
+    <h2 class="tip-title">怎么开始</h2>
+    <ul class="tip-list">
+      <li><strong>窗口</strong>：把《我的世界》设为「无边框窗口」或窗口化全屏，别用独占全屏。</li>
+      <li><strong>置顶</strong>：织界可点「置顶」，或按控制键、上档键和 L 保持可见。</li>
+      <li><strong>切回工坊</strong>：在 Minecraft 里按 Alt+Z：先松开游戏鼠标（游戏会打开暂停菜单），再切回工坊；再按一次回到游戏。</li>
+      <li><strong>伴玩</strong>：打开后变成 420×620 小窗，只留目标、艾拉的一句话和运行按钮。</li>
+      <li><strong>并排</strong>：代码窗口和 Minecraft 各占一边，就能一边看效果一边改下一句。</li>
+    </ul>
   </section>
-
-  <p class="log" id="log" role="status"></p>
-
-  <footer class="foot">
-    <details class="tip">
-      <summary class="tip-title">怎么开始</summary>
-      <ul class="tip-list">
-        <li><strong>窗口</strong>：把《我的世界》设为「无边框窗口」或窗口化全屏，别用独占全屏。</li>
-        <li><strong>置顶</strong>：织界可点「置顶」，或按控制键、上档键和 L 保持可见。</li>
-        <li><strong>切回工坊</strong>：在 Minecraft 里按 Alt+Z：先松开游戏鼠标（游戏会打开暂停菜单），再切回工坊；再按一次回到游戏。</li>
-        <li><strong>伴玩</strong>：打开后变成 420×620 小窗，只留目标、艾拉的一句话和运行按钮。</li>
-        <li><strong>并排</strong>：代码窗口和 Minecraft 各占一边，就能一边看效果一边改下一句。</li>
-      </ul>
-    </details>
-    <details class="tip">
-      <summary class="tip-title">高级：真实织机地址</summary>
-      <div class="engine-mode">
-        <label for="engine-url">真实织机地址（可选；安装包已内置，默认无需填写）</label>
-        <div class="engine-row">
-          <input id="engine-url" type="url" placeholder="默认使用内置织机：127.0.0.1:4317（留空即可）" autocomplete="off" />
-          <button id="btn-save-engine" type="button">保存地址</button>
-          <button id="btn-clear-engine" type="button">恢复内置</button>
-        </div>
-      </div>
-    </details>
-  </footer>
 </div>
-
 <script type="module">
 let seq = 0;
 const pending = new Map();
-const $ = (id) => document.getElementById(id);
-const KINDS = ["engine", "paper", "bot", "client"];
-const LIGHT_NAMES = { engine: "织机", paper: "世界服务端", bot: "织偶", client: "《我的世界》" };
-const STARTING_LABEL = { engine: "正在启动织机…", paper: "正在启动世界…", bot: "正在启动织偶…", client: "正在启动客户端…" };
-const cardEls = {};
-for (const kind of KINDS) {
-  const card = document.querySelector(`.card[data-kind="${kind}"]`);
-  const detail = card.querySelector(".detail");
-  cardEls[kind] = { card, button: card.querySelector(".card-action"), detail, hint: card.querySelector(".hint"), fallback: detail.textContent };
-}
-
-let env = null;
-let toastTimer = null;
-
-window.addEventListener("message", (event) => {
+window.addEventListener("message", event => {
   const data = event.data;
-  if (!data || typeof data !== "object") return;
-  if (data.type === "loom:invoke-result" && pending.has(data.id)) {
-    const entry = pending.get(data.id);
-    pending.delete(data.id);
-    if (data.ok) entry.resolve(data.result);
-    else entry.reject(new Error(data.error));
-    return;
-  }
-  if (data.type === "loom:env" && data.env) render(data.env);
+  if (!data || data.type !== "loom:invoke-result" || !pending.has(data.id)) return;
+  const entry = pending.get(data.id);
+  pending.delete(data.id);
+  if (data.ok) entry.resolve(data.result);
+  else entry.reject(new Error(data.error));
 });
-
-function invoke(command, args) {
-  const tauri = window.__TAURI__;
-  if (tauri?.core?.invoke) return tauri.core.invoke(command, args);
-  // iframe 内经壳代理 Tauri IPC。
+const invoke = (command, args) => {
+  const t = window.__TAURI__;
+  if (t?.core?.invoke) return t.core.invoke(command, args);
+  // 作为 iframe 运行时，经由壳页面代理 Tauri IPC。
   const id = ++seq;
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    try { parent.postMessage({ type: "loom:invoke", id, command, args }, "*"); }
-    catch (error) { pending.delete(id); reject(error); }
+    try {
+      parent.postMessage({ type: "loom:invoke", id, command, args }, "*");
+    } catch (error) {
+      pending.delete(id);
+      reject(error);
+    }
   });
-}
-
-function log(text) { $("log").textContent = text || ""; }
-function toast(text) {
-  log(text);
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { if ($("log").textContent === text) log(""); }, 4000);
-}
-
-/**
- * 唯一的「EnvState 灯态 → 卡内小按钮」规则（四卡共用，文案只来自 EnvState）：
- *   checking → 检测中…（禁用）；starting/launching → 正在启动…（禁用）；ready → 已就绪（禁用）；
- *   needs_action/error → 重新启动（可点）；客户端：准备 26.1.2 / 启动 26.1.2 / 重新启动客户端 / 去安装启动器。
- */
-function actionFor(light, kind, launching, state) {
-  const env = state || {};
-  const isChecking = !state; // 还没拿到 EnvState
-  if (isChecking || light?.state === "checking") return { label: "检测中…", disabled: true, tone: "checking" };
-  if (light?.state === "starting" || (Array.isArray(launching) && launching.includes(kind))) {
-    return { label: STARTING_LABEL[kind] || "正在启动…", disabled: true, tone: "starting" };
-  }
-  if (light?.state === "ready") return { label: "已就绪", disabled: true, tone: "ready" };
-  if (kind === "client") {
-    // task-20：本机已有 26.1.2（clientInstallDir）或需准备（clientPrepareAvailable）时，
-    // 统一走 client_prepare：有资产=采用本机 26.1.2；无资产=打开官方下载页并给诊断。
-    if (env.clientPrepareAvailable === true || env.clientInstallDir) {
-      return { label: "准备 26.1.2", disabled: false, tone: "blocked", action: "prepare" };
-    }
-    if (light?.guide && !light?.canStart && !light?.canRetry) {
-      return { label: "去安装启动器", disabled: false, tone: "blocked", action: "guide", guide: light.guide };
-    }
-    if (light?.canRetry || light?.state === "error") return { label: "重新启动客户端", disabled: false, tone: "blocked", action: "start" };
-    return { label: "启动 26.1.2", disabled: false, tone: "blocked", action: "start" };
-  }
-  return { label: "重新启动", disabled: false, tone: "blocked", action: "start" };
-}
-
-function enterBlockReason(state) {
-  if (!state) return "正在读取四灯状态……";
-  if (state.versionBlocked) {
-    const client = state.clientVersion ? `客户端 ${state.clientVersion}` : "客户端未运行";
-    const server = state.serverVersion ? `服务端 ${state.serverVersion}` : "服务端版本未知";
-    return `版本不匹配：${client} / ${server}；需要 26.1.2（协议 775）`;
-  }
-  if (state.allReady) return "四盏灯都亮了。";
-  const missing = KINDS.filter((kind) => state[kind]?.state !== "ready").map((kind) => LIGHT_NAMES[kind]);
-  return `还差：${missing.join("、")}${Array.isArray(state.launching) && state.launching.length ? "（正在启动…）" : ""}`;
-}
-
-function render(next) {
-  if (!next || typeof next !== "object") return;
-  env = next;
-  const launching = Array.isArray(next.launching) ? next.launching : [];
-  for (const kind of KINDS) {
-    const light = next[kind] || {};
-    const view = cardEls[kind];
-    if (!view) continue;
-    const action = actionFor(light, kind, launching, next);
-    const button = view.button;
-    button.textContent = action.label;
-    button.disabled = !!action.disabled;
-    button.dataset.tone = action.tone;
-    button.dataset.action = action.action || "";
-    button.dataset.guide = action.guide || "";
-    let hint = light.hint || "";
-    // task-20：本机已有 26.1.2 资产时把 installDir 消费到提示/悬浮 title（有 Rust hint 时不重复）。
-    if (kind === "client" && light.state !== "ready" && next.clientInstallDir && !hint) {
-      hint = "本机已检测到 26.1.2 客户端，可一键准备。";
-    }
-    view.detail.textContent = light.detail || view.fallback;
-    view.hint.textContent = hint;
-    button.title = [light.detail, hint, next.clientInstallDir && kind === "client" ? `安装目录：${next.clientInstallDir}` : ""]
-      .filter(Boolean).join(" · ") || action.label;
-  }
-  const blocked = next.versionBlocked === true;
-  const ready = next.allReady === true && !blocked;
-  $("btn-enter").disabled = !ready;
-  const reason = $("enter-reason");
-  reason.textContent = enterBlockReason(next);
-  reason.dataset.tone = ready ? "ready" : blocked ? "blocked" : "waiting";
-  const readyCount = KINDS.filter((kind) => next[kind]?.state === "ready").length;
-  $("env-count").textContent = `${readyCount} / 4 就绪`;
-  const tag = $("env-tag");
-  tag.textContent = blocked ? "版本不匹配" : ready ? "四灯就绪" : next.mock ? "本地演示" : "准备中";
-  tag.dataset.state = ready ? "ready" : blocked ? "blocked" : "waiting";
-}
-
-async function pull() {
-  try { render(await invoke("env_state")); } catch { /* 壳还没就绪，等 loom:env 事件 */ }
-}
-
-async function runCardAction(kind, button) {
-  if (!button.dataset.action) return;
-  try {
-    if (button.dataset.action === "prepare") {
-      const status = await invoke("client_prepare");
-      toast(status?.detail || "已处理 26.1.2 准备。");
-    } else if (button.dataset.action === "guide") {
-      const status = await invoke("open_launcher_download", { kind: button.dataset.guide || "install" });
-      toast(status?.detail || "已打开下载页");
-    } else {
-      const status = await invoke("env_retry", { kind }).catch(() => invoke("env_start", { kind }));
-      toast(status?.detail || STARTING_LABEL[kind] || "已开始启动…");
-    }
-  } catch (error) {
-    toast("操作失败：" + error);
-  }
-  setTimeout(() => void pull(), 400);
-}
-
-for (const kind of KINDS) {
-  cardEls[kind]?.button.addEventListener("click", () => void runCardAction(kind, cardEls[kind].button));
-}
-
-$("btn-enter").addEventListener("click", () => {
-  if (!env?.allReady || env.versionBlocked) { toast(enterBlockReason(env)); return; }
-  try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); }
-  catch { location.href = "./studio/index.html"; }
-});
-
+};
+const $ = id => document.getElementById(id);
 try {
   const saved = localStorage.getItem("loom.engineUrl") || "";
   $("engine-url").value = /^http:\/\/127\.0\.0\.1:4320\/?$/.test(saved) ? "" : saved;
   if (!saved || /^http:\/\/127\.0\.0\.1:4320\/?$/.test(saved)) localStorage.removeItem("loom.engineUrl");
 } catch { /* ignore */ }
-$("btn-save-engine").addEventListener("click", () => {
+$("btn-save-engine").onclick = () => {
   const value = $("engine-url").value.trim().replace(/\/$/, "");
   try { localStorage.setItem("loom.engineUrl", value); } catch { /* ignore */ }
-  toast(value ? "已保存真实织机地址；进入工坊后会连接它。请确认外部引擎与 Paper 已启动。" : "已恢复内置 Mock 织机。");
-});
-$("btn-clear-engine").addEventListener("click", () => {
+  log(value ? "已保存真实织机地址；进入工坊后会连接它。请确认外部引擎与 Paper 已启动。" : "已恢复内置 Mock 织机。");
+};
+$("btn-clear-engine").onclick = () => {
   $("engine-url").value = "";
   try { localStorage.removeItem("loom.engineUrl"); } catch { /* ignore */ }
-  toast("已恢复内置 Mock 织机。");
-});
+  log("已恢复内置 Mock 织机。");
+};
+const setPill = (id, probe) => {
+  const pill = $("pill-" + id); const detail = $("detail-" + id);
+  pill.className = "pill " + (probe.ok ? "ok" : probe.ok === false ? "bad" : "");
+  pill.textContent = probe.ok ? "就绪" : probe.ok === false ? "需要处理" : "检测中";
+  detail.textContent = probe.detail || "";
+};
+const log = text => { $("log").textContent = text; };
 
-async function boot() {
-  try { await invoke("env_autostart"); } catch { /* 旧壳无自动准备 */ }
-  await pull();
-  // 只读同一份 EnvState 快照兜底（不触发探测、不是第二数据源）。
-  setInterval(() => { if (!document.hidden) void pull(); }, 2000);
+async function probe() {
+  log("正在检测本机环境…");
+  try {
+    const report = await invoke("env_probe");
+    setPill("java", report.java); setPill("node", report.node); setPill("prism", report.prism); setPill("paper", report.paper);
+    log([report.java, report.node, report.prism, report.paper].filter(p => !p.ok).map(p => "· " + p.detail).join("\n") || "四个步骤都就绪了。");
+  } catch (error) { log("# 检测失败：" + error); }
 }
-void boot();
+
+$("btn-probe").onclick = () => void probe();
+$("btn-engine").onclick = async () => {
+  log("正在启动织机……");
+  try { const r = await invoke("start_engine"); log(r.detail); } catch (e) { log("# 启动织机失败：" + e); }
+};
+$("btn-paper").onclick = async () => {
+  log("正在启动世界服务端（首次启动约十到二十秒）……");
+  try { const r = await invoke("start_paper"); log(r.detail); } catch (e) { log("# 启动世界失败：" + e); }
+};
+$("btn-prism").onclick = async () => {
+  log("正在启动《我的世界》启动器……");
+  try { const r = await invoke("launch_prism"); log(r.detail); } catch (e) { log("# 启动《我的世界》失败：" + e); }
+};
+$("btn-enter").onclick = () => {
+  try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); } catch { location.href = "./studio/index.html"; }
+};
+void probe();
+setInterval(() => void probe(), 8000);
 </script>
 </body>
 </html>
