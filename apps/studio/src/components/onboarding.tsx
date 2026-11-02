@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { acts, buttons, chrome, fill, journal, journalLabels, levelCopy, prologue, rules, unlockedTerms } from "../copy";
 import { ConceptRevealCard } from "./ConceptRevealCard";
 import type { StudioProgress } from "../progress";
-import { RichText } from "./RichText";
 import { JustifiedText } from "./JustifiedText";
 
 const CHINESE_INDEX = ["一", "二", "三"];
@@ -325,7 +324,7 @@ export function ActIntroOverlay({ act, mode, onDone }: ActIntroProps) {
           <StageBackdrop variant={act * 2 + index}>
             <div className="stage-lines-text">
               <p>
-                <RichText text={copy.screens[index]} />
+                <JustifiedText text={copy.screens[index]} />
               </p>
             </div>
           </StageBackdrop>

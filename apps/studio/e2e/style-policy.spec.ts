@@ -154,6 +154,33 @@ test("WebKit 降级路径：所有宽度首行占满、末行左对齐", async (
         }
       }
     }
+    if (viewport.width < 1000) {
+      // 幕开场：同样必须走 JustifiedText（首行占满、末行左起）。
+      await page.getByTestId("onboarding-skip").click();
+      await page.getByTestId("level-card-L01").click();
+      await expect(page.getByTestId("act-overlay")).toBeVisible();
+      await expect.poll(() => page.locator('[data-testid="act-overlay"] .justified-text-block').count(), { timeout: 10_000 }).toBeGreaterThan(0);
+      const actRows = await page.locator('[data-testid="act-overlay"] .justified-text-block').evaluateAll((blocks) =>
+        blocks.map((block) => {
+          const width = block.getBoundingClientRect().width;
+          const left = block.getBoundingClientRect().left;
+          return {
+            width,
+            left: block.getBoundingClientRect().left,
+            lines: [...block.querySelectorAll<HTMLElement>(".justified-line")].map((line) => {
+              const rect = line.getBoundingClientRect();
+              return { width: rect.width, left: rect.left, isLast: line.classList.contains("is-last") };
+            }),
+          };
+        }),
+      );
+      for (const row of actRows) {
+        for (const line of row.lines) {
+          if (line.isLast) expect(line.left, "幕开场末行必须左起").toBeCloseTo(row.left, 1);
+          else expect(Math.abs(line.width - row.width), "幕开场非末行未占满").toBeLessThan(2);
+        }
+      }
+    }
     await context.close();
   }
 });
