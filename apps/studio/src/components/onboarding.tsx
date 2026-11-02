@@ -3,6 +3,7 @@ import { acts, buttons, chrome, fill, journal, journalLabels, levelCopy, prologu
 import { ConceptRevealCard } from "./ConceptRevealCard";
 import type { StudioProgress } from "../progress";
 import { RichText } from "./RichText";
+import { JustifiedText } from "./JustifiedText";
 
 const CHINESE_INDEX = ["一", "二", "三"];
 
@@ -261,7 +262,7 @@ export function PrologueOverlay({ mode, onDone }: PrologueProps) {
             <div className="stage-lines-text">
               {screen.lines.map((line) => (
                 <p key={line}>
-                  <RichText text={line} />
+                  <JustifiedText text={line} />
                 </p>
               ))}
             </div>
@@ -388,7 +389,7 @@ export function LevelOpeningOverlay({ levelId, onStart }: LevelOpeningProps) {
                     <span className="opening-label">
                       {[chrome.onboarding.openingLabels.world, chrome.onboarding.openingLabels.task, chrome.onboarding.openingLabels.why][index]}
                     </span>
-                    <RichText text={line} />
+                    <JustifiedText text={line} />
                   </span>
                 </li>
               ))}

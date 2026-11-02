@@ -1677,6 +1677,14 @@ body.desktop-shell code {
 
 /* 2026-11-02 用户口径：像素字好看但不适合长阅读；短 UI/短说明默认像素，
    只有长段正文（narrative/journal/textbook/手册说明等）与代码用非像素字体。 */
+/* WebKitGTK 无法对纯 CJK 行做 justification：按行拆开后逐行补齐（见 JustifiedText.tsx）。 */
+.justified-text-block { display: block; width: 100%; }
+.justified-line { display: block; white-space: nowrap; }
+.justified-line.is-last { white-space: normal; }
+.stage-lines-text p.is-narrow,
+.stage-lines-text .opening-copy.is-narrow,
+.opening-copy.is-narrow { text-align: left; }
+
 body .map-hero-copy p,
 body .hud-note,
 body .repl-hint,

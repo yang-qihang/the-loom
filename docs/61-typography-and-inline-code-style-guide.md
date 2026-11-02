@@ -88,4 +88,5 @@
 - 桌面壳会 `document.documentElement.style.zoom = uiScale`（默认 0.8）；窗口按钮用同 viewBox/同 strokeWidth 的 SVG，统一 14px，禁止用 `— / □ / ✕` 字形凑。
 - 桌面 HTML 可能被 WebKit 缓存：`shell.js` 给 Studio iframe URL 追加 `?v=<timestamp>`，每次启动绕开旧 HTML；仍要求 UI 改动后**重新打包并完全退出旧进程**再启动。
 - 序言/幕/关开场正文：`text-align: justify` + `text-align-last: left`（窄内容/末行必须从左侧换行），并显式 `width:100%`；两段正文共享同一文本盒。e2e 断言文本盒 left/right/width 一致，末行不得右对齐。
+- **WebKitGTK 的纯 CJK justification 不扩展**（实测首行仅到自然宽度）：`JustifiedText.tsx` 用 UA 检测 WebKit，按真实换行拆行并对非末行逐行 letter-spacing 补齐；Chrome 走原生 justify。e2e 用 WebKit UA 触发同一 fallback 路径，断言非末行宽度 = 容器宽度。
 - 验收桌面端时至少做一次「首启序章」；如果本机已有进度，先备份并清理 `~/.local/share/dev.loomcraft.desktop`（Linux）或在测试机 profile 里重置，才能看到序章。
