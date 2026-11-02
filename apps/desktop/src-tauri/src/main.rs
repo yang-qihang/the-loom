@@ -1646,6 +1646,15 @@ fn build_env_state(
         .and_then(|since| *since)
         .map(|started| started.elapsed() >= Duration::from_millis(BOT_STALL_MS))
         .unwrap_or(false);
+    let launch_context = state.build_launch_context(None, None);
+    // task-20：本机是否已有可用 26.1.2 安装（「启动 26.1.2」/「准备 26.1.2」入口）。
+    let existing_install = if !mock && !client_compatible {
+        launcher::find_existing_client_install(&launch_context)
+    } else {
+        None
+    };
+    let client_install_dir = existing_install.as_ref().map(|install| install.dir.display().to_string());
+    let client_prepare_available = !mock && !client_compatible && existing_install.is_none();
     let input = envstate::PollInput {
         engine_health: health.as_ref(),
         paper_port_open,
@@ -1653,6 +1662,7 @@ fn build_env_state(
         client_version: client_version.clone(),
         other_client_version: other_client_version.clone(),
         expected_version: expected,
+        client_install_dir: client_install_dir.clone(),
         launching: &launching,
         errors: &errors,
         client_guide: client_guide.clone(),
@@ -1687,8 +1697,8 @@ fn build_env_state(
         && (client_version_mismatch
             || (health.as_ref().map(|value| value.mc_connected).unwrap_or(false) && !server_compatible));
     let all_ready = engine_ready && paper_ok && bot_ok && client_ok && !client_lost && !version_blocked;
-    let launch_context = state.build_launch_context(None, None);
     let (minecraft_dir, _versions) = launcher::detect_minecraft_dir(&launch_context);
+    let minecraft_dir = client_install_dir.as_ref().map(PathBuf::from).or(minecraft_dir);
     envstate::EnvState {
         engine,
         paper,
@@ -1705,6 +1715,8 @@ fn build_env_state(
         server_version,
         expected_version: expected.to_string(),
         minecraft_dir: minecraft_dir.map(|path| path.display().to_string()),
+        client_install_dir,
+        client_prepare_available,
         version_blocked,
         mock,
         updated_at: envstate::now_millis(),
@@ -2096,6 +2108,58 @@ fn open_launcher_download(kind: String) -> OpStatus {
         OpStatus { ok: true, detail: format!("已打开下载页：{label}（{url}）；安装完成后再回来点「重试」。" ) }
     } else {
         OpStatus { ok: false, detail: format!("打不开浏览器；请手动访问：{url}") }
+    }
+}
+
+/// task-20：「准备 26.1.2」一键入口。
+/// - 本机已有 `versions/26.1.2` → 直接采用（写入设置 `minecraftDir`），返回可立即启动；
+/// - 本机没有 → 打开官方下载页并给明确诊断（不伪造下载、不打包 Mojang 资产）。
+#[tauri::command]
+fn client_prepare(app: tauri::AppHandle) -> OpStatus {
+    let state = app.state::<AppState>();
+    let context = state.build_launch_context(None, None);
+    if let Some(install) = launcher::find_existing_client_install(&context) {
+        let path = install.dir.display().to_string();
+        if let Ok(mut settings) = state.settings.lock() {
+            settings.minecraft_dir = Some(path.clone());
+        }
+        if let Ok(mut game_dir) = state.client_game_dir.lock() {
+            *game_dir = Some(path.clone());
+        }
+        state.save();
+        state.log(
+            "launcher",
+            &format!("一键准备：采用本机 {} 客户端 {path}（来源：{}）", install.version, install.source),
+        );
+        let env = refresh_env(&app);
+        emit_env(&app, &env);
+        return OpStatus {
+            ok: true,
+            detail: format!(
+                "已采用本机《我的世界》{} 客户端：{path}。现在点「启动 {}」即可（内置 Java/离线账号 + quickPlay 25565）。",
+                install.version, install.version
+            ),
+        };
+    }
+    let (url, label) = launcher::download_guide("official");
+    let opened = launcher::open_url(url);
+    let (dir, versions) = launcher::detect_minecraft_dir(&context);
+    let scan = match dir {
+        Some(dir) => format!(
+            "扫描到 {}（现有版本：{}）",
+            dir.display(),
+            if versions.is_empty() { "无".to_string() } else { versions.join(",") }
+        ),
+        None => "没有找到可用的 .minecraft 目录".to_string(),
+    };
+    state.log("launcher", &format!("一键准备：本机未找到 versions/{}；{scan}", launcher::DEFAULT_MC_VERSION));
+    OpStatus {
+        ok: false,
+        detail: format!(
+            "本机没有找到《我的世界》{} 客户端文件（{scan}）。{}（{label}：{url}）；安装 26.1.2 后点重试，或在设置里指定 .minecraft / 设置 LOOM_MINECRAFT_DIR。",
+            launcher::DEFAULT_MC_VERSION,
+            if opened { "已打开官方下载页" } else { "请手动打开官方下载页" }
+        ),
     }
 }
 
@@ -3160,6 +3224,7 @@ fn main() {
             set_game_session,
             clear_game_session,
             open_launcher_download,
+            client_prepare,
             quit_game,
             quit_ack,
             env_cancel,

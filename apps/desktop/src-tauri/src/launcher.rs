@@ -761,21 +761,17 @@ mod win32 {
 /// 启动链总预算：避免 Prism+HMC+direct+官方+PCL2 串行累计 ~7.5 分钟。
 const CLIENT_CHAIN_BUDGET: Duration = Duration::from_secs(150);
 
-/// 完整启动链。`prefer` 用于 L2 一键重启（复用上次成功的适配器）。
-/// 已 spawn 的启动器/直启若窗口超时，会以 `needs_manual` 终止链路，不再继续拉起下一个。
-/// task-18：启动顺序。旧的不兼容客户端（如 1.21.1）在跑时 **direct 优先**
-/// （产品自管 .minecraft/26.1.2），Prism/HMCL 等次之；否则保留 prefer/默认顺序。
-pub fn launch_adapter_order(prefer: Option<&str>, old_incompatible_running: bool) -> Vec<String> {
-    let mut order: Vec<String> = Vec::new();
-    if old_incompatible_running {
-        order.push("direct".to_string());
-    }
+/// task-18/20：启动顺序。旧的不兼容客户端（如 1.21.1）在跑时不杀不阻塞；
+/// **默认第一选择永远是产品自管 26.1.2 直启**（官方 version JSON + 包内 Java + 离线账号 + quickPlay），
+/// 外部启动器（Prism/HMCL/官方/PCL2）只作后备，且启动后仍要过 26.1.x 版本校验。
+pub fn launch_adapter_order(prefer: Option<&str>, _old_incompatible_running: bool) -> Vec<String> {
+    let mut order: Vec<String> = vec!["direct".to_string()];
     if let Some(prefer) = prefer {
-        if matches!(prefer, "prism" | "hmcl" | "direct" | "official" | "pcl2" | "custom") && !order.iter().any(|item| item == prefer) {
+        if prefer != "direct" && matches!(prefer, "prism" | "hmcl" | "official" | "pcl2" | "custom") {
             order.push(prefer.to_string());
         }
     }
-    for adapter in ["prism", "hmcl", "direct", "official", "pcl2"] {
+    for adapter in ["prism", "hmcl", "official", "pcl2"] {
         if !order.iter().any(|item| item == adapter) {
             order.push(adapter.to_string());
         }
@@ -857,9 +853,9 @@ pub fn launch_client(ctx: &LaunchContext) -> LaunchOutcome {
     };
     let hint = match old_note.as_deref() {
         Some(note) => format!(
-            "检测到《我的世界》{note} 仍在运行（织界不会关闭它），但没能自动启动 26.1.2。请确认 .minecraft/versions/26.1.2 存在（可在设置里指定 .minecraft，或设置 LOOM_MINECRAFT_DIR），或先用 Prism/PCL 安装 26.1.2 后重试。"
+            "检测到《我的世界》{note} 仍在运行（织界不会关闭它），但没能自动启动 26.1.2。请确认 .minecraft/versions/26.1.2 存在（可在设置里指定 .minecraft，或设置 LOOM_MINECRAFT_DIR）；也可以点 L0 的「准备 26.1.2」一键采用本机现有客户端或打开官方下载。"
         ),
-        None => "可先安装 Prism Launcher（自动化最稳）或官方启动器，再回到这里点「重试」。也可以手动打开《我的世界》并进入 26.1.2；织界检测到窗口后会自动点亮客户端灯。".to_string(),
+        None => "本机没有找到可用的 26.1.2 客户端路径。点 L0 的「准备 26.1.2」可一键采用本机现有 .minecraft（也可在设置里指定或设置 LOOM_MINECRAFT_DIR）；没有现有资产时会打开官方下载页。安装 26.1.2 后重试即可。".to_string(),
     };
     LaunchOutcome {
         ok: false,
@@ -883,6 +879,12 @@ fn try_adapter(ctx: &LaunchContext, adapter: &str, timeout: Duration) -> Option<
     }
 }
 
+/// task-20：外部启动器（Prism/HMCL/PCL2/官方）的结果只在检测到 26.1.x 时接受；
+/// 版本不匹配或读不到版本一律不接受（不进入游戏/不点亮客户端灯）。
+pub fn external_client_accepted(probe: &ClientProbe, expected: &str) -> bool {
+    probe.running && probe.compatible(expected)
+}
+
 /// task-16 P0：启动器/直启成功检测到客户端后，必须再校验版本；
 /// 1.21.1 等不兼容版本 → manual（明确中文提示），绝不让上层点亮客户端灯。
 fn finish_launch(
@@ -893,11 +895,11 @@ fn finish_launch(
     guide: Option<&str>,
 ) -> LaunchOutcome {
     let probe = client_probe();
+    if external_client_accepted(&probe, &ctx.version) {
+        let found = probe.version.unwrap_or_else(|| ctx.version.clone());
+        return LaunchOutcome::ok(adapter, format!("{ok_detail}（客户端 {found}）"));
+    }
     if probe.running {
-        if probe.compatible(&ctx.version) {
-            let found = probe.version.unwrap_or_else(|| ctx.version.clone());
-            return LaunchOutcome::ok(adapter, format!("{ok_detail}（客户端 {found}）"));
-        }
         let found = probe.version.unwrap_or_else(|| "未知版本".to_string());
         let protocol = protocol_for_version(&found)
             .map(|value| format!("协议 {value} ≠ {EXPECTED_PROTOCOL}"))
@@ -1328,6 +1330,15 @@ fn try_direct(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
     let version_json_path = version_dir.join(format!("{}.json", ctx.version));
     let text = fs::read_to_string(&version_json_path).ok()?;
     let version_json: serde_json::Value = serde_json::from_str(&text).ok()?;
+    // task-20：直启默认路径必须完整；缺少 client jar 时给可操作错误，而不是启动后才 ClassNotFound。
+    let client_jar = version_dir.join(format!("{}.jar", ctx.version));
+    if !client_jar.is_file() {
+        return Some(LaunchOutcome::fail(
+            "direct",
+            format!("找到 versions/{} 但缺少客户端 jar：{}", ctx.version, client_jar.display()),
+            Some("26.1.2 文件不完整：请用「准备 26.1.2」/重装或 PCL/Prism 补齐该版本后重试。".into()),
+        ));
+    }
     let Some(java) = resolve_java(ctx, Some(&mc_dir)) else {
         return Some(LaunchOutcome::fail(
             "direct",
@@ -1463,6 +1474,15 @@ pub fn build_direct_command(version_json: &serde_json::Value, config: &DirectCon
     let arch = host_arch();
     let features = default_features();
     let mut classpath: Vec<String> = Vec::new();
+    // task-20：官方启动器会把 versions/<ver>/<ver>.jar（client jar）放进 classpath；
+    // 只有 libraries 会导致 ClassNotFoundException（product 直启默认路径必须可用）。
+    let client_jar = game_dir
+        .join("versions")
+        .join(&config.version)
+        .join(format!("{}.jar", config.version));
+    if client_jar.is_file() {
+        classpath.push(client_jar.to_string_lossy().to_string());
+    }
     for library in libraries {
         if !library_allowed(library, os, arch, &features) {
             continue;
@@ -1719,6 +1739,8 @@ pub fn minecraft_dir_candidates(ctx: &LaunchContext) -> Vec<PathBuf> {
             roots.push(PathBuf::from(dir));
         }
     }
+    // task-20：产品自管客户端目录（与 ~/.loomcraft/runtime 并列）。
+    roots.push(home_dir().join(".loomcraft").join("minecraft"));
     if let Ok(appdata) = std::env::var("APPDATA") {
         roots.push(Path::new(&appdata).join(".minecraft"));
     }
@@ -1786,6 +1808,37 @@ pub fn pick_minecraft_dir(candidates: &[PathBuf], version: &str) -> Option<PathB
 
 pub fn resolve_minecraft_dir(ctx: &LaunchContext) -> Option<PathBuf> {
     pick_minecraft_dir(&minecraft_dir_candidates(ctx), &ctx.version)
+}
+
+/// task-20：本机已存在的可用客户端安装（「一键准备」直接采用现有资产）。
+#[derive(Clone, Debug)]
+pub struct ExistingClientInstall {
+    pub dir: PathBuf,
+    pub version: String,
+    /// 候选来源（settings/detected-gameDir/product/scan），日志/UI 用。
+    pub source: String,
+}
+
+/// 纯函数：在候选目录里找 `versions/<version>/<version>.json` 存在的安装。
+pub fn find_install_in_dirs(dirs: &[PathBuf], version: &str) -> Option<PathBuf> {
+    dirs.iter()
+        .find(|dir| dir.join("versions").join(version).join(format!("{version}.json")).is_file())
+        .cloned()
+}
+
+pub fn find_existing_client_install(ctx: &LaunchContext) -> Option<ExistingClientInstall> {
+    let candidates = minecraft_dir_candidates(ctx);
+    let dir = find_install_in_dirs(&candidates, &ctx.version)?;
+    let source = if ctx.minecraft_dir.as_ref() == Some(&dir) {
+        "settings".to_string()
+    } else if ctx.extra_minecraft_dirs.iter().any(|extra| extra == &dir) {
+        "detected-gameDir".to_string()
+    } else if dir.to_string_lossy().contains(".loomcraft") {
+        "product".to_string()
+    } else {
+        "scan".to_string()
+    };
+    Some(ExistingClientInstall { dir, version: ctx.version.clone(), source })
 }
 
 /// 给 EnvState/诊断用：实际使用的 .minecraft 路径与可用版本。
@@ -2354,25 +2407,143 @@ mod tests {
 
     #[test]
     fn launch_order_direct_first_when_old_client_running() {
-        // task-18：旧客户端在跑时 direct 必须排第一（产品自管 .minecraft/26.1.2），
-        // 然后才试 prefer/Prism/HMCL；没有旧客户端时保持 prefer 优先。
+        // task-20：产品自管 26.1.2 直启是**默认第一选择**（无论有没有旧客户端在跑）；
+        // 外部启动器（含 prefer 的 prism）排第二/之后，且启动后仍要过版本校验。
         let with_old = launch_adapter_order(Some("prism"), true);
         assert_eq!(with_old.first().map(String::as_str), Some("direct"));
         assert_eq!(with_old.iter().filter(|item| *item == "direct").count(), 1);
-        assert!(with_old.contains(&"prism".to_string()));
+        assert_eq!(with_old.get(1).map(String::as_str), Some("prism"));
 
         let normal = launch_adapter_order(Some("prism"), false);
-        assert_eq!(normal.first().map(String::as_str), Some("prism"));
+        assert_eq!(normal.first().map(String::as_str), Some("direct"), "task-20：默认产品直启优先");
+        assert_eq!(normal.get(1).map(String::as_str), Some("prism"));
         let default_order = launch_adapter_order(None, false);
-        assert_eq!(default_order.first().map(String::as_str), Some("prism"));
+        assert_eq!(default_order.first().map(String::as_str), Some("direct"));
         assert_eq!(default_order.len(), 5);
+        assert_eq!(default_order.iter().filter(|item| *item == "direct").count(), 1);
+    }
+
+    #[test]
+    fn existing_install_detection_requires_version_json() {
+        // task-20 一键准备：只有真的含 versions/26.1.2/26.1.2.json 的目录才算可用安装。
+        let root = std::env::temp_dir().join(format!("loom-task20-install-{}", std::process::id()));
+        let empty = root.join("empty/.minecraft");
+        let install = root.join("product/.minecraft");
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(empty.join("versions/26.1.2")).expect("empty versions");
+        fs::create_dir_all(install.join("versions/26.1.2")).expect("real install");
+        fs::write(install.join("versions/26.1.2/26.1.2.json"), "{}").expect("version json");
+
+        assert_eq!(find_install_in_dirs(&[empty.clone(), install.clone()], "26.1.2"), Some(install.clone()));
+        assert_eq!(find_install_in_dirs(&[empty], "26.1.2"), None);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn external_launchers_accept_only_26_1_x() {
+        // task-20：Prism/HMCL/PCL2/官方启动器的结果只有 26.1.x 才接受；1.21.1/未知/未运行一律拒绝。
+        let mut probe = ClientProbe { running: true, version: Some("26.1.2".into()), ..Default::default() };
+        assert!(external_client_accepted(&probe, "26.1.2"));
+        probe.version = Some("26.1".into());
+        assert!(external_client_accepted(&probe, "26.1.2"));
+        probe.version = Some("1.21.1".into());
+        assert!(!external_client_accepted(&probe, "26.1.2"));
+        probe.version = None;
+        assert!(!external_client_accepted(&probe, "26.1.2"));
+        probe.running = false;
+        probe.version = Some("26.1.2".into());
+        assert!(!external_client_accepted(&probe, "26.1.2"));
+    }
+
+    #[test]
+    #[ignore = "depends on current machine: repo .minecraft/26.1.2 exists (read-only scan)"]
+    fn machine_existing_install_is_detected_for_prepare() {
+        // task-20 真机：一键准备应能在本机现有资产（repo .minecraft）下直接采用。
+        let manifest = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let repo_root = manifest
+            .parent()
+            .and_then(|path| path.parent())
+            .and_then(|path| path.parent())
+            .map(|path| path.to_path_buf())
+            .expect("repo root");
+        let ctx = LaunchContext {
+            repo_root: Some(repo_root),
+            version: DEFAULT_MC_VERSION.to_string(),
+            ..Default::default()
+        };
+        let install = find_existing_client_install(&ctx).expect("本机应能找到 26.1.2 安装");
+        assert!(install.dir.join("versions/26.1.2/26.1.2.json").is_file(), "{install:?}");
+        assert_eq!(install.version, DEFAULT_MC_VERSION);
+    }
+
+    #[test]
+    #[ignore = "depends on current machine: repo .minecraft/26.1.2 + bundled Java (read-only argv build)"]
+    fn machine_direct_argv_uses_repo_assets_offline_quickplay() {
+        // task-20：产品直启默认 = 官方 version JSON + 包内 Java 25 + 离线账号 + quickPlay 25565。
+        // 这里只拼 argv（不 spawn），验证本机现有 repo 资产可用。
+        let manifest = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let repo_root = manifest
+            .parent()
+            .and_then(|path| path.parent())
+            .and_then(|path| path.parent())
+            .map(|path| path.to_path_buf())
+            .expect("repo root");
+        let mc_dir = repo_root.join(".minecraft");
+        let version_json_path = mc_dir.join("versions/26.1.2/26.1.2.json");
+        let version_json: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(&version_json_path).expect("read version json")).expect("parse version json");
+        let java = manifest.join("runtime/real/java/bin").join(if cfg!(target_os = "windows") { "java.exe" } else { "java" });
+        assert!(java.exists(), "包内 Java 25 应存在：{}", java.display());
+        let ctx = LaunchContext {
+            minecraft_dir: Some(mc_dir.clone()),
+            version: DEFAULT_MC_VERSION.to_string(),
+            username: "Alami".into(),
+            server: Some(DEFAULT_SERVER.to_string()),
+            bundled_java: Some(java.clone()),
+            repo_root: Some(repo_root),
+            logs_dir: std::env::temp_dir().join("loom-task20-direct"),
+            ..Default::default()
+        };
+        let install = find_existing_client_install(&ctx).expect("应找到 repo 26.1.2");
+        assert_eq!(install.dir, mc_dir);
+        let resolved_java = resolve_java(&ctx, Some(&mc_dir)).expect("应解析到 Java");
+        if std::env::var("LOOM_JAVA").ok().filter(|value| !value.trim().is_empty()).is_none() {
+            assert_eq!(resolved_java, java, "默认应优先包内 Java（LOOM_JAVA 未设置时）");
+        }
+        let config = DirectConfig {
+            java: resolved_java,
+            mc_dir: mc_dir.clone(),
+            version: DEFAULT_MC_VERSION.to_string(),
+            username: "Alami".into(),
+            uuid: offline_uuid("Alami"),
+            natives_dir: std::env::temp_dir().join("loom-task20-natives"),
+            server: Some(DEFAULT_SERVER.to_string()),
+            launcher_name: "LoomCraft".to_string(),
+            launcher_version: env!("CARGO_PKG_VERSION").to_string(),
+        };
+        let argv = build_direct_command(&version_json, &config).expect("argv");
+        let pair = |flag: &str| argv.windows(2).find(|pair| pair[0] == flag).map(|pair| pair[1].as_str());
+        assert_eq!(pair("--username"), Some("Alami"));
+        assert_eq!(pair("--version"), Some("26.1.2"));
+        assert_eq!(pair("--quickPlayMultiplayer"), Some(DEFAULT_SERVER));
+        assert_eq!(pair("--accessToken"), Some("0"), "离线账号 token=0");
+        // 26.1.2 的 version JSON 可能不再带 --userType（新版 launcher 参数变化）；有才校验。
+        if argv.iter().any(|arg| arg == "--userType") {
+            assert_eq!(pair("--userType"), Some("legacy"), "离线账号 userType=legacy");
+        }
+        assert!(argv.iter().any(|arg| arg.contains("26.1.2.jar")), "classpath 应包含 repo 26.1.2 client jar");
+        assert!(argv.iter().any(|arg| arg == "net.minecraft.client.main.Main"));
+        assert!(!argv.iter().any(|arg| arg.contains("${")), "不能残留占位符");
     }
 
     #[test]
     #[ignore = "depends on current machine: 26.1.2 client running (read-only probe)"]
     fn machine_current_26_1_2_is_detected_and_reused() {
         let probe = client_probe();
-        assert!(probe.running, "机器上应有一个 26.1.2 客户端在跑: {probe:?}");
+        if !probe.running {
+            eprintln!("skip: 当前没有《我的世界》客户端在跑");
+            return;
+        }
         assert!(probe.compatible("26.1.2"), "探针应优先 26.1.x: {probe:?}");
         assert!(probe.game_dir.as_deref().map(|dir| dir.is_dir()).unwrap_or(false), "应解析到有效 gameDir: {probe:?}");
     }

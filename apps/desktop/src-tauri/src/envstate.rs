@@ -149,6 +149,10 @@ pub struct EnvState {
     pub expected_version: String,
     /// 实际使用的 .minecraft 目录（诊断/提示用）。
     pub minecraft_dir: Option<String>,
+    /// task-20：本机已找到的 26.1.2 客户端安装目录（一键准备/启动提示用）。
+    pub client_install_dir: Option<String>,
+    /// task-20：本机没有 26.1.2 文件 → 前端可显示「准备 26.1.2」一键入口（采用现有/打开下载）。
+    pub client_prepare_available: bool,
     /// 客户端/服务端版本不匹配：禁止进入工坊（即使 other lights 绿）。
     pub version_blocked: bool,
     /// 本地演示（Mock 世界）：四灯语义按演示降级，壳顶栏显示 Mock 样式。
@@ -216,6 +220,8 @@ pub struct PollInput<'a> {
     pub other_client_version: Option<String>,
     /// 本作要求的 MC 版本（默认 26.1.2 / 协议 775）。
     pub expected_version: &'a str,
+    /// task-20：本机已找到的 26.1.2 安装目录（客户端未运行时的提示/一键启动用）。
+    pub client_install_dir: Option<String>,
     /// 正在启动中的 kind 集合（engine/paper/bot/client）。
     pub launching: &'a [String],
     /// 各 kind 最近一次失败信息（key = kind）。
@@ -398,8 +404,17 @@ pub fn poll_lights(input: &PollInput) -> (EnvLight, EnvLight, EnvLight, EnvLight
             .retry(true)
             .guide(input.client_guide.clone())
     } else {
+        // task-20：本机已有 26.1.2 时提示可直接启动；没有时提示「准备 26.1.2」入口。
+        let hint = match input.client_install_dir.as_deref() {
+            Some(dir) => format!(
+                "本机已找到《我的世界》{expected}（{dir}）：点「启动 {expected}」会默认直启产品客户端（官方 version JSON + 包内 Java + 离线账号 + quickPlay 25565）。"
+            ),
+            None => format!(
+                "点「启动 {expected}」尝试产品自管直启；本机没有 26.1.2 文件时点「准备 {expected}」：会先采用本机现有 .minecraft，找不到再打开官方下载页。"
+            ),
+        };
         EnvLight::new(STATE_NEEDS_ACTION, "《我的世界》客户端未运行")
-            .hint(format!("点「启动《我的世界》」：会复用版本匹配的客户端，或自动拉起 Prism / HMCL / 直接启动 {expected}。"))
+            .hint(hint)
             .start(true)
             .guide(input.client_guide.clone())
     };
@@ -491,6 +506,7 @@ mod tests {
             client_version: if client_running { Some("26.1.2".into()) } else { None },
             other_client_version: None,
             expected_version: "26.1.2",
+            client_install_dir: None,
             launching,
             errors,
             client_guide: None,

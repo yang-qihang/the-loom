@@ -1,6 +1,6 @@
-# 57 — 启动流程 / EnvState / 客户端启动器契约（task-7/8/9/11/16/17/18）
+# 57 — 启动流程 / EnvState / 客户端启动器契约（task-7/8/9/11/16/17/18/20）
 
-> 状态：已实现并完成对抗性 P0/P1 加固 + 集成真机修复 + 版本门控 + 窗口几何 clamp + 多客户端启动（本地工作区，未提交）｜日期：2026-11-02
+> 状态：已实现并完成对抗性 P0/P1 加固 + 集成真机修复 + 版本门控 + 窗口几何 clamp + 产品直启启动器（本地工作区，未提交）｜日期：2026-11-02
 > 基线：`85cc282`（工作区含未提交改动；Studio 侧另有 ui-shell-fixer 的 WIP，见 §8）
 > 上游：`docs/53-game-start-flow-design.md`、`docs/54-takeover-audit-and-task-plan.md`、`docs/58-client-version-compatibility-review.md`、`tmp/audit/ui-issues.md`、`tmp/audit/launcher-adversarial-review.md`、`tmp/integrated-screen.png`
 > 实现范围：`apps/desktop/src-tauri/**`、`apps/desktop/shell/**`、`docs/**`；**不改 `apps/studio`**。
@@ -58,6 +58,8 @@ Rust `envstate::EnvState`（camelCase JSON）：
   "serverVersion": "26.1.2",     // task-16：engine health `mc.version`
   "expectedVersion": "26.1.2",   // task-16：本作要求版本（前端口径）
   "minecraftDir": "D:\\...\\.minecraft", // task-16：实际选中的 .minecraft（诊断）
+  "clientInstallDir": "D:\\...\\.minecraft", // task-20：本机已找到的 26.1.2 安装（一键准备/启动）
+  "clientPrepareAvailable": false, // task-20：本机没有 26.1.2 文件 → 前端可显示「准备 26.1.2」
   "versionBlocked": false,       // task-16：客户端/服务端版本不匹配 → 禁止进入工坊
   "mock": false,                 // 本地演示（Mock 世界）
   "updatedAt": 1710000000000
@@ -83,7 +85,8 @@ Rust `envstate::EnvState`（camelCase JSON）：
 | `env_autostart` | — | — | 幂等：自动启动 Paper+engine（L0 加载时调用） |
 | `env_start` | `{ kind: "engine"\|"paper"\|"bot"\|"client"\|"all" }` | `OpStatus` | 立即返回，后台线程执行；启动锁防重复 |
 | `env_retry` | `{ kind }` | `OpStatus` | 同 env_start（语义别名） |
-| `launch_client` | — | `OpStatus` | 客户端启动链（复用→Prism→HMCL→direct→official→PCL2→引导） |
+| `launch_client` | — | `OpStatus` | 客户端启动链：**direct（产品自管 26.1.2）→ Prism→HMCL→official→PCL2**；已运行 26.1.x 复用；旧版本不杀不阻塞 |
+| `client_prepare` | — | `OpStatus` | task-20 一键准备：本机已有 versions/26.1.2 → 采用并写入设置；没有 → 打开官方下载页 + 明确诊断（不下载/不打包 Mojang 资产） |
 | `restart_client_and_reconnect` | — | `OpStatus` | L2：优先复用上次适配器，quickPlay 回当前 Paper；不重建会话 |
 | `set_game_session` | `{ sessionId, levelId }` / 空 | — | 壳收到 Studio 的 `loom:session` 后同步；空 = 清除 |
 | `clear_game_session` | — | — | 回 L0 / 退出关卡时清除 |
@@ -148,26 +151,20 @@ Rust `envstate::EnvState`（camelCase JSON）：
 
 ## 3. 客户端启动器适配（`launcher.rs`）
 
-**触发时机（task-11/16/18）**：L0 启动后 `env_autostart` 在 Paper/engine 就绪后自动调用一次启动链（`should_autostart_client` 单测覆盖：正常环境未运行/不兼容→尝试；**版本兼容在跑**/mock/`LOOM_DISABLE_CLIENT_AUTOSTART`→跳过）；之后用户也可在卡片点「启动《我的世界》」或 L2「一键重启并连接」——**三条入口都走 `spawn_client_worker` → `launch_client` 同一条路径**。失败（含只拉起了启动器 UI 但窗口超时、拉起的版本不匹配）会在 EnvState 里给出 error/needs_action + guide，L0 显示「去安装启动器/重试」与中文版本提示。quickPlay 只在 engine 确认 26.1.2 Paper 时追加（`spawn_client_worker` 校验 health 后才传 server）。
+**触发时机（task-11/16/18/20）**：L0 启动后 `env_autostart` 在 Paper/engine 就绪后自动调用一次启动链（`should_autostart_client` 单测覆盖：正常环境未运行/不兼容→尝试；**版本兼容在跑**/mock/`LOOM_DISABLE_CLIENT_AUTOSTART`→跳过）；之后用户也可在卡片点「启动 26.1.2」或 L2「一键重启并连接」——**三条入口都走 `spawn_client_worker` → `launch_client` 同一条路径**。失败（含只拉起了启动器 UI 但窗口超时、拉起的版本不匹配）会在 EnvState 里给出 error/needs_action + guide，L0 显示「准备 26.1.2/重试」与中文版本提示。quickPlay 只在 engine 确认 26.1.2 Paper 时追加（`spawn_client_worker` 校验 health 后才传 server）。
 
 顺序（`launch_client`）：
 
-1. **已运行**：版本匹配（26.1.x）→ `adapter="reuse"`，绝不重复启动；**不兼容（如 1.21.1）→ 不杀、不失败**，记下旧版本并继续启动产品 26.1.2（task-18）。启动顺序变为 **direct 优先**（产品自管 `.minecraft/26.1.2`），Prism/HMCL/官方/PCL2 次之；`launch_adapter_order(prefer, old_incompatible_running)` 单测覆盖。
-2. **Prism**（自动化最稳）：
-   - Windows 常见路径 + `where prismlauncher.exe`；Linux flatpak `org.prismlauncher.PrismLauncher` 或 PATH。
-   - 从 `instances/*/mmc-pack.json` 找 `uid=net.minecraft` 且版本 = 目标版本（默认 26.1.2）的实例 → `--launch <instance>`。
-   - 找不到实例 → 只拉起 Prism UI，返回「请在 Prism 里选 26.1.2」（needs manual）。
-   - 旧设置 `prismCommand`：**P0-4 后只接受可执行文件路径/名称并直启（不经 cmd /C start / sh -lc，不接受参数或 shell 元字符）**；非法值在保存/启动两层都会被拒绝。
-3. **HMCL**：`HMCL.jar`/`hmcl.exe` → 拉起 UI；CLI 未确认，所以走「拉起 + 等待窗口 + 引导」。
-4. **直接启动 `.minecraft`**（离线 profile，自动化兜底）：
-   - 目录探测：`LOOM_MINECRAFT_DIR` → `%APPDATA%/.minecraft` → 仓库 `.minecraft`（开发机）→ `~/.minecraft`。
-   - 版本 JSON：`versions/<version>/<version>.json`；rules 按 `windows/linux/osx` + host arch 过滤；classpath 含所有匹配库（含 `:natives-*` jar，LWJGL 会从 classpath 解压 natives；`${natives_directory}` 指向 `~/.loomcraft/runtime/natives/<version>`）。
-   - Java：`LOOM_JAVA` → 随包 `runtime/real/java/bin/java` → `.minecraft/runtime/java-runtime-*` → PATH。
-   - 参数（P1-2 修正）：quickPlay features **全部关闭**，不让 version JSON 展开 `${quickPlayPath}` 等半成品占位符；手工只追加一次 `--quickPlayMultiplayer 127.0.0.1:25565`；`--width/--height` 去重；任何残留 `${...}` 清空。
-   - 日志：`~/.loomcraft/logs/minecraft.log`；等待窗口/进程超时或**取消**时 **kill 自己 spawn 的 java**（P1-3，不留孤儿）。
-5. **官方启动器**：拉起 UI + 引导（自动化 quickPlay 最弱）。
-6. **PCL2**：拉起 UI + 引导（CLI 未确认，不承诺自动进服）。
-7. **都没有**：`guide="install"`，L0 卡片出现「去安装启动器」，`open_launcher_download` 打开 Prism/官方下载页。
+1. **已运行**：版本匹配（26.1.x）→ `adapter="reuse"`，绝不重复启动；**不兼容（如 1.21.1）→ 不杀、不失败**，记下旧版本并继续启动产品 26.1.2（task-18）。
+2. **默认产品自管 26.1.2 直启（task-20 第一优先）**：官方 `versions/26.1.2/26.1.2.json` + **client jar 进 classpath** + 包内 Java 25 + 离线账号（token=0）+ `--quickPlayMultiplayer 127.0.0.1:25565`；成功后再探测版本（`wait_for_client(expected)` + `client_probe`），不是 26.1.x 会 kill 自己 spawn 的 java 并给中文提示。
+   - 目录候选：设置 `minecraftDir` / 检测到的 26.1.2 `--gameDir` / `LOOM_MINECRAFT_DIR(S)` / **产品目录 `~/.loomcraft/minecraft`** / APPDATA/用户目录 / repo `.minecraft`（dev）/ PCL 常见目录；`pick_minecraft_dir` 优先含 `versions/26.1.2` 的目录。
+   - 缺少 client jar / 找不到版本目录时返回可操作错误，不启动残缺客户端。
+3. **外部启动器**（Prism/HMCL/官方/PCL2，按 `launch_adapter_order` 排后备）：只有检测到 **26.1.x** 才接受（`external_client_accepted` + `finish_launch`/`wait_for_client` 双重校验）；版本不匹配明确提示、不进入游戏、不点亮客户端灯。
+   - Prism：Windows 常见路径 + `where prismlauncher.exe`；Linux flatpak 或 PATH；从 `mmc-pack.json` 匹配 26.1.2 实例 → `--launch <instance>`；找不到实例只拉 UI + 引导。
+   - HMCL：`HMCL.jar`/`hmcl.exe` → UI + 等待窗口 + 引导。
+   - 旧设置 `prismCommand`：P0-4 后只接受可执行文件路径/名称并直启（不经 shell，不接受参数/元字符）。
+4. **一键准备（task-20，`client_prepare`）**：本机已有 `versions/26.1.2/26.1.2.json` → 采用（写 `settings.minecraftDir`/`client_game_dir`）并返回可启动；本机没有 → 打开官方下载页 + 诊断（已扫描目录/现有版本、支持设置路径/`LOOM_MINECRAFT_DIR`）。不实现自动下载游戏资产（遵守「不打包 Mojang 资产」红线）。
+5. **都没有**：`guide="install"`，L0 显示「准备 26.1.2」入口。
 
 启动链预算（P1-3）：
 - 总预算 150s；适配器内部等待取 `min(剩余预算, 120s)`；
@@ -235,34 +232,30 @@ Rust `envstate::EnvState`（camelCase JSON）：
 
 ## 7. 测试与证据
 
-本轮（task-18 多客户端启动后）实际跑过（Windows host，`85cc282` + 本地未提交改动）：
+本轮（task-20 启动器后端）实际跑过（Windows host，`4109095` + 本地改动）：
 
 - `cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml`：**exit 0，0 warnings**。
-- `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`：**48 passed / 0 failed / 2 ignored**
-  - `envstate`：四灯判定/全绿/错误+启动中、客户端丢失→恢复、mock 不阻断、织偶超时 needs_action、client 1.21.1 不绿 / 26.1 族绿 / 未知版本不绿 / 端口-only 不算 Paper ready / 旧 Paper 版本 error / L2 版本不匹配文案 / **多客户端优先 26.1.2 + 旧版本提示不阻塞**；
-  - `launcher`：rules/arch、Maven→路径、Prism 实例、直启命令、离线 UUID、命令注入拒绝、quickPlay、cancel、open_url、`--version` 解析与兼容矩阵、空目录不挡 versions/26.1.2、PCL `D:\Prograft` 候选、**多客户端 probe 优先 26.1.x + gameDir 解析 + otherVersions**、**旧客户端在跑时 direct 优先的启动顺序**；
+- `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`：**50 passed / 0 failed / 4 ignored**
+  - `envstate`：四灯判定/全绿/错误+启动中、客户端丢失→恢复、mock 不阻断、织偶超时 needs_action、client 1.21.1 不绿 / 26.1 族绿 / 未知版本不绿 / 端口-only 不算 Paper ready / 旧 Paper error / L2 版本不匹配 / 多客户端优先 26.1.2 + 旧版本提示不阻塞；
+  - `launcher`：rules/arch、Maven→路径、Prism 实例、直启命令、离线 UUID、命令注入拒绝、quickPlay、cancel、open_url、`--version` 解析与兼容矩阵、空目录不挡 versions/26.1.2、PCL 候选、多客户端 probe + gameDir、**task-20 默认 direct 第一顺序、外部启动器仅接受 26.1.x、现有安装检测（要求 26.1.2.json）**；
   - `window_geometry`：窗口几何 clamp 全套（见 §5.1）+ 真实 Win32 rcWork 查询。
-  - 2 个 ignored 机器相关测试（本次显式 `--ignored` 跑过，只读/不 spawn）：**机器上 26.1.2 被识别（version/gameDir 有效）+ `launch_client` 走 reuse、不重复启动**。
+  - 4 个 ignored 机器只读测试（本机显式 `--ignored` 跑过）：**repo `.minecraft/26.1.2` 被一键准备识别**、**直启 argv = 官方 JSON + 包内 Java + 离线 token + quickPlay 25565 + client jar 进 classpath**；客户端运行时另验证 `client_probe` 优先 26.1.x / `launch_client` 走 reuse（客户端关闭时自动 skip）。
 - 仓库根 `npm test`：**28 files / 251 tests PASS**（本批未触碰 JS 测试域）。
-- 静态契约/回归检查：`tmp/audit/launcher-contract-check.log` **65/65**（task-9/11/16）+ `tmp/audit/task17-window-contract-check.log` **18/18**（窗口几何）+ `tmp/audit/task18-multiclient-contract-check.log` **17/17**（多客户端 direct 优先 / 不杀旧客户端 / 只关产品客户端 / gameDir 复用 / machine reuse）。合计 **100 项静态回归 PASS**。
-- **受控 UI 验证（headless Chromium，不启 GUI）**：`tmp/audit/task11-dot-verify.mjs` + `shell-dot-harness.html` → **12/12 PASS**（四灯颜色映射 + 事件/快照两条路径 + mock + versionBlocked 硬门控）。证据：`tmp/audit/task11-dot-harness-{event,ready,version-gate}.png`、`task11-dot-harness.json`。
-- **真机只读探测**（`tmp/audit/task16-real-env-probe.log` + 本轮 `task18` 机器测试，未杀任何进程）：
-  - 本轮运行中：java PID 8280 `--version 26.1.2 --gameDir D:\VScode_code\the-loom\.minecraft`；25565/4317 有监听；26.1.2 已连服（Lead 日志 `Alami joined the game`）；
-  - 机器测试验证 `client_probe` 优先 26.1.2、`gameDir` 有效；`launch_client` 命中 reuse、无 child（**不重复启动当前 26.1.2**）；
-  - 旧场景（上一轮）PID 41176 `--version 1.21.1` 已由 task-16 门控覆盖；task-18 新增「旧客户端在跑仍继续 direct 启动 26.1.2」的纯逻辑回归。
-- 语法检查：`shell.js` 与 `wizard.html` 内联脚本 `node --check` PASS（纳入 65/65）。
-- **未做**：真机 GUI 验证（需等 Lead 重建安装包）：1.21.1 在跑 + App 点击/自动启动 26.1.2 最终四灯绿、旧客户端保持不关、quickPlay 进 25565、X 二次放行、全屏/窗口几何。
+- 静态契约/回归检查：`tmp/audit/launcher-contract-check.log` **65/65** + `tmp/audit/task17-window-contract-check.log` **18/18** + `tmp/audit/task18-multiclient-contract-check.log` **17/17** + `tmp/audit/task20-launcher-contract-check.log`（task-20 默认直启/一键准备/外部校验/退出只关产品客户端）。合计 **约 110 项静态回归 PASS**。
+- **真机只读探测**（`task20` 机器测试，未杀任何进程）：本轮开始时 java PID 8280 `--version 26.1.2 --gameDir D:\VScode_code\the-loom\.minecraft`、25565/4317 有监听；测试期间客户端被外部关闭（测试自动 skip 运行中用例），repo `.minecraft/26.1.2` 与包内 Java 25 资产始终可用。
+- **未做**：真机 GUI 启动（按约束不重复启动/不抢焦点）；1.21.1 在跑 + App 自动/点击启动 26.1.2 的完整时序需重建安装包后验收。
 
 ## 8. 未完成 / 交给后续
 
 1. **Studio 侧切换状态源（P1-10，ui-shell-fixer WIP）**：`loom:env` 消费（顶栏「织机在线」）与 L2 时禁用运行/评分/切关需要改 `apps/studio`；当前工作区有 ui-shell-fixer 的未提交 Studio 改动（`shell-env.ts` untracked 等），本任务未触碰、也未验证。**建议 task-7/8/9 与 Studio 接入原子提交或由 Lead 明确降级**。
 2. **P1-5 部分收口**：壳在进入工作室/回 L0/伴随退出时会 `clear_game_session`，但 Studio 从关卡返回地图墙不会主动发 `loom:session(null)`（需要 Studio 改动）；地图墙上的旧会话可能让 L2 阻断多显示一会儿，用户可「回到 L0」清掉。契约：Studio 应在 Workbench unmount 时 `postMessage({type:"loom:session", sessionId:null, levelId:null})`。
 3. **L2 阻断在 Studio 内部**：目前壳用全屏红色覆盖层挡住 iframe 交互；Studio 内没有单独禁用按钮（无 Studio 改动时的唯一可行方式）。
-4. **打包期（task-11/16/17/18 阻塞点）**：`build-assets.mjs` 会把新的 wizard.html/shell.js 复制进 dist/runtime；本轮未重建安装包。当前安装的 407.5MB 包（sha256 C9BA…）**早于 task-11/16/17/18 修复**，需要重建/重装后才能真机看到「自动拉客户端 / 1.21.1 在跑仍启动 26.1.2 / 顶栏四灯同色 / 窗口几何 clamp」；开发机无打包 runtime 时 Paper 仍会回退 `scripts/mc-up.sh`（仅本地开发兜底，不属于产品路径）。
-5. **真机 GUI 回归**（1.21.1 在跑 + 点击/自动启动 26.1.2 最终四灯绿且旧客户端仍在、26.1.2 已连接不重复启动、旧 Paper 占 25565 提示、四灯/门控/退出/全屏/重连、保存大窗口几何不裁边）待 Lead 重建安装包后在桌面阶段执行；窗口几何修复可查 `~/.loomcraft/logs` 的「恢复窗口几何已夹到工作区」日志，多客户端可查 `launcher.log` 的客户端（direct/reuse）与「另有 … 在运行」提示。L01 hidden h1、world 干净包等既有问题不在本任务内。
-6. **版本门控的已知边界（task-16/18）**：
-   - 「客户端灯 ready」= 版本匹配的 26.1.x 进程在运行；**不等于已成功进服**（插件 health 只报 bot 连接，不报玩家连接）。真正的进服由 L2 会话/Studio 事件确认；进入工坊后的世界内错误仍走 L2。
-   - 版本解析依赖 `--version` 命令行或窗口标题；两者都读不到时保守显示「未知版本」不绿（可点重试）。
-   - **task-18**：旧客户端在跑不再阻塞启动；direct 优先复用检测到的 26.1.2 `--gameDir`（并持久化到设置 `minecraftDir`），找不到时再 Prism/HMCL。产品仍未实现「自动下载准备 26.1.2」（方案 A）与 ViaVersion（C）；若机器上不存在 26.1.2 客户端，会失败并给安装/指定路径提示。
-   - 方案 A/C 未实现，等用户确认；不改变 Paper/客户端版本锁。
+4. **打包期（task-11/16/17/18/20 阻塞点）**：`build-assets.mjs` 会把新的 wizard.html/shell.js 复制进 dist/runtime；本轮未重建安装包。当前安装包早于本批修复，需要重建/重装后才能真机看到「产品直启为默认 / 1.21.1 在跑仍启动 26.1.2 / 顶栏四灯同色 / 窗口几何 clamp / 准备 26.1.2 入口」。
+5. **真机 GUI 回归**（1.21.1 在跑 + 点击/自动启动 26.1.2 最终四灯绿且旧客户端仍在、26.1.2 已连接不重复启动、缺 26.1.2 时一键准备采用 repo 资产、退出只关产品客户端）待 Lead 重建安装包后在桌面阶段执行；窗口几何查 `~/.loomcraft/logs`「恢复窗口几何已夹到工作区」，启动器行为查 `launcher.log`（direct/reuse/一键准备）。L01 hidden h1、world 干净包等既有问题不在本任务内。
+6. **版本门控/启动器已知边界（task-16/18/20）**：
+   - 「客户端灯 ready」= 版本匹配的 26.1.x 进程在运行；不等于已成功进服（插件 health 只报 bot 连接）。真正进服由 L2 会话/Studio 事件确认。
+   - 版本解析依赖 `--version` 命令行或窗口标题；读不到时保守「未知版本」不绿。
+   - **task-20 一键准备只采用本机现有资产**（`versions/26.1.2/26.1.2.json`，并可把路径写入设置）；不在运行时下载游戏资产、不打包 Mojang 资产。没有现有资产时打开官方下载页并给路径/环境变量引导。
+   - 方案 A 完整自动下载、方案 C ViaVersion 未实现，等用户确认；不改 Paper/客户端版本锁。
+   - **UI 接线（不在本任务范围）**：`client_prepare` 命令已注册，`EnvState.clientPrepareAvailable/clientInstallDir` 已下发；shell 的 `BRIDGE_COMMANDS` 白名单与 L0 按钮由 UI agent（task-19）接入——本任务按约束未改 shell。
    - Linux 版本探测用 `/proc/*/cmdline`；Paper ownership 检查用进程命令行；未在 Linux 实机回归。
