@@ -42,7 +42,11 @@ for lib in $(ldd "$NODE_BIN" | awk '/=> \//{print $3} /^\//{print $1}'); do cp -
 # 5) Java
 cp -a "$JAVA_HOME_SRC/." "$DEST/java/"
 # 6) Paper / 插件 / 世界（日志与运行时输入输出不打包）
-rsync -a --exclude logs --exclude 'console.*' --exclude '*.log' --exclude 'session.lock' "$PAPER_SRC/" "$DEST/paper/"
+rsync -a --exclude logs --exclude 'console.*' --exclude '*.log' --exclude 'session.lock' \
+  --exclude 'world/players' --exclude 'world/logs' --exclude 'world/backup*' \
+  --exclude 'world.bak*' --exclude 'usercache.json' "$PAPER_SRC/" "$DEST/paper/"
+# 玩家数据/旧世界备份不进安装包（真实玩家 UUID 会污染新用户世界）
+rm -rf "$DEST/paper/world/players" "$DEST/paper/world/logs" "$DEST/paper/world.bak"* "$DEST/paper/usercache.json"
 # 世界布局版本 marker：插件/场景/重置语义升级时 bump，桌面壳会为老用户换一份干净世界。
 WORLD_LAYOUT_VERSION="${LOOM_WORLD_LAYOUT_VERSION:-loomworld-v2}"
 mkdir -p "$DEST/paper/world"

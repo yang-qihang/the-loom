@@ -99,9 +99,14 @@ Copy-Item -Path (Join-Path $JavaHome "*") -Destination (Join-Path $OutDir "java"
 
 # 6) Paper / 插件 / 世界；排除运行期日志和 session.lock
 $paperDest = Join-Path $OutDir "paper"
-$rc = & robocopy $PaperDir $paperDest /E /XD logs crash-reports /XF "console.*" "*.log" "session.lock" /NFL /NDL /NJH /NJS /NP
+$rc = & robocopy $PaperDir $paperDest /E /XD logs crash-reports "world\players" "world\logs" /XF "console.*" "*.log" "session.lock" "usercache.json" /NFL /NDL /NJH /NJS /NP
 if ($LASTEXITCODE -ge 8) { Fail "robocopy Paper 失败（exit $LASTEXITCODE）" }
 $global:LASTEXITCODE = 0
+# 玩家数据/旧世界备份不进安装包（真实玩家 UUID 会污染新用户世界）
+Remove-Item -LiteralPath (Join-Path $paperDest "world\players") -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath (Join-Path $paperDest "world\logs") -Recurse -Force -ErrorAction SilentlyContinue
+Get-ChildItem -LiteralPath $paperDest -Filter "world.bak*" | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath (Join-Path $paperDest "usercache.json") -Force -ErrorAction SilentlyContinue
 
 $worldLayoutVersion = if ($env:LOOM_WORLD_LAYOUT_VERSION) { $env:LOOM_WORLD_LAYOUT_VERSION } else { "loomworld-v2" }
 New-Item -ItemType Directory -Path (Join-Path $paperDest "world") -Force | Out-Null

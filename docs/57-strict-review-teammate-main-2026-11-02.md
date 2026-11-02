@@ -82,3 +82,14 @@
 4. 修复 P1：Windows 证据/CI、L01 h1 采样、教材 copy gate、guard 扩围、字体策略用户确认。
 5. 重跑 §2 全部门禁（Linux 原生 + 真实 Paper L01/L10/引擎回归 + Windows 同学机 + 安装包冒烟）。
 6. squash 为一个 commit（保留 docs/55 说明）后合并；更新 README/STATUS/HANDOFF/docs/49/56 为同一事实。
+
+
+## 8. 处理结果（2026-11-02 收口）
+
+- **B1 qa/**：Lead 已在 `docs/60` §2 书面批准这组跨平台改动（Linux gate 与基线一致；Windows gate 仍 blocked-by-evidence）；后续 qa 改动仍需 Lead 批准。
+- **B2 C/CMake/Make**：用户决定**废弃同学 C 图标生成器方案**，不再声称 C 等价；issue #1 第 8 条的「C 语言」要求不通过该方案完成，若课程必须 C 需另立任务（`docs/60` §6）。当前原生组件是 C++20 `native/e2e-runner`。
+- **B3 文档不实**：README/STATUS/HANDOFF/docs/49 的 C 声明与 docs/50 引用已删除，并记录废弃决策。
+- **B4 world 污染**：`build-real-runtime.sh/.ps1` 排除 + 清理玩家数据/旧世界备份；`package-desktop.sh` 加硬断言。
+- **B5 图标可复现**：用 JS 生成器重新生成并提交 4 个 PNG；连续两次 `desktop:assets` 无 diff。
+- **保留未闭环**：P1 Windows 证据不可复现、L01 h1 并行 flake、全量 10 关基准、少量 P2；不再把 main 标记为「全部验收完成」。
+- 结论状态从 **BLOCK** 更新为 **CONDITIONAL PASS（Linux 可交付，Windows/全量并行待验收）**；main 不回滚，采用修复前进 + 分支隔离后续工作的方案（`docs/60`）。

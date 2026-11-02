@@ -13,7 +13,7 @@
   ③ 剧情浮层排版（固定头/滚动内容/固定底、对称留白、小视口不裁切、同类浮层同修）；
   ④ 字体系统（代码=Maple Mono、长文=Noto Sans SC 随包子集、短标题/按钮=像素）；
   ⑤ 10 章配套教材（76,429 汉字）+ 可拖动/缩放/置顶教材窗口（首次进关自动打开、随时回看）；
-  - **质量（Round 4 验收）**：`tsc --noEmit` 0；`npm test` 28 files / 251 tests；Studio real-config e2e **37/37**、mock-config e2e 4/4；教材校验 0 error；C 等价 8/8；真实 Paper e2e L01/L10 + 引擎回归 PASS（`evidence/l*-real-latest.json`、`evidence/engine-paper-regressions-latest.json`）。
+  - **质量（Round 4 验收）**：`tsc --noEmit` 0；`npm test` 28 files / 251 tests；Studio real-config e2e **37/37**、mock-config e2e 4/4；教材校验 0 error；真实 Paper e2e L01/L10 + 引擎回归 PASS（`evidence/l*-real-latest.json`、`evidence/engine-paper-regressions-latest.json`）。
 - **桌面**：AppImage ≈429MB / RPM ≈436MB（上一轮产物）；内置 Node/Java/Paper/插件/世界/引擎/织偶；**新桌面包需同学在原生 Linux 重新打包**（本轮源码含新字体/教材/引擎，未在 Linux 侧打包验证）。
 - **明确边界**：挑战层仍是说明卡；真人多背景盲测未执行；Fresh Reader Round 4 未清零；教材为长文阅读、真人学习效果未测；L09 取金苹果仍用旧写法 `place("air", chest)`（内容侧待改）；L01 hidden `h1` 的 `agent.move` 采样边界仍偶发（判星公平性问题，见 STATUS 顶部 Round 3 段）。
 - **Windows 原生验证栈（canonical 端口）**：Paper `25567` / 插件 RPC `8765` / engine `4317` / Studio `5173`；`it/.mc-server/server.properties` 为 25567；Paper 用 `.tools/win/paper-host.mjs` 托管。Fedora VM 已清理（`loom-vm` 仅 3 份报告 md），AppImage/RPM 由同学原生 Linux 打包。
@@ -81,7 +81,7 @@ bash scripts/package-desktop.sh
 ## 5. 文档地图（新 agent 按需读）
 
 - 当前事实源：`STATUS.md`（顶部 Round 4）、`docs/49-round4-teaching-ux-and-textbook-plan.md`（本轮契约/结果）、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`、`README.md`、`docs/41-ai-contributor-guide.md`。
-- 本轮新增：`docs/50-native-build-system.md`（C 图标生成器 + CMake/Make，含等价性证据/回退/风险）；教材写作规范 `apps/studio/src/textbook/README.md`。
+- 本轮新增：教材写作规范 `apps/studio/src/textbook/README.md`；C++20 并行 e2e 执行器 `native/e2e-runner`（`docs/58`）。旧 C 图标生成器方案已废弃（`docs/60`），不存在 `docs/50-native-build-system.md`。
 - 架构/契约：`docs/07-architecture.md`、`docs/21-t1-contracts.md`（T1 基线，2026-11-01 的 RPC/进度变更见 docs/46 §2）。
 - 设计期历史（结论保留、当前实现以代码为准）：`docs/00`–`docs/18`、`docs/24`。
 - 质量/流程：`docs/20`（§3b4 字体策略）、`docs/28`、`docs/29`、`docs/30`、`qa/README.md`。

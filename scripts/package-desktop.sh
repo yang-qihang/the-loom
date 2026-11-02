@@ -73,5 +73,9 @@ javap -p -classpath "$ROOT/apps/desktop/src-tauri/runtime/real/paper/plugins/loo
 grep -Rq 'Iosevka' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null && { echo "[package] 包里仍有 Iosevka 字体残留" >&2; exit 4; } || true
 grep -Rq 'Maple Mono' "$ROOT/apps/desktop/dist/studio/assets" 2>/dev/null || { echo "[package] 包里没有 Maple Mono 字体" >&2; exit 4; }
 test -f "$ROOT/apps/desktop/src-tauri/runtime/real/paper/world/.loom-world-version" || { echo "[package] 缺世界布局版本 marker" >&2; exit 4; }
+# 安装包不得携带测试玩家数据/旧世界备份/运行日志（可复现 + 新用户干净世界）
+if find "$ROOT/apps/desktop/src-tauri/runtime/real/paper/world/players" -type f 2>/dev/null | grep -q .; then echo "[package] world/players 非空，禁止打包测试玩家数据" >&2; exit 5; fi
+if compgen -G "$ROOT/apps/desktop/src-tauri/runtime/real/paper/world.bak*" > /dev/null; then echo "[package] 发现 world.bak*，禁止打包旧世界备份" >&2; exit 5; fi
+if find "$ROOT/apps/desktop/src-tauri/runtime/real/paper" -maxdepth 2 \( -name 'console.*' -o -name '*.log' \) | grep -q .; then echo "[package] 运行日志进入 runtime，禁止打包" >&2; exit 5; fi
 echo "[package] OK"
 ls -lh "$BUNDLE/appimage/Loomcraft_0.1.0_amd64.AppImage" "$BUNDLE/rpm/"*.rpm 2>/dev/null || true
