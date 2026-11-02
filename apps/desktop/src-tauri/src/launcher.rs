@@ -96,6 +96,19 @@ pub fn parse_client_version(cmdline: &str) -> Option<String> {
             }
         }
     }
+    // Prism/MultiMC 的 NewLaunch 包装器不一定把 --version 写进宿主命令行；
+    // classpath 里始终带 minecraft-<version>-client.jar，作为跨启动器的稳定兜底。
+    for token in cleaned.split_whitespace() {
+        let segment = token.rsplit(['/', '\\']).next().unwrap_or(token);
+        if let Some(version) = segment
+            .strip_prefix("minecraft-")
+            .and_then(|value| value.strip_suffix("-client.jar"))
+        {
+            if version_family(version).is_some() {
+                return Some(version.to_string());
+            }
+        }
+    }
     None
 }
 
@@ -188,6 +201,17 @@ pub fn probe_from_cmdlines(cmdlines: &[String], titles: &[String], fallback_runn
         };
     }
     ClientProbe { running: fallback_running, version: None, game_dir: None, other_versions: Vec::new() }
+}
+
+/// 是否是真正的 Minecraft 游戏进程，而不是任意带 minecraft 字样的进程。
+/// Prism/MultiMC 用 NewLaunch.jar 的 EntryPoint 包一层，宿主 /proc 里看到的是
+/// `org.prismlauncher.EntryPoint`；必须同时看到 client jar，避免把启动器 UI 当成游戏。
+fn is_minecraft_cmdline(lower: &str) -> bool {
+    if lower.contains("net.minecraft.client.main.main") || lower.contains("org.lwjgl.glfw.glfw") {
+        return true;
+    }
+    let wrapper = lower.contains("org.prismlauncher.entrypoint") || lower.contains("org.multimc.entrypoint");
+    wrapper && lower.contains("minecraft-") && lower.contains("-client.jar")
 }
 
 /// 当前客户端进程 + 版本（命令行优先，窗口标题兜底；读不到版本时 version=None）。
@@ -336,7 +360,7 @@ impl LaunchOutcome {
 // Windows：Toolhelp 枚举 java.exe/javaw.exe → 读进程命令行（PEB）→ 必须含
 //          `net.minecraft.client.main.Main` 或 `org.lwjgl.glfw.GLFW`；
 //          命令行读不到时退化为「java/javaw 进程 + 该进程窗口标题含 minecraft」。
-// Linux：/proc/*/cmdline 必须含 `net.minecraft.client.main.Main`。
+// Linux：/proc/*/cmdline 必须含 Minecraft 主类，或 Prism/MultiMC 的 EntryPoint + client jar。
 
 pub fn client_process_running() -> bool {
     !minecraft_pids().is_empty()
@@ -417,7 +441,7 @@ fn linux_minecraft_pids() -> Vec<u32> {
         let Ok(cmdline) = fs::read(entry.path().join("cmdline")) else { continue };
         let text = String::from_utf8_lossy(&cmdline).to_ascii_lowercase();
         // 必须是主类，不是任意带 minecraft 字样的进程。
-        if text.contains("net.minecraft.client.main.main") {
+        if is_minecraft_cmdline(&text) {
             if let Ok(pid) = name.parse::<u32>() {
                 pids.push(pid);
             }
@@ -439,7 +463,7 @@ fn linux_validated_cmdline_pairs() -> Vec<(u32, String)> {
         let Ok(cmdline) = fs::read(entry.path().join("cmdline")) else { continue };
         let text = String::from_utf8_lossy(&cmdline).replace('\0', " ");
         let lower = text.to_ascii_lowercase();
-        if lower.contains("net.minecraft.client.main.main") || lower.contains("org.lwjgl.glfw.glfw") {
+        if is_minecraft_cmdline(&lower) {
             if let Ok(pid) = name_text.parse::<u32>() {
                 found.push((pid, text));
             }
@@ -677,7 +701,7 @@ mod win32 {
         let mut validated = Vec::new();
         for pid in java_pids() {
             if let Some(cmdline) = process_cmdline(pid) {
-                if cmdline.contains("net.minecraft.client.main.main") || cmdline.contains("org.lwjgl.glfw.glfw") {
+                if is_minecraft_cmdline(&cmdline.to_ascii_lowercase()) {
                     validated.push(pid);
                 }
                 continue;
@@ -726,7 +750,7 @@ mod win32 {
         let mut found = Vec::new();
         for pid in java_pids() {
             let Some(cmdline) = process_cmdline(pid) else { continue };
-            if cmdline.contains("net.minecraft.client.main.main") || cmdline.contains("org.lwjgl.glfw.glfw") {
+            if is_minecraft_cmdline(&cmdline.to_ascii_lowercase()) {
                 found.push((pid, cmdline));
             }
         }
@@ -794,7 +818,7 @@ pub fn launch_client(ctx: &LaunchContext) -> LaunchOutcome {
                 .other_version()
                 .map(|other| format!("（另有 {other} 在运行，不重复启动、不关闭）"))
                 .unwrap_or_default();
-            return LaunchOutcome::ok("reuse", format!("检测到《我的世界》{found} 已在运行，直接复用{extra}"));
+            return LaunchOutcome::ok("reuse", format!("检测到《我的世界》{found} 已在运行，直接使用{extra}"));
         }
         let found = probe.version.clone().unwrap_or_else(|| "未知版本".to_string());
         old_note = Some(found);
@@ -901,12 +925,9 @@ fn finish_launch(
     }
     if probe.running {
         let found = probe.version.unwrap_or_else(|| "未知版本".to_string());
-        let protocol = protocol_for_version(&found)
-            .map(|value| format!("协议 {value} ≠ {EXPECTED_PROTOCOL}"))
-            .unwrap_or_else(|| format!("需要协议 {EXPECTED_PROTOCOL}"));
         return LaunchOutcome::manual(
             adapter,
-            format!("已拉起启动器，但检测到《我的世界》{found}，需要 {}（{protocol}）", ctx.version),
+            format!("已拉起启动器，但检测到《我的世界》{found}，本作需要 {}", ctx.version),
             manual_hint,
             guide,
         );
@@ -993,6 +1014,7 @@ fn try_prism(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
             let mut command = Command::new(&info.program);
             command.args(&info.args_prefix).arg("--launch").arg(&instance);
             quiet(&mut command);
+            detach_command(&mut command);
             if command.spawn().is_err() {
                 return Some(LaunchOutcome::fail("prism", "Prism 实例启动命令失败", Some("打开「日志目录」查看；也可以在 Prism 里手动启动 26.1.2。".into())));
             }
@@ -1095,6 +1117,7 @@ fn launch_prism_program(info: &PrismInfo) {
     let mut command = Command::new(&info.program);
     command.args(&info.args_prefix);
     quiet(&mut command);
+    detach_command(&mut command);
     let _ = command.spawn();
 }
 
@@ -1168,6 +1191,7 @@ fn try_hmcl(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
         let mut command = Command::new(java);
         command.arg("-jar").arg(&jar);
         quiet(&mut command);
+        detach_command(&mut command);
         let _ = command.spawn();
         let ready = wait_for_client(None, timeout, &ctx.version, ctx.cancel.as_deref());
         if ready.cancelled {
@@ -1197,6 +1221,7 @@ fn try_hmcl(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
     if let Some(exe) = found {
         let mut command = Command::new(exe);
         quiet(&mut command);
+        detach_command(&mut command);
         let _ = command.spawn();
         let ready = wait_for_client(None, timeout, &ctx.version, ctx.cancel.as_deref());
         if ready.cancelled {
@@ -1242,6 +1267,7 @@ fn try_official(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome>
     let exe = candidates.into_iter().find(|path| path.exists())?;
     let mut command = Command::new(exe);
     quiet(&mut command);
+    detach_command(&mut command);
     let _ = command.spawn();
     let ready = wait_for_client(None, timeout, &ctx.version, ctx.cancel.as_deref());
     if ready.cancelled {
@@ -1259,7 +1285,7 @@ fn try_official(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome>
     Some(LaunchOutcome::manual(
         "official",
         "已拉起官方 Minecraft Launcher",
-        format!("官方启动器通常不能无人值守 quickPlay：请在启动器里选择 {} 并点「开始游戏」；织界会等待游戏窗口。", ctx.version),
+        format!("请在官方启动器里选择 {} 并点「开始游戏」；织界会等待游戏窗口。", ctx.version),
         Some("official"),
     ))
 }
@@ -1295,6 +1321,7 @@ fn try_pcl2(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
     let exe = candidates.into_iter().find(|path| path.exists())?;
     let mut command = Command::new(exe);
     quiet(&mut command);
+    detach_command(&mut command);
     let _ = command.spawn();
     let ready = wait_for_client(None, timeout, &ctx.version, ctx.cancel.as_deref());
     if ready.cancelled {
@@ -1379,6 +1406,7 @@ fn try_direct(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
     if let Some(file) = stderr {
         command.stderr(Stdio::from(file));
     }
+    detach_command(&mut command);
     let mut child = match command.spawn() {
         Ok(child) => child,
         Err(error) => {
@@ -1403,7 +1431,7 @@ fn try_direct(ctx: &LaunchContext, timeout: Duration) -> Option<LaunchOutcome> {
         let _ = child.wait();
         return Some(LaunchOutcome::manual(
             "direct",
-            format!("直接启动后检测到《我的世界》{found}，本作需要 {}（协议 {}）", ctx.version, EXPECTED_PROTOCOL),
+            format!("直接启动后检测到《我的世界》{found}，本作需要 {}", ctx.version),
             "请确认 .minecraft/versions 里实际是 26.1.2（不是 1.21.x）；修正后重试，或改用 Prism/PCL 安装 26.1.2。",
             Some("direct"),
         ));
@@ -1459,7 +1487,7 @@ pub fn build_direct_command(version_json: &serde_json::Value, config: &DirectCon
     let main_class = version_json
         .get("mainClass")
         .and_then(|value| value.as_str())
-        .ok_or_else(|| "version JSON 缺少 mainClass".to_string())?;
+        .ok_or_else(|| "客户端版本文件缺少启动入口".to_string())?;
     let asset_index = version_json
         .get("assetIndex")
         .and_then(|value| value.get("id"))
@@ -1469,7 +1497,7 @@ pub fn build_direct_command(version_json: &serde_json::Value, config: &DirectCon
     let libraries = version_json
         .get("libraries")
         .and_then(|value| value.as_array())
-        .ok_or_else(|| "version JSON 缺少 libraries".to_string())?;
+        .ok_or_else(|| "客户端版本文件缺少运行库".to_string())?;
     let os = os_name();
     let arch = host_arch();
     let features = default_features();
@@ -1491,7 +1519,7 @@ pub fn build_direct_command(version_json: &serde_json::Value, config: &DirectCon
         classpath.push(game_dir.join("libraries").join(path).to_string_lossy().to_string());
     }
     if classpath.is_empty() {
-        return Err("classpath 为空（version JSON 的 libraries 规则不匹配当前系统）".to_string());
+        return Err("客户端运行库为空，无法启动".to_string());
     }
     let classpath_separator = if cfg!(target_os = "windows") { ";" } else { ":" };
     let classpath_text = classpath.join(classpath_separator);
@@ -2037,6 +2065,21 @@ fn quiet(command: &mut Command) {
     }
 }
 
+/// Linux：把外部启动器/客户端放到独立进程组，避免被桌面任务栏当成织界的子窗口，
+/// 也避免 Ctrl+C/退出信号沿默认进程组误伤游戏；仍保留 Child 句柄用于取消与回收。
+#[cfg(target_os = "linux")]
+fn detach_command(command: &mut Command) {
+    use std::os::unix::process::CommandExt;
+    let _ = command.process_group(0);
+    // 不要继承织界的桌面启动令牌：否则 KWin 会把启动器/游戏窗口当成织界的一次启动，
+    // 任务栏合并到织界图标下，游戏也可能以 parent 的 activation 状态打开。
+    for key in ["DESKTOP_STARTUP_ID", "XDG_ACTIVATION_TOKEN", "GIO_LAUNCHED_DESKTOP_FILE", "GIO_LAUNCHED_DESKTOP_FILE_PID"] {
+        command.env_remove(key);
+    }
+}
+#[cfg(not(target_os = "linux"))]
+fn detach_command(_command: &mut Command) {}
+
 #[cfg(target_os = "linux")]
 fn run_capture(program: &str, args: &[&str]) -> Option<String> {
     let output = Command::new(program).args(args).output().ok()?;
@@ -2100,6 +2143,7 @@ fn spawn_validated_exe(command: &str) -> Result<(), String> {
     let program = validate_program(command)?;
     let mut cmd = Command::new(&program);
     quiet(&mut cmd);
+    detach_command(&mut cmd);
     cmd.spawn()
         .map(|_| ())
         .map_err(|error| format!("无法启动 {}：{error}", program.display()))
@@ -2190,6 +2234,44 @@ mod tests {
         assert_eq!(prism_instance_for(&dir, "26.1.2").as_deref(), Some("26.1.2 test"));
         assert_eq!(prism_instance_for(&dir, "1.20.1"), None);
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn prism_newlaunch_cmdline_is_detected_and_version_parsed() {
+        let cmdline = "java -Duser.language=en -cp /app/share/PrismLauncher/NewLaunch.jar:/home/u/.var/app/PrismLauncher/libraries/com/mojang/minecraft/26.1.2/minecraft-26.1.2-client.jar org.prismlauncher.EntryPoint";
+        assert!(is_minecraft_cmdline(&cmdline.to_ascii_lowercase()));
+        assert_eq!(parse_client_version(cmdline).as_deref(), Some("26.1.2"));
+        assert_eq!(parse_client_version("java org.prismlauncher.EntryPoint"), None);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn linux_prism_entrypoint_process_is_probed_as_minecraft() {
+        use std::process::{Command, Stdio};
+        // 模拟 Prism NewLaunch 在宿主 /proc 里的真实形态：argv0 是包装后的 java 命令，
+        // 没有 --version，但 classpath 带 minecraft-26.1.2-client.jar。
+        let fake = "java -cp /tmp/NewLaunch.jar:/tmp/minecraft-26.1.2-client.jar org.prismlauncher.EntryPoint";
+        let mut child = Command::new("bash")
+            .arg("-c")
+            .arg(format!("exec -a {fake:?} sleep 5"))
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .expect("spawn fake prism process");
+        let mut found = None;
+        for _ in 0..20 {
+            std::thread::sleep(Duration::from_millis(50));
+            let probe = client_probe();
+            if probe.version.as_deref() == Some("26.1.2") {
+                found = Some(probe);
+                break;
+            }
+        }
+        let _ = child.kill();
+        let _ = child.wait();
+        let probe = found.expect("Prism EntryPoint 进程未被识别为 26.1.2");
+        assert!(probe.running);
+        assert!(probe.compatible("26.1.2"));
     }
 
     #[test]

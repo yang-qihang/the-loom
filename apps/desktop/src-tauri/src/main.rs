@@ -12,7 +12,7 @@ use std::io::Write;
 use std::net::{SocketAddr, TcpStream};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
@@ -1689,6 +1689,10 @@ fn build_env_state(
     if let Ok(mut seen) = state.client_seen_ready.lock() {
         *seen = next_seen_ready;
     }
+    // 客户端第一次就绪：把游戏窗口抬到前台（Linux X11/XWayland 或 KDE KWin script）。
+    if !seen_ready && next_seen_ready && client.state == envstate::STATE_READY {
+        focus_client_window();
+    }
     if let Ok(mut lost) = state.client_lost.lock() {
         *lost = client_lost;
     }
@@ -2678,6 +2682,8 @@ mod x11_focus {
         fn XFree(data: *mut c_void) -> c_int;
         fn XSetInputFocus(display: *mut Display, window: Window, revert_to: c_int, time: c_ulong) -> c_int;
         fn XRaiseWindow(display: *mut Display, window: Window) -> c_int;
+        fn XMapWindow(display: *mut Display, window: Window) -> c_int;
+        fn XMapRaised(display: *mut Display, window: Window) -> c_int;
         fn XFlush(display: *mut Display) -> c_int;
         fn XStringToKeysym(name: *const c_char) -> c_ulong;
         fn XKeysymToKeycode(display: *mut Display, keysym: c_ulong) -> u8;
@@ -2771,6 +2777,9 @@ mod x11_focus {
             let root = unsafe { XDefaultRootWindow(self.0) };
             let Some(window) = self.find_window(root, "minecraft", 4) else { return false; };
             unsafe {
+                // 最小化/图标化时先 map，再 raise；仅 XSetInputFocus 不会把窗口显示出来。
+                XMapWindow(self.0, window);
+                XMapRaised(self.0, window);
                 XRaiseWindow(self.0, window);
                 XSetInputFocus(self.0, window, 2, 0);
                 XFlush(self.0);
@@ -2779,6 +2788,64 @@ mod x11_focus {
         }
     }
 }
+
+/// 启动完成后把游戏窗口带到前台；Wayland 下 X11 proto 不可用，走 KWin scripting DBus。
+static LAST_CLIENT_FOCUS_MS: AtomicU64 = AtomicU64::new(0);
+
+#[cfg(target_os = "linux")]
+fn focus_client_window() {
+    LAST_CLIENT_FOCUS_MS.store(envstate::now_millis(), Ordering::Relaxed);
+    // X11/XWayland 先直接 map+raise；KDE Wayland 下 KWin script 才是能激活窗口的那条路径，
+    // 因此即使 X11 找到了窗口也继续走 KWin（两者对同一窗口幂等）。
+    if let Some(display) = x11_focus::DisplayHandle::open() {
+        let _ = display.focus_minecraft();
+    }
+    focus_client_window_kwin();
+}
+
+#[cfg(target_os = "linux")]
+fn focus_client_window_kwin() {
+    let desktop = std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default().to_ascii_lowercase();
+    if !desktop.contains("kde") && !desktop.contains("plasma") {
+        return;
+    }
+    // 放在私有 runtime 目录，避免 /tmp 固定文件名被 symlink 抢占后执行任意 KWin script。
+    let base = std::env::var_os("XDG_RUNTIME_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(std::env::temp_dir);
+    let script_path = base.join(format!("loom-focus-mc-{}.js", std::process::id()));
+    let pids = crate::launcher::minecraft_pids_for_version(crate::launcher::DEFAULT_MC_VERSION);
+    let pids: Vec<String> = pids.iter().map(ToString::to_string).collect();
+    let script = r#"const pids = [__PIDS__];
+const list = workspace.windowList();
+const mc = list.find(w => {
+  const s = ((w.caption || '') + ' ' + (w.resourceClass || '') + ' ' + (w.resourceName || '')).toLowerCase();
+  return (typeof w.pid === 'number' && pids.includes(w.pid)) || s.includes('minecraft') || s.includes('lwjgl') || s.includes('glfw');
+});
+if (mc) {
+  try { mc.minimized = false; } catch (e) {}
+  try { workspace.activateWindow(mc); } catch (e) {}
+}
+"#.replace("__PIDS__", &pids.join(","));
+    if std::fs::write(&script_path, script).is_err() {
+        return;
+    }
+    let path = script_path.to_string_lossy().to_string();
+    let _ = std::process::Command::new("gdbus")
+        .args(["call", "--session", "--dest", "org.kde.KWin", "--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.loadScript", &path])
+        .output();
+    let _ = std::process::Command::new("gdbus")
+        .args(["call", "--session", "--dest", "org.kde.KWin", "--object-path", "/Scripting", "--method", "org.kde.kwin.Scripting.start"])
+        .output();
+}
+
+#[cfg(target_os = "windows")]
+fn focus_client_window() {
+    let _ = win_focus::focus_minecraft();
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+fn focus_client_window() {}
 
 #[cfg(target_os = "linux")]
 fn install_kwin_focus_script(state: &AppState) -> bool {
@@ -2957,11 +3024,12 @@ fn start_focus_follow(app: tauri::AppHandle) {
                 .lock()
                 .map(|settings| settings.focus_follow)
                 .unwrap_or(true);
-            if inside {
+            let recently_focused_client = envstate::now_millis().saturating_sub(LAST_CLIENT_FOCUS_MS.load(Ordering::Relaxed)) < 3000;
+            if inside && !recently_focused_client {
                 let _ = window.unminimize();
                 let _ = window.show();
                 let _ = window.set_focus();
-            } else if follow_game && window.is_focused().unwrap_or(false) {
+            } else if follow_game && window.is_focused().unwrap_or(false) && !recently_focused_client {
                 let _ = display.focus_minecraft();
             }
             was_inside = inside;

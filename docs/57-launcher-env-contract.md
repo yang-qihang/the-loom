@@ -235,7 +235,7 @@ Rust `envstate::EnvState`（camelCase JSON）：
 本轮（task-20 启动器后端）实际跑过（Windows host，`4109095` + 本地改动）：
 
 - `cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml`：**exit 0，0 warnings**。
-- `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`：**49 passed / 0 failed / 4 ignored（Linux 合入后）**；Windows 本机原记录为 50 passed。跨平台修正：直启命令单测原先写死 `natives-windows`，在 Linux 会误判合法 OS 过滤；已改为按宿主 OS 断言，测试语义不变。
+- `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`：**52 passed / 0 failed / 4 ignored（Linux 合入后）**；Windows 本机原记录为 50 passed。跨平台修正：直启命令单测原先写死 `natives-windows`，在 Linux 会误判合法 OS 过滤；已改为按宿主 OS 断言，测试语义不变。
   - `envstate`：四灯判定/全绿/错误+启动中、客户端丢失→恢复、mock 不阻断、织偶超时 needs_action、client 1.21.1 不绿 / 26.1 族绿 / 未知版本不绿 / 端口-only 不算 Paper ready / 旧 Paper error / L2 版本不匹配 / 多客户端优先 26.1.2 + 旧版本提示不阻塞；
   - `launcher`：rules/arch、Maven→路径、Prism 实例、直启命令、离线 UUID、命令注入拒绝、quickPlay、cancel、open_url、`--version` 解析与兼容矩阵、空目录不挡 versions/26.1.2、PCL 候选、多客户端 probe + gameDir、**task-20 默认 direct 第一顺序、外部启动器仅接受 26.1.x、现有安装检测（要求 26.1.2.json）**；
   - `window_geometry`：窗口几何 clamp 全套（见 §5.1）+ 真实 Win32 rcWork 查询。
@@ -244,6 +244,14 @@ Rust `envstate::EnvState`（camelCase JSON）：
 - 静态契约/回归检查：`tmp/audit/launcher-contract-check.log` **65/65** + `tmp/audit/task17-window-contract-check.log` **18/18** + `tmp/audit/task18-multiclient-contract-check.log` **17/17** + `tmp/audit/task20-launcher-contract-check.log`（task-20 默认直启/一键准备/外部校验/退出只关产品客户端）。合计 **约 110 项静态回归 PASS**。
 - **真机只读探测**（`task20` 机器测试，未杀任何进程）：本轮开始时 java PID 8280 `--version 26.1.2 --gameDir D:\VScode_code\the-loom\.minecraft`、25565/4317 有监听；测试期间客户端被外部关闭（测试自动 skip 运行中用例），repo `.minecraft/26.1.2` 与包内 Java 25 资产始终可用。
 - **未做**：真机 GUI 启动（按约束不重复启动/不抢焦点）；1.21.1 在跑 + App 自动/点击启动 26.1.2 的完整时序需重建安装包后验收。
+
+## 7.1 Linux 客户端补强（2026-11-02 合入后修复）
+
+- **Prism/MultiMC 检测**：NewLaunch 的宿主进程是 `org.prismlauncher.EntryPoint`，不一定有 `--version`；现在接受该包装器，并同时要求 classpath 含 `minecraft-<ver>-client.jar`，从 jar 名兜底解析版本。避免把 Prism 启动器 UI 误判成游戏，也避免 26.1.2 游戏漏检。
+- **启动后前台**：客户端第一次 ready 时自动聚焦；Linux 先走 X11 `map+raise+focus`（含最小化恢复），KDE Wayland 再走 KWin scripting DBus（按 PID/窗口标题找游戏、取消最小化、activate）。focus-follow 在 3 秒内让位，避免织界把刚弹到前面的游戏又盖回去。
+- **任务栏归属**：外部启动器/直启 Java 使用独立进程组，并清除从织界继承的 `DESKTOP_STARTUP_ID` / `XDG_ACTIVATION_TOKEN` 等启动令牌，避免 KWin 把游戏窗口合并到织界图标下。
+- **卡片文案**：四张 L0 卡片只保留用户可操作的信息；移除协议号、task 编号、内部实现口径（如「写死」「产品自管直启」「version JSON + 包内 Java」）等开发者说明。
+- **验证**：cargo test **52 passed / 0 failed / 4 ignored**（含真实 /proc 的 Prism EntryPoint 模拟）；完整 Playwright e2e 见本次运行；verify 绿（仅既有 G-FRESH-READER 告警）。
 
 ## 8. 未完成 / 交给后续
 

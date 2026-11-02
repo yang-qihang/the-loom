@@ -78,7 +78,7 @@
   <div class="grid">
     <div class="card"><span class="pill" id="pill-java">检测中</span><h2>运行环境</h2><div class="detail" id="detail-java">正在检测系统运行环境……</div></div>
     <div class="card"><span class="pill" id="pill-node">检测中</span><h2>织机运行时</h2><div class="detail" id="detail-node">织机以后台进程运行……</div></div>
-    <div class="card"><span class="pill" id="pill-prism">检测中</span><h2>《我的世界》客户端</h2><div class="detail" id="detail-prism">正在检测启动器……</div></div>
+    <div class="card"><span class="pill" id="pill-prism">检测中</span><h2>《我的世界》客户端</h2><div class="detail" id="detail-prism">正在检测客户端……</div></div>
     <div class="card"><span class="pill" id="pill-paper">检测中</span><h2>世界服务端</h2><div class="detail" id="detail-paper">正在检测服务端与插件……</div></div>
   </div>
   <div class="engine-mode">
@@ -101,7 +101,7 @@
     <h2 class="tip-title">怎么开始</h2>
     <ul class="tip-list">
       <li><strong>窗口</strong>：把《我的世界》设为「无边框窗口」或窗口化全屏，别用独占全屏。</li>
-      <li><strong>置顶</strong>：织界可点「置顶」，或按控制键、上档键和 L 保持可见。</li>
+      <li><strong>置顶</strong>：点「置顶」或按 Ctrl+Shift+L，让织界保持可见。</li>
       <li><strong>切回工坊</strong>：在 Minecraft 里按 Alt+Z：先松开游戏鼠标（游戏会打开暂停菜单），再切回工坊；再按一次回到游戏。</li>
       <li><strong>伴玩</strong>：打开后变成 420×620 小窗，只留目标、艾拉的一句话和运行按钮。</li>
       <li><strong>并排</strong>：代码窗口和 Minecraft 各占一边，就能一边看效果一边改下一句。</li>
@@ -179,7 +179,7 @@ function applyEnvState(env) {
   if (env.client?.state === "ready" && env.clientVersion) {
     $("detail-prism").textContent = `已连接《我的世界》${env.clientVersion}${env.otherClientVersion ? `（另有 ${env.otherClientVersion} 在运行，未关闭）` : ""}`;
   }
-  if (env.versionBlocked) $("detail-prism").textContent = env.client?.detail || "客户端版本不匹配，本作需要 26.1.2";
+  if (env.versionBlocked) $("detail-prism").textContent = env.client?.detail || "客户端版本不一致，请启动本作版本";
 }
 async function refreshEnvState() {
   try { applyEnvState(await invoke("env_state")); } catch { /* old shell fallback */ }
@@ -191,8 +191,8 @@ async function probe() {
     setPill("java", report.java); setPill("node", report.node);
     await refreshEnvState();
     const missing = [report.java, report.node].filter(p => !p.ok).map(p => "· " + p.detail);
-    if (latestEnv?.versionBlocked) missing.push("· 客户端版本不匹配：本作需要 26.1.2");
-    else if (latestEnv && !latestEnv.allReady) missing.push("· 四灯尚未全部就绪");
+    if (latestEnv?.versionBlocked) missing.push("· 客户端版本不一致，请启动本作版本");
+    else if (latestEnv && !latestEnv.allReady) missing.push("· 还有环境项没准备好");
     log(missing.join("\n") || "四个步骤都就绪了。");
   } catch (error) { log("# 检测失败：" + error); }
 }
@@ -224,8 +224,8 @@ $("btn-enter").onclick = async () => {
   try {
     const env = await invoke("env_state");
     applyEnvState(env);
-    if (env.versionBlocked) { log("客户端版本不匹配：本作需要 26.1.2；请先准备/启动正确的客户端。"); return; }
-    if (!env.allReady) { log("四灯尚未全部就绪，暂时不能进入工坊。"); return; }
+    if (env.versionBlocked) { log("客户端版本不一致，请先准备或启动本作版本。"); return; }
+    if (!env.allReady) { log("还有环境项没准备好，暂时不能进入工坊。"); return; }
   } catch { /* fall through to old shell */ }
   try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); } catch { location.href = "./studio/index.html"; }
 };

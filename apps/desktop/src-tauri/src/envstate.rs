@@ -255,10 +255,7 @@ pub fn poll_lights(input: &PollInput) -> (EnvLight, EnvLight, EnvLight, EnvLight
     let engine = if engine_ready {
         EnvLight::new(
             STATE_READY,
-            match input.engine_health {
-                Some(health) => format!("织机已连接（127.0.0.1，端口 {}）", if health.port.is_empty() { "4317" } else { health.port.as_str() }),
-                None => "织机已连接".to_string(),
-            },
+            "织机已连接".to_string(),
         )
     } else if launching(input, KIND_ENGINE) {
         EnvLight::new(STATE_STARTING, "正在启动织机…").hint("首次启动约 5–15 秒，启动后会自动连接世界与织偶。")
@@ -278,30 +275,27 @@ pub fn poll_lights(input: &PollInput) -> (EnvLight, EnvLight, EnvLight, EnvLight
         let server_version = health.mc_version.trim();
         let server_compatible = !server_version.is_empty() && crate::launcher::client_version_compatible(Some(server_version), expected);
         if health.mc_connected && server_compatible {
-            EnvLight::new(STATE_READY, format!("世界服务端已就绪（{server_version}，127.0.0.1:25565）"))
+            EnvLight::new(STATE_READY, format!("世界服务端已就绪（{server_version}）"))
         } else if health.mc_connected && !server_version.is_empty() {
-            let protocol = crate::launcher::protocol_for_version(server_version)
-                .map(|value| format!("协议 {value}"))
-                .unwrap_or_else(|| "协议未知".to_string());
             EnvLight::new(
                 STATE_ERROR,
-                format!("世界服务端版本 {server_version}（{protocol}），本作需要 {expected}（协议 {}）", crate::launcher::EXPECTED_PROTOCOL),
+                format!("世界服务端版本不一致：当前 {server_version}，本作需要 {expected}"),
             )
-            .hint("25565 上跑的不是内置 26.1.2 Paper：请关闭旧服务端（如 1.21.1 Paper）后点「重试启动世界」；织界不会自动杀它。")
+            .hint("请关闭旧服务端后点「重试启动世界」；织界不会自动关闭它。")
             .retry(true)
         } else if health.mc_connected {
             EnvLight::new(
                 STATE_ERROR,
-                format!("织机已连上服务端，但读不到版本，无法确认是 {expected}（协议 {}）", crate::launcher::EXPECTED_PROTOCOL),
+                format!("世界服务端已连接，但无法确认版本（需要 {expected}）"),
             )
-            .hint("请点「重试启动世界」重启内置 26.1.2 Paper；若端口被其他服务端占用，先关闭它。")
+            .hint("点「重试启动世界」重启本作服务端；若 25565 被别的程序占用，先关闭它。")
             .retry(true)
         } else if input.paper_port_open {
             EnvLight::new(
                 STATE_NEEDS_ACTION,
-                format!("25565 端口有服务，但织机没连上 {expected} Paper（可能是旧 1.21.1 Paper 或其他服务端占用）"),
+                format!("25565 被其他程序占用，还没连上本作服务端（需要 {expected}）"),
             )
-            .hint("关闭占用 25565 的旧服务端后点「重试启动世界」；织界不会自动杀它。")
+            .hint("关闭占用 25565 的程序后点「重试启动世界」；织界不会自动关闭它。")
             .retry(true)
         } else {
             EnvLight::new(STATE_NEEDS_ACTION, "世界服务端未启动")
@@ -314,9 +308,9 @@ pub fn poll_lights(input: &PollInput) -> (EnvLight, EnvLight, EnvLight, EnvLight
         // P0：端口开着不等于 26.1.2 Paper 就绪（旧 1.21.1 也能占 25565）。
         EnvLight::new(
             STATE_NEEDS_ACTION,
-            format!("25565 端口有服务，但织机未确认它是 {expected} Paper（可能是旧版服务端占用）"),
+            format!("25565 被其他程序占用，还没确认本作服务端（需要 {expected}）"),
         )
-        .hint("关闭占用 25565 的旧服务端后点「重试启动世界」；织机起来后会自动校验版本。")
+        .hint("关闭占用 25565 的程序后点「重试启动世界」。")
         .retry(true)
     } else if let Some(error) = input.errors.get(KIND_PAPER) {
         EnvLight::new(STATE_ERROR, error.clone())
@@ -382,36 +376,26 @@ pub fn poll_lights(input: &PollInput) -> (EnvLight, EnvLight, EnvLight, EnvLight
         )
         .hint("首次启动可能需要十几秒；完成后客户端灯会变绿；失败会给出可操作的中文提示。")
     } else if input.client_running {
-        // task-16 P0：任意版本客户端在跑但 ≠26.1.x → 绝不绿、绝不 allReady。
+        // 任意版本客户端在跑但版本不符 → 绝不绿、绝不 allReady。
         let found = client_version.unwrap_or("未知版本");
-        let protocol = crate::launcher::protocol_for_version(found)
-            .map(|value| format!("协议 {value} ≠ {}", crate::launcher::EXPECTED_PROTOCOL))
-            .unwrap_or_else(|| format!("无法确认协议，需要 {}", crate::launcher::EXPECTED_PROTOCOL));
         EnvLight::new(
             STATE_NEEDS_ACTION,
-            format!(
-                "检测到《我的世界》{found}（{protocol}）；本作服务端需要 {expected}（协议 {}），版本不匹配不能进入世界",
-                crate::launcher::EXPECTED_PROTOCOL
-            ),
+            format!("检测到《我的世界》{found}，版本与本作不一致"),
         )
-        .hint("不用关闭当前旧客户端：直接点「重试」，织界会保持它运行并自动启动本作 26.1.2（优先复用已检测到的 .minecraft/26.1.2）；若仍失败，再按提示安装/指定 26.1.2。")
+        .hint(format!("本作使用 {expected}；旧客户端不用关闭，点「重试」会自动启动本作版本。"))
         .retry(true)
     } else if launching(input, KIND_CLIENT) {
-        EnvLight::new(STATE_STARTING, "正在启动《我的世界》…").hint(format!("只接受 {expected}（协议 {}）；复用已运行客户端前会先校验版本。", crate::launcher::EXPECTED_PROTOCOL))
+        EnvLight::new(STATE_STARTING, "正在启动《我的世界》…").hint("首次启动可能需要十几秒，完成后会自动切到游戏。")
     } else if let Some(error) = input.errors.get(KIND_CLIENT) {
         EnvLight::new(STATE_ERROR, error.clone())
-            .hint("可点「重试启动客户端」；失败原因会写进「打开日志目录」里的 client 日志。")
+            .hint("点「重试」再试一次；仍失败可打开日志目录查看原因。")
             .retry(true)
             .guide(input.client_guide.clone())
     } else {
         // task-20：本机已有 26.1.2 时提示可直接启动；没有时提示「准备 26.1.2」入口。
         let hint = match input.client_install_dir.as_deref() {
-            Some(dir) => format!(
-                "本机已找到《我的世界》{expected}（{dir}）：点「启动 {expected}」会默认直启产品客户端（官方 version JSON + 包内 Java + 离线账号 + quickPlay 25565）。"
-            ),
-            None => format!(
-                "点「启动 {expected}」尝试产品自管直启；本机没有 26.1.2 文件时点「准备 {expected}」：会先采用本机现有 .minecraft，找不到再打开官方下载页。"
-            ),
+            Some(_dir) => format!("点「启动《我的世界》」即可，本机已找到 {expected}。"),
+            None => format!("点「准备 {expected}」找到本机客户端；没有的话会打开官方下载页。"),
         };
         EnvLight::new(STATE_NEEDS_ACTION, "《我的世界》客户端未运行")
             .hint(hint)
@@ -424,13 +408,13 @@ pub fn poll_lights(input: &PollInput) -> (EnvLight, EnvLight, EnvLight, EnvLight
 
 pub fn adapter_label(adapter: &str) -> &str {
     match adapter {
-        "reuse" => "复用已运行客户端",
+        "reuse" => "已运行的客户端",
         "prism" => "Prism Launcher",
         "hmcl" => "HMCL",
-        "direct" => "直接启动 26.1.2",
+        "direct" => "本作启动",
         "official" => "官方启动器",
         "pcl2" => "PCL2",
-        "custom" => "自定义启动命令",
+        "custom" => "自定义启动器",
         other => other,
     }
 }
@@ -576,7 +560,7 @@ mod tests {
 
     #[test]
     fn client_121_running_is_needs_action_and_never_ready() {
-        // task-16 P0 回归：1.21.1 在跑 → client 灯不绿、提示当前版本/需要版本/协议，且可重试。
+        // 1.21.1 在跑 → client 灯不绿、提示当前版本/需要版本，且可重试。
         let healthy = health("26.1.2", true);
         let errors = HashMap::new();
         let launching: Vec<String> = vec![];
@@ -589,9 +573,22 @@ mod tests {
         assert!(client.can_retry);
         assert!(!client.can_start);
         assert!(client.detail.contains("1.21.1"));
-        assert!(client.detail.contains("26.1.2"));
-        assert!(client.detail.contains("767"));
-        assert!(client.detail.contains("775"));
+        assert!(client.detail.contains("版本与本作不一致"));
+        assert!(client.hint.as_deref().unwrap_or("").contains("26.1.2"));
+    }
+
+    #[test]
+    fn client_card_text_does_not_expose_internal_protocol_jargon() {
+        let healthy = health("26.1.2", true);
+        let errors = HashMap::new();
+        let launching: Vec<String> = vec![];
+        let mut poll = input(Some(&healthy), true, true, &launching, &errors);
+        poll.client_version = Some("1.21.1".into());
+        let (_, _, _, client) = poll_lights(&poll);
+        let text = format!("{} {}", client.detail, client.hint.unwrap_or_default());
+        assert!(!text.contains("协议"), "卡片不能显示内部协议号：{text}");
+        assert!(!text.contains("写死"), "卡片不能显示实现口径：{text}");
+        assert!(text.contains("26.1.2"));
     }
 
     #[test]
@@ -672,8 +669,8 @@ mod tests {
         assert_eq!(paper.state, STATE_ERROR);
         assert!(paper.can_retry);
         assert!(paper.detail.contains("1.21.1"));
-        assert!(paper.detail.contains("767"));
-        assert!(paper.detail.contains("775"));
+        assert!(paper.detail.contains("版本不一致"));
+        assert!(paper.detail.contains("26.1.2"));
     }
 
     #[test]
