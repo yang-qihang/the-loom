@@ -8,9 +8,9 @@
 [WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
 [WebServer] (node:283308) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 [WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
-[WebServer] 
+[WebServer]
 [WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
-[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] [plugin builtin:vite-reporter]
 [WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
 [WebServer] - Using dynamic import() to code-split the application
 [WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
@@ -21,7 +21,7 @@
 [WebServer]   - plugin vite:worker-import-meta-url transform (4 calls)
 [WebServer]   - plugin vite:worker load (2 calls)
 [WebServer] See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
-[WebServer] 
+[WebServer]
 [WebServer] (node:283296) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 [WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
 

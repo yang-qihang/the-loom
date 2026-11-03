@@ -173,7 +173,7 @@ dist/assets/tsMode-BmsEYaq7.js                              21.82 kB │ gzip:  
 dist/assets/lspLanguageFeatures-CHlgDdx9.js                 28.21 kB │ gzip:     7.17 kB
 dist/assets/index-rKeZwRxB.js                            4,985.81 kB │ gzip: 1,348.26 kB
 
-[plugin builtin:vite-reporter] 
+[plugin builtin:vite-reporter]
 (!) Some chunks are larger than 4096 kB after minification. Consider:
 - Using dynamic import() to code-split the application
 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
@@ -256,4 +256,3 @@ warning: `loomcraft-desktop` (bin "loomcraft-desktop") generated 7 warnings (run
     Finished 2 bundles at:
         /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm (452.78 MiB)
         /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage (522.51 MiB)
-

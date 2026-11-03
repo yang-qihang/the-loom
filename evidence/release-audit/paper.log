@@ -16,7 +16,7 @@ ssed":true},{"id":"player-lit-fourth","passed":true},{"id":"no-shortcut","passed
 [2026-11-03T09:44:58.859Z] CHECK l1.no-beat.not-passed PASS {"passed":false,"stars":1,"criteria":[{"id":"four-lamps-lit","passed":false},{"id":"golem-home","passed":true},{"id":"player-lit-fourth","passed":false},{"id":"no-shortcut","passed":true}],"hidden":[{"id":"h1","passed":true},{"id":"h2","passed":true}],"failures":["4 盏路灯全部点亮","第 4 盏灯由你亲手点亮"]}
 [2026-11-03T09:44:58.859Z] CHECK l1.no-beat.report-equals-mock PASS {"real":{"passed":false,"stars":1,"criteria":[{"id":"four-lamps-lit","passed":false},{"id":"golem-home","passed":true},{"id":"player-lit-fourth","passed":false},{"id":"no-shortcut","passed":true}],"hidden":[{"id":"h1","passed":true},{"id":"h2","passed":true}],"failures":["4 盏路灯全部点亮","第 4 盏灯由你亲手点亮"]},"mock":{"passed":false,"stars":1,"criteria":[{"id":"four-lamps-lit","passed":false},{"id":"golem-home","passed":true},{"id":"player-lit-fourth","passed":false},{"id":"no-shortcut","passed":true}],"hidden":[{"id":"h1","passed":true},{"id":"h2","passed":true}],"failures":["4 盏路灯全部点亮","第 4 盏灯由你亲手点亮"]}}
 [2026-11-03T09:44:58.863Z] CHECK l1.no-beat.digest-equals-mock PASS null
-[2026-11-03T09:44:58.863Z] CHECK l1.no-beat.player-lit-fourth-fails PASS 
+[2026-11-03T09:44:58.863Z] CHECK l1.no-beat.player-lit-fourth-fails PASS
 [2026-11-03T09:44:59.053Z] evidence written: evidence/l1-real-2026-11-03T09-44-20-204Z.json
 [2026-11-03T09:44:59.053Z] RESULT PASS
 

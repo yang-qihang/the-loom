@@ -3,7 +3,7 @@
  session=93f8c386 epoch=1
 [2026-11-03T09:47:25.469Z] CHECK both-bots-online PASS ["LeftWeaver","RightWeaver"]
 [2026-11-03T09:47:25.469Z] CHECK session-level PASS "L10"
-[2026-11-03T09:47:25.518Z] CHECK stale-session-rejected PASS 
+[2026-11-03T09:47:25.518Z] CHECK stale-session-rejected PASS
 [2026-11-03T09:47:25.568Z] CHECK give.LeftWeaver PASS {"ok":true,"gave":"minecraft:oak_planks","count":4,"players":0,"kit":{"minecraft:lodestone":4,"minecraft:oak_planks":4},"queued":true}
 [2026-11-03T09:47:25.618Z] CHECK give.RightWeaver PASS {"ok":true,"gave":"minecraft:oak_planks","count":4,"players":0,"kit":{"minecraft:lodestone":4,"minecraft:oak_planks":4},"queued":true}
 [2026-11-03T09:47:29.168Z] CHECK give.HumanLike PASS {"ok":true,"gave":"minecraft:lodestone","count":1,"players":1,"kit":{"minecraft:lodestone":1,"minecraft:oak_planks":4}}

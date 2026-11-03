@@ -101,4 +101,3 @@ test window_geometry::tests::work_area_smaller_than_min_allows_shrink_to_fit ...
 test launcher::tests::linux_prism_entrypoint_process_is_probed_as_minecraft ... ok
 
 test result: ok. 54 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.06s
-
