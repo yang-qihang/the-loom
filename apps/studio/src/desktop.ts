@@ -4,8 +4,17 @@ export type DesktopInvoke = (command: string, args?: Record<string, unknown>) =>
 interface TauriInternals {
   invoke?: DesktopInvoke;
 }
+interface TauriWindowHandle {
+  close: () => Promise<void>;
+  startDragging: () => Promise<void>;
+  setAlwaysOnTop: (value: boolean) => Promise<void>;
+  startResizeDragging?: (direction: string) => Promise<void>;
+}
+
 interface TauriGlobal {
   core?: { invoke?: DesktopInvoke };
+  window?: { getCurrentWindow?: () => TauriWindowHandle };
+  webviewWindow?: { getCurrentWebviewWindow?: () => TauriWindowHandle };
 }
 interface WindowWithShell {
   __TAURI_INTERNALS__?: TauriInternals;
@@ -56,8 +65,9 @@ export function isEmbeddedFrame(): boolean {
 
 export function getDesktopInvoke(): DesktopInvoke | null {
   const shell = shellWindow();
-  if (shell.__TAURI_INTERNALS__?.invoke) return shell.__TAURI_INTERNALS__.invoke;
+  // 优先使用 Tauri 公共 API，旧壳没有公开全局 API 时回退内部接口。
   if (shell.__TAURI__?.core?.invoke) return shell.__TAURI__.core.invoke;
+  if (shell.__TAURI_INTERNALS__?.invoke) return shell.__TAURI_INTERNALS__.invoke;
   // Studio 在 iframe 里时通过壳的 postMessage 桥转发（见 apps/desktop/shell/shell.js）。
   if (typeof window !== "undefined" && window.parent && window.parent !== window) {
     return (command, args) => new Promise((resolve, reject) => {
@@ -79,4 +89,19 @@ export function getDesktopInvoke(): DesktopInvoke | null {
     });
   }
   return null;
+}
+
+/**
+ * 当前原生窗口句柄。独立教材窗口优先使用公共 window API，
+ * 操作仍受 Tauri 权限控制；调用方在失败时回退自定义 Rust 命令。
+ */
+export function getDesktopWindow(): TauriWindowHandle | null {
+  const shell = shellWindow();
+  const api = shell.__TAURI__;
+  try {
+    return api?.window?.getCurrentWindow?.() ?? api?.webviewWindow?.getCurrentWebviewWindow?.() ?? null;
+  } catch {
+    // 独立窗口如果还没拿到 window metadata，直接退回自定义命令路径。
+    return null;
+  }
 }

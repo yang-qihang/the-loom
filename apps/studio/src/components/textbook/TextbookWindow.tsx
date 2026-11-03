@@ -10,7 +10,7 @@ import {
 } from "react";
 import { RichText } from "../RichText";
 import { createPortal } from "react-dom";
-import { getDesktopInvoke } from "../../desktop";
+import { getDesktopInvoke, getDesktopWindow } from "../../desktop";
 import { TextbookContent, textbookSections } from "./TextbookContent";
 import type { TextbookLibrary } from "../../textbook/types";
 import "./textbook.css";
@@ -175,6 +175,14 @@ export function TextbookWindow({
   // 独立窗口的「置顶」必须落到原生窗口，不能只改 DOM z-index；这里把持久化的初值同步过去。
   useEffect(() => {
     if (!standalone) return;
+    const nativeWindow = getDesktopWindow();
+    if (nativeWindow) {
+      void nativeWindow.setAlwaysOnTop(pinned).catch(() => {
+        const invoke = getDesktopInvoke();
+        if (invoke) void invoke("set_textbook_pin", { value: pinned }).catch(() => {});
+      });
+      return;
+    }
     const invoke = getDesktopInvoke();
     if (!invoke) return;
     void invoke("set_textbook_pin", { value: pinned }).catch(() => {});
@@ -248,6 +256,14 @@ export function TextbookWindow({
       if (target?.closest(TITLEBAR_BUTTON_SELECTOR)) return;
       event.preventDefault();
       if (standalone) {
+        const nativeWindow = getDesktopWindow();
+        if (nativeWindow) {
+          void nativeWindow.startDragging().catch(() => {
+            const invoke = getDesktopInvoke();
+            if (invoke) void invoke("window_start_drag").catch(() => {});
+          });
+          return;
+        }
         const invoke = getDesktopInvoke();
         if (invoke) void invoke("window_start_drag").catch(() => {});
         return;
@@ -289,6 +305,14 @@ export function TextbookWindow({
     event.preventDefault();
     event.stopPropagation();
     if (standalone) {
+      const nativeWindow = getDesktopWindow();
+      if (nativeWindow?.startResizeDragging) {
+        void nativeWindow.startResizeDragging("SouthEast").catch(() => {
+          const invoke = getDesktopInvoke();
+          if (invoke) void invoke("textbook_start_resize", { direction: "south-east" }).catch(() => {});
+        });
+        return;
+      }
       const invoke = getDesktopInvoke();
       if (invoke) void invoke("textbook_start_resize", { direction: "south-east" }).catch(() => {});
       return;
@@ -358,7 +382,7 @@ export function TextbookWindow({
       className={windowClassName}
       style={
         standalone
-          ? { position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0 }
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: TEXTBOOK_UNPINNED_Z_INDEX }
           : {
               left: geometry.x,
               top: geometry.y,

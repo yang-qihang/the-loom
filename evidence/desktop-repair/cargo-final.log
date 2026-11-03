@@ -1,0 +1,104 @@
+   Compiling loomcraft-desktop v0.1.0 (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri)
+warning: unused variable: `center_x`
+    --> src/main.rs:2432:9
+     |
+2432 |     let center_x = position.x + (size.width / 2) as i32;
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_center_x`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `center_y`
+    --> src/main.rs:2433:9
+     |
+2433 |     let center_y = position.y + (size.height / 2) as i32;
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_center_y`
+
+warning: function `start_focus_follow` is never used
+    --> src/main.rs:3160:4
+     |
+3160 | fn start_focus_follow(app: tauri::AppHandle) {
+     |    ^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `pointer` is never used
+    --> src/main.rs:2861:16
+     |
+2855 |     impl DisplayHandle {
+     |     ------------------ method in this implementation
+...
+2861 |         pub fn pointer(&self) -> Option<(i32, i32)> {
+     |                ^^^^^^^
+
+warning: function `XQueryPointer` is never used
+    --> src/main.rs:2815:12
+     |
+2815 |         fn XQueryPointer(
+     |            ^^^^^^^^^^^^^
+
+warning: `loomcraft-desktop` (bin "loomcraft-desktop" test) generated 5 warnings (run `cargo fix --bin "loomcraft-desktop" -p loomcraft-desktop --tests` to apply 2 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.76s
+     Running unittests src/main.rs (apps/desktop/src-tauri/target/debug/deps/loomcraft_desktop-efc3df4bc27140e6)
+
+running 58 tests
+test envstate::tests::client_26_1_family_running_is_ready ... ok
+test envstate::tests::all_green_requires_every_light ... ok
+test envstate::tests::client_121_running_is_needs_action_and_never_ready ... ok
+test envstate::tests::client_autostart_decision_matches_l0_requirement ... ok
+test envstate::tests::client_loss_message_distinguishes_version_mismatch ... ok
+test envstate::tests::client_loss_clears_when_client_returns ... ok
+test envstate::tests::client_card_text_does_not_expose_internal_protocol_jargon ... ok
+test envstate::tests::client_loss_requires_active_session_and_seen_ready ... ok
+test envstate::tests::health_json_projection_handles_missing_bot ... ok
+test envstate::tests::launching_26_1_while_old_client_runs_shows_starting_not_failure ... ok
+test envstate::tests::failure_and_launching_states_are_reported ... ok
+test envstate::tests::mock_env_is_ready_without_paper_or_client ... ok
+test envstate::tests::mock_mode_never_blocks_on_client_loss ... ok
+test envstate::tests::multi_client_prefers_26_1_and_shows_other_version_note ... ok
+test envstate::tests::paper_26_1_health_is_ready_even_if_engine_busy ... ok
+test envstate::tests::paper_port_only_without_health_is_not_ready ... ok
+test envstate::tests::paper_wrong_version_is_error_not_ready ... ok
+test envstate::tests::running_client_with_unknown_version_is_not_green ... ok
+test envstate::tests::stalled_bot_becomes_actionable_instead_of_starting_forever ... ok
+test launcher::tests::client_version_parsing_and_compatibility_matrix ... ok
+test launcher::tests::external_launchers_accept_only_26_1_x ... ok
+test launcher::tests::launch_order_direct_first_when_old_client_running ... ok
+test launcher::tests::library_path_from_maven_coordinates ... ok
+test launcher::tests::machine_current_26_1_2_is_detected_and_reused ... ignored, depends on current machine: 26.1.2 client running (read-only probe)
+test launcher::tests::machine_direct_argv_uses_repo_assets_offline_quickplay ... ignored, depends on current machine: repo .minecraft/26.1.2 + bundled Java (read-only argv build)
+test launcher::tests::machine_existing_26_1_2_is_reused_not_duplicated ... ignored, depends on current machine: 26.1.2 client running (does not launch/spawn)
+test launcher::tests::build_direct_command_replaces_placeholders_and_filters_os_rules ... ok
+test launcher::tests::machine_existing_install_is_detected_for_prepare ... ignored, depends on current machine: repo .minecraft/26.1.2 exists (read-only scan)
+test launcher::tests::offline_uuid_is_stable_and_valid_shape ... ok
+test launcher::tests::open_url_rejects_non_http_or_shell_payload ... ok
+test launcher::tests::multi_client_probe_prefers_26_1_and_keeps_game_dir ... ok
+test launcher::tests::existing_install_detection_requires_version_json ... ok
+test launcher::tests::prism_newlaunch_cmdline_is_detected_and_version_parsed ... ok
+test launcher::tests::program_validation_rejects_shell_injection ... ok
+test launcher::tests::program_validation_accepts_existing_executable_path ... ok
+test launcher::tests::rules_match_os_and_arch ... ok
+test launcher::tests::wait_for_client_respects_cancel_flag ... ok
+test startup_window_tests::large_startup_fits_small_and_scaled_work_areas ... ok
+test launcher::tests::pcl2_candidates_include_prograft ... ok
+test launcher::tests::prism_instance_detection_reads_mmc_pack ... ok
+test launcher::tests::quickplay_does_not_leak_placeholders_or_duplicate_flags ... ok
+test startup_window_tests::old_small_window_is_migrated_to_large_startup_size ... ok
+test launcher::tests::minecraft_dir_pick_prefers_directory_with_expected_version ... ok
+test window_geometry::tests::dpi_scaled_logical_geometry_fits_physical_work_area ... ok
+test window_geometry::tests::invalid_zero_geometry_is_treated_as_missing ... ok
+test window_geometry::tests::missing_geometry_uses_default_window_centered ... ok
+test window_geometry::tests::already_fitting_geometry_is_untouched ... ok
+test window_geometry::tests::negative_offscreen_coordinates_fall_back_centered ... ok
+test window_geometry::tests::oversized_centered_saved_geometry_stays_visible ... ok
+test window_geometry::tests::oversized_saved_geometry_fits_1707_work_area ... ok
+test window_geometry::tests::real_saved_geometry_bottom_below_taskbar_is_clamped ... ok
+test window_geometry::tests::removed_second_monitor_falls_back_to_primary ... ok
+test window_geometry::tests::right_edge_overflow_is_clamped_inside ... ok
+test window_geometry::tests::secondary_monitor_offset_is_respected_when_monitor_still_exists ... ok
+test window_geometry::tests::small_saved_window_is_raised_to_min_but_never_beyond_work_area ... ok
+test window_geometry::tests::taskbar_work_area_offset_and_height_are_respected ... ok
+test window_geometry::tests::work_area_smaller_than_min_allows_shrink_to_fit ... ok
+test launcher::tests::linux_prism_entrypoint_process_is_probed_as_minecraft ... ok
+
+test result: ok. 54 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

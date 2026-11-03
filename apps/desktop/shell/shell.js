@@ -134,8 +134,9 @@ async function loadSettings() {
   } catch {
     toast("读取设置失败，使用默认值");
   }
-  // 修复历史坏状态：伴玩模式不能承载完整工作台页面，否则会把 1280 宽界面塞进 420 小窗。
-  if (settings.mode === "companion" && settings.page === "workbench") {
+  // 修复历史坏状态：伴玩模式只能承载 companion 页面；向导/工作台必须是完整窗口，
+  // 否则 Linux/Windows 首启会把设置向导塞进 420×620 小窗。
+  if (settings.mode === "companion" && settings.page !== "companion") {
     settings.mode = "workbench";
     try { await invoke("set_mode", { mode: "workbench" }); } catch { /* old shell */ }
   }

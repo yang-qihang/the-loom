@@ -1,0 +1,10 @@
+textbook hit test {
+  hit: '<button type="button" class="tb-icon-btn tb-close-btn" data-testid="btn-textbook-close" aria-label="关闭教材" title="关闭教材">×</button>',
+  root: '1',
+  win: '60'
+}
+narrative { box: 416, client: 520, padding: '44px', paragraph: 345.625 }
+narrative { box: 416, client: 520, padding: '44px', paragraph: 345.625 }
+narrative { box: 416, client: 520, padding: '44px', paragraph: 345.625 }
+narrative { box: 416, client: 520, padding: '44px', paragraph: 345.625 }
+narrative { box: 416, client: 520, padding: '44px', paragraph: 345.625 }

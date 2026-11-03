@@ -1,0 +1,42 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts e2e/desktop-ui-regressions.spec.ts
+
+[WebServer] (node:46440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:46451) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:46471) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] 
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] [PLUGIN_TIMINGS] JavaScript callbacks ran for 2.5s of this 3.5s build (72%).
+[WebServer] 3 callbacks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+[WebServer]   - plugin vite:css transform (107 calls)
+[WebServer]   - plugin vite:worker-import-meta-url transform (4 calls)
+[WebServer]   - plugin vite:worker load (2 calls)
+[WebServer] See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+[WebServer] 
+[WebServer] (node:46459) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:47136) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 0.65 (17.0s)
+  ✓  2 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 0.8 (17.3s)
+  ✓  3 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 1 (17.4s)
+  ✓  4 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 1.25 (18.6s)
+  ✓  5 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 0.65 (17.1s)
+  ✓  6 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 0.8 (16.8s)
+  ✓  7 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 1 (17.8s)
+  ✓  8 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 1.25 (17.3s)
+  ✓  9 e2e/desktop-ui-regressions.spec.ts:64:1 › 独立教材：真实命中、滚动、翻章与 Tauri 命令接线 (1.2s)
+
+  9 passed (2.5m)

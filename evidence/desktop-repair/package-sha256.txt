@@ -1,0 +1,4 @@
+73f87a3a3a7ba54044c1e8beb6cf5b976ae4aa78f64b0be6a797cde013dfe7bf  apps/desktop/src-tauri/target/release/loomcraft-desktop
+36a7ed40a1759677643f24c726bcd37990d2787e4861c784a444d648ebeadd1b  apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft.AppDir/usr/bin/loomcraft-desktop
+2fbf6a1b9bd9063996a9880245943046fc8f6996f076747c849a4ab6aa9ee5c4  apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage
+4d9a9a97921ca4ecfd09f5f39695ba5beb9c3088fa7be0ef7ed10b73a72924b7  apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm

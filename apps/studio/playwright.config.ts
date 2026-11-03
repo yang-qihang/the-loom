@@ -6,7 +6,7 @@ export default defineConfig({
   testDir: "./e2e",
   outputDir: ".pw-out/real",
   testMatch:
-    /(real-engine|onboarding|repl|codex|levels-copy|narrative-layout|typography|style-policy|textbook-window|auto-beat|runtime-recovery)\.spec\.ts/,
+    /(desktop-ui-regressions|real-engine|onboarding|repl|codex|levels-copy|narrative-layout|typography|style-policy|textbook-window|auto-beat|runtime-recovery)\.spec\.ts/,
   timeout: 180_000,
   expect: { timeout: 25_000 },
   fullyParallel: false,

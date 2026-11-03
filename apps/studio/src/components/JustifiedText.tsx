@@ -52,6 +52,8 @@ function probeNativeCjkJustify(): boolean {
 }
 
 function computeLines(host: HTMLElement, text: string): string[] {
+  const style = getComputedStyle(host);
+  const width = host.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
   const measure = document.createElement("span");
   measure.style.cssText = [
     "position:absolute",
@@ -59,11 +61,14 @@ function computeLines(host: HTMLElement, text: string): string[] {
     "left:0",
     "top:0",
     "display:block",
-    `width:${host.clientWidth || host.getBoundingClientRect().width}px`,
+    `width:${Math.max(1, width)}px`,
     "white-space:normal",
-    "font-family:var(--font-text)",
-    "font-size:18px",
-    "line-height:1.7",
+    `font-family:${style.fontFamily}`,
+    `font-size:${style.fontSize}`,
+    `font-weight:${style.fontWeight}`,
+    `line-height:${style.lineHeight}`,
+    `letter-spacing:${style.letterSpacing}`,
+    "text-align:left",
   ].join(";");
   measure.textContent = text;
   host.appendChild(measure);
@@ -117,14 +122,19 @@ export function JustifiedText({ text, centerWhenSingleLine = false }: { text: st
     const parent = anchorRef.current?.parentElement;
     if (!parent) return;
     let frame = 0;
+    let lastWidth = -1;
     const observer = new ResizeObserver(() => {
+      if (parent.clientWidth === lastWidth) return;
+      lastWidth = parent.clientWidth;
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(updateFallback);
     });
     observer.observe(parent);
+    document.fonts.addEventListener("loadingdone", updateFallback);
     return () => {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
+      document.fonts.removeEventListener("loadingdone", updateFallback);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
@@ -132,7 +142,8 @@ export function JustifiedText({ text, centerWhenSingleLine = false }: { text: st
   useLayoutEffect(() => {
     const block = blockRef.current;
     if (!block || !lines || lines.length < 2) return;
-    const target = block.getBoundingClientRect().width;
+    const target = block.clientWidth;
+    const scale = block.getBoundingClientRect().width / target || 1;
     const lineEls = Array.from(block.querySelectorAll<HTMLElement>(".justified-line"));
     for (let index = 0; index < lineEls.length; index += 1) {
       const el = lineEls[index];
@@ -141,7 +152,7 @@ export function JustifiedText({ text, centerWhenSingleLine = false }: { text: st
       const range = document.createRange();
       range.selectNodeContents(el);
       const naturalRect = range.getClientRects()[0];
-      const natural = naturalRect ? naturalRect.width : el.getBoundingClientRect().width;
+      const natural = (naturalRect ? naturalRect.width : el.getBoundingClientRect().width) / scale;
       const chars = Array.from(lines[index] ?? "").length;
       if (chars <= 1 || natural <= 0) continue;
       const spacing = (target - natural) / chars;

@@ -1,0 +1,5 @@
+        Info Patching /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/loomcraft-desktop with bundle type information: rpm
+    Bundling Loomcraft-0.1.0-1.x86_64.rpm (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm)
+    Finished 1 bundle at:
+        /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm (452.76 MiB)
+

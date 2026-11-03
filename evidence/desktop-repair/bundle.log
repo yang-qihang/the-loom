@@ -1,0 +1,9 @@
+        Info Patching /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/loomcraft-desktop with bundle type information: rpm
+        Warn Failed to add bundler type to the binary: Failed to write binary file changes: `Text file busy (os error 26)`. Updater plugin may not be able to update this package. This shouldn't normally happen, please report it to https://github.com/tauri-apps/tauri/issues
+    Bundling Loomcraft-0.1.0-1.x86_64.rpm (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm)
+        Info Patching /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/loomcraft-desktop with bundle type information: appimage
+    Bundling Loomcraft_0.1.0_amd64.AppImage (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage)
+    Finished 2 bundles at:
+        /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm (452.76 MiB)
+        /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage (522.49 MiB)
+

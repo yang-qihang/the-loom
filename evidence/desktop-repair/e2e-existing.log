@@ -1,0 +1,32 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts e2e/style-policy.spec.ts e2e/typography.spec.ts e2e/textbook-window.spec.ts
+
+[WebServer] (node:250376) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:250387) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:250436) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] 
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:250424) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:250522) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/style-policy.spec.ts:48:1 › 字体三轨道 + 行内代码渲染策略 (2.7s)
+  ✓  2 e2e/style-policy.spec.ts:122:1 › WebKit 降级路径：所有宽度首行占满、末行左对齐 (1.2s)
+  ✓  3 e2e/style-policy.spec.ts:214:1 › 关开场三段的文本容器等宽（不再出现第二段窄于其他两段） (425ms)
+  ✓  4 e2e/textbook-window.spec.ts:56:1 › 教材浮动窗口：阅读排版、代码字体、拖动缩放置顶、持久化与关闭 (5.1s)
+  ✓  5 e2e/typography.spec.ts:227:1 › 字体资产：像素装饰字 + MiSans 正文 + 长文 + 字体真加载 (2.2s)
+  ✓  6 e2e/typography.spec.ts:324:1 › 代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + 长文 MiSans (2.5s)
+
+  6 passed (20.8s)

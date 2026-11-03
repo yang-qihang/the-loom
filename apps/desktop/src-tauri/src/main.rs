@@ -40,8 +40,12 @@ const RESTORE_SHORTCUT: &str = "Ctrl+Shift+F";
 const FOCUS_SHORTCUT: &str = "Alt+Z";
 const COMPANION_WIDTH: u32 = 420;
 const COMPANION_HEIGHT: u32 = 620;
-const WORKBENCH_WIDTH: u32 = 1440;
-const WORKBENCH_HEIGHT: u32 = 900;
+/// 工作台默认打开尺寸：Linux 用 persist 的旧小窗启动时会先按这个尺寸恢复。
+const WORKBENCH_WIDTH: u32 = 1600;
+const WORKBENCH_HEIGHT: u32 = 1000;
+/// 工作台恢复下限；伴玩模式单独走 420×620，小屏幕仍夹到工作区内。
+const WORKBENCH_MIN_WIDTH: u32 = 1280;
+const WORKBENCH_MIN_HEIGHT: u32 = 840;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -1205,7 +1209,7 @@ fn validate_textbook_level(raw: &str) -> Result<String, String> {
 
 /// 打开/复用配套教材窗口：它是无父窗口的独立 WebviewWindow，几何/任务栏/拖动都不依赖主窗口。
 #[tauri::command]
-fn open_textbook_window(app: tauri::AppHandle, level_id: String) -> Result<(), String> {
+async fn open_textbook_window(app: tauri::AppHandle, level_id: String) -> Result<(), String> {
     let level = validate_textbook_level(&level_id)?;
     let page = format!("studio/index.html?textbook={level}");
     if let Some(window) = app.get_webview_window("textbook") {
@@ -1221,6 +1225,7 @@ fn open_textbook_window(app: tauri::AppHandle, level_id: String) -> Result<(), S
         .inner_size(980.0, 760.0)
         .min_inner_size(420.0, 320.0)
         .resizable(true)
+        .disable_drag_drop_handler()
         .decorations(false)
         .visible(true)
         .focused(true)
@@ -2342,6 +2347,64 @@ fn min_window_size() -> GeoSize {
     GeoSize { width: window_geometry::MIN_WINDOW_WIDTH, height: window_geometry::MIN_WINDOW_HEIGHT }
 }
 
+/// 工作台恢复/首次打开的最小尺寸：避免旧版本持久化的 560×620 小窗
+/// 把 Linux 启动画面恢复得过小；伴玩模式不走这个下限。
+fn workbench_min_window_size() -> GeoSize {
+    GeoSize { width: WORKBENCH_MIN_WIDTH, height: WORKBENCH_MIN_HEIGHT }
+}
+
+fn restore_workbench_rect(saved: Option<GeoRect>, work: GeoRect) -> (GeoRect, bool) {
+    window_geometry::restore_rect(saved, work, preferred_window_size(), preferred_window_size())
+}
+
+#[cfg(test)]
+mod startup_window_tests {
+    use super::*;
+
+    #[test]
+    fn old_small_window_is_migrated_to_large_startup_size() {
+        let work = GeoRect { x: 0, y: 0, width: 1920, height: 1080 };
+        let old = GeoRect { x: 100, y: 100, width: 560, height: 620 };
+        for saved in [None, Some(old)] {
+            let (rect, _) = restore_workbench_rect(saved, work);
+            assert_eq!((rect.width, rect.height), (1600, 1000));
+            assert_eq!(rect.intersection_area(&work), rect.width as u64 * rect.height as u64);
+        }
+        let config: serde_json::Value = serde_json::from_str(include_str!("../tauri.conf.json")).unwrap();
+        assert_eq!(config["app"]["windows"][0]["width"], WORKBENCH_WIDTH);
+        assert_eq!(config["app"]["windows"][0]["height"], WORKBENCH_HEIGHT);
+    }
+
+    #[test]
+    fn large_startup_fits_small_and_scaled_work_areas() {
+        for (width, height) in [(1366, 728), (1280, 680), (960, 540)] {
+            let work = GeoRect { x: 0, y: 24, width, height };
+            let (rect, _) = restore_workbench_rect(None, work);
+            assert_eq!((rect.width, rect.height), (width, height));
+            assert_eq!((rect.x, rect.y), (0, 24));
+        }
+    }
+}
+
+/// 只有真正处于伴玩页面时才允许 420×620 下限；向导/工作台即使设置里残留
+/// companion 模式，也必须按工作台下限恢复，避免启动时的隐藏窗口尺寸把
+/// 已恢复的 1280×840 又夹成 480×620。
+fn is_companion_window(app: &tauri::AppHandle) -> bool {
+    let state = app.state::<AppState>();
+    let companion = match state.settings.lock() {
+        Ok(settings) => settings.mode == "companion" && settings.page == "companion",
+        Err(_) => false,
+    };
+    companion
+}
+
+fn min_window_size_for(app: Option<&tauri::AppHandle>) -> GeoSize {
+    match app {
+        Some(app) if !is_companion_window(app) => workbench_min_window_size(),
+        _ => min_window_size(),
+    }
+}
+
 fn physical_rect(rect: GeoRect, scale: f64) -> GeoRect {
     let scale = if scale > 0.0 { scale } else { 1.0 };
     GeoRect {
@@ -2393,6 +2456,16 @@ fn monitor_work_areas_logical(window: &WebviewWindow) -> Vec<GeoRect> {
         .collect()
 }
 
+// Linux 的无边框主窗内外尺寸相同。Tao 在首次 configure-event 前把 outer_size
+// 初始化为 root_origin（位置），启动时读它会把 1600×1000 错记成 480×266，
+// 随后的 clamp 又把窗口缩回最小值。inner_size 的初值来自 GTK 的真实尺寸。
+fn main_window_size(window: &WebviewWindow) -> tauri::Result<tauri::PhysicalSize<u32>> {
+    #[cfg(target_os = "linux")]
+    { window.inner_size() }
+    #[cfg(not(target_os = "linux"))]
+    { window.outer_size() }
+}
+
 /// 恢复保存几何时选工作区：优先与保存矩形交集最大的显示器；都不相交（旧屏被拔掉）→ 主屏。
 fn choose_saved_work_area(window: &WebviewWindow, saved: Option<GeoRect>) -> Option<GeoRect> {
     let works = monitor_work_areas_logical(window);
@@ -2422,7 +2495,7 @@ fn choose_saved_work_area(window: &WebviewWindow, saved: Option<GeoRect>) -> Opt
 /// 当前窗口所在显示器的物理工作区（窗口中心点命中）。
 fn work_area_physical_for_window(window: &WebviewWindow) -> Option<GeoRect> {
     let position = window.outer_position().ok()?;
-    let size = window.outer_size().ok()?;
+    let size = main_window_size(window).ok()?;
     let center_x = position.x + (size.width / 2) as i32;
     let center_y = position.y + (size.height / 2) as i32;
     #[cfg(target_os = "windows")]
@@ -2463,11 +2536,12 @@ fn clamp_window_to_work_area(window: &WebviewWindow, app: Option<&AppHandle>) {
     if window.is_fullscreen().unwrap_or(false) || window.is_maximized().unwrap_or(false) {
         return;
     }
-    let (Ok(position), Ok(size)) = (window.outer_position(), window.outer_size()) else { return };
+    let (Ok(position), Ok(size)) = (window.outer_position(), main_window_size(window)) else { return };
     let Some(work) = work_area_physical_for_window(window) else { return };
     let scale = window.scale_factor().unwrap_or(1.0);
+    let logical_min = min_window_size_for(app);
     let min = physical_rect(
-        GeoRect { x: 0, y: 0, width: min_window_size().width, height: min_window_size().height },
+        GeoRect { x: 0, y: 0, width: logical_min.width, height: logical_min.height },
         scale,
     );
     let min_size = GeoSize { width: min.width, height: min.height };
@@ -2484,7 +2558,7 @@ fn clamp_window_to_work_area(window: &WebviewWindow, app: Option<&AppHandle>) {
     let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(rect.width, rect.height)));
     let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(rect.x, rect.y)));
     // 恢复后再校验一次（WM 可能按最小尺寸/装饰做二次调整），只做一轮，避免和用户拖动打架。
-    if let (Ok(position), Ok(size)) = (window.outer_position(), window.outer_size()) {
+    if let (Ok(position), Ok(size)) = (window.outer_position(), main_window_size(window)) {
         let actual = GeoRect { x: position.x, y: position.y, width: size.width.max(1), height: size.height.max(1) };
         if !window_geometry::fully_visible(&actual, &work) {
             let (fitted, _) = window_geometry::restore_rect(Some(actual), work, min_size, preferred_size);
@@ -2506,12 +2580,19 @@ fn clamp_window_to_work_area(window: &WebviewWindow, app: Option<&AppHandle>) {
 fn apply_saved_window(app: &tauri::AppHandle) {
     let Some(window) = app.get_webview_window("main") else { return };
     let state = app.state::<AppState>();
-    let (always_on_top, mode, geometry) = match state.settings.lock() {
-        Ok(settings) => (settings.always_on_top, settings.mode.clone(), settings.window.clone()),
+    let (always_on_top, mode, page, geometry) = match state.settings.lock() {
+        Ok(settings) => (
+            settings.always_on_top,
+            settings.mode.clone(),
+            settings.page.clone(),
+            settings.window.clone(),
+        ),
         Err(_) => return,
     };
     let _ = window.set_always_on_top(always_on_top);
-    if mode == "companion" {
+    // 伴玩小窗只用于真正的 companion 页面；向导/工作台即使遗留了 companion 模式，
+    // 启动时也先给足工作台尺寸，不能在设置向导界面直接开成 420×620 小窗。
+    if mode == "companion" && page == "companion" {
         let _ = apply_mode(&window, "companion");
         clamp_window_to_work_area(&window, Some(app));
         return;
@@ -2523,7 +2604,9 @@ fn apply_saved_window(app: &tauri::AppHandle) {
         height: geom.height.max(1),
     });
     if let Some(work) = choose_saved_work_area(&window, saved) {
-        let (rect, adjusted) = window_geometry::restore_rect(saved, work, min_window_size(), preferred_window_size());
+        // 启动也迁移旧的小窗记录；仅修改配置默认值不会影响已有用户。
+        // 工作区不足 1600×1000 时 restore_rect 会缩到屏幕可用范围。
+        let (rect, adjusted) = restore_workbench_rect(saved, work);
         let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(rect.width as f64, rect.height as f64)));
         let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition::new(rect.x as f64, rect.y as f64)));
         if adjusted {
@@ -2539,8 +2622,11 @@ fn apply_saved_window(app: &tauri::AppHandle) {
             );
         }
     } else if let Some(geometry) = geometry.as_ref() {
-        // 拿不到显示器信息时退回旧行为，但仍由后面的物理 clamp 兜底。
-        let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(geometry.width as f64, geometry.height as f64)));
+        // 暂时拿不到显示器信息时也提升旧的小窗记录，显示后再物理 clamp。
+        let _ = window.set_size(tauri::Size::Logical(tauri::LogicalSize::new(
+            geometry.width.max(WORKBENCH_WIDTH) as f64,
+            geometry.height.max(WORKBENCH_HEIGHT) as f64,
+        )));
         let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition::new(geometry.x as f64, geometry.y as f64)));
     }
     // 恢复后再 clamp 一次（窗口显示后由 show_main_window 再做物理 clamp；
@@ -2570,7 +2656,7 @@ fn save_window_geometry(app: &tauri::AppHandle, force: bool) {
             return;
         }
     }
-    if let (Ok(scale), Ok(position), Ok(size)) = (window.scale_factor(), window.outer_position(), window.outer_size()) {
+    if let (Ok(scale), Ok(position), Ok(size)) = (window.scale_factor(), window.outer_position(), main_window_size(&window)) {
         let mut geometry = WindowGeom {
             x: (position.x as f64 / scale).round() as i32,
             y: (position.y as f64 / scale).round() as i32,

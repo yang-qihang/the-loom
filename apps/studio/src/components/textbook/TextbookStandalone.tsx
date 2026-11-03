@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { getDesktopInvoke } from "../../desktop";
+import { getDesktopInvoke, getDesktopWindow } from "../../desktop";
 import { TEXTBOOK, TEXTBOOK_CHAPTERS, markTextbookRead } from "../../textbook";
 import { TextbookWindow } from "./TextbookWindow";
 
@@ -19,6 +19,14 @@ export function TextbookStandalone({ initialId }: TextbookStandaloneProps): Reac
 
   const close = useCallback((): void => {
     if (TEXTBOOK[currentId]) markTextbookRead(currentId);
+    const nativeWindow = getDesktopWindow();
+    if (nativeWindow) {
+      void nativeWindow.close().catch(() => {
+        const invoke = getDesktopInvoke();
+        if (invoke) void invoke("window_close").catch(() => {});
+      });
+      return;
+    }
     const invoke = getDesktopInvoke();
     if (invoke) {
       void invoke("window_close").catch(() => {});
