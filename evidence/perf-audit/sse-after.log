@@ -1,0 +1,28 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts e2e/desktop-ui-regressions.spec.ts -g HTTP
+
+[WebServer] (node:41282) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41293) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41314) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer]
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter]
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:41302) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:41401) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/desktop-ui-regressions.spec.ts:160:1 › 快速运行的 SSE 先于 HTTP 202 返回时，第二次运行仍显示结果 (1.8s)
+  ✓  2 e2e/desktop-ui-regressions.spec.ts:186:1 › HTTP 确认在途时 reset，晚到确认和缓冲结果不得恢复旧运行 (1.0s)
+
+  2 passed (9.3s)

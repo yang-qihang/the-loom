@@ -1,0 +1,251 @@
+
+> loomcraft@0.0.1 desktop:build
+> npm --prefix apps/desktop run build
+
+
+> @loom/desktop@0.1.0 build
+> tauri build
+
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `node scripts/build-assets.mjs`
+[desktop/assets] 构建 studio（vite build --base=./）…
+vite v8.3.5 building client environment for production...
+transforming...
+
+../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 1418 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                              0.68 kB │ gzip:     0.46 kB
+dist/assets/MiSansVF.7d084b054b54abc1.55-D-niG1Cm.woff2      8.42 kB
+dist/assets/DepartureMono-Regular-2BZob_Zz.woff2            22.49 kB
+dist/assets/MiSansVF.ca620abda1b076bd.53-BGSdC53c.woff2     22.79 kB
+dist/assets/MiSansVF.4f81f745e2c3159d.51-Dh0pBHy9.woff2     24.80 kB
+dist/assets/MiSansVF.517a94fe8dd5692a.54-ChdNRa0W.woff2     25.59 kB
+dist/assets/MiSansVF.d525a1349c7ec9e4.52-Cv3HvKJa.woff2     29.22 kB
+dist/assets/MiSansVF.16240990c6f7f7dd.0-hYNu36zK.woff2      50.04 kB
+dist/assets/MiSansVF.3ee7f36171786397.50-B2mtXAXw.woff2     50.71 kB
+dist/assets/MiSansVF.1fa3a293a561985c.1-Ik97Bnim.woff2      60.19 kB
+dist/assets/MiSansVF.235af3ebfd0343d5.2-9YwKK7yC.woff2      66.63 kB
+dist/assets/MiSansVF.53744263f2939586.3-DT-x9XRC.woff2      68.91 kB
+dist/assets/MiSansVF.8ac4bbc96a6db0e2.4-CLvgMvHJ.woff2      70.21 kB
+dist/assets/MiSansVF.0915b4d5a6f0ee33.49-LMn5Q4GP.woff2     71.48 kB
+dist/assets/MiSansVF.73924789affc3080.5-O0rdDs3A.woff2      72.45 kB
+dist/assets/MiSansVF.52728aa7bc854270.6-BmPMmo-Q.woff2      75.70 kB
+dist/assets/MiSansVF.d77855c75a78e271.7-C_C7j9eS.woff2      78.31 kB
+dist/assets/MiSansVF.18220753c89aeaa7.9-ClfyzM_W.woff2      78.56 kB
+dist/assets/MiSansVF.c06909dbc78c83aa.8-9EM0gbMF.woff2      78.63 kB
+dist/assets/MiSansVF.91d6994ea01c40e1.10-DEcCGd-1.woff2     79.27 kB
+dist/assets/MiSansVF.a597bc0d89a7e9de.12-BbvMbbeG.woff2     81.58 kB
+dist/assets/MiSansVF.4432f1e8b9c6afb6.11-4ZdC0IHJ.woff2     81.85 kB
+dist/assets/MiSansVF.799303268bd0a8c8.13-DwvW2pYT.woff2     81.89 kB
+dist/assets/MiSansVF.c626836af9104d5f.16-Cn-uDijZ.woff2     81.99 kB
+dist/assets/MiSansVF.00d0682c24b9e852.15-2e6f7JpF.woff2     82.13 kB
+dist/assets/MiSansVF.7f4670c6ddefc0b7.17-JNBV3-bJ.woff2     82.50 kB
+dist/assets/MiSansVF.353f733c1a9d24dd.14-DsPHSW78.woff2     82.70 kB
+dist/assets/MiSansVF.cfcb48d0933e0ec5.20-DtJGSCz-.woff2     84.14 kB
+dist/assets/MiSansVF.a068ef4539a6cd96.23-2lDk_Pzi.woff2     84.36 kB
+dist/assets/MiSansVF.868ff10381a4fff7.21-COM3rrf8.woff2     84.86 kB
+dist/assets/MiSansVF.e4ea5bc4c8993992.25-QCrSaZfC.woff2     86.67 kB
+dist/assets/MiSansVF.0aa19e2394367e45.28-BA6TmvoL.woff2     86.86 kB
+dist/assets/MiSansVF.8739e6cdf2007d9e.18-CW9JsvXP.woff2     86.94 kB
+dist/assets/MiSansVF.30106979750ad8e7.27-COo67qta.woff2     86.97 kB
+dist/assets/MiSansVF.184e5227db3e935f.22--LBj-Hb3.woff2     87.06 kB
+dist/assets/MiSansVF.3581642e24f576d7.26-DFSukXV9.woff2     88.71 kB
+dist/assets/MiSansVF.e2fb4df3666402bd.30-CBTjEOGS.woff2     89.13 kB
+dist/assets/MiSansVF.a397ccbbda85fd60.19-Drtf84UU.woff2     89.64 kB
+dist/assets/MiSansVF.43a930e968cb0514.29-D4pA0GF5.woff2     90.64 kB
+dist/assets/MiSansVF.77773797e06e14c0.24-CIwq3smS.woff2     90.74 kB
+dist/assets/MiSansVF.92c0f158f1d0c43b.32-D_nHOWsY.woff2     91.93 kB
+dist/assets/MiSansVF.f08d1f83ff0dabdd.31-B-qHDOHs.woff2     94.47 kB
+dist/assets/MiSansVF.c6c390a740763363.34-5N4-3NiL.woff2     96.60 kB
+dist/assets/MiSansVF.081b771213563eae.33-DNyn2Gkt.woff2     96.79 kB
+dist/assets/MiSansVF.5ebd323d44595044.36-Geeq6vWV.woff2     97.56 kB
+dist/assets/MiSansVF.b8965049ba77d8e5.35-CKrADHFj.woff2     98.46 kB
+dist/assets/MiSansVF.aa995a1ea7837593.37-BOzYTkrh.woff2     99.84 kB
+dist/assets/MiSansVF.00ed8f01da81647e.47-il558wcj.woff2     99.99 kB
+dist/assets/MiSansVF.d6a0497045ed1170.38-B1422lRy.woff2    101.42 kB
+dist/assets/MiSansVF.def9fc53240b0bba.40-CCG-FJFi.woff2    102.89 kB
+dist/assets/MiSansVF.b666094020110d0a.45-DXPbajQH.woff2    103.29 kB
+dist/assets/MiSansVF.a3d4bcfd8dba2e50.44-VKMPAliQ.woff2    103.42 kB
+dist/assets/MiSansVF.bc2b7bd40e327658.46-B-h4q1nN.woff2    104.93 kB
+dist/assets/MiSansVF.c4a48795fdedf3a5.42-DbwfVnRu.woff2    105.62 kB
+dist/assets/MiSansVF.71c7e77bac6a2786.39-CPjeTgzL.woff2    106.03 kB
+dist/assets/MiSansVF.ef133bbc03cec415.43-i4UGVXA_.woff2    106.40 kB
+dist/assets/MiSansVF.182a224825bf167c.41-CYo6GT10.woff2    108.94 kB
+dist/assets/MiSansVF.4f3d21c8b761cd08.48-BF9KcnIc.woff2    109.82 kB
+dist/assets/codicon-DF1abBS2.ttf                           153.22 kB
+dist/assets/editor.worker-CX7Cj20z.js                      303.84 kB
+dist/assets/json.worker-BfeARH1Q.js                        433.20 kB
+dist/assets/html.worker-DNu74flJ.js                        743.44 kB
+dist/assets/zpix-ByAf9pOZ.woff2                            966.70 kB
+dist/assets/css.worker-DA-Gmr7e.js                       1,078.35 kB
+dist/assets/noto-sans-sc-400-BMBUuRtC.woff2              1,144.66 kB
+dist/assets/noto-sans-sc-700-Dv9RFWQN.woff2              1,172.98 kB
+dist/assets/ts.worker-CVbFdYz4.js                        6,927.85 kB
+dist/assets/index-DYSRhLl3.css                             358.07 kB │ gzip:    75.41 kB
+dist/assets/javascript-C1yro0PV.js                           0.68 kB │ gzip:     0.40 kB
+dist/assets/azcli-Bc_sGQ0U.js                                0.70 kB │ gzip:     0.28 kB
+dist/assets/ini-sBoK_t0W.js                                  0.96 kB │ gzip:     0.49 kB
+dist/assets/workers-DZsS2VCq.js                              1.21 kB │ gzip:     0.56 kB
+dist/assets/csp-bTuwJoIa.js                                  1.27 kB │ gzip:     0.48 kB
+dist/assets/pla-CopQ2nXW.js                                  1.54 kB │ gzip:     0.60 kB
+dist/assets/scheme-BeGwcela.js                               1.62 kB │ gzip:     0.77 kB
+dist/assets/flow9-C5_-GSwl.js                                1.66 kB │ gzip:     0.80 kB
+dist/assets/sb-CcwsVR0C.js                                   1.68 kB │ gzip:     0.78 kB
+dist/assets/bat-i0X4ZdIN.js                                  1.69 kB │ gzip:     0.82 kB
+dist/assets/dockerfile-DZFCIeNp.js                           1.72 kB │ gzip:     0.63 kB
+dist/assets/pascaligo-D-ptJ9y-.js                            1.85 kB │ gzip:     0.86 kB
+dist/assets/xml-PpbHUKqq.js                                  1.91 kB │ gzip:     0.72 kB
+dist/assets/cameligo-DMUM7wLl.js                             1.97 kB │ gzip:     0.91 kB
+dist/assets/lua-CsQS60Ue.js                                  1.98 kB │ gzip:     0.88 kB
+dist/assets/objective-c-FvmIjYaQ.js                          2.10 kB │ gzip:     1.01 kB
+dist/assets/graphql-fmXr3nnJ.js                              2.11 kB │ gzip:     0.99 kB
+dist/assets/sparql-D_Lu-MrJ.js                               2.21 kB │ gzip:     1.10 kB
+dist/assets/lexon-CfSJPG6W.js                                2.28 kB │ gzip:     0.88 kB
+dist/assets/mips-CIPQ_RoX.js                                 2.32 kB │ gzip:     1.02 kB
+dist/assets/go-C-y9NEjX.js                                   2.35 kB │ gzip:     1.11 kB
+dist/assets/bicep-B5-_aFwp.js                                2.36 kB │ gzip:     0.91 kB
+dist/assets/sophia-CRfGWb83.js                               2.48 kB │ gzip:     1.15 kB
+dist/assets/m3-D-oSqn_W.js                                   2.52 kB │ gzip:     1.29 kB
+dist/assets/typespec-B8J7ngcE.js                             2.62 kB │ gzip:     1.01 kB
+dist/assets/pascal-DrH0SRf2.js                               2.63 kB │ gzip:     1.35 kB
+dist/assets/fsharp-C8Ef5oNN.js                               2.65 kB │ gzip:     1.27 kB
+dist/assets/qsharp-DkqhCAOL.js                               2.72 kB │ gzip:     1.37 kB
+dist/assets/shell-CC2rA5mh.js                                2.81 kB │ gzip:     1.16 kB
+dist/assets/r-BwWrilGY.js                                    2.83 kB │ gzip:     1.25 kB
+dist/assets/java-BEtHBSE6.js                                 2.90 kB │ gzip:     1.34 kB
+dist/assets/cssMode-SqXLNglW.js                              2.95 kB │ gzip:     1.12 kB
+dist/assets/redis-ClamHrr6.js                                3.03 kB │ gzip:     1.41 kB
+dist/assets/kotlin-BOotOW0E.js                               3.04 kB │ gzip:     1.41 kB
+dist/assets/cypher-CVaqCwHa.js                               3.04 kB │ gzip:     1.40 kB
+dist/assets/powershell-DmHpPYUd.js                           3.05 kB │ gzip:     1.33 kB
+dist/assets/tcl-DISqw1ZD.js                                  3.27 kB │ gzip:     1.32 kB
+dist/assets/liquid-z1VnMTB1.js                               3.33 kB │ gzip:     1.41 kB
+dist/assets/coffee-Ba7i2nA0.js                               3.36 kB │ gzip:     1.24 kB
+dist/assets/htmlMode-BgcQNecs.js                             3.41 kB │ gzip:     1.23 kB
+dist/assets/hcl-CpzslTdj.js                                  3.44 kB │ gzip:     1.45 kB
+dist/assets/python-lq9JHIRd.js                               3.45 kB │ gzip:     1.42 kB
+dist/assets/apex-BWPQTe0t.js                                 3.46 kB │ gzip:     1.70 kB
+dist/assets/yaml-Cc8U8wdn.js                                 3.53 kB │ gzip:     1.28 kB
+dist/assets/markdown-Cimd5fb3.js                             3.63 kB │ gzip:     1.34 kB
+dist/assets/rust-DdL9SqIa.js                                 3.66 kB │ gzip:     1.80 kB
+dist/assets/restructuredtext-BYgofb2h.js                     3.74 kB │ gzip:     1.32 kB
+dist/assets/less-B9JPFI3C.js                                 3.74 kB │ gzip:     1.36 kB
+dist/assets/dart-onAF5SnQ.js                                 3.93 kB │ gzip:     1.60 kB
+dist/assets/csharp-BKxtCVv1.js                               4.11 kB │ gzip:     1.66 kB
+dist/assets/msdax-DauUninz.js                                4.27 kB │ gzip:     1.87 kB
+dist/assets/mdx-DP4fIUdB.js                                  4.31 kB │ gzip:     1.20 kB
+dist/assets/css-DIMkf-bt.js                                  4.36 kB │ gzip:     1.33 kB
+dist/assets/pug-Z5eAx3Zn.js                                  4.46 kB │ gzip:     1.60 kB
+dist/assets/swift-Bxkupp3x.js                                4.48 kB │ gzip:     1.99 kB
+dist/assets/ecl-94qehhXe.js                                  4.50 kB │ gzip:     2.17 kB
+dist/assets/html-Cjc_pWsq.js                                 4.51 kB │ gzip:     1.14 kB
+dist/assets/typescript-DDm1eDLl.js                           4.67 kB │ gzip:     1.93 kB
+dist/assets/cpp-C7h46wYY.js                                  4.74 kB │ gzip:     2.02 kB
+dist/assets/vb-DV3o63ZY.js                                   5.30 kB │ gzip:     2.01 kB
+dist/assets/twig-De2hgUGE.js                                 5.78 kB │ gzip:     1.48 kB
+dist/assets/scss-gp-XZpBa.js                                 6.26 kB │ gzip:     1.70 kB
+dist/assets/handlebars-COCR5RQq.js                           6.27 kB │ gzip:     1.37 kB
+dist/assets/julia-Bri6UV-V.js                                6.50 kB │ gzip:     2.64 kB
+dist/assets/systemverilog-Bz4Y3fRF.js                        6.85 kB │ gzip:     2.72 kB
+dist/assets/st-DbInun42.js                                   6.94 kB │ gzip:     2.24 kB
+dist/assets/scala-DHpiXF5c.js                                7.11 kB │ gzip:     2.07 kB
+dist/assets/wgsl-DpFanUEy.js                                 7.18 kB │ gzip:     2.73 kB
+dist/assets/perl-oz_6vUea.js                                 7.35 kB │ gzip:     3.10 kB
+dist/assets/postiats-43DmfD33.js                             7.36 kB │ gzip:     2.39 kB
+dist/assets/php-nr791fC2.js                                  7.74 kB │ gzip:     2.03 kB
+dist/assets/razor-BXR163vR.js                                8.10 kB │ gzip:     2.04 kB
+dist/assets/clojure-Cm7r79vr.js                              8.21 kB │ gzip:     3.49 kB
+dist/assets/ruby-DezsRK8O.js                                 8.21 kB │ gzip:     2.55 kB
+dist/assets/sql-NEE52Syq.js                                  8.84 kB │ gzip:     3.73 kB
+dist/assets/protobuf-C531GsRP.js                             8.89 kB │ gzip:     2.04 kB
+dist/assets/mysql-SOo6toE5.js                                9.65 kB │ gzip:     3.98 kB
+dist/assets/elixir-6RTg0lbw.js                              10.11 kB │ gzip:     2.50 kB
+dist/assets/redshift-DT7zqm-g.js                            10.33 kB │ gzip:     4.24 kB
+dist/assets/abap-08VXUWAP.js                                11.69 kB │ gzip:     5.15 kB
+dist/assets/pgsql-DTj74zXo.js                               11.91 kB │ gzip:     4.42 kB
+dist/assets/jsonMode-CSHPQf-W.js                            12.18 kB │ gzip:     4.43 kB
+dist/assets/powerquery-D3hlyOfw.js                          15.34 kB │ gzip:     4.73 kB
+dist/assets/freemarker2-jL9m0zNi.js                         15.54 kB │ gzip:     3.97 kB
+dist/assets/solidity-BEEn4gHE.js                            15.99 kB │ gzip:     4.39 kB
+dist/assets/tsMode-CTkPyUaA.js                              21.82 kB │ gzip:     6.14 kB
+dist/assets/lspLanguageFeatures-rIzEzgC8.js                 28.21 kB │ gzip:     7.17 kB
+dist/assets/index-1vEtLSPu.js                            4,986.69 kB │ gzip: 1,348.47 kB
+
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 4096 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.47s
+[desktop/assets] studio 构建完成（相对路径 asset 已校验）
+[desktop/assets] 前端资源复制完成（dist/index.html + dist/studio/ + dist/companion.html）
+[desktop/assets] 打包 engine 单文件（esbuild bundle → engine.mjs + engine.cjs 启动器）…
+[desktop/assets] engine 打包完成：runtime/engine.mjs + runtime/engine.cjs
+[desktop/assets] engine runtime 依赖已复制（typescript + esbuild + @esbuild/*，3 个包）
+[desktop/assets] 生成 Tauri 图标（JS makeIcon）…
+[desktop/assets] 图标生成完成（5 个 PNG）sha256=00fafd0d2e98
+[desktop/assets] engine.cjs 冒烟测试（独立临时端口）…
+[desktop/assets] engine.cjs 健康检查通过：{"ok":true,"port":"mock","mc":{"kind":"mock","connected":true},"sessions":0,"uptimeSec":0,"version":"1.0.0-t1"}
+[desktop/assets] 全部资源准备完成
+   Compiling loomcraft-desktop v0.1.0 (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri)
+warning: unused variable: `center_x`
+    --> src/main.rs:2426:9
+     |
+2426 |     let center_x = position.x + (size.width / 2) as i32;
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_center_x`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `center_y`
+    --> src/main.rs:2427:9
+     |
+2427 |     let center_y = position.y + (size.height / 2) as i32;
+     |         ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_center_y`
+
+warning: function `start_focus_follow` is never used
+    --> src/main.rs:3154:4
+     |
+3154 | fn start_focus_follow(app: tauri::AppHandle) {
+     |    ^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `EXPECTED_PROTOCOL` is never used
+  --> src/launcher.rs:24:11
+   |
+24 | pub const EXPECTED_PROTOCOL: u16 = 775;
+   |           ^^^^^^^^^^^^^^^^^
+
+warning: function `protocol_for_version` is never used
+  --> src/launcher.rs:72:8
+   |
+72 | pub fn protocol_for_version(version: &str) -> Option<u16> {
+   |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: method `pointer` is never used
+    --> src/main.rs:2855:16
+     |
+2849 |     impl DisplayHandle {
+     |     ------------------ method in this implementation
+...
+2855 |         pub fn pointer(&self) -> Option<(i32, i32)> {
+     |                ^^^^^^^
+
+warning: function `XQueryPointer` is never used
+    --> src/main.rs:2809:12
+     |
+2809 |         fn XQueryPointer(
+     |            ^^^^^^^^^^^^^
+
+warning: `loomcraft-desktop` (bin "loomcraft-desktop") generated 7 warnings (run `cargo fix --bin "loomcraft-desktop" -p loomcraft-desktop` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 59.96s
+       Built application at: /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/loomcraft-desktop
+        Info Patching /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/loomcraft-desktop with bundle type information: rpm
+    Bundling Loomcraft-0.1.0-1.x86_64.rpm (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm)
+        Info Patching /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/loomcraft-desktop with bundle type information: appimage
+    Bundling Loomcraft_0.1.0_amd64.AppImage (/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage)
+    Finished 2 bundles at:
+        /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm (452.78 MiB)
+        /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage (522.51 MiB)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * 桌面壳下发的环境状态（唯一环境状态源）。
@@ -97,6 +97,7 @@ export function parseEnvState(value: unknown): EnvState | null {
  */
 export function useShellEnv(): EnvState | null {
   const [env, setEnv] = useState<EnvState | null>(null);
+  const signature = useRef<string | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.parent === window) return;
@@ -109,7 +110,11 @@ export function useShellEnv(): EnvState | null {
       const data = event.data as { type?: unknown; env?: unknown } | null;
       if (!data || typeof data !== "object" || data.type !== "loom:env") return;
       const parsed = parseEnvState(data.env);
-      if (parsed) setEnv(parsed);
+      if (!parsed) return;
+      const next = JSON.stringify({ ...parsed, updatedAt: 0 });
+      if (signature.current === next) return;
+      signature.current = next;
+      setEnv(parsed);
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);

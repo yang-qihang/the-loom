@@ -1,0 +1,2 @@
+6b1a71cd995ba4282f74eebfd506b65d78a7678aeb553e5849d276a496eea575  apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage
+1e814e13971d6aa76f9e2da8973997801ec33016d61a45c200115bb5cafa5674  apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm

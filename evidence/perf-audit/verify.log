@@ -1,0 +1,13 @@
+13:41:23Z verify start task=perf-audit layers=l0,l1,l2,l3,lg commit=d6337f1 at=2026-11-03T13:41:23Z
+13:41:23Z ▶ LAYER l0 :: layer_l0
+13:41:25Z ✗ l0 exit=1 (2023ms)
+13:41:25Z ▶ LAYER l1 :: layer_l1
+13:41:27Z ✓ l1 (2469ms)
+13:41:27Z ▶ LAYER l2 :: layer_l2
+13:41:29Z ✓ l2 (2180ms)
+13:41:29Z ▶ LAYER l3 :: layer_l3
+13:41:32Z ✓ l3 (3000ms)
+13:41:32Z ▶ LAYER lg :: layer_lg
+13:41:37Z ! lg warn (4332ms)
+13:41:37Z VERIFY FAIL (14031ms) layers=l0,l1,l2,l3,lg
+{"ts":"20261103T134123Z","task":"perf-audit","commit":"d6337f1","result":"fail","warnings":["gates: tracked fail=G-FRESH-READER（G-FRESH-READER Round1，见 qa/evidence/qa-gates.json；Round2 前不得假绿）"],"totalMs":14031,"log":"verify-reports/20261103T134123Z-perf-audit.log","layers":{"l0":{"status":"fail","ms":2023,"detail":"exit=1"},"l1":{"status":"pass","ms":2469,"detail":""},"l2":{"status":"pass","ms":2180,"detail":""},"l3":{"status":"pass","ms":3000,"detail":""},"lg":{"status":"warn","ms":4332,"detail":"warn"}}}

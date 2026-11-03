@@ -2,14 +2,14 @@ import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-async function openShell(page: Page, failEvents = false) {
+async function openShell(page: Page, failEvents = false, realWizard = false) {
   await page.route("**/__desktop/**", async route => {
     const name = new URL(route.request().url()).pathname.split("/__desktop/")[1];
-    if (name === "wizard.html") {
+    if (name === "wizard.html" && !realWizard) {
       await route.fulfill({ contentType: "text/html", body: '<!doctype html><html><body>向导测试<scr' + 'ipt>window.received=[];addEventListener("message",e=>received.push(e.data));</scr' + 'ipt></body></html>' });
       return;
     }
-    if (!["index.html", "shell.js", "shell.css", "shell-policy.js"].includes(name)) { await route.fulfill({ status: 404, body: "" }); return; }
+    if (!["index.html", "shell.js", "shell.css", "shell-policy.js", "wizard.html"].includes(name)) { await route.fulfill({ status: 404, body: "" }); return; }
     const body = await readFile(resolve(process.cwd(), "../desktop/shell", name));
     await route.fulfill({ body, contentType: name.endsWith(".js") ? "application/javascript" : name.endsWith(".css") ? "text/css" : "text/html" });
   });
@@ -30,6 +30,7 @@ async function openShell(page: Page, failEvents = false) {
         core: { invoke: async (command: string, args?: unknown) => {
           calls.push({ command, args });
           if (command === "get_settings") return { page: "wizard", mode: "workbench" };
+          if (command === "env_probe") return { java: { ok: true, detail: "Java 25" }, node: { ok: true, detail: "Node 22" } };
           if (command === "env_state") return env;
           if (command === "engine_ready") return true;
           return { ok: true };
@@ -121,4 +122,41 @@ test("跨源 Studio 接收父壳缩放，不刷新页面", async ({ page }) => {
   await page.locator("iframe").evaluate((el: HTMLIFrameElement) => el.contentWindow!.postMessage({ type: "loom:scale", scale: 1.1 }, "*"));
   await expect.poll(async () => page.frames().find(frame => frame.url().startsWith("http://localhost:5186/"))!.evaluate(() => document.documentElement.style.zoom)).toBe("1.1");
   await expect(iframe.getByTestId("prologue-overlay")).toBeVisible();
+});
+
+test("静止壳状态不重复下发；时间戳变化不触发 Studio 更新", async ({ page }) => {
+  await openShell(page);
+  const frame = page.frames().find(frame => frame !== page.mainFrame())!;
+  const messages = () => frame.evaluate(() => (window as any).received.filter((event: any) => event.type === "loom:env").length);
+  await expect.poll(messages).toBeGreaterThan(0);
+  const before = await messages();
+  await page.evaluate(async () => {
+    const probe = (window as any).shellProbe;
+    for (let index = 0; index < 10; index++) {
+      probe.env.updatedAt = index;
+      window.dispatchEvent(new Event("loom:status"));
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  });
+  await frame.evaluate(() => new Promise(requestAnimationFrame));
+  expect(await messages()).toBe(before);
+  await page.evaluate(() => {
+    const probe = (window as any).shellProbe;
+    probe.env.bot.detail = "new bot status";
+    probe.topics["loom://env"]({ payload: probe.env });
+  });
+  await expect.poll(messages).toBe(before + 1);
+});
+
+test("启动页自动刷新只读灯态，不定时重跑版本检测", async ({ page }) => {
+  await page.clock.install();
+  await openShell(page, false, true);
+  const probeCount = async () => (await calls(page)).filter(call => call.command === "env_probe").length;
+  await expect.poll(probeCount).toBe(1);
+  await page.clock.fastForward(30_000);
+  await expect.poll(async () => (await calls(page)).filter(call => call.command === "env_state").length).toBeGreaterThan(1);
+  expect(await probeCount()).toBe(1);
+  const frame = page.frameLocator("iframe");
+  await frame.locator("#btn-probe").click();
+  await expect.poll(probeCount).toBe(2);
 });

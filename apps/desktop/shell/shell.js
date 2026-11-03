@@ -41,6 +41,7 @@ function currentEngineUrl() {
 }
 
 let currentEnv = null;
+let currentEnvSignature = null;
 function sendFrame(data) {
   try { els.iframe.contentWindow?.postMessage(data, "*"); } catch { /* frame navigating */ }
 }
@@ -64,6 +65,9 @@ function showQuitConfirmation() {
 function applyEnv(env) {
   if (!env || typeof env !== "object") return;
   currentEnv = env;
+  const signature = JSON.stringify({ ...env, updatedAt: 0 });
+  if (signature === currentEnvSignature) return;
+  currentEnvSignature = signature;
   for (const key of ["engine", "paper", "bot", "client"]) {
     const light = env[key];
     const state = env.mock ? "mock" : light?.state === "ready" ? "ok"
@@ -181,28 +185,33 @@ function setConn(el, state, title) {
   el.dataset.state = state;
   el.title = title || "";
 }
+let refreshingStatus = false;
 async function refreshStatus() {
+  if (refreshingStatus) return;
+  refreshingStatus = true;
   try {
-    const env = await invoke("env_state");
-    if (env?.engine && env?.client) { applyEnv(env); return; }
-  } catch { /* old shell falls back to health */ }
-  let health = null;
-  try {
-    const base = currentEngineUrl();
-    const response = await fetch(base + "/api/health", { signal: AbortSignal.timeout(1800) });
-    health = await response.json();
-  } catch { /* engine offline */ }
-  const engineOk = !!health?.ok;
-  const isMock = health?.port === "mock";
-  const paperOk = !isMock && health?.mc?.kind === "paper" && health?.mc?.connected === true;
-  const botOk = !isMock && health?.bot?.connected === true;
-  setConn(els.connEngine, engineOk ? "ok" : "off", engineOk ? "织机已连接" : "织机未连接");
-  setConn(els.connPaper, isMock ? "mock" : paperOk ? "ok" : "bad", isMock ? "Mock 试玩：未连接 Paper" : paperOk ? "Paper 26.1.2 已连接" : "Paper / 插件未连接");
-  setConn(els.connBot, isMock ? "mock" : botOk ? "ok" : "bad", isMock ? "Mock 试玩：没有真实织偶" : botOk ? "mineflayer 织偶已进服" : "mineflayer 织偶未连接");
-  let clientOk = false;
-  try { clientOk = !!(await invoke("client_running")); } catch { /* old shell */ }
-  setConn(els.connClient, clientOk ? "ok" : "off", clientOk ? "我的世界客户端正在运行" : "我的世界客户端未检测到");
-  try { els.iframe.contentWindow?.postMessage({ type: "loom:conn", client: clientOk }, "*"); } catch { /* ignore */ }
+    try {
+      const env = await invoke("env_state");
+      if (env?.engine && env?.client) { applyEnv(env); return; }
+    } catch { /* old shell falls back to health */ }
+    let health = null;
+    try {
+      const base = currentEngineUrl();
+      const response = await fetch(base + "/api/health", { signal: AbortSignal.timeout(1800) });
+      health = await response.json();
+    } catch { /* engine offline */ }
+    const engineOk = !!health?.ok;
+    const isMock = health?.port === "mock";
+    const paperOk = !isMock && health?.mc?.kind === "paper" && health?.mc?.connected === true;
+    const botOk = !isMock && health?.bot?.connected === true;
+    setConn(els.connEngine, engineOk ? "ok" : "off", engineOk ? "织机已连接" : "织机未连接");
+    setConn(els.connPaper, isMock ? "mock" : paperOk ? "ok" : "bad", isMock ? "Mock 试玩：未连接 Paper" : paperOk ? "Paper 26.1.2 已连接" : "Paper / 插件未连接");
+    setConn(els.connBot, isMock ? "mock" : botOk ? "ok" : "bad", isMock ? "Mock 试玩：没有真实织偶" : botOk ? "mineflayer 织偶已进服" : "mineflayer 织偶未连接");
+    let clientOk = false;
+    try { clientOk = !!(await invoke("client_running")); } catch { /* old shell */ }
+    setConn(els.connClient, clientOk ? "ok" : "off", clientOk ? "我的世界客户端正在运行" : "我的世界客户端未检测到");
+    try { els.iframe.contentWindow?.postMessage({ type: "loom:conn", client: clientOk }, "*"); } catch { /* ignore */ }
+  } finally { refreshingStatus = false; }
 }
 
 els.pin.addEventListener("click", async () => {

@@ -132,3 +132,87 @@ test('独立教材：公共 Tauri 当前窗口 API 接线', async ({ page }) => 
   expect(await page.evaluate(() => (window as unknown as { textbookCalls: unknown[][] }).textbookCalls))
     .toEqual(expect.arrayContaining([['setAlwaysOnTop', true], ['startDragging'], ['startResizeDragging', 'SouthEast'], ['close']]));
 });
+
+test("80% 缩放的 Chromium 使用原生排版，字体通知不再逐字扫描", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.clear();
+    const original = Range.prototype.getClientRects;
+    (window as any).rangeReadCount = 0;
+    Range.prototype.getClientRects = function () {
+      (window as any).rangeReadCount++;
+      return original.call(this);
+    };
+  });
+  await page.goto("/?scale=0.8");
+  await expect(page.getByTestId("prologue-overlay")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator(".justified-text-block")).toHaveCount(0);
+  const reads = await page.evaluate(async () => {
+    (window as any).rangeReadCount = 0;
+    document.fonts.dispatchEvent(new Event("loadingdone"));
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    return (window as any).rangeReadCount;
+  });
+  expect(reads).toBe(0);
+});
+
+test("快速运行的 SSE 先于 HTTP 202 返回时，第二次运行仍显示结果", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: true, actsSeen: [1, 2, 3], levelsStarted: ["L01"], lastCompletedLevelId: null }));
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01"]));
+  });
+  await page.goto("/");
+  await page.getByTestId("level-card-L01").click();
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  await page.evaluate(() => window.__loomStudio?.setCode("golem.moveTo("));
+  await Promise.all([
+    page.waitForResponse(response => response.url().endsWith("/api/run") && response.request().method() === "POST"),
+    page.getByTestId("btn-run").click(),
+  ]);
+  await expect(page.getByTestId("error-banner")).toBeVisible();
+  await page.route("**/api/run", async route => {
+    const response = await route.fetch();
+    // 后端照常执行，只延后网络确认，确定性重现 SSE 已到但 activeRunId 仍属于上一轮。
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await route.fulfill({ response });
+  });
+  await page.evaluate(() => window.__loomStudio?.fillReference());
+  await page.getByTestId("btn-run").click();
+  await expect(page.getByTestId("btn-player-beat")).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId("error-banner")).toBeHidden();
+});
+
+test("HTTP 确认在途时 reset，晚到确认和缓冲结果不得恢复旧运行", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: true, actsSeen: [1, 2, 3], levelsStarted: ["L01"], lastCompletedLevelId: null }));
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01"]));
+  });
+  await page.goto("/");
+  await page.getByTestId("level-card-L01").click();
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  await page.evaluate(() => window.__loomStudio?.fillReference());
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route("**/api/run", async route => {
+    const response = await route.fetch();
+    await gate;
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByTestId("btn-run").click();
+    await expect(page.locator('.goal[data-done="true"]')).toHaveCount(2);
+    await Promise.all([
+      page.waitForResponse(response => response.url().endsWith("/api/reset")),
+      page.getByTestId("btn-reset").click(),
+    ]);
+    await expect(page.locator('.goal[data-done="true"]')).toHaveCount(0);
+    const oldAck = page.waitForResponse(response => response.url().endsWith("/api/run"));
+    release();
+    await oldAck;
+    await expect(page.getByTestId("btn-player-beat")).toBeHidden();
+    await expect(page.locator('.goal[data-done="true"]')).toHaveCount(0);
+  } finally { release(); await page.unroute("**/api/run"); }
+  await page.getByTestId("btn-run").click();
+  await expect(page.getByTestId("btn-player-beat")).toBeVisible();
+});

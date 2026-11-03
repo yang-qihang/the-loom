@@ -186,7 +186,10 @@ function applyEnvState(env) {
 async function refreshEnvState() {
   try { applyEnvState(await invoke("env_state")); } catch { /* old shell fallback */ }
 }
+let probing = false;
 async function probe() {
+  if (probing) return;
+  probing = true;
   log("正在检测本机环境…");
   try {
     const report = await invoke("env_probe");
@@ -197,6 +200,7 @@ async function probe() {
     else if (latestEnv && !latestEnv.allReady) missing.push("· 还有环境项没准备好");
     log(missing.join("\n") || "四个步骤都就绪了。");
   } catch (error) { log("# 检测失败：" + error); }
+  finally { probing = false; }
 }
 
 $("btn-probe").onclick = () => void probe();
@@ -232,7 +236,7 @@ $("btn-enter").onclick = async () => {
   try { parent.postMessage({ type: "loom:navigate", page: "workbench" }, "*"); } catch { location.href = "./studio/index.html"; }
 };
 void probe();
-setInterval(() => void probe(), 8000);
+// 版本/安装诊断只在首次和手动重新检测时执行；实时灯态读下方缓存快照。
 setInterval(() => void refreshEnvState(), 2000);
 </script>
 </body>

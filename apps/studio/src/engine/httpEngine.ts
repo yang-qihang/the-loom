@@ -127,6 +127,8 @@ export class HttpEngine implements StudioEngine {
    * SSE 里 error/result 事件都带 runId：对不上的一律丢弃（旧 run 的迟到事件/断线回放不会再污染界面）。
    */
   private activeRunId: string | null = null;
+  /** HTTP 202 确认前先缓存终态：快执行的 SSE 可能比新 runId 更早到达。对象身份即请求 token。 */
+  private pendingRun: { sessionId: string; events: Array<() => void> } | null = null;
   /** 玩家节拍请求在途：beat-* 结果不属于 activeRunId，看到对应的 beat 结果后自动放行。 */
   private beatPending = false;
 
@@ -225,13 +227,28 @@ export class HttpEngine implements StudioEngine {
       method: "POST",
       body: JSON.stringify({ levelId }),
     });
+    this.pendingRun = null;
+    this.activeRunId = null;
+    this.beatPending = false;
     return data.sessionId;
   }
 
   async run(sessionId: string, source: string): Promise<string | null> {
-    const data = await this.request<{ runId?: string }>("/api/run", { method: "POST", body: JSON.stringify({ sessionId, source }) });
-    this.activeRunId = typeof data.runId === "string" && data.runId.length > 0 ? data.runId : null;
-    return this.activeRunId;
+    const pending = { sessionId, events: [] as Array<() => void> };
+    this.pendingRun = pending;
+    let acknowledged = false;
+    try {
+      const data = await this.request<{ runId?: string }>("/api/run", { method: "POST", body: JSON.stringify({ sessionId, source }) });
+      if (this.pendingRun !== pending) return null;
+      this.activeRunId = typeof data.runId === "string" && data.runId.length > 0 ? data.runId : null;
+      acknowledged = true;
+      return this.activeRunId;
+    } finally {
+      if (this.pendingRun === pending) {
+        this.pendingRun = null;
+        if (acknowledged) for (const deliver of pending.events) deliver();
+      }
+    }
   }
 
   async createReplSession(levelId?: string): Promise<string> {
@@ -242,10 +259,10 @@ export class HttpEngine implements StudioEngine {
     return data.sessionId;
   }
 
-  /** 位置 HUD：引擎会话快照（docs/48 §1.6）；引擎还没有该端点时返回 null 让 UI 降级。 */
+  /** 位置 HUD 轻量投影：省略 blocks/events/vars；调试客户端仍可请求默认完整端点。旧引擎忽略 view 时兼容嵌套 snapshot。 */
   async snapshot(sessionId: string): Promise<SnapshotView | null> {
     try {
-      const data = await this.request<SnapshotView & { snapshot?: SnapshotView }>(`/api/session/${encodeURIComponent(sessionId)}/snapshot`);
+      const data = await this.request<SnapshotView & { snapshot?: SnapshotView }>(`/api/session/${encodeURIComponent(sessionId)}/snapshot?view=hud`);
       const snapshot = data.snapshot ?? data;
       return snapshot && typeof snapshot === "object" ? snapshot : null;
     } catch {
@@ -302,6 +319,7 @@ export class HttpEngine implements StudioEngine {
   async stop(sessionId: string): Promise<void> {
     await this.request("/api/stop", { method: "POST", body: JSON.stringify({ sessionId }) });
     this.activeRunId = null;
+    if (this.pendingRun?.sessionId === sessionId) this.pendingRun = null;
     this.beatPending = false;
   }
 
@@ -309,6 +327,7 @@ export class HttpEngine implements StudioEngine {
     await this.request("/api/reset", { method: "POST", body: JSON.stringify({ sessionId }) });
     // 重置后旧 run 的结果/错误一律作废：清掉活跃 runId，迟到的旧事件会被下方 subscribe 丢弃。
     this.activeRunId = null;
+    if (this.pendingRun?.sessionId === sessionId) this.pendingRun = null;
     this.beatPending = false;
   }
 
@@ -336,20 +355,26 @@ export class HttpEngine implements StudioEngine {
 
   subscribe(sessionId: string, listener: (event: StudioEvent) => void): () => void {
     const source = new EventSource(`${this.base}/api/events?sessionId=${encodeURIComponent(sessionId)}`);
+    let closed = false;
     source.onmessage = (message) => {
       try {
         const event = normalizeEvent(JSON.parse(message.data) as RawEvent);
         if (!event) return;
         // docs/49 §2.4：只接受当前活跃 run 的 error/result；旧 run 的迟到事件/断线回放直接丢弃。
         // 例外：玩家节拍（beat-*）结果由 Engine.playerBeat 单独标记放行。
-        const runId =
-          event.type === "result" ? event.result.runId : event.type === "error" ? event.runId : undefined;
-        if (this.activeRunId && typeof runId === "string" && runId !== this.activeRunId) {
-          const beatResult = this.beatPending && event.type === "result" && runId.startsWith("beat-");
-          if (!beatResult) return;
-          this.beatPending = false;
-        }
-        listener(event);
+        const deliver = (): void => {
+          if (closed) return;
+          const runId = event.type === "result" ? event.result.runId : event.type === "error" ? event.runId : undefined;
+          if (typeof runId === "string" && runId !== this.activeRunId) {
+            const beatResult = this.beatPending && event.type === "result" && runId.startsWith("beat-");
+            if (!beatResult) return;
+            this.beatPending = false;
+          }
+          listener(event);
+        };
+        if (this.pendingRun?.sessionId === sessionId && (event.type === "result" || event.type === "error")) {
+          this.pendingRun.events.push(deliver);
+        } else deliver();
       } catch {
         listener({ type: "log", line: chrome.workbench.eventMalformed });
       }
@@ -357,6 +382,10 @@ export class HttpEngine implements StudioEngine {
     source.onerror = () => {
       listener({ type: "log", line: chrome.workbench.eventDisconnected });
     };
-    return () => source.close();
+    return () => {
+      closed = true;
+      if (this.pendingRun?.sessionId === sessionId) this.pendingRun = null;
+      source.close();
+    };
   }
 }

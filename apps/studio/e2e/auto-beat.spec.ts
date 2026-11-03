@@ -79,7 +79,7 @@ interface SnapshotPatchJson {
  * - 之后 progress 全 passed、playerBeatDone=true，模拟 Paper 世界的真值。
  */
 async function installPlayerCompletedSnapshot(page: Page): Promise<void> {
-  await page.route("**/api/session/*/snapshot", async (route) => {
+  await page.route(/\/api\/session\/[^/]+\/snapshot(?:\?.*)?$/, async (route) => {
     const response = await route.fetch();
     const json = (await response.json()) as SnapshotPatchJson;
     const progress = Array.isArray(json.progress) ? json.progress : [];
@@ -99,7 +99,7 @@ async function installPlayerCompletedSnapshot(page: Page): Promise<void> {
         allPassed: true,
         playerBeatDone: true,
         snapshot: {
-          ...(json.snapshot ?? {}),
+          ...(json.snapshot ?? json),
           state: "READY",
           progress: patched,
           playerBeatReady: true,

@@ -1,0 +1,58 @@
+{
+  "runs": [
+    {
+      "command": [
+        "apps/desktop/src-tauri/runtime/real/java/bin/java",
+        "-version"
+      ],
+      "durationMs": [
+        41.17,
+        33.08,
+        34.49,
+        32.98
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "apps/desktop/src-tauri/runtime/real/node/bin/node",
+        "--version"
+      ],
+      "durationMs": [
+        14.31,
+        11.74,
+        9.63,
+        12.06
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "flatpak",
+        "--version"
+      ],
+      "durationMs": [
+        33.93,
+        10.1,
+        8.4,
+        7.99
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "flatpak",
+        "info",
+        "org.prismlauncher.PrismLauncher"
+      ],
+      "durationMs": [
+        13.32,
+        9.75,
+        10.04,
+        11.23
+      ],
+      "exit": 0
+    }
+  ],
+  "note": "子命令墙钟时间，非原生UI端到端测试；优化后这些诊断仅首次/手动运行，并在后台线程执行。"
+}

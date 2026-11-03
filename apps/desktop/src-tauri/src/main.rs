@@ -1487,7 +1487,12 @@ fn set_mode(app: tauri::AppHandle, mode: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
-fn env_probe(app: tauri::AppHandle) -> EnvReport {
+async fn env_probe(app: tauri::AppHandle) -> Result<EnvReport, String> {
+    tauri::async_runtime::spawn_blocking(move || probe_env(&app)).await
+        .map_err(|error| format!("环境检测任务失败：{error}"))
+}
+
+fn probe_env(app: &AppHandle) -> EnvReport {
     let state = app.state::<AppState>();
     let real = find_real_runtime(&state);
     let java = match real.as_deref() {
@@ -1560,34 +1565,9 @@ fn stop_engine(app: tauri::AppHandle) -> Result<OpStatus, String> {
 }
 
 #[tauri::command]
-fn start_paper(app: tauri::AppHandle) -> Result<OpStatus, String> {
-    let state = app.state::<AppState>();
-    if find_real_runtime(&state).is_some() {
-        return spawn_bundled_paper(&state);
-    }
-    let Some(root) = state.repo_root.clone() else {
-        return Err("找不到仓库目录，无法启动 Paper 世界。".into());
-    };
-    if port_open(MC_PORT) {
-        return Ok(OpStatus { ok: true, detail: "世界已在运行（127.0.0.1:25565）。".into() });
-    }
-    let script = root.join("scripts/mc-up.sh");
-    if !script.exists() {
-        return Err(format!("缺少 {}", script.display()));
-    }
-    let _ = fs::create_dir_all(&state.logs_dir);
-    let log_file = File::create(state.logs_dir.join("paper.log")).map_err(|error| error.to_string())?;
-    let log_file_err = log_file.try_clone().map_err(|error| error.to_string())?;
-    let child = Command::new("bash")
-        .arg(&script)
-        .current_dir(&root)
-        .stdout(Stdio::from(log_file))
-        .stderr(Stdio::from(log_file_err))
-        .spawn()
-        .map_err(|error| format!("启动世界失败：{error}"))?;
-    state.children.lock().map_err(|_| "子进程状态锁失效".to_string())?.insert("paper".into(), child);
-    state.log("lifecycle", &format!("启动 Paper：{}", script.display()));
-    Ok(OpStatus { ok: true, detail: "Paper 正在启动（首次约 10–20 秒），就绪后织偶会自动连接。".into() })
+fn start_paper(app: tauri::AppHandle) -> OpStatus {
+    // 首次可复制整个运行时；统一走已有后台线程与启动锁，不能占用 WebView UI 线程。
+    env_start_inner(app, "paper")
 }
 
 #[tauri::command]
@@ -2105,10 +2085,12 @@ fn env_state(app: tauri::AppHandle) -> envstate::EnvState {
 }
 
 #[tauri::command]
-fn env_refresh(app: tauri::AppHandle) -> envstate::EnvState {
-    let env = refresh_env(&app);
-    emit_env(&app, &env);
-    env
+async fn env_refresh(app: tauri::AppHandle) -> Result<envstate::EnvState, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let env = refresh_env(&app);
+        emit_env(&app, &env);
+        env
+    }).await.map_err(|error| format!("环境刷新任务失败：{error}"))
 }
 
 #[tauri::command]

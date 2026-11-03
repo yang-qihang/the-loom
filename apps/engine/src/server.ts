@@ -394,6 +394,26 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       const points = pointsView(session.level.def);
       const containers = sessionContainers(session, points);
       const progressView = snapshotProgressView(session, snapshot);
+      // HUD 不显示 blocks/events，也无需同一快照的顶层/嵌套双份数据。
+      // 默认路径保持完整调试契约；此投影仍按同一份新鲜快照计算进度和自动结算。
+      if (url.searchParams.get("view") === "hud") {
+        sendJson(res, 200, {
+          ok: true,
+          sessionId: session.id,
+          state: session.state,
+          sessionEpoch: session.epoch,
+          epoch: session.epoch,
+          port: session.portKind,
+          mode: session.mode,
+          agents: snapshot.agents,
+          npcs: snapshot.npcs,
+          tick: snapshot.tick,
+          ...progressView,
+          points,
+          containers,
+        });
+        return;
+      }
       const envelope = {
         ok: true,
         // 插件 world.snapshot 也带 sessionId/epoch：先展开再写本引擎的值，避免被插件值覆盖

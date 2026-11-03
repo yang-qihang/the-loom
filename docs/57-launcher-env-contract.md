@@ -255,6 +255,10 @@ Rust `envstate::EnvState`（camelCase JSON）：
 - **卡片文案**：四张 L0 卡片只保留用户可操作的信息；移除协议号、task 编号、内部实现口径（如「写死」「产品自管直启」「version JSON + 包内 Java」）等开发者说明。
 - **验证**：cargo test **52 passed / 0 failed / 4 ignored**（含真实 /proc 的 Prism EntryPoint 模拟）；完整 Playwright e2e 见本次运行；verify 绿（仅既有 G-FRESH-READER 告警）。
 
+## 7.2a 2026-11-03 卡顿修复
+
+启动页安装诊断只在首次/手动执行，env_probe 与 env_refresh 在后台运行；周期状态仍读 env_state。壳和 Studio Hook 忽略 updatedAt 去重，iframe load 强制补发。兼容 start_paper 入口进入同一后台启动锁。测量与回归见 docs/63。
+
 ## 7.2 2026-11-03 审计修复
 
 接手时 shell.js 缺少 §2 声明的 env/quit/session 接线与 IPC 白名单；本轮已按契约恢复，并以真实 shell 源文件 + Tauri stub 的浏览器回归验证。EnvState 来自 Rust 事件与 2s env_state 兜底；Workbench 卸载会清除旧会话（切到伴玩时由壳保留）；退出确认显式 ack；伴玩恢复事件会切回工作台页面。跨源缩放改用 loom:scale，无需刷新学生编辑器。事件订阅失败时保留初始化和快照轮询。

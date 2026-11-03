@@ -1,0 +1,136 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts e2e/desktop-shell.spec.ts e2e/desktop-ui-regressions.spec.ts e2e/style-policy.spec.ts e2e/auto-beat.spec.ts e2e/runtime-recovery.spec.ts
+
+[WebServer] (node:34140) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:34151) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:34174) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer]
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter]
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:34162) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 24 tests using 1 worker
+
+(node:34260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✘   1 e2e/auto-beat.spec.ts:114:1 › L01 参考解跑完后：世界侧全完成 → 不点按钮自动结算 3 星 (31.3s)
+(node:34514) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✘   2 e2e/auto-beat.spec.ts:180:1 › 自动确认串行安全：重置后再跑一轮不会残留上一轮的结算 (31.0s)
+(node:34841) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓   3 e2e/desktop-shell.spec.ts:51:1 › 真实 shell：环境同源、会话同步与掉线阻断 (246ms)
+  ✓   4 e2e/desktop-shell.spec.ts:75:1 › 真实 shell：消息桥拒绝伪造来源/命令，退出须确认，恢复伴玩页面 (205ms)
+  ✓   5 e2e/desktop-shell.spec.ts:99:1 › 真实 shell：事件订阅失败仍能初始化和关闭；缩放消息即时下发 (232ms)
+  ✓   6 e2e/desktop-shell.spec.ts:111:1 › 跨源 Studio 接收父壳缩放，不刷新页面 (488ms)
+  ✓   7 e2e/desktop-shell.spec.ts:126:1 › 静止壳状态不重复下发；时间戳变化不触发 Studio 更新 (129ms)
+  ✓   8 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 0.65 (16.7s)
+  ✓   9 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 0.8 (16.6s)
+  ✓  10 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 1 (16.4s)
+  ✓  11 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 Chromium native × 1.25 (16.7s)
+  ✓  12 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 0.65 (17.8s)
+  ✓  13 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 0.8 (16.4s)
+  ✓  14 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 1 (16.5s)
+  ✓  15 e2e/desktop-ui-regressions.spec.ts:6:5 › 叙事缩放后宽度稳定 WebKit fallback × 1.25 (16.7s)
+  ✓  16 e2e/desktop-ui-regressions.spec.ts:64:1 › 独立教材：真实命中、滚动、翻章与 Tauri 命令接线 (1.0s)
+  ✓  17 e2e/desktop-ui-regressions.spec.ts:103:1 › 独立教材：公共 Tauri 当前窗口 API 接线 (552ms)
+  ✓  18 e2e/desktop-ui-regressions.spec.ts:136:1 › 80% 缩放的 Chromium 使用原生排版，字体通知不再逐字扫描 (438ms)
+  ✓  19 e2e/runtime-recovery.spec.ts:69:1 › 语法错误后换参考解再运行：红条消失、直接进入玩家节拍 (1.2s)
+  ✘  20 e2e/runtime-recovery.spec.ts:110:1 › 双击「运行」只发一次 run：不会用 409 红条覆盖正确结果 (20.9s)
+(node:38502) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓  21 e2e/runtime-recovery.spec.ts:138:1 › P0 脏世界：L02 starter 失败后参考解自动恢复场景并通过（手动兜底 3 星） (3.5s)
+  ✓  22 e2e/style-policy.spec.ts:48:1 › 字体三轨道 + 行内代码渲染策略 (2.3s)
+  ✓  23 e2e/style-policy.spec.ts:122:1 › WebKit 降级路径：所有宽度首行占满、末行左对齐 (994ms)
+  ✓  24 e2e/style-policy.spec.ts:214:1 › 关开场三段的文本容器等宽（不再出现第二段窄于其他两段） (391ms)
+
+
+  1) e2e/auto-beat.spec.ts:114:1 › L01 参考解跑完后：世界侧全完成 → 不点按钮自动结算 3 星 ────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('settle-overlay')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('settle-overlay') with timeout 30000ms
+      - waiting for getByTestId('settle-overlay')
+
+
+      136 |
+      137 |   // 不点 btn-player-beat：轮询到「世界侧全完成」后自动确认 → 自动结算。
+    > 138 |   await expect(page.getByTestId("settle-overlay")).toBeVisible({ timeout: 30_000 });
+          |                                                    ^
+      139 |   await expect(page.getByTestId("settle-overlay")).toContainText("灯全亮");
+      140 |
+      141 |   // 结算浮层出现后，目标打勾可能在同一帧稍晚落地：先等它记录到，再比较先后顺序（时间戳不会倒置）。
+        at /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/studio/e2e/auto-beat.spec.ts:138:52
+
+    Error Context: .pw-out/real/auto-beat-L01-参考解跑完后：世界侧全完成-→-不点按钮自动结算-3-星/error-context.md
+
+  2) e2e/auto-beat.spec.ts:180:1 › 自动确认串行安全：重置后再跑一轮不会残留上一轮的结算 ──────────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('settle-overlay')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('settle-overlay') with timeout 30000ms
+      - waiting for getByTestId('settle-overlay')
+
+
+      191 |   await page.evaluate(() => window.__loomStudio?.fillReference());
+      192 |   await page.getByTestId("btn-run").click();
+    > 193 |   await expect(page.getByTestId("settle-overlay")).toBeVisible({ timeout: 30_000 });
+          |                                                    ^
+      194 |   await page.getByTestId("btn-settle-replay").click();
+      195 |   await expect(page.getByTestId("settle-overlay")).toBeHidden();
+      196 |   await expect(page.getByTestId("result-placeholder")).toBeVisible();
+        at /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/studio/e2e/auto-beat.spec.ts:193:52
+
+    Error Context: .pw-out/real/auto-beat-自动确认串行安全：重置后再跑一轮不会残留上一轮的结算/error-context.md
+
+  3) e2e/runtime-recovery.spec.ts:110:1 › 双击「运行」只发一次 run：不会用 409 红条覆盖正确结果 ──────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('btn-player-beat')
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('btn-player-beat') with timeout 20000ms
+      - waiting for getByTestId('btn-player-beat')
+
+
+      130 |     window.__loomStudio?.run();
+      131 |   });
+    > 132 |   await expect(page.getByTestId("btn-player-beat")).toBeVisible({ timeout: 20_000 });
+          |                                                     ^
+      133 |   await expect(page.getByTestId("error-banner")).toBeHidden();
+      134 |   expect(runRequests - before, "同步守卫应只放行一次 run 请求").toBe(1);
+      135 |   expect(consoleErrors, `console errors: ${consoleErrors.join(" | ")}`).toEqual([]);
+        at /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/studio/e2e/runtime-recovery.spec.ts:132:53
+
+    Error Context: .pw-out/real/runtime-recovery-双击「运行」只发一次-run：不会用-409-红条覆盖正确结果/error-context.md
+
+  3 failed
+    e2e/auto-beat.spec.ts:114:1 › L01 参考解跑完后：世界侧全完成 → 不点按钮自动结算 3 星 ─────────────────────────────────
+    e2e/auto-beat.spec.ts:180:1 › 自动确认串行安全：重置后再跑一轮不会残留上一轮的结算 ───────────────────────────────────────
+    e2e/runtime-recovery.spec.ts:110:1 › 双击「运行」只发一次 run：不会用 409 红条覆盖正确结果 ───────────────────────────
+  21 passed (4.0m)

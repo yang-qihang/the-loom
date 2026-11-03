@@ -1,0 +1,39 @@
+{
+  "node": "v22.23.1",
+  "world": "MockWorld",
+  "results": [
+    {
+      "level": "L01",
+      "full": {
+        "bytes": 96091,
+        "parse500Ms": 146.26
+      },
+      "hud": {
+        "bytes": 1673,
+        "parse500Ms": 1.75
+      }
+    },
+    {
+      "level": "L05",
+      "full": {
+        "bytes": 222383,
+        "parse500Ms": 467.61
+      },
+      "hud": {
+        "bytes": 2137,
+        "parse500Ms": 2.39
+      }
+    },
+    {
+      "level": "L10",
+      "full": {
+        "bytes": 31263,
+        "parse500Ms": 44.21
+      },
+      "hud": {
+        "bytes": 1822,
+        "parse500Ms": 1.85
+      }
+    }
+  ]
+}

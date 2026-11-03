@@ -42,7 +42,9 @@ function probeNativeCjkJustify(): boolean {
     const range = document.createRange();
     range.selectNodeContents(probe);
     const firstLine = range.getClientRects()[0];
-    nativeSupport = Boolean(firstLine && firstLine.width >= probe.clientWidth - 2);
+    // 两边都用实际渲染像素；CSS zoom 下 DOMRect 宽度不能和 clientWidth 比较。
+    // 混用会把默认 80% 缩放的 Chromium 错判为不支持，令每段都走逐字拆行。
+    nativeSupport = Boolean(firstLine && firstLine.width >= probe.getBoundingClientRect().width - 2);
   } catch {
     nativeSupport = true;
   } finally {
@@ -104,9 +106,19 @@ export function JustifiedText({ text, centerWhenSingleLine = false }: { text: st
   const updateFallback = (): void => {
     const parent = anchorRef.current?.parentElement;
     if (!parent) return;
+    if (probeNativeCjkJustify()) {
+      // 原生路径直接按已排好的段落高度检测单行，不为每个字符创建 Range。
+      // centerWhenSingleLine 只用于幕开场 p；其它容器还可能有标题，不能据其总高度判断。
+      const style = centerWhenSingleLine ? getComputedStyle(parent) : null;
+      const single = style !== null && parent.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)
+        <= parseFloat(style.lineHeight) + 1;
+      parent.classList.toggle("is-single-line", single);
+      setLines(null);
+      return;
+    }
     const next = computeLines(parent, text);
     parent.classList.toggle("is-single-line", centerWhenSingleLine && next.length === 1);
-    if (probeNativeCjkJustify() || text.includes("`")) {
+    if (text.includes("`")) {
       setLines(null);
       return;
     }

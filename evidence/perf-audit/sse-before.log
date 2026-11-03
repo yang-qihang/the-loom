@@ -1,0 +1,54 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts e2e/desktop-ui-regressions.spec.ts -g SSE 先于 HTTP
+
+[WebServer] (node:39618) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:39629) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:39657) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer]
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter]
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:39645) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:39745) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✘  1 e2e/desktop-ui-regressions.spec.ts:160:1 › 快速运行的 SSE 先于 HTTP 202 返回时，第二次运行仍显示结果 (6.1s)
+
+
+  1) e2e/desktop-ui-regressions.spec.ts:160:1 › 快速运行的 SSE 先于 HTTP 202 返回时，第二次运行仍显示结果 ───────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('btn-player-beat')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('btn-player-beat') with timeout 5000ms
+      - waiting for getByTestId('btn-player-beat')
+
+
+      180 |   await page.evaluate(() => window.__loomStudio?.fillReference());
+      181 |   await page.getByTestId("btn-run").click();
+    > 182 |   await expect(page.getByTestId("btn-player-beat")).toBeVisible({ timeout: 5000 });
+          |                                                     ^
+      183 |   await expect(page.getByTestId("error-banner")).toBeHidden();
+      184 | });
+      185 |
+        at /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/studio/e2e/desktop-ui-regressions.spec.ts:182:53
+
+    Error Context: .pw-out/real/desktop-ui-regressions-快速运行的-SSE-先于-HTTP-202-返回时，第二次运行仍显示结果/error-context.md
+
+  1 failed
+    e2e/desktop-ui-regressions.spec.ts:160:1 › 快速运行的 SSE 先于 HTTP 202 返回时，第二次运行仍显示结果 ────────────────
