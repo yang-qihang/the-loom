@@ -1,5 +1,6 @@
 # 57 — 启动流程 / EnvState / 客户端启动器契约（task-7/8/9/11/16/17/18/20）
 
+> 当前补充（2026-11-03）：实际壳接线、退出取消与跨源缩放已按 §7.2 恢复；当前验收见 docs/62。下方 2026-11-02 数字是历史快照。
 > 状态：已实现并完成对抗性 P0/P1 加固 + 集成真机修复 + 版本门控 + 窗口几何 clamp + 产品直启启动器；**已合入 main（`b9a92af`，2026-11-02）**。合入后 Linux 验证：verify 绿（仅 G-FRESH-READER 已知告警）、cargo check/test 49 passed / 4 ignored、mock e2e 7/7、完整 e2e 41/41｜日期：2026-11-02
 > 基线：`main@5b31af9` → 合入 `b9a92af`；Windows 真机行为与 Linux 静态/无头验证分层记录。
 > 上游：`docs/53-game-start-flow-design.md`、`docs/54-takeover-audit-and-task-plan.md`、`docs/58-client-version-compatibility-review.md`、`tmp/audit/ui-issues.md`、`tmp/audit/launcher-adversarial-review.md`、`tmp/integrated-screen.png`
@@ -94,6 +95,7 @@ Rust `envstate::EnvState`（camelCase JSON）：
 | `env_cancel` | — | `OpStatus` | P1-3：取消进行中的《我的世界》启动链；等待窗口的直启 child 会 kill |
 | `quit_game` | — | — | L1 完整退出（含客户端/服务端/织界） |
 | `quit_ack` | — | — | shell 已显示退出确认（停止 Rust 10s 兜底计时） |
+| `quit_cancel` | — | — | 用户取消退出，撤销二次关闭捷径及旧 watchdog 请求 |
 | `window_allow_close` | — | — | shell 引导异常兜底：下次 X/Alt+F4 直接放行 |
 | `window_force_close` | — | — | shell 引导异常兜底：立即关闭窗口 |
 
@@ -253,11 +255,15 @@ Rust `envstate::EnvState`（camelCase JSON）：
 - **卡片文案**：四张 L0 卡片只保留用户可操作的信息；移除协议号、task 编号、内部实现口径（如「写死」「产品自管直启」「version JSON + 包内 Java」）等开发者说明。
 - **验证**：cargo test **52 passed / 0 failed / 4 ignored**（含真实 /proc 的 Prism EntryPoint 模拟）；完整 Playwright e2e 见本次运行；verify 绿（仅既有 G-FRESH-READER 告警）。
 
+## 7.2 2026-11-03 审计修复
+
+接手时 shell.js 缺少 §2 声明的 env/quit/session 接线与 IPC 白名单；本轮已按契约恢复，并以真实 shell 源文件 + Tauri stub 的浏览器回归验证。EnvState 来自 Rust 事件与 2s env_state 兜底；Workbench 卸载会清除旧会话（切到伴玩时由壳保留）；退出确认显式 ack；伴玩恢复事件会切回工作台页面。跨源缩放改用 loom:scale，无需刷新学生编辑器。事件订阅失败时保留初始化和快照轮询。
+
 ## 8. 未完成 / 交给后续
 
 1. ~~Studio 侧切换状态源~~ **已完成并合入**：`apps/studio/src/shell-env.ts` 消费壳下发 `loom:env`；地图墙/工作台状态胶囊与 L2 禁用运行/玩家节拍已接入；e2e「桌面壳嵌入」覆盖无第二标题栏、EnvState 驱动与 zoom 100% 链。
-2. **P1-5 部分收口**：壳在进入工作室/回 L0/伴随退出时会 `clear_game_session`，但 Studio 从关卡返回地图墙不会主动发 `loom:session(null)`（需要 Studio 改动）；地图墙上的旧会话可能让 L2 阻断多显示一会儿，用户可「回到 L0」清掉。契约：Studio 应在 Workbench unmount 时 `postMessage({type:"loom:session", sessionId:null, levelId:null})`。
-3. **L2 阻断在 Studio 内部**：目前壳用全屏红色覆盖层挡住 iframe 交互；Studio 内没有单独禁用按钮（无 Studio 改动时的唯一可行方式）。
+2. **P1-5 已补齐（2026-11-03）**：Workbench 卸载发送 loom:session(null)，壳同步到 set_game_session；清理消息带 previousSessionId，避免误清新会话。
+3. **L2 阻断已接线（2026-11-03）**：壳显示客户端掉线覆盖层并提供重连/返回启动页/退出入口；Studio 使用同一 EnvState 禁用运行与玩家节拍。
 4. **打包期（task-11/16/17/18/20）**：`build-assets.mjs` 会把新的 wizard.html/shell.js 复制进 dist/runtime；**Lead 已在合入后重建 Linux 包（AppImage 459M / RPM 453M，2026-11-02 23:28）**。Windows 安装包仍需在 Windows host 重建/重装后做 GUI 真机验收。
 5. **真机 GUI 回归**（1.21.1 在跑 + 点击/自动启动 26.1.2 最终四灯绿且旧客户端仍在、26.1.2 已连接不重复启动、缺 26.1.2 时一键准备采用 repo 资产、退出只关产品客户端）：Linux 包已重建、无头 e2e/静态契约已过；Windows GUI 待 Windows host 重装后执行。窗口几何查 `~/.loomcraft/logs`「恢复窗口几何已夹到工作区」，启动器行为查 `launcher.log`（direct/reuse/一键准备）。L01 hidden h1、world 干净包等既有问题不在本任务内。
 6. **版本门控/启动器已知边界（task-16/18/20）**：

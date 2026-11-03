@@ -1,6 +1,6 @@
 # 43 — 环境、依赖、打包边界
 
-> 状态：交接事实（当前安装包已内置真实运行时；2026-11-01 Round 2 补字体/截图素材）｜负责人：Lead｜最后更新：2026-11-01｜上游：`README.md`、`apps/desktop/README.md`、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`
+> 状态：交接事实（当前安装包已内置真实运行时；2026-11-01 Round 2 补字体/截图素材）｜负责人：Lead｜最后更新：2026-11-03｜上游：`README.md`、`apps/desktop/README.md`、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`
 
 ## 1. 用户应自己安装的
 
@@ -20,7 +20,7 @@
 - 真实引擎 bundle（`runtime/real/engine.mjs`）
 - **mineflayer / minecraft-protocol / pathfinder** 与 `bot/manager.mjs`
 - Mock 演示引擎、图标、窗口/缩放/连接灯逻辑
-- **嵌包字体**：代码 Maple Mono（含中文回退，OFL 许可随包）；长文 Noto Sans SC（OFL）；装饰字 MiSans VF（Apache-2.0，随包切片）；全部随包，不依赖系统字体
+- **嵌包字体**：代码 Maple Mono（含中文回退，OFL 许可随包）；长文 MiSans VF（Apache-2.0，Noto Sans SC 仅 fallback）；短 UI/装饰字 Zpix + Departure Mono；全部随包，不依赖系统字体
 - **关卡截图素材**（`apps/studio/public/world/*.png` 玩家出生视角；`report/evidence/*.png` 报告配图；成品尺寸/文件以最终提交素材为准）
 
 ## 3. 用户只需要
@@ -49,7 +49,7 @@ npx tauri build
 
 `build-real-runtime.sh` 需要构建机提供 Node 22、Java 25（默认读 Prism runtime，可用 `LOOM_JAVA_HOME` 覆盖）和可用的 Paper server；这些只在构建时使用，不进用户路线。
 
-> 注：AppImage 打包在本机曾遇到 linuxdeploy 图标/体积问题；RPM 可直接生成。可用 AppDir + `linuxdeploy-plugin-appimage.AppImage` 手动补图打包。
+> 2026-11-03：一键打包入口已为 linuxdeploy 添加包内 Java `lib/server` 与 `lib` 搜索路径，避免 `libjvm.so` 找不到。手动分步构建需设置同样的 `LD_LIBRARY_PATH`；无 FUSE 时设置 `APPIMAGE_EXTRACT_AND_RUN=1`。最新包体积/验证见 `docs/62-release-audit-2026-11-03.md`。
 
 ## 6. 当前真实模式启动路径（源码开发）
 
@@ -82,7 +82,7 @@ npm run desktop:build
 ### 8.1 字体
 
 - 代码统一使用嵌包 **Maple Mono CN**（开启 ligature）；编辑器右键菜单/补全/悬停/查找同样是清晰普通字体。
-- 所有非衬线装饰性字体（标题/按钮/标签）统一 **MiSans VF**；长段正文用 **Noto Sans SC**；不把正文/标题改成 Maple Mono。
+- 短 UI/装饰性字体（标题/按钮/标签）用 **Zpix + Departure Mono**；长段正文用 **MiSans VF**，Noto 只作 fallback；代码用 Maple Mono。
 - 字体文件与 OFL 许可随 Studio 静态资源（`apps/studio/public/fonts/`）打包，桌面 App 与浏览器吃同一份文件，不依赖系统 fallback。
 - 验收方式（实现侧）：`document.fonts.check("16px \"Maple Mono\"")` 为 true、`.monaco-editor .view-lines` 的 computed font-family 含 Maple Mono；截图人工核对 0/O、1/l/I 不混淆。
 

@@ -1,0 +1,13 @@
+
+> loomcraft@0.0.1 test
+> vitest run
+
+
+ RUN  v5.0.5 /home/yqh0919/Documents/deepseek-harness/default-workspace
+
+
+ Test Files  29 passed (29)
+      Tests  259 passed (259)
+   Start at  17:52:29
+   Duration  11.02s (tests 48%, import 41%, transform 10%)
+

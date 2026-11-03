@@ -1,6 +1,6 @@
 # 61 · 字体与行内代码 Style Guide（强制契约）
 
-> 状态：生效（2026-11-02）｜负责人：Lead｜适用：所有 Studio / 桌面壳 / 教材 / 内容文案 / 前端 agent
+> 状态：生效（2026-11-02）｜负责人：Lead｜最后更新：2026-11-03｜上游：docs/11、docs/62｜适用：所有 Studio / 桌面壳 / 教材 / 内容文案 / 前端 agent
 > 实现：`apps/studio/src/typography.css`、`apps/studio/src/styles.css`、`apps/desktop/shell/*`
 > 自动化：`npm run check:style`、`apps/studio/e2e/style-policy.spec.ts`、`apps/studio/e2e/typography.spec.ts`
 
@@ -94,7 +94,7 @@
 
 - **叙事浮层标题（序章/幕开场/关开场）**：`.narrative-head` 必须占满卡片内容宽度，`h2` 用 `width:100%; text-align:center` 居中，不依赖 shrink-to-fit/flex 基线；像素字 `letter-spacing` 不得让标题视觉偏左。WebKitGTK 实测标题 Range 中线与卡片中线一致。
 
-- **多段正文的段组居中**：若组内所有段落当前都只渲染一行、且没有任何一段实际占满容器宽度，则把整个段组作为整体居中（块宽 = 最宽一段，短段保持左对齐）；只要任一段换行或任一行占满，就回到正常两端对齐。检测用 Range 行盒（按 top 去重）做，`NarrativeLines` + ResizeObserver 实时更新。
+- **多段正文的段组居中**：若组内所有段落当前都只渲染一行、且没有任何一段实际占满容器宽度，则把整个段组作为整体居中（块宽 = 最宽一段，短段保持左对齐）；只要任一段换行或任一行占满，就回到正常两端对齐。检测用移除旧补齐行后的隐藏克隆测量自然宽度；scrollWidth/clientWidth 均为未 zoom 的 CSS 像素。`NarrativeLines` 只响应父容器宽度变化，字体 loadingdone 后重算。
 
 - **关开场三段容器等宽**：`.opening-copy` 必须是 `.opening-line` 的 flex 剩余宽度（`flex:1 1 auto; min-width:0; width:100%`），不能 shrink-to-fit；否则第二段会明显窄于其他两段。WebKitGTK 静态探针三段 copy 宽度均为 494.49px。
-- **叙事翻页不得有 transient 宽度跳变**：`NarrativeLines` 按 `index` 重挂载并跳过 ResizeObserver 首次通知，`JustifiedText` 按文本 key 重挂载，避免新页先复用旧页行宽/旧段组 padding 再缩紧。切页采集 RAF 采样，宽度在首帧后不再变化。
+- **叙事翻页不得有 transient 宽度跳变**：`NarrativeLines` 按 `index` 重挂载，ResizeObserver 忽略高度变化和相同宽度通知，`JustifiedText` 按文本 key 重挂载，避免新页先复用旧页行宽/旧段组 padding 再缩紧。切页采集 RAF 采样，宽度在首帧后不再变化。

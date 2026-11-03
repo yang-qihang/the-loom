@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "startedAt": "2026-11-03T09:44:08.941Z",
+  "finishedAt": "2026-11-03T09:45:01.913Z",
+  "totalDurationMs": 52972,
+  "workers": 1,
+  "levels": ["L01", "L10"],
+  "commandTemplate": "npx tsx it/l{level_num}-real.ts",
+  "allPassed": false,
+  "jobs": [
+    {
+      "id": "L01",
+      "level": "L01",
+      "command": "npx tsx it/l1-real.ts",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 50246,
+      "worker": 0,
+      "tailLog": "\",\"passed\":true}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[]},\"mock\":{\"passed\":true,\"stars\":3,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":true},{\"id\":\"golem-home\",\"passed\":true},{\"id\":\"player-lit-fourth\",\"passed\":true},{\"id\":\"no-shortcut\",\"passed\":true}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[]}}\n[2026-11-03T09:44:38.021Z] CHECK L01.digest-equals-mock PASS {\"agentPlaces\":3,\"says\":0,\"blocks\":1357}\n[2026-11-03T09:44:38.212Z] CHECK L01.reset-under-2s PASS {\"a\":22,\"b\":12}\n[2026-11-03T09:44:38.212Z] CHECK L01.reset-hash-stable PASS {\"a\":\"sha256:09c50c78872e5bed6cec557b97e2679b7fd76e7d0f647add40279f9e1b3bdc11\",\"b\":\"sha256:09c50c78872e5bed6cec557b97e2679b7fd76e7d0f647add40279f9e1b3bdc11\"}\n[2026-11-03T09:44:38.251Z] CHECK L01.reset-clears-events PASS {\"events\":0}\n[2026-11-03T09:44:40.234Z] [bot] move recovery nudge right for (-12, 10) at (-0.8, 12.2, 2.5)\n[2026-11-03T09:44:42.338Z] [bot] move recovery nudge left for (-12, 10) at (-3.5, 12.2, 3.8)\n[2026-11-03T09:44:45.112Z] CHECK l1.starter.not-passed PASS {\"passed\":false,\"stars\":2,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":false},{\"id\":\"golem-home\",\"passed\":false},{\"id\":\"player-lit-fourth\",\"passed\":true},{\"id\":\"no-shortcut\",\"passed\":false}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[\"1→2→3 号灯顺序正确\",\"4 盏路灯全部点亮\",\"灰崽回到艾拉身边\"]}\n[2026-11-03T09:44:45.112Z] CHECK l1.starter.report-equals-mock PASS {\"real\":{\"passed\":false,\"stars\":2,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":false},{\"id\":\"golem-home\",\"passed\":false},{\"id\":\"player-lit-fourth\",\"passed\":true},{\"id\":\"no-shortcut\",\"passed\":false}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[\"1→2→3 号灯顺序正确\",\"4 盏路灯全部点亮\",\"灰崽回到艾拉身边\"]},\"mock\":{\"passed\":false,\"stars\":2,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":false},{\"id\":\"golem-home\",\"passed\":false},{\"id\":\"player-lit-fourth\",\"passed\":true},{\"id\":\"no-shortcut\",\"passed\":false}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[\"1→2→3 号灯顺序正确\",\"4 盏路灯全部点亮\",\"灰崽回到艾拉身边\"]}}\n[2026-11-03T09:44:45.117Z] CHECK l1.starter.digest-equals-mock PASS null\n[2026-11-03T09:44:45.117Z] CHECK l1.starter.has-failures PASS [\"4 盏路灯全部点亮\",\"灰崽回到艾拉身边\",\"1→2→3 号灯顺序正确\"]\n[2026-11-03T09:44:47.912Z] [bot] move recovery nudge right for (-12, 10) at (-0.8, 12.2, 2.5)\n[2026-11-03T09:44:50.014Z] [bot] move recovery nudge left for (-12, 10) at (-3.6, 12.2, 3.9)\n[2026-11-03T09:44:58.859Z] CHECK l1.no-beat.not-passed PASS {\"passed\":false,\"stars\":1,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":false},{\"id\":\"golem-home\",\"passed\":true},{\"id\":\"player-lit-fourth\",\"passed\":false},{\"id\":\"no-shortcut\",\"passed\":true}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[\"4 盏路灯全部点亮\",\"第 4 盏灯由你亲手点亮\"]}\n[2026-11-03T09:44:58.859Z] CHECK l1.no-beat.report-equals-mock PASS {\"real\":{\"passed\":false,\"stars\":1,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":false},{\"id\":\"golem-home\",\"passed\":true},{\"id\":\"player-lit-fourth\",\"passed\":false},{\"id\":\"no-shortcut\",\"passed\":true}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[\"4 盏路灯全部点亮\",\"第 4 盏灯由你亲手点亮\"]},\"mock\":{\"passed\":false,\"stars\":1,\"criteria\":[{\"id\":\"four-lamps-lit\",\"passed\":false},{\"id\":\"golem-home\",\"passed\":true},{\"id\":\"player-lit-fourth\",\"passed\":false},{\"id\":\"no-shortcut\",\"passed\":true}],\"hidden\":[{\"id\":\"h1\",\"passed\":true},{\"id\":\"h2\",\"passed\":true}],\"failures\":[\"4 盏路灯全部点亮\",\"第 4 盏灯由你亲手点亮\"]}}\n[2026-11-03T09:44:58.863Z] CHECK l1.no-beat.digest-equals-mock PASS null\n[2026-11-03T09:44:58.863Z] CHECK l1.no-beat.player-lit-fourth-fails PASS \n[2026-11-03T09:44:59.053Z] evidence written: evidence/l1-real-2026-11-03T09-44-20-204Z.json\n[2026-11-03T09:44:59.053Z] RESULT PASS\n\n[loom-stack] worker=0 paper_stack_start_count=1（本 job 冷启动）"
+    },
+    {
+      "id": "L10",
+      "level": "L10",
+      "command": "npx tsx it/l10-real.ts",
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": 1628,
+      "worker": 0,
+      "tailLog": "/home/yqh0919/Documents/deepseek-harness/default-workspace/packages/worldport/src/paper-port.ts:140\n        reject(new Error(`cannot connect to plugin RPC at ${url}`));\n               ^\n\nError: cannot connect to plugin RPC at ws://127.0.0.1:8765\n    at WebSocket.socket.onerror (/home/yqh0919/Documents/deepseek-harness/default-workspace/packages/worldport/src/paper-port.ts:140:16)\n    at [nodejs.internal.kHybridDispatch] (node:internal/event_target:843:20)\n    at WebSocket.dispatchEvent (node:internal/event_target:776:26)\n    at fireEvent (node:internal/deps/undici/undici:11990:14)\n    at failWebsocketConnection (node:internal/deps/undici/undici:12071:9)\n    at Object.processResponse (node:internal/deps/undici/undici:12289:13)\n    at node:internal/deps/undici/undici:11060:23\n    at node:internal/process/task_queues:149:7\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at AsyncResource.runMicrotask (node:internal/process/task_queues:146:8)\n\nNode.js v22.23.1\n\n[loom-stack] worker=0 paper_stack_start_count=1（复用常驻栈）\n[loom] 失败证据已保存（无 Paper 控制台输出，写错误文本）：evidence/release-audit/logs/L10-console.log"
+    }
+  ]
+}

@@ -85,3 +85,30 @@ describe("RT-02 worker_threads + vm 沙箱", () => {
     expect(world.blocks.size).toBeGreaterThanOrEqual(4);
   });
 });
+
+describe("宿主取消沙箱", () => {
+  it("取消死循环时终止 worker，无需等待原来的长超时", async () => {
+    const { host } = makeHost();
+    const controller = new AbortController();
+    let started!: () => void;
+    const ready = new Promise<void>(resolve => { started = resolve; });
+    const running = runStudentSandboxed(host, 'console.log("started"); while (true) {}', {
+      timeoutMs: 10_000,
+      signal: controller.signal,
+      onLog: () => started(),
+    });
+    const outcome = running.catch(error => error);
+    await ready;
+    controller.abort();
+    expect(await outcome).toMatchObject({ name: "AbortError" });
+  });
+
+  it("已取消的运行不发出任何世界动作", async () => {
+    const { host, calls } = makeHost();
+    const controller = new AbortController();
+    controller.abort();
+    await expect(runStudentSandboxed(host, 'golem.say("must not run")', { signal: controller.signal }))
+      .rejects.toMatchObject({ name: "AbortError" });
+    expect(calls).toEqual([]);
+  });
+});

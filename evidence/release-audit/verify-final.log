@@ -1,0 +1,13 @@
+10:01:26Z verify start task=release-audit-final layers=l0,l1,l2,l3,lg commit=cd56cc5 at=2026-11-03T10:01:26Z
+10:01:26Z ▶ LAYER l0 :: layer_l0
+10:01:31Z ✓ l0 (4819ms)
+10:01:31Z ▶ LAYER l1 :: layer_l1
+10:01:35Z ✓ l1 (3306ms)
+10:01:35Z ▶ LAYER l2 :: layer_l2
+10:01:37Z ✓ l2 (2548ms)
+10:01:37Z ▶ LAYER l3 :: layer_l3
+10:01:41Z ✓ l3 (3547ms)
+10:01:41Z ▶ LAYER lg :: layer_lg
+10:01:46Z ! lg warn (4869ms)
+10:01:46Z VERIFY OK (with warnings) (19120ms) layers=l0,l1,l2,l3,lg
+{"ts":"20261103T100126Z","task":"release-audit-final","commit":"cd56cc5","result":"pass","warnings":["gates: tracked fail=G-FRESH-READER（G-FRESH-READER Round1，见 qa/evidence/qa-gates.json；Round2 前不得假绿）"],"totalMs":19120,"log":"verify-reports/20261103T100126Z-release-audit-final.log","layers":{"l0":{"status":"pass","ms":4819,"detail":""},"l1":{"status":"pass","ms":3306,"detail":""},"l2":{"status":"pass","ms":2548,"detail":""},"l3":{"status":"pass","ms":3547,"detail":""},"lg":{"status":"warn","ms":4869,"detail":"warn"}}}

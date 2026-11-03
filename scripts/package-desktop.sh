@@ -41,6 +41,9 @@ bash "$ROOT/scripts/build-real-runtime.sh"
 echo "[package] 3/5 构建 Studio 与桌面壳前端"
 (cd "$ROOT/apps/desktop" && npm run assets)
 
+# linuxdeploy 扫描包内 Java 工具时需要解析 libjvm.so；不能依赖宿主安装的 JDK。
+export LD_LIBRARY_PATH="$ROOT/apps/desktop/src-tauri/runtime/real/java/lib/server:$ROOT/apps/desktop/src-tauri/runtime/real/java/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export NO_STRIP="${NO_STRIP:-1}"
 echo "[package] 4/5 tauri build（RPM + AppDir；AppImage 失败时由下一步手动封）"
 # 本机 FUSE 不可用：让 tauri 内的 linuxdeploy/AppImage 工具自动解包运行。
 (cd "$ROOT/apps/desktop" && APPIMAGE_EXTRACT_AND_RUN=1 npx tauri build) || true

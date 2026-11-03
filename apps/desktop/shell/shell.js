@@ -1,3 +1,4 @@
+import { DEFAULT_ENGINE_URL, normalizeEngineUrl, BRIDGE_COMMANDS, trustedFrameMessage, bridgeArgs } from "./shell-policy.js";
 /* 织界桌面壳：标题栏按钮 + iframe 路由 + Tauri 命令桥。 */
 const tauri = window.__TAURI__;
 const invoke = (command, args) => tauri.core.invoke(command, args);
@@ -34,21 +35,45 @@ try {
   if (savedScale >= 0.7 && savedScale <= 1.2) settings.uiScale = savedScale;
 } catch { /* ignore */ }
 
+function currentEngineUrl() {
+  try { return normalizeEngineUrl(localStorage.getItem("loom.engineUrl")) || DEFAULT_ENGINE_URL; }
+  catch { return DEFAULT_ENGINE_URL; }
+}
+
+let currentEnv = null;
+function sendFrame(data) {
+  try { els.iframe.contentWindow?.postMessage(data, "*"); } catch { /* frame navigating */ }
+}
 function applyUiScale() {
-  // 桌面壳用 WebView 缩放（窗口不变、内容变多）；浏览器直开时退回 CSS zoom。
-  // 始终缩 iframe 内容：窗口不变，可见内容变多；标题栏保持原尺寸可操作。
+  // Studio 与壳跨源；用消息即时缩放，不重新加载学生编辑器。
+  sendFrame({ type: "loom:scale", scale: settings.uiScale });
   try {
     const doc = els.iframe?.contentDocument;
     if (doc?.documentElement) doc.documentElement.style.zoom = String(settings.uiScale);
-  } catch { /* iframe may still be loading */ }
+  } catch { /* cross-origin Studio consumes loom:scale */ }
 }
-
-window.addEventListener("message", event => {
-  const data = event.data;
-  if (!data || data.type !== "loom:session") return;
-  currentSession = data.sessionId || null;
-  currentLevel = data.levelId || null;
-});
+function updateSession(sessionId, levelId) {
+  currentSession = sessionId || null;
+  currentLevel = levelId || null;
+  void invoke("set_game_session", { sessionId: currentSession, levelId: currentLevel }).catch(() => {});
+}
+function showQuitConfirmation() {
+  document.getElementById("quit-modal").hidden = false;
+  void invoke("quit_ack").catch(() => {});
+}
+function applyEnv(env) {
+  if (!env || typeof env !== "object") return;
+  currentEnv = env;
+  for (const key of ["engine", "paper", "bot", "client"]) {
+    const light = env[key];
+    const state = env.mock ? "mock" : light?.state === "ready" ? "ok"
+      : light?.state === "error" ? "bad" : ["checking", "starting"].includes(light?.state) ? "busy" : "off";
+    setConn(els["conn" + key[0].toUpperCase() + key.slice(1)], state, light?.detail || "");
+  }
+  document.getElementById("client-lost-modal").hidden = !env.clientLost;
+  sendFrame({ type: "loom:env", env });
+  sendFrame({ type: "loom:conn", client: env.client?.state === "ready" });
+}
 
 function toast(text) {
   els.toast.textContent = text;
@@ -76,7 +101,7 @@ let pendingTimer = null;
 
 function frameUrl(page) {
   if (page === "wizard") return "./wizard.html";
-  const engine = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
+  const engine = currentEngineUrl();
   const params = new URLSearchParams();
   params.set("engine", engine);
   params.set("scale", String(settings.uiScale));
@@ -96,7 +121,7 @@ async function waitEngineThen(page, attempt = 0) {
   try { ready = await invoke("engine_ready"); } catch { /* fallback below */ }
   if (!ready) {
     try {
-      const base = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
+      const base = currentEngineUrl();
       const response = await fetch(base + "/api/health", { signal: AbortSignal.timeout(700) });
       ready = response.ok;
     } catch { /* still booting */ }
@@ -112,6 +137,9 @@ async function waitEngineThen(page, attempt = 0) {
 }
 
 function show(page) {
+  if (!["wizard", "workbench", "companion"].includes(page)) return;
+  if (page !== "wizard" && currentEnv?.versionBlocked) { toast("客户端版本不匹配，请先准备 26.1.2。"); return; }
+  if (page === "wizard") updateSession(null, null);
   settings.page = page;
   void invoke("save_settings", { settings }).catch(() => {});
   if (page === "wizard") {
@@ -154,9 +182,13 @@ function setConn(el, state, title) {
   el.title = title || "";
 }
 async function refreshStatus() {
+  try {
+    const env = await invoke("env_state");
+    if (env?.engine && env?.client) { applyEnv(env); return; }
+  } catch { /* old shell falls back to health */ }
   let health = null;
   try {
-    const base = (localStorage.getItem("loom.engineUrl") || "http://127.0.0.1:4317").replace(/\/$/, "");
+    const base = currentEngineUrl();
     const response = await fetch(base + "/api/health", { signal: AbortSignal.timeout(1800) });
     health = await response.json();
   } catch { /* engine offline */ }
@@ -247,13 +279,25 @@ els.openLogs.addEventListener("click", async () => {
 window.addEventListener("message", event => {
   const data = event.data;
   if (!data || typeof data !== "object") return;
+  if (!trustedFrameMessage(event, els.iframe.contentWindow, location.origin, currentEngineUrl())) return;
+  if (data.type === "loom:session") {
+    if (!data.sessionId && settings.page === "companion") return;
+    if (!data.sessionId && data.previousSessionId && data.previousSessionId !== currentSession) return;
+    updateSession(data.sessionId, data.levelId);
+    return;
+  }
+  if (data.type === "loom:request-quit") { showQuitConfirmation(); return; }
   if (data.type === "loom:invoke") {
     // iframe 里没有 window.__TAURI__（Tauri 只注入主 frame），由壳代发命令。
     const source = event.source;
     if (!source || typeof source.postMessage !== "function") return;
-    invoke(data.command, data.args).then(
-      result => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: true, result }, "*"),
-      error => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: String(error) }, "*"),
+    if (!BRIDGE_COMMANDS.has(data.command)) {
+      source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: "命令不在白名单" }, event.origin);
+      return;
+    }
+    invoke(data.command, bridgeArgs(data.command, data.args)).then(
+      result => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: true, result }, event.origin),
+      error => source.postMessage({ type: "loom:invoke-result", id: data.id, ok: false, error: String(error) }, event.origin),
     );
     return;
   }
@@ -270,20 +314,35 @@ window.addEventListener("message", event => {
     }
     show(page);
   }
-  if (data.type === "loom:toast" && data.text) toast(String(data.text));
+  if (data.type === "loom:toast" && data.text) toast(String(data.text).slice(0, 500));
 });
 
 window.addEventListener("loom:status", refreshStatus);
 
-applyTauriEvents();
+await applyTauriEvents();
 async function applyTauriEvents() {
   if (!tauri?.event) return;
-  await tauri.event.listen("loom://pin", event => {
+  const listen = async (topic, callback) => {
+    try { await tauri.event.listen(topic, callback); }
+    catch (error) { console.warn(`桌面事件订阅失败 ${topic}`, error); }
+  };
+  await listen("loom://env", event => applyEnv(event.payload));
+  await listen("loom://quit-requested", showQuitConfirmation);
+  await listen("loom://restore-companion", () => {
+    settings.mode = "workbench";
+    renderMode();
+    show("workbench");
+  });
+  await listen("loom://session-changed", event => {
+    currentSession = event.payload?.sessionId || null;
+    currentLevel = event.payload?.levelId || null;
+  });
+  await listen("loom://pin", event => {
     settings.alwaysOnTop = !!event.payload;
     renderPin();
     toast(settings.alwaysOnTop ? "已置顶（按控制键、上档键和 L 可切换）" : "已取消置顶");
   });
-  await tauri.event.listen("loom://mode", event => {
+  await listen("loom://mode", event => {
     settings.mode = event.payload === "companion" ? "companion" : "workbench";
     renderMode();
   });
@@ -293,7 +352,7 @@ await loadSettings();
 document.getElementById("boot-splash")?.classList.add("is-hidden");
 try { await invoke("show_main_window"); } catch { /* old shell */ }
 void refreshStatus();
-setInterval(refreshStatus, 8000);
+setInterval(refreshStatus, 2000);
 window.__loomShell = { show, toast };
 
 /* ---- T9：自绘标题栏窗口控制（Rust 命令）+ 原生行为收口 ---- */
@@ -377,7 +436,27 @@ function guardFrame() {
   }
 }
 els.iframe.addEventListener("load", () => {
+  if (currentEnv) sendFrame({ type: "loom:env", env: currentEnv });
   applyUiScale();
   guardFrame();
 });
 guardFrame();
+
+document.getElementById("btn-quit-cancel").addEventListener("click", async () => {
+  try { await invoke("quit_cancel"); document.getElementById("quit-modal").hidden = true; }
+  catch (error) { toast(`取消退出失败：${error}`); }
+});
+document.getElementById("btn-quit-confirm").addEventListener("click", () => {
+  void invoke("quit_game").catch(error => toast(`退出失败：${error}`));
+});
+document.getElementById("btn-client-reconnect").addEventListener("click", async event => {
+  event.currentTarget.disabled = true;
+  try { const result = await invoke("restart_client_and_reconnect"); toast(result?.detail || "正在重新连接"); }
+  catch (error) { toast(`重连失败：${error}`); }
+  finally { document.getElementById("btn-client-reconnect").disabled = false; }
+});
+document.getElementById("btn-client-home").addEventListener("click", async () => {
+  await invoke("set_mode", { mode: "workbench" });
+  settings.mode = "workbench"; renderMode(); show("wizard");
+});
+document.getElementById("btn-client-quit").addEventListener("click", showQuitConfirmation);

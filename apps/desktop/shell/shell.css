@@ -177,3 +177,7 @@ body.companion .loom-bar .win-btn { width: 28px; height: 26px; }
 .boot-mark { font-family: "Zpix", "Departure Mono", monospace; font-size: 64px; letter-spacing: 10px; color: #f0d68a; }
 .boot-line { font-family: "Zpix", "Departure Mono", monospace; font-size: 14px; color: #a9b896; }
 .loom-main { background: #0e1710; }
+
+/* 退出确认位于掉线提示之上；短 UI 沿用壳的像素字体。 */
+#quit-modal { z-index: 200; }
+.conn[data-state="busy"] .dot { background: var(--warm); }

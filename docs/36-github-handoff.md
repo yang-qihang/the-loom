@@ -1,7 +1,9 @@
 # 36 — GitHub 交接说明（给人类开发者）
 
-> 状态：交接可用（L01–L10 真实 Paper 已 PASS；2026-11-01 试玩修复已落地）｜负责人：Lead｜最后更新：2026-11-01｜上游：`STATUS.md`、`docs/46-playtest-fix-plan.md`
+> 状态：交接可用（L01–L10 真实 Paper 已 PASS；2026-11-01 试玩修复已落地）｜负责人：Lead｜最后更新：2026-11-03｜上游：`STATUS.md`、`docs/46-playtest-fix-plan.md`
 > 目的：让另一个人能复现、定位并继续修复，不需要再开新的可行性 spike。
+
+> 当前补充：`docs/62-release-audit-2026-11-03.md` 记录本轮代码审计、修复、回归与原生验证边界。下方 2026-11-01 的测试数为历史快照。
 
 ## 1. 先看哪几份
 
@@ -16,7 +18,7 @@
 ## 2. 为什么说「不需要新 spike」
 
 - **L05–L09 真实路径**：已经有一套真实 Paper e2e harness（`it/real-harness.ts`、`it/l5-real.ts`…`l9-real.ts`），能真实 prepare、跑参考解、playerBeat、生产评分、WorldDigest 对照；失败坐标和 evidence 已固定。剩下是场景布局/可走性工程，不是可行性研究。
-- **L10 多织偶**：`docs/02c-finale-spike.md` 的双 bot 铺桥路线 A 已 10/10 通过、0 掉落；需要的是把已验证的 spike 接进 engine/worldport/runner，不是再验证「能不能做」。
+- **L10 多织偶**：`docs/02c-finale-spike.md` 的双 bot 铺桥路线 A 已 10/10 通过、0 掉落；现已接入 engine/worldport/runner，L10 真实 Paper 验收已通过；隔离运行时尊重 MC_RPC_PORT / LOOM_RPC_URL。
 - **桌面/窗口/字体/标注**：均已有可运行实现和 e2e，问题属于工程细节。
 
 ## 3. 环境（锁定）
@@ -58,8 +60,8 @@ npx tsx it/l10-real.ts          # PASS (双织偶, 19 checks)
 ## 6. 交接时必须先做的清理
 
 - 不要提交 `node_modules/`、`apps/desktop/dist/`、`apps/desktop/src-tauri/target/`、`it/.mc-server/`、Paper jar、世界存档、contact sheet 大图。
-- `scripts/prepare-github-handoff.sh` 会生成一个干净的新仓库目录（新 git 历史、只含源码/文档/锁文件/小证据），不包含 .git 历史里的旧大文件。
-- 仓库历史里若已有大文件，直接推旧历史可能超 GitHub 建议大小；**推荐用脚本生成的新仓库作为 GitHub 主仓**，旧历史留在本地。
+- `scripts/prepare-github-handoff.sh` 只接受仓库之外的新目录或空目录，拒绝删除已有非空目录；会生成一个干净的新仓库目录（新 git 历史、只含源码/文档/锁文件/小证据），不包含 .git 历史里的旧大文件。
+- 仓库历史里若已有大文件，直接推旧历史可能超 GitHub 建议大小；已有 origin 时正常 commit/push 即可；仅在确需制作无历史交接快照时使用脚本，不需要为了本轮更新重建仓库。
 
 ## 7. 红线（不要重蹈）
 

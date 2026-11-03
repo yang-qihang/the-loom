@@ -190,6 +190,10 @@ export function Workbench({
     try {
       window.parent?.postMessage({ type: "loom:session", sessionId, levelId }, "*");
     } catch { /* 浏览器直开时没有父壳 */ }
+    return () => {
+      try { window.parent?.postMessage({ type: "loom:session", sessionId: null, levelId: null, previousSessionId: sessionId }, "*"); }
+      catch { /* parent closed */ }
+    };
   }, [sessionId, levelId]);
 
   useEffect(() => {

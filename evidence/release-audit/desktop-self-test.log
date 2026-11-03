@@ -1,0 +1,47 @@
+
+> @loom/desktop@0.1.0 self-test
+> node --test scripts/release-audit.test.mjs
+
+TAP version 13
+# Subtest: 命令桥必须同时校验 iframe、origin 与命令白名单
+ok 1 - 命令桥必须同时校验 iframe、origin 与命令白名单
+  ---
+  duration_ms: 1.274929
+  type: 'test'
+  ...
+# Subtest: 织机地址只允许不带凭据/路径的 loopback HTTP origin
+ok 2 - 织机地址只允许不带凭据/路径的 loopback HTTP origin
+  ---
+  duration_ms: 0.260438
+  type: 'test'
+  ...
+# [desktop/assets] engine.cjs 冒烟测试（独立临时端口）…
+# Subtest: 构建冒烟拒绝提前退出的新产物，即使已有服务返回健康
+ok 3 - 构建冒烟拒绝提前退出的新产物，即使已有服务返回健康
+  ---
+  duration_ms: 116.274246
+  type: 'test'
+  ...
+# [desktop/assets] engine.cjs 冒烟测试（独立临时端口）…
+# [desktop/assets] engine.cjs 健康检查通过：{"ok":true,"ownArtifact":true}
+# Subtest: 构建冒烟使用新产物通过 PORT=0 报告的独立地址
+ok 4 - 构建冒烟使用新产物通过 PORT=0 报告的独立地址
+  ---
+  duration_ms: 118.651561
+  type: 'test'
+  ...
+# Subtest: 交接脚本拒绝仓库路径和已有非空目录，不删除原数据
+ok 5 - 交接脚本拒绝仓库路径和已有非空目录，不删除原数据
+  ---
+  duration_ms: 61.052466
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 442.961109

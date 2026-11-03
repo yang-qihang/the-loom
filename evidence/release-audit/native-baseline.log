@@ -1,0 +1,26 @@
+
+> loomcraft@0.0.1 native:test
+> npm run native:build && ctest --test-dir tmp/native-build --output-on-failure
+
+
+> loomcraft@0.0.1 native:build
+> cmake -S native/e2e-runner -B tmp/native-build -DCMAKE_BUILD_TYPE=Release && cmake --build tmp/native-build -j 8
+
+-- native/e2e-runner: 检测到 native-stack 源文件 → 启用真实执行路径
+-- native-test: 已启用 loom-tests（stack=TRUE, sanitize=''）
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/yqh0919/Documents/deepseek-harness/default-workspace/tmp/native-build
+[ 26%] Built target loom-core
+[ 39%] Built target loom-stack
+[ 47%] Built target loom-e2e
+[100%] Built target loom-tests
+Test project /home/yqh0919/Documents/deepseek-harness/default-workspace/tmp/native-build
+    Start 1: loom-unit
+1/2 Test #1: loom-unit ........................   Passed   17.27 sec
+    Start 2: loom-fake-integration
+2/2 Test #2: loom-fake-integration ............   Passed    1.83 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  19.10 sec

@@ -4,9 +4,15 @@
 >
 > **当前状态**：L01–L10 已全部通过真实 Paper e2e；Studio 有完整中文引导、挑战层说明与 UOS 用户操作模拟。**最新桌面包已内置 Node/Java/Paper/插件/世界/真实引擎与 mineflayer 织偶**：用户只需安装正确版本的 Minecraft，桌面应用会自己启动服务端与真实引擎。
 > **2026-11-01 Round 2 已完成**：语义化 API 与命名坐标点、指令手册/位置 HUD、概念揭晓、每关名实相符（AST codeRequirements）、Maple Mono 字体、真实客户端高清截图与 10 关起始点审计；契约与结果见 `docs/48-round2-guidance-api-visual-plan.md`。
-> **2026-11-01 Round 4 已完成**（`docs/49`）：玩家任务自动检测/自动结算、剧情浮层排版与自然滚动、字体系统（代码全 Maple / 长文 Noto Sans SC / 短标题按钮像素）、**10 章配套教材（76,429 汉字）+ 可拖动/缩放/置顶教材窗口**、运行状态鲁棒性（失败重试自动恢复场景）、C++20 并行真实 e2e 执行器（CMake/Make，`native/e2e-runner`，见 `docs/58`）。
+> **2026-11-01 Round 4 已完成**（`docs/49`）：玩家任务自动检测/自动结算、剧情浮层排版与自然滚动、字体系统（代码全 Maple / 长文 MiSans VF（Noto fallback）/ 短标题按钮像素）、**10 章配套教材（76,429 汉字）+ 可拖动/缩放/置顶教材窗口**、运行状态鲁棒性（失败重试自动恢复场景）、C++20 并行真实 e2e 执行器（CMake/Make，`native/e2e-runner`，见 `docs/58`）。
 >
 > 2026-11-02 决策：旧 C 图标生成器方案已废弃，不再声称 C 等价；C++ e2e 执行器是当前项目里的原生构建/性能验证组件（`docs/60`）。
+
+## 2026-11-03 展示前代码审计
+
+本轮修复了运行时异常后的场景恢复、旧回调污染新关卡、重置临时失败无法重试、停止后 worker 持续占用 CPU，以及桌面壳环境/会话/退出接线、IPC 校验和即时缩放。启动工作台默认 1600×1000，并迁移旧小窗记录；小屏幕按工作区适配。
+
+审计发现、复现、验证与剩余边界统一见 [展示前审计报告](docs/62-release-audit-2026-11-03.md)。2026-11-01 的测试数与安装包体积是历史记录，当前结果以该报告为准。字体当前口径：代码 Maple Mono、长文 MiSans VF、短 UI 像素字；Noto 只做 fallback。
 
 ## 一句话玩法
 
@@ -50,7 +56,7 @@
 bash scripts/launch-desktop.sh
 
 # 手动启动
-./apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft-x86_64.AppImage
+./apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage
 # 或 Fedora: sudo rpm -i apps/desktop/src-tauri/target/release/bundle/rpm/Loomcraft-0.1.0-1.x86_64.rpm
 ```
 
@@ -145,8 +151,8 @@ Round 2 终验（2026-11-01，最终工作树 + 重新打包产物）：
 
 - **玩家任务自动检测与自动结算**：引擎 `GET /api/session/:id/snapshot` 附带 `progress/playerBeatReady/allPassed` 真值；Studio 每秒同步目标面板（逐条打勾），世界侧全部完成时自动确认玩家节拍并自动打开结算——不再需要手动点「我已在游戏里完成」（按钮保留为 paper/离线兜底）。游戏内中文完成提示仍由插件发出。
 - **剧情浮层排版**：序章/幕开场/关开场/旅途手记改为「固定头 / 可滚内容 / 固定底」；隐藏原生滚动条 + 自绘悬浮滑轨，滚轮/键盘/拖拽/触屏可滚；左右留白恒对称（不依赖 `scrollbar-gutter`）；小视口（1024×600/896×603/720×560）不再裁切。同类长内容浮层（结算/手册/织典/试符台/完整解）一并修复。
-- **字体系统**：所有【代码】统一 **Maple Mono**；长段正文统一 **Noto Sans SC**（OFL-1.1 随包子集 2.21MB）；非像素正文/普通 UI 用 **MiSans VF**（Apache-2.0 随包切片）；像素装饰字保留 Zpix/Departure Mono（策略见 `docs/20` §3b4）。
-- **配套教材**：10 章、合计 **76,429 汉字**（每章 6.5k–9.7k 字、5–8 个代码块、10–12 条术语，只用本关及之前 API）；独立浮动窗口可拖动/缩放/置顶/记忆位置、章内目录、代码复制；进入关卡首次自动打开，关闭即记已读，工作台常驻「回看教材」入口。内容源 `apps/studio/src/textbook/content/*.md`，构建校验 `npx tsx scripts/build-textbook.ts --write`。
+- **字体系统**：所有【代码】统一 **Maple Mono**；长段正文/非像素普通 UI 用 **MiSans VF**（Apache-2.0 随包切片），**Noto Sans SC** 只作 fallback；像素装饰字保留 Zpix/Departure Mono（策略见 `docs/20` §3b4）。
+- **配套教材**：10 章、合计 **76,429 汉字**（每章 6.5k–9.7k 字、5–8 个代码块、10–12 条术语，只用本关及之前 API）；独立浮动窗口可拖动/缩放/置顶、章内目录、代码复制（DOM 模式记忆几何；原生教材窗口关闭后尚不恢复位置/尺寸）；进入关卡首次自动打开，关闭即记已读，工作台常驻「回看教材」入口。内容源 `apps/studio/src/textbook/content/*.md`，构建校验 `npx tsx scripts/build-textbook.ts --write`。
 - **运行状态鲁棒性（修复「第一次失败后粘参考解仍报错」）**：会话内上一次失败且改过世界时，下一次 run 前自动恢复场景（port.reset + epoch+1）；执行前做真语法检查（半截代码不再偷偷执行）；runId + SSE `Last-Event-ID` 过滤旧事件；后端错误原因（message/hint/code）透传到错误卡；双击运行防重入；本地 mock 支持块注释。
 - **质量门**：`tsc --noEmit` 0；`npm test` 28 files / 251 tests；Studio real-config e2e **37/37**（含新增 narrative-layout / typography / textbook-window / auto-beat / runtime-recovery）、mock-config e2e 4/4；教材内容校验 0 error；真实 Paper e2e L01/L10 + 引擎回归见下。
 

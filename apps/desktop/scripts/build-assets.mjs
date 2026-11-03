@@ -183,32 +183,45 @@ async function copyRuntimeDependencies() {
   log(`engine runtime 依赖已复制（typescript + esbuild + @esbuild/*，${packages.length} 个包）`);
 }
 
-async function smokeTestEngine() {
-  const port = 4399;
-  log(`engine.cjs 冒烟测试（PORT=${port}）…`);
-  const child = spawn(process.execPath, [join(runtimeDir, "engine.cjs")], {
+export async function smokeTestEngine({ entry = join(runtimeDir, "engine.cjs"), timeoutMs = 8000 } = {}) {
+  // PORT=0 由操作系统分配；从本次 child 的 ready 输出读取地址，不能借用旧服务判绿。
+  log("engine.cjs 冒烟测试（独立临时端口）…");
+  const child = spawn(process.execPath, [entry], {
     cwd: repoRoot,
-    env: { ...process.env, PORT: String(port), NODE_PATH: join(repoRoot, "node_modules") },
-    stdio: "ignore",
+    env: { ...process.env, HOST: "127.0.0.1", PORT: "0", LOOM_WORLD: "mock", NODE_PATH: join(repoRoot, "node_modules") },
+    stdio: ["ignore", "pipe", "pipe"],
   });
+  let output = "";
+  let failure = null;
+  const closed = new Promise(resolveClose => child.once("close", resolveClose));
+  const collect = data => { output = (output + data.toString()).slice(-16384); };
+  child.stdout.on("data", collect);
+  child.stderr.on("data", collect);
+  child.on("error", error => { failure = error; });
+  child.on("exit", (code, signal) => { failure = new Error(`engine.cjs 提前退出（${code ?? signal}）：${output}`); });
   try {
-    const deadline = Date.now() + 8000;
+    const deadline = Date.now() + timeoutMs;
     for (;;) {
-      if (Date.now() > deadline) throw new Error("engine.cjs 启动 8s 内未响应 /api/health");
-      try {
-        const response = await fetch(`http://127.0.0.1:${port}/api/health`);
-        const body = await response.json();
-        if (body.ok) {
-          log(`engine.cjs 健康检查通过：${JSON.stringify(body)}`);
-          return;
-        }
-      } catch {
-        // 尚未就绪
+      if (failure) throw failure;
+      if (Date.now() > deadline) throw new Error(`engine.cjs ${timeoutMs}ms 内未就绪：${output}`);
+      const ready = output.match(/LOOM engine ready: (http:\/\/127\.0\.0\.1:\d+)/);
+      if (ready) {
+        try {
+          const response = await fetch(`${ready[1]}/api/health`, { signal: AbortSignal.timeout(1000) });
+          const body = await response.json();
+          if (response.ok && body.ok && !failure && child.exitCode === null && child.signalCode === null) {
+            log(`engine.cjs 健康检查通过：${JSON.stringify(body)}`);
+            return body;
+          }
+        } catch { /* 尚未就绪；下一轮先检查 child 是否退出 */ }
       }
-      await new Promise(resolvePromise => setTimeout(resolvePromise, 150));
+      await new Promise(resolveWait => setTimeout(resolveWait, 100));
     }
   } finally {
-    child.kill("SIGTERM");
+    if (child.exitCode === null && child.signalCode === null) child.kill("SIGTERM");
+    const killer = setTimeout(() => child.kill("SIGKILL"), 1000);
+    await closed;
+    clearTimeout(killer);
   }
 }
 

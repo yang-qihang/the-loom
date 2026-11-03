@@ -1,6 +1,6 @@
 {
  "level": "L10",
- "startedAt": "2026-11-01T14:42:09.178Z",
+ "startedAt": "2026-11-03T09:47:20.351Z",
  "bots": {
   "left": "LeftWeaver",
   "right": "RightWeaver"
@@ -80,7 +80,7 @@
   "playerBeat.activate": {
    "ok": true,
    "detail": {
-    "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
+    "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
     "armed": true,
     "active": true,
     "hint": "手持合龙石，对准中央基座按右键",
@@ -107,7 +107,7 @@
    "detail": {
     "seq": 50,
     "type": "block.place",
-    "tick": 1578,
+    "tick": 222,
     "actor": "HumanLike",
     "actorType": "player",
     "pos": [
@@ -250,11 +250,11 @@
    "detail": {
     "resetA": {
      "ok": true,
-     "ms": 17,
+     "ms": 13,
      "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
-     "tick": 1593,
-     "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
-     "epoch": 3,
+     "tick": 236,
+     "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
+     "epoch": 1,
      "checkpointSize": 1146,
      "restoredBlocks": 1,
      "removedEntities": 5,
@@ -265,11 +265,11 @@
     },
     "resetB": {
      "ok": true,
-     "ms": 16,
+     "ms": 9,
      "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
-     "tick": 1599,
-     "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
-     "epoch": 3,
+     "tick": 242,
+     "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
+     "epoch": 1,
      "checkpointSize": 1146,
      "restoredBlocks": 0,
      "removedEntities": 5,
@@ -285,11 +285,11 @@
    "detail": {
     "resetA": {
      "ok": true,
-     "ms": 17,
+     "ms": 13,
      "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
-     "tick": 1593,
-     "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
-     "epoch": 3,
+     "tick": 236,
+     "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
+     "epoch": 1,
      "checkpointSize": 1146,
      "restoredBlocks": 1,
      "removedEntities": 5,
@@ -300,11 +300,11 @@
     },
     "resetB": {
      "ok": true,
-     "ms": 16,
+     "ms": 9,
      "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
-     "tick": 1599,
-     "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
-     "epoch": 3,
+     "tick": 242,
+     "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
+     "epoch": 1,
      "checkpointSize": 1146,
      "restoredBlocks": 0,
      "removedEntities": 5,
@@ -396,42 +396,42 @@
  "actions": [
   {
    "action": "moveTo(10,-1)",
-   "ms": 1491
+   "ms": 1787
   },
   {
    "action": "place(minecraft:oak_planks@10,65,0)",
-   "ms": 107
-  },
-  {
-   "action": "moveTo(11,-1)",
-   "ms": 588
+   "ms": 105
   },
   {
    "action": "moveTo(13,1)",
-   "ms": 2238
-  },
-  {
-   "action": "place(minecraft:oak_planks@11,65,0)",
-   "ms": 55
+   "ms": 2336
   },
   {
    "action": "place(minecraft:oak_planks@13,65,0)",
-   "ms": 65
+   "ms": 26
   },
   {
-   "action": "say(左岸铺好了)",
-   "ms": 0
+   "action": "moveTo(11,-1)",
+   "ms": 545
   },
   {
    "action": "moveTo(14,1)",
-   "ms": 88
+   "ms": 74
   },
   {
    "action": "place(minecraft:oak_planks@14,65,0)",
-   "ms": 19
+   "ms": 26
+  },
+  {
+   "action": "place(minecraft:oak_planks@11,65,0)",
+   "ms": 32
   },
   {
    "action": "say(右岸铺好了)",
+   "ms": 0
+  },
+  {
+   "action": "say(左岸铺好了)",
    "ms": 0
   },
   {
@@ -440,14 +440,14 @@
   },
   {
    "action": "reset",
-   "ms": 308
+   "ms": 291
   },
   {
    "action": "reset",
-   "ms": 301
+   "ms": 296
   }
  ],
- "prepareMs": 2988,
+ "prepareMs": 3338,
  "plugin": {
   "levelId": "L10",
   "bots": [
@@ -500,16 +500,11 @@
   },
   {
    "kind": "send",
-   "actor": "RightWeaver",
+   "actor": "LeftWeaver",
    "text": "2"
   },
   {
    "kind": "send",
-   "actor": "LeftWeaver",
-   "text": "2"
-  },
-  {
-   "kind": "receive",
    "actor": "RightWeaver",
    "text": "2"
   },
@@ -517,9 +512,14 @@
    "kind": "receive",
    "actor": "LeftWeaver",
    "text": "2"
+  },
+  {
+   "kind": "receive",
+   "actor": "RightWeaver",
+   "text": "2"
   }
  ],
- "referenceRunMs": 2899,
+ "referenceRunMs": 2720,
  "snapshot": {
   "agentPlaceCount": 4,
   "playerPlaceCount": 1,
@@ -557,11 +557,11 @@
  "reset": {
   "resetA": {
    "ok": true,
-   "ms": 17,
+   "ms": 13,
    "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
-   "tick": 1593,
-   "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
-   "epoch": 3,
+   "tick": 236,
+   "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
+   "epoch": 1,
    "checkpointSize": 1146,
    "restoredBlocks": 1,
    "removedEntities": 5,
@@ -572,11 +572,11 @@
   },
   "resetB": {
    "ok": true,
-   "ms": 16,
+   "ms": 9,
    "hash": "sha256:edfc1bbcf551364c17148f13897b3a203784d13a1f51ab0dc2abcefae73c276c",
-   "tick": 1599,
-   "sessionId": "6f3e2fc3-1672-401e-8bdb-fb186f749c74",
-   "epoch": 3,
+   "tick": 242,
+   "sessionId": "93f8c386-a72e-4d7a-b46d-c506062c8c93",
+   "epoch": 1,
    "checkpointSize": 1146,
    "restoredBlocks": 0,
    "removedEntities": 5,
@@ -586,6 +586,6 @@
    }
   }
  },
- "finishedAt": "2026-11-01T14:42:19.829Z",
+ "finishedAt": "2026-11-03T09:47:31.520Z",
  "ok": true
 }

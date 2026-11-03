@@ -77,6 +77,7 @@ export function getDesktopInvoke(): DesktopInvoke | null {
         reject(new Error(`desktop bridge timeout: ${command}`));
       }, 5000);
       const onMessage = (event: MessageEvent) => {
+        if (event.source !== window.parent) return;
         const data = event.data as { type?: string; id?: string; ok?: boolean; result?: unknown; error?: string } | null;
         if (!data || data.type !== "loom:invoke-result" || data.id !== id) return;
         window.clearTimeout(timer);

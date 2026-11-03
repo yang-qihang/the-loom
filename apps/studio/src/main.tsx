@@ -16,6 +16,17 @@ import "./narrative.css";
 import "./typography.css";
 
 if (isDesktopShell()) installNativeGuard();
+if (window.parent !== window) {
+  window.addEventListener("message", event => {
+    if (event.source !== window.parent || event.data?.type !== "loom:scale") return;
+    const value = event.data.scale;
+    if (typeof value === "number" && Number.isFinite(value) && value >= 0.65 && value <= 1.25) {
+      document.documentElement.style.zoom = String(value);
+      // CSS zoom 不改变未缩放 clientWidth；显式通知排版重新测量。
+      window.dispatchEvent(new Event("resize"));
+    }
+  });
+}
 
 /**
  * 桌面壳在 iframe 里加载 Studio 时，Tauri 也会把 `__TAURI_INTERNALS__` 注入子 frame，

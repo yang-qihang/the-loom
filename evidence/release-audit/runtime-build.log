@@ -1,0 +1,24 @@
+engine 1261204
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:802: warning: [removal] DO_DAYLIGHT_CYCLE in GameRule has been deprecated and marked for removal
+            case "doDaylightCycle" -> GameRule.DO_DAYLIGHT_CYCLE;
+                                              ^
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:803: warning: [removal] DO_MOB_SPAWNING in GameRule has been deprecated and marked for removal
+            case "doMobSpawning" -> GameRule.DO_MOB_SPAWNING;
+                                            ^
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:804: warning: [removal] DO_FIRE_TICK in GameRule has been deprecated and marked for removal
+            case "doFireTick" -> GameRule.DO_FIRE_TICK;
+                                         ^
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:805: warning: [removal] KEEP_INVENTORY in GameRule has been deprecated and marked for removal
+            case "keepInventory" -> GameRule.KEEP_INVENTORY;
+                                            ^
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:806: warning: [removal] DO_WEATHER_CYCLE in GameRule has been deprecated and marked for removal
+            case "doWeatherCycle" -> GameRule.DO_WEATHER_CYCLE;
+                                             ^
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:807: warning: [removal] MOB_GRIEFING in GameRule has been deprecated and marked for removal
+            case "mobGriefing" -> GameRule.MOB_GRIEFING;
+                                          ^
+/home/yqh0919/Documents/deepseek-harness/default-workspace/plugin/src/main/java/dev/loomcraft/mc/SceneManager.java:808: warning: [removal] RANDOM_TICK_SPEED in GameRule has been deprecated and marked for removal
+            case "randomTickSpeed" -> GameRule.RANDOM_TICK_SPEED;
+                                              ^
+7 warnings
+997M	/home/yqh0919/Documents/deepseek-harness/default-workspace/apps/desktop/src-tauri/runtime/real

@@ -155,6 +155,8 @@ struct AppState {
     errors: Mutex<HashMap<String, String>>,
     /// 当前关卡会话（L2 客户端丢失判定与「一键重连当前进度」）。
     session: Mutex<Option<GameSessionRef>>,
+    /// 串行创建/复用同 label 教材窗，避免并发打开失败后触发第二个 DOM 教材。
+    textbook_open: tauri::async_runtime::Mutex<()>,
     /// L2 红色阻断：关卡会话进行中、客户端掉线。
     client_lost: Mutex<bool>,
     /// 是否曾经亮过客户端灯（区分「还没启动」与「从运行中掉线」）。
@@ -1211,6 +1213,8 @@ fn validate_textbook_level(raw: &str) -> Result<String, String> {
 #[tauri::command]
 async fn open_textbook_window(app: tauri::AppHandle, level_id: String) -> Result<(), String> {
     let level = validate_textbook_level(&level_id)?;
+    let state = app.state::<AppState>();
+    let _opening = state.textbook_open.lock().await;
     let page = format!("studio/index.html?textbook={level}");
     if let Some(window) = app.get_webview_window("textbook") {
         // 同一窗口复用，保留用户拖到的位置/尺寸；只改 query 触发 React 章节更新。
@@ -2241,8 +2245,8 @@ fn client_prepare(app: tauri::AppHandle) -> OpStatus {
 }
 
 #[tauri::command]
-fn quit_game(app: tauri::AppHandle) {
-    quit_game_impl(&app);
+async fn quit_game(app: tauri::AppHandle) {
+    let _ = tauri::async_runtime::spawn_blocking(move || quit_game_impl(&app)).await;
 }
 
 /// shell 已显示确认弹窗（ack）：Rust 停止「确认 UI 无响应」超时兜底。
@@ -2254,6 +2258,14 @@ fn quit_ack(app: tauri::AppHandle) {
             *ack = Some(Instant::now());
         };
     }
+}
+
+/// 取消后撤销二次关闭捷径与旧 watchdog，下一次 X 必须重新确认。
+#[tauri::command]
+fn quit_cancel(app: tauri::AppHandle) {
+    let state = app.state::<AppState>();
+    if let Ok(mut request) = state.close_requested_at.lock() { *request = None; }
+    if let Ok(mut ack) = state.quit_ack_at.lock() { *ack = None; };
 }
 
 /// shell 引导失败/无监听时的兜底：允许关闭（下次 X/Alt+F4 直接放行）。
@@ -3222,6 +3234,7 @@ fn main() {
         env: Mutex::new(envstate::EnvState::default()),
         errors: Mutex::new(HashMap::new()),
         session: Mutex::new(None),
+        textbook_open: tauri::async_runtime::Mutex::new(()),
         client_lost: Mutex::new(false),
         client_seen_ready: Mutex::new(false),
         client_guide: Mutex::new(None),
@@ -3308,7 +3321,8 @@ fn main() {
                     let state = app_handle.state::<AppState>();
                     let confirmed = state.quit_confirmed.lock().map(|guard| *guard).unwrap_or(false);
                     if confirmed {
-                        // quit_game/allow_close 已确认：放行真正的关闭（退出清理由 RunEvent::Exit 兜底）。
+                        // 教材是独立窗口，关闭主窗不保证进程退出；确认后结束整个应用。
+                        app_handle.exit(0);
                         return;
                     }
                     // P0-2：第一次关闭只提醒，同一次会话里再次请求（或 shell 确认 UI 无响应）才放行，避免永久关不掉。
@@ -3321,10 +3335,10 @@ fn main() {
                         .map(|first| now.duration_since(first) <= Duration::from_millis(CLOSE_SECOND_PASS_MS))
                         .unwrap_or(false);
                     if second_pass {
-                        if let Ok(mut confirmed) = state.quit_confirmed.lock() {
-                            *confirmed = true;
-                        }
+                        api.prevent_close();
                         state.log("lifecycle", "关闭请求二次到达：直接放行");
+                        let quitting = app_handle.clone();
+                        std::thread::spawn(move || quit_game_impl(&quitting));
                         return;
                     }
                     if let Ok(mut first) = state.close_requested_at.lock() {
@@ -3341,6 +3355,9 @@ fn main() {
                     std::thread::spawn(move || {
                         std::thread::sleep(Duration::from_millis(CLOSE_CONFIRM_FALLBACK_MS));
                         let state = watchdog.state::<AppState>();
+                        let same_request = state.close_requested_at.lock()
+                            .map(|request| *request == Some(now)).unwrap_or(false);
+                        if !same_request { return; }
                         let confirmed = state.quit_confirmed.lock().map(|guard| *guard).unwrap_or(false);
                         if confirmed {
                             return;
@@ -3348,22 +3365,13 @@ fn main() {
                         let acked = state
                             .quit_ack_at
                             .lock()
-                            .ok()
-                            .and_then(|guard| *guard)
-                            .map(|ack| ack.elapsed() < Duration::from_millis(CLOSE_CONFIRM_FALLBACK_MS))
+                            .map(|ack| ack.is_some())
                             .unwrap_or(false);
                         if acked {
                             return;
                         }
                         state.log("lifecycle", "确认 UI 无响应：放行关闭（Rust 兜底）");
-                        if let Ok(mut confirmed) = state.quit_confirmed.lock() {
-                            *confirmed = true;
-                        }
-                        state.client_cancel.store(true, Ordering::SeqCst);
-                        if let Some(window) = watchdog.get_webview_window("main") {
-                            let _ = window.set_fullscreen(false);
-                            let _ = window.close();
-                        }
+                        quit_game_impl(&watchdog);
                     });
                 }
                 _ => {}
@@ -3449,6 +3457,7 @@ fn main() {
             client_prepare,
             quit_game,
             quit_ack,
+            quit_cancel,
             env_cancel,
             window_allow_close,
             window_force_close,

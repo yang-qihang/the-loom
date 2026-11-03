@@ -1,0 +1,92 @@
+
+ RUN  v5.0.5 /home/yqh0919/Documents/deepseek-harness/default-workspace
+
+ ❯ packages/session/src/recovery.test.ts (5 tests | 5 failed) 243ms
+   ❯ 运行异常、重置故障与旧回调恢复 (5)
+     × 部分修改世界后异常，参考解重试自动恢复：throw 136ms
+     × 部分修改世界后异常，参考解重试自动恢复：SDK error 66ms
+     × reset 后晚到的旧错误快照不得写回新 epoch 35ms
+     × level 重置 RPC 临时失败后可以重试 3ms
+     × repl 重置 RPC 临时失败后可以重试 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/session/src/recovery.test.ts > 运行异常、重置故障与旧回调恢复 > 部分修改世界后异常，参考解重试自动恢复：throw
+ FAIL  packages/session/src/recovery.test.ts > 运行异常、重置故障与旧回调恢复 > 部分修改世界后异常，参考解重试自动恢复：SDK error
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ packages/session/src/recovery.test.ts:37:31
+     35|         const epoch = session.epoch;
+     36|         const next = await run(session, L02Content.def.code.referenceS…
+     37|         expect(session.epoch).toBe(epoch + 1);
+       |                               ^
+     38|         expect(next.failures).toEqual([]);
+     39|         expect(next.playerBeatReady).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  packages/session/src/recovery.test.ts > 运行异常、重置故障与旧回调恢复 > reset 后晚到的旧错误快照不得写回新 epoch
+AssertionError: expected { type: 'result', …(13) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "criteria": [],
+  "digest": "",
+  "epoch": 1,
+  "failures": [
+    "[Error] old failure（第 1 行）",
+  ],
+  "hidden": [],
+  "observedTick": 0,
+  "passed": false,
+  "playerBeatReady": false,
+  "progress": [],
+  "runId": "run-1",
+  "snapshotDigest": "",
+  "source": "run",
+  "stars": 0,
+  "type": "result",
+}
+
+ ❯ packages/session/src/recovery.test.ts:61:34
+     59|       release.resolve();
+     60|       await new Promise(setImmediate);
+     61|       expect(session.lastResult).toBeNull();
+       |                                  ^
+     62|       expect(session.recentEvents().filter(event => event.type === "re…
+     63|       expect(session.state).toBe("READY");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  packages/session/src/recovery.test.ts > 运行异常、重置故障与旧回调恢复 > level 重置 RPC 临时失败后可以重试
+ FAIL  packages/session/src/recovery.test.ts > 运行异常、重置故障与旧回调恢复 > repl 重置 RPC 临时失败后可以重试
+AssertionError: expected 'PREPARING' to be 'STOPPED' // Object.is equality
+
+Expected: "STOPPED"
+Received: "PREPARING"
+
+ ❯ packages/session/src/recovery.test.ts:80:31
+     78|         const reset = () => mode === "level" ? session.reset() : sessi…
+     79|         await expect(reset()).rejects.toThrow("temporary RPC timeout");
+     80|         expect(session.state).toBe("STOPPED");
+       |                               ^
+     81|         expect((await reset()).state).toBe("READY");
+     82|         expect(session.epoch).toBe(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  17:39:42
+   Duration  765ms (import 48%, tests 39%, transform 13%)
+

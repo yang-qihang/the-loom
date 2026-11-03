@@ -24,7 +24,7 @@ fi
 # --- paper jar (download once, verify sha256) ----------------------------------
 if [ ! -f "$DATA/paper.jar" ]; then
   echo "mc: downloading Paper $VERSION build $BUILD ..."
-  META=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/$VERSION/builds/latest")
+  META=$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/$VERSION/builds/$BUILD")
   URL=$(printf '%s' "$META" | python3 -c 'import json,sys; print(json.load(sys.stdin)["downloads"]["server:default"]["url"])')
   curl -fsSL "$URL" -o "$DATA/paper.jar"
 fi

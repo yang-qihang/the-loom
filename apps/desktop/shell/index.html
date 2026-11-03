@@ -71,6 +71,27 @@
         </div>
       </div>
     </div>
+    <div class="modal" id="client-lost-modal" role="alertdialog" aria-modal="true" aria-labelledby="client-lost-title" hidden>
+      <div class="modal-card">
+        <h2 id="client-lost-title">客户端已断开</h2>
+        <p>当前关卡进度已保留。重新连接《我的世界》后继续。</p>
+        <div class="modal-actions">
+          <button id="btn-client-reconnect" class="btn primary" type="button">重新连接</button>
+          <button id="btn-client-home" class="btn" type="button">返回启动页</button>
+          <button id="btn-client-quit" class="btn" type="button">退出游戏</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="quit-modal" role="alertdialog" aria-modal="true" aria-labelledby="quit-title" hidden>
+      <div class="modal-card">
+        <h2 id="quit-title">退出织界？</h2>
+        <p>将关闭游戏客户端、世界服务端和织界窗口。</p>
+        <div class="modal-actions">
+          <button id="btn-quit-cancel" class="btn" type="button">继续游戏</button>
+          <button id="btn-quit-confirm" class="btn primary" type="button">退出游戏</button>
+        </div>
+      </div>
+    </div>
     <script type="module" src="./shell.js"></script>
   </body>
 </html>

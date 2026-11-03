@@ -1,5 +1,15 @@
 # STATUS — 项目状态（Lead 维护，每个集成点更新）
 
+## 2026-11-03 展示前审计与修复
+
+> 上游：用户要求检查代码、修复问题、更新文档并推送；完整范围、证据和边界见 `docs/62-release-audit-2026-11-03.md`。
+
+- **会话/沙箱**：运行时 throw 或 SDK 动作失败后也会自动恢复脏世界；错误快照和 actionbar 的旧回调不能在 reset 后发布结果；重置 RPC 临时失败转 STOPPED，可再次 reset；Stop/reset/dispose 通过 AbortSignal 终止关卡 worker。
+- **桌面壳**：恢复 EnvState 订阅与快照兜底、关卡会话同步、客户端掉线覆盖层、退出确认和伴玩恢复；限制消息来源/origin/命令与引擎地址；跨源 Studio 缩放即时生效；教材创建串行化，退出应用会结束独立教材窗。
+- **构建/交接**：冒烟检查用本次子进程的临时端口，不能借旧服务判绿；修复失效的 desktop self-test；Paper 下载直接指定 build 74；交接脚本拒绝覆盖仓库/已有非空目录；AppImage 构建补充包内 Java 依赖搜索路径；L10 验收脚本遵守隔离 RPC 端口。
+- **验证**：当前单测 29 files / 259 tests；Rust 54 passed / 4 ignored；真实 Paper L01、L10 均通过（含评分/快照对照和 reset）；Studio 主配置 55 PASS、Mock 7 PASS；Linux release/AppImage/RPM 已重建；最终 verify l0/l1/l2/l3 PASS，lg 已知告警。详见审计报告。`G-FRESH-READER` 仍为既有 tracked warning。
+- **边界**：Windows GUI 未在本机实测；关卡 worker 取消不保证已经发出的原生 bot/端口动作立即停止；REPL 仍有自身超时；原生教材窗口位置/尺寸尚未持久化；真人学习效果尚未完成盲测。
+
 ## 2026-11-01 Round 4（教学体验 / 配套教材 / 工程化，已完成并推送 main）
 
 > 上游：用户 2026-11-01 的 10 项反馈；契约与分工见 `docs/49-round4-teaching-ux-and-textbook-plan.md`。
@@ -8,7 +18,7 @@
 - **玩家任务自动检测/自动结算（任务 1/7/9）**：引擎 `GET /api/session/:id/snapshot` 附带 `progress`（含 `player` 标志）/`playerBeatReady`/`allPassed`/`playerBeatRequired`/`playerBeatDone`/`sessionEpoch`（顶层+嵌套）；Studio 轮询每秒按 id 同步 GoalList（解决「世界 3/3、面板 2/3」），世界侧全部完成时一次性自动 confirm 玩家节拍并自动打开结算（paper 保持 confirm-only、mock 模拟语义不变；手动按钮保留兜底）。
 - **运行状态鲁棒性（用户 bug 真根因）**：同一 `GameSession` 内每次 run 前不恢复场景——第一次失败前已执行的语句把世界改脏（L02 蛋被收走 / L04 田被种乱 / L09 两坛已开酿），参考解按干净世界执行必失败。修复：`session.run()` 前条件恢复（上一轮失败 && !playerBeatReady && 确有世界写动作 → port.reset + epoch+1，已通过/已轮到玩家不回滚）；runner 执行前检查 TS `parseDiagnostics`（半截代码不再偷偷执行）；事件带 runId、SSE 帧带 id + `Last-Event-ID`（新连接不回放旧 error/hint）；后端 `{code,message,hint}` 透传到 Studio 错误卡并给「重置本关后重试」；双击运行同步防重入；本地 mock 支持块注释。
 - **剧情浮层排版（任务 2/5）**：序章/幕开场/关开场/旅途手记重构为「固定头 / 可滚内容 / 固定底」，隐藏原生滚动条 + 自绘悬浮滑轨 + 滚轮/键盘/拖拽/触屏 + 上下渐隐；左右留白恒对称（不依赖 `scrollbar-gutter`）；1024×600 / 896×603 / 720×560 不再裁切；同类长内容浮层（结算/手册/织典/试符台/完整解）同修；桌面壳 36px 标题栏避让。
-- **字体系统（任务 3/4）**：所有【代码】统一 **Maple Mono**（编辑器/参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；长段正文统一 **Noto Sans SC**（OFL-1.1，随包子集 woff2 400/700 共 2.21MB、7554 码点、缺字 0）；非像素正文/普通 UI 统一 **MiSans VF**；像素装饰字（标题/按钮/标签/角色名）保留 Zpix/Departure Mono（2026-11-02 最终口径）。策略见 `docs/20` §3b4，实现 `apps/studio/src/typography.css`。
+- **字体系统（任务 3/4）**：所有【代码】统一 **Maple Mono**（编辑器/参考解/手册/织典/试符台/结算/日志/inline-code/教材代码块）；长段正文/非像素普通 UI 统一 **MiSans VF**；**Noto Sans SC** 只作 fallback（2026-11-02 最终口径）；像素装饰字（标题/按钮/标签/角色名）保留 Zpix/Departure Mono（2026-11-02 最终口径）。策略见 `docs/20` §3b4，实现 `apps/studio/src/typography.css`。
 - **配套教材（任务 6）**：**10 章、合计 76,429 汉字**（L01 7188 / L02 9713 / L03 8743 / L04 8895 / L05 9168 / L06 6504 / L07 6564 / L08 6547 / L09 6544 / L10 6563；每章 5–8 代码块、10–12 术语、warn callout、goals，只用本关及之前 API）。内容源 `apps/studio/src/textbook/content/*.md`，构建校验 `npx tsx scripts/build-textbook.ts --write`（0 error）；独立浮动窗口可拖动/缩放/置顶/持久化/章内目录/代码复制；进入关卡首次自动打开、关闭即记已读、工作台常驻「读本关教材/回看教材」入口。
 - **基础设施（任务 10）**：Playwright `webServer` 的 POSIX 环境变量前缀改为 `env` 注入 + `vite --mode e2e/mock`，`npm run test:e2e` / `test:e2e:local` 在 Windows 可直接运行；既有多份 spec 增加「教材已读」预置（回访玩家），与教材首次自动打开兼容。
 
@@ -16,7 +26,7 @@
 
 **2026-11-02 收口**：旧 C 图标生成器方案已废弃（`docs/60`）；新增 `native/e2e-runner` C++20 并行 e2e 执行器（3 workers × 3 关 1.46×，`docs/58`）。证据：`evidence/narrative-layout/`、`evidence/typography/`、`evidence/runtime-ui/`、`evidence/textbook-window/`。
 
-**Round 4 已知边界/遗留**（详见 docs/49 §5）：教材为长文阅读界面，**真人阅读/学习效果盲测未做**（Fresh Reader Round 4 仍未清零）；挑战层仍是说明卡；L09「取金苹果」仍用旧写法 `place("air", chest)`（内容侧语义 API 待修，教材已标注为旧写法）；`it/engine-paper.ts:191` 仍按旧 testMode 断言（待改成显式 simulate）；Noto 子集按 GB2312 + 仓库文本生成（新增生僻字需重跑 `scripts/build-font-subset.py`）；桌面壳 WebKitGTK 的字体/滚动需 Linux 实机复验；`build-assets.mjs` 在 Windows 仍有既有 `spawn .bin/vite` 平台限制（图标路径已单测）。
+**Round 4 已知边界/遗留**（详见 docs/49 §5）：教材为长文阅读界面，**真人阅读/学习效果盲测未做**（Fresh Reader Round 4 仍未清零）；挑战层仍是说明卡；L09「取金苹果」仍用旧写法 `place("air", chest)`（内容侧语义 API 待修，教材已标注为旧写法）；`it/engine-paper.ts:191` 仍按旧 testMode 断言（待改成显式 simulate）；Noto 子集按 GB2312 + 仓库文本生成（新增生僻字需重跑 `scripts/build-font-subset.py`）；桌面壳 WebKitGTK 的字体/滚动需 Linux 实机复验；`build-assets.mjs` 的 Windows vite 启动已改用 Node 执行 vite.js，Windows 原生 GUI 仍待复验。
 
 ## 2026-11-01 P0 修复与独立验证（Windows 原生，已完成）
 

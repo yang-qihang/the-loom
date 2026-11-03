@@ -146,7 +146,7 @@ export class GameSession {
   #epoch = 0;
   #ticket = 0;
   #runSeq = 0;
-  #activeRun: (RunTicket & { aborted: boolean }) | null = null;
+  #activeRun: (RunTicket & { aborted: boolean; controller: AbortController }) | null = null;
   #lastResult: ResultEvent | null = null;
   /**
    * 事件订阅者：第二个参数是事件 id（单调递增），SSE 用它写 `id:` 帧、
@@ -291,7 +291,7 @@ export class GameSession {
     }
     this.#runWroteWorld = false;
     const ticket = this.#ticket;
-    this.#activeRun = { runId, ticket, aborted: false };
+    this.#activeRun = { runId, ticket, aborted: false, controller: new AbortController() };
     this.#eventRunId = runId;
     this.#transition("COMPILING");
     void this.#executeRun(runId, source, ticket);
@@ -308,6 +308,7 @@ export class GameSession {
       await runStudentSandboxed(sdk, source, {
         timeoutMs: this.#runTimeoutMs,
         mode: this.runMode === "explicit" ? "explicit" : "auto-await",
+        signal: this.#activeRun?.controller.signal,
         onLog: line => this.#emit({ type: "log", line }),
       });
       if (!this.#isCurrent(runId, ticket)) return;
@@ -317,6 +318,7 @@ export class GameSession {
       const line = error instanceof StudentCodeError ? error.line : undefined;
       this.#emit({ type: "error", message: messageOf(error), ...(line !== undefined ? { line } : {}) });
       const observedTick = (await this.#safeSnapshotTick()) ?? 0;
+      if (!this.#isCurrent(runId, ticket)) return;
       const result: ResultEvent = {
         type: "result",
         runId,
@@ -335,7 +337,6 @@ export class GameSession {
       };
       this.#lastResult = result;
       this.#emit(result);
-      this.#settle();
       this.#toReady();
     } finally {
       if (this.#activeRun?.runId === runId) {
@@ -461,11 +462,13 @@ export class GameSession {
     { runId, ticket, studentSource }: { runId: string; ticket: number; studentSource?: string | null },
     source: "run" | "player-beat",
   ): Promise<ResultEvent | null> {
-    if (this.#disposed || ticket !== this.#ticket) return null;
+    const current = (): boolean => !this.#disposed && ticket === this.#ticket
+      && (source !== "run" || this.#activeRun?.runId === runId);
+    if (!current()) return null;
     if (this.#state !== "RUNNING" && this.#state !== "READY" && this.#state !== "PASSED") return null;
     this.#transition("VERIFYING");
     const snapshot = await this.port.snapshot(this.level.def.id);
-    if (this.#disposed || ticket !== this.#ticket) return null;
+    if (!current()) return null;
     const epoch = this.#epoch;
     const digest = digestSnapshot(snapshot);
     this.#issueSnapshot(runId, { epoch, digest });
@@ -533,20 +536,22 @@ export class GameSession {
         level: 1,
         text: hintText ?? (failures[0] ? `还没完成：${failures[0]}` : "还有目标没完成，检查右侧目标面板"),
       });
-      this.#transition("READY");
       if (playerBeatReady) {
         if (failedCode) {
           // 代码要求没过但织偶部分已完成：先激活玩家节拍（不重复发 playerBeatHint），actionbar 让位给代码引导。
-          await this.#activatePlayerBeat(true);
-          await this.#sendActionbar(failedCode);
+          await this.#activatePlayerBeat(true, ticket);
+          await this.#sendActionbar(failedCode, ticket);
         } else {
           // 轮到玩家：沿用既有玩家节拍短提示（playerBeatHint）；失败 hint 已通过 SSE 给教练卡。
-          await this.#activatePlayerBeat();
+          await this.#activatePlayerBeat(false, ticket);
         }
       } else if (hintText) {
-        await this.#sendActionbar(hintText);
+        await this.#sendActionbar(hintText, ticket);
       }
+      if (!current()) return null;
+      this.#transition("READY");
     }
+    if (!current()) return null;
     this.#emit(result);
     return result;
   }
@@ -563,7 +568,8 @@ export class GameSession {
   }
 
   /** 把一段中文提示打到游戏内 actionbar；没有真实 MC 界面时静默跳过，不阻断评分。 */
-  async #sendActionbar(text: string): Promise<void> {
+  async #sendActionbar(text: string, ticket = this.#ticket): Promise<void> {
+    if (this.#disposed || ticket !== this.#ticket) return;
     const trimmed = text.trim();
     if (trimmed.length === 0) return;
     try {
@@ -577,7 +583,8 @@ export class GameSession {
    * 通知端口「轮到玩家」，并把本关的短提示打到 actionbar；任何一环失败都不阻断评分/事件流。
    * skipActionbar=true 时只激活玩家节拍、不再发 actionbar（本次失败已经发过引导 hint，避免刷屏）。
    */
-  async #activatePlayerBeat(skipActionbar = false): Promise<void> {
+  async #activatePlayerBeat(skipActionbar = false, ticket = this.#ticket): Promise<void> {
+    if (this.#disposed || ticket !== this.#ticket) return;
     try {
       await this.port.activatePlayerBeat();
     } catch {
@@ -585,7 +592,7 @@ export class GameSession {
     }
     if (skipActionbar) return;
     const hint = this.level.def.task.playerBeatHint ?? this.level.def.task.playerBeat;
-    await this.#sendActionbar(hint);
+    await this.#sendActionbar(hint, ticket);
   }
 
   /** 中止当前运行并撤销 capability（REQ-STOP-01 / REQ-RUN-01）。 */
@@ -596,6 +603,7 @@ export class GameSession {
       throw new SessionError(`当前状态 ${this.#state} 不能停止`, "INVALID_STATE");
     }
     this.#ticket += 1;
+    this.#activeRun?.controller.abort();
     this.#activeRun = null;
     this.#eventRunId = null;
     this.#transition("STOPPED");
@@ -608,7 +616,11 @@ export class GameSession {
     if (this.#state === "DISCONNECTED") {
       throw new SessionError("会话尚未连接", "INVALID_STATE");
     }
+    if (this.#state === "PREPARING" || this.#state === "CONNECTING") {
+      throw new SessionError("场景正在准备，请稍后再重置", "INVALID_STATE");
+    }
     this.#ticket += 1;
+    this.#activeRun?.controller.abort();
     this.#activeRun = null;
     this.#eventRunId = null;
     this.#lastResult = null;
@@ -622,9 +634,7 @@ export class GameSession {
     this.#history = [];
     this.#transition("PREPARING");
     this.#epoch += 1;
-    await this.port.reset(this.level);
-    const snapshot = await this.port.snapshot(this.level.def.id);
-    this.#transition("READY");
+    const snapshot = await this.#resetWorld();
     this.#emit({ type: "log", line: `场景已重置（epoch ${this.#epoch}）` });
     return { state: this.#state, epoch: this.#epoch, snapshot };
   }
@@ -674,19 +684,38 @@ export class GameSession {
     if (this.#state === "DISCONNECTED") {
       throw new SessionError("会话尚未连接", "INVALID_STATE");
     }
+    if (this.#state === "PREPARING" || this.#state === "CONNECTING") {
+      throw new SessionError("场景正在准备，请稍后再重置", "INVALID_STATE");
+    }
     this.#ticket += 1;
     this.#activeRun = null;
     this.#transition("PREPARING");
     this.#epoch += 1;
-    await this.port.reset(this.level);
-    const snapshot = await this.port.snapshot(this.level.def.id);
-    this.#transition("READY");
+    const snapshot = await this.#resetWorld();
     return { state: this.#state, epoch: this.#epoch, snapshot };
+  }
+
+  async #resetWorld(): Promise<WorldSnapshot> {
+    const ticket = this.#ticket;
+    try {
+      await this.port.reset(this.level);
+      const snapshot = await this.port.snapshot(this.level.def.id);
+      if (this.#disposed || ticket !== this.#ticket) {
+        throw new SessionError("重置结果已作废", "INVALID_STATE");
+      }
+      this.#transition("READY");
+      return snapshot;
+    } catch (error) {
+      // 端口临时故障后只允许重新 reset，不能带着半恢复的世界继续 run。
+      if (!this.#disposed && ticket === this.#ticket && this.#state === "PREPARING") this.#transition("STOPPED");
+      throw error;
+    }
   }
 
   async dispose(): Promise<void> {
     this.#assertAlive();
     this.#ticket += 1;
+    this.#activeRun?.controller.abort();
     this.#disposed = true;
     this.#listeners.clear();
     await this.port.dispose();
@@ -705,10 +734,6 @@ export class GameSession {
     if (this.#state === "COMPILING" || this.#state === "RUNNING" || this.#state === "VERIFYING") {
       this.#transition("READY");
     }
-  }
-
-  #settle(): void {
-    this.#activeRun = null;
   }
 
   #isCurrent(runId: string, ticket: number): boolean {

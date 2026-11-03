@@ -87,7 +87,7 @@ async function main() {
     return !!ok;
   };
 
-  const rpc = await WsJsonRpcClient.connect("ws://127.0.0.1:8765");
+  const rpc = await WsJsonRpcClient.connect(process.env.LOOM_RPC_URL ?? `ws://${process.env.MC_HOST ?? "127.0.0.1"}:${process.env.MC_RPC_PORT ?? "8765"}`);
   const bots = {
     LeftWeaver: new GolemBot({ name: "LeftWeaver", log: (line) => log("[bot:left]", line) }),
     RightWeaver: new GolemBot({ name: "RightWeaver", log: (line) => log("[bot:right]", line) }),

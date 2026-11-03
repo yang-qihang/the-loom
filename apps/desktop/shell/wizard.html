@@ -109,6 +109,7 @@
   </section>
 </div>
 <script type="module">
+import { normalizeEngineUrl } from "./shell-policy.js";
 let seq = 0;
 const pending = new Map();
 window.addEventListener("message", event => {
@@ -142,13 +143,14 @@ try {
 } catch { /* ignore */ }
 $("btn-save-engine").onclick = () => {
   const value = $("engine-url").value.trim().replace(/\/$/, "");
-  try { localStorage.setItem("loom.engineUrl", value); } catch { /* ignore */ }
-  log(value ? "已保存真实织机地址；进入工坊后会连接它。请确认外部引擎与 Paper 已启动。" : "已恢复内置 Mock 织机。");
+  if (value && !normalizeEngineUrl(value)) { log("织机地址只接受本机 HTTP 地址，例如 http://127.0.0.1:4317。"); return; }
+  try { localStorage.setItem("loom.engineUrl", value ? normalizeEngineUrl(value) : ""); } catch { /* ignore */ }
+  log(value ? "已保存真实织机地址；进入工坊后会连接它。请确认外部引擎与 Paper 已启动。" : "已恢复内置织机。");
 };
 $("btn-clear-engine").onclick = () => {
   $("engine-url").value = "";
   try { localStorage.removeItem("loom.engineUrl"); } catch { /* ignore */ }
-  log("已恢复内置 Mock 织机。");
+  log("已恢复内置织机。");
 };
 const setPill = (id, probe) => {
   const pill = $("pill-" + id); const detail = $("detail-" + id);

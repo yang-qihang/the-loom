@@ -1,13 +1,15 @@
 # 42 — 玩家怎么玩（真实模式）
 
-> 状态：玩家入口（2026-11-01 Round 2：指令手册/坐标/HUD/REPL/字体）｜负责人：Lead｜最后更新：2026-11-01｜上游：`README.md`、`docs/43-environment-and-bundling.md`、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`
+> 状态：玩家入口（2026-11-01 Round 2：指令手册/坐标/HUD/REPL/字体）｜负责人：Lead｜最后更新：2026-11-03｜上游：`README.md`、`docs/43-environment-and-bundling.md`、`docs/46-playtest-fix-plan.md`、`docs/48-round2-guidance-api-visual-plan.md`
+
+> 2026-11-03：启动窗默认 1600×1000（小屏适配）；客户端掉线时先使用「重新连接」，不必重建关卡。完整审计与当前边界见 `docs/62-release-audit-2026-11-03.md`。
 
 ## 1. 你需要的
 
 - Linux + 能运行 Minecraft Java 的显卡/桌面。
 - **Minecraft Java 26.1.2**，推荐 Prism Launcher（Flatpak 也可）。
 - 一个正版/可登录的 Minecraft 账号。
-- Java 25：Prism 的 Microsoft runtime 即可（26.1.2 需要 Java 25）。
+- 桌面包已带 Java 25；用 Prism 运行客户端时使用启动器管理的 Java runtime，无须额外安装服务端 Java。
 - 桌面安装包：已内置真实引擎 + Paper 服务端；源码开发时用 `bash scripts/mc-up.sh` + `npm run dev:engine:paper`（见 README）。
 
 ## 2. 启动游戏
@@ -15,7 +17,7 @@
 双击/运行：
 
 ```text
-apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft-x86_64.AppImage
+apps/desktop/src-tauri/target/release/bundle/appimage/Loomcraft_0.1.0_amd64.AppImage
 ```
 
 或 Fedora 安装 RPM。应用会自动启动包内 Paper 与真实引擎；顶部四个连接灯显示 **织机 / Paper / 织偶 / 客户端**。不需要终端，也不需要外部引擎。

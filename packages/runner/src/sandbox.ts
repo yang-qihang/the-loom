@@ -41,6 +41,8 @@ export interface SandboxMultiAgentWorkerConfig {
 
 export interface SandboxRunOptions {
   timeoutMs?: number;
+  /** 宿主撤销运行时立即终止 worker；信号不暴露给学生进程。 */
+  signal?: AbortSignal;
   mode?: "auto-await" | "explicit";
   /** console.log/warn/error 的宿主回调（不暴露 console 对象本身）。 */
   onLog?: (line: string) => void;
@@ -496,6 +498,7 @@ function semanticWorkerData(sdk: RunSdk): {
 }
 
 export async function executeSandboxCode(sdk: RunSdk, code: string, options: SandboxCodeOptions = {}): Promise<unknown> {
+  options.signal?.throwIfAborted();
   const timeoutMs = options.timeoutMs ?? 3000;
   const studentLineCount = options.studentLineCount ?? 1;
   const vars: unknown = structuredClone(sdk.world.vars);
@@ -519,15 +522,18 @@ export async function executeSandboxCode(sdk: RunSdk, code: string, options: San
 
   return await new Promise<unknown>((resolve, reject) => {
     let settled = false;
-    let timer: NodeJS.Timeout;
+    let timer: NodeJS.Timeout | undefined;
     const finish = (action: () => void): void => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      options.signal?.removeEventListener("abort", onAbort);
       worker.removeAllListeners();
-      void worker.terminate();
-      action();
+      void worker.terminate().then(action, action);
     };
+    const onAbort = (): void => finish(() => reject(options.signal?.reason ?? new Error("运行已取消")));
+    options.signal?.addEventListener("abort", onAbort, { once: true });
+    if (options.signal?.aborted) { onAbort(); return; }
     timer = setTimeout(() => finish(() => reject(new RunTimeoutError(timeoutMs))), timeoutMs);
     worker.on("message", (message: WorkerMessage) => {
       if (!message || settled) return;
