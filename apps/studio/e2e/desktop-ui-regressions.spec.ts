@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 // 桌面主窗给 iframe 传 scale，教材原生窗使用 ?textbook，普通工作台测试不经过这些路径。
 for (const webkit of [false, true]) {
@@ -215,4 +217,36 @@ test("HTTP 确认在途时 reset，晚到确认和缓冲结果不得恢复旧运
   } finally { release(); await page.unroute("**/api/run"); }
   await page.getByTestId("btn-run").click();
   await expect(page.getByTestId("btn-player-beat")).toBeVisible();
+});
+
+test("位置卡收起后的坐标与标题、按钮不重叠", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: true, actsSeen: [1, 2, 3], levelsStarted: ["L01"], lastCompletedLevelId: null }));
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01"]));
+  });
+  await page.goto("/");
+  await page.getByTestId("level-card-L01").click();
+  const hud = page.getByTestId("position-hud");
+  await expect(hud).toBeVisible();
+  await expect(page.getByTestId("hud-golem-pos")).not.toContainText("未知");
+  await page.getByTestId("btn-hud-toggle").click();
+  await expect(page.getByTestId("hud-collapsed-pos")).toBeVisible();
+  for (const width of [1920, 1440, 1024]) {
+    await page.setViewportSize({ width, height: 1080 });
+    const collisions = await hud.evaluate(root => {
+      const items = Array.from(root.querySelectorAll('h3, .hud-pos-tag, button'));
+      const hits: string[] = [];
+      for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+        const a = items[i]!.getBoundingClientRect(), b = items[j]!.getBoundingClientRect();
+        if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) {
+          hits.push(`${items[i]!.textContent} / ${items[j]!.textContent}`);
+        }
+      }
+      return hits;
+    });
+    expect(collisions, `${width}px 下标题、坐标、按钮必须相互避让`).toEqual([]);
+    const evidence = resolve(process.cwd(), '../../evidence/incremental-fix');
+    mkdirSync(evidence, { recursive: true });
+    await hud.screenshot({ path: resolve(evidence, `hud-${width}.png`) });
+  }
 });

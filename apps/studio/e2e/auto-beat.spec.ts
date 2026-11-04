@@ -37,13 +37,15 @@ async function seed(page: Page): Promise<void> {
     const timeline: LoomTimeline = { goalsAllDoneAt: null, settleAt: null };
     (window as unknown as { __loomTimeline: LoomTimeline }).__loomTimeline = timeline;
     const sample = (): void => {
+      // 同次同步 DOM 采样共用时间：两次读时钟会把已同时存在的目标/结算误记成先后。
+      const sampledAt = performance.now();
       if (timeline.settleAt === null && document.querySelector('[data-testid="settle-overlay"]')) {
-        timeline.settleAt = performance.now();
+        timeline.settleAt = sampledAt;
       }
       if (timeline.goalsAllDoneAt !== null) return;
       const goals = Array.from(document.querySelectorAll(".goal"));
       if (goals.length > 0 && goals.every((node) => node.getAttribute("data-done") === "true")) {
-        timeline.goalsAllDoneAt = performance.now();
+        timeline.goalsAllDoneAt = sampledAt;
       }
     };
     // 用定时采样而不是 MutationObserver：addInitScript 里 document.documentElement 可能还不存在。
@@ -201,4 +203,35 @@ test("自动确认串行安全：重置后再跑一轮不会残留上一轮的�
   expect(goals.length).toBe(3);
   expect(goals.every((done) => done === "false"), `重置后目标应全部未完成：${JSON.stringify(goals)}`).toBe(true);
   expect(consoleErrors, `console errors: ${consoleErrors.join(" | ")}`).toEqual([]);
+});
+
+const THREE_LAMPS = `golem.moveTo(lamp1)
+golem.place("lantern", lamp1)
+golem.moveTo(lamp2)
+golem.place("lantern", lamp2)
+golem.moveTo(lamp3)
+golem.place("lantern", lamp3)`;
+
+test("保留三盏灯代码补回程：玩家先完成第四盏灯，第二次整段运行自动结算", async ({ page, request }) => {
+  await seed(page);
+  await page.addInitScript(() => localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01"])));
+  await page.goto("/");
+  const created = page.waitForResponse(response => response.url().endsWith("/api/session") && response.status() === 201);
+  await page.getByTestId("level-card-L01").click();
+  const { sessionId } = await (await created).json() as { sessionId: string };
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  await page.evaluate(source => window.__loomStudio?.setCode(source), THREE_LAMPS);
+  await page.getByTestId("btn-run").click();
+  await expect(page.getByTestId("btn-player-beat")).toBeVisible();
+  await expect(page.locator('.goal[data-done="true"]')).toHaveCount(1);
+  // 在服务端模拟真人点第四盏灯，保留真实评分与进度，不改写 snapshot。
+  const beat = await request.post("http://127.0.0.1:4399/api/player-beat", { data: { sessionId, simulate: true } });
+  expect(beat.ok()).toBe(true);
+  await expect(page.locator('.goal[data-done="true"]')).toHaveCount(2);
+  await expect(page.getByTestId("settle-overlay")).toBeHidden();
+  await page.evaluate(source => window.__loomStudio?.setCode(source), `${THREE_LAMPS}\ngolem.moveTo(eira)`);
+  await page.getByTestId("btn-run").click();
+  await expect(page.locator('.goal[data-done="true"]')).toHaveCount(3);
+  await expect(page.getByTestId("settle-overlay")).toBeVisible({ timeout: 6000 });
+  await expect(page.getByTestId("settle-overlay")).toContainText("灯全亮");
 });

@@ -169,8 +169,17 @@ export class GolemBot {
   async moveTo(x, z, timeoutMs = 30_000) {
     if (!this.bot?.entity) throw new GolemError("BOT_OFFLINE", "织偶不在世界里");
     await this.ensureChunks();
-    const me = this.bot.entity.position;
-    if (Math.abs(me.y - this.groundY) < 1.5 && Math.hypot(me.x - (x + 0.5), me.z - (z + 0.5)) <= 2.4) {
+    // 与 agent.mark / 世界快照相同，按真实位置所在方块判断到达。
+    // 到格子中心 2.4 格内仍可能落在对角 (2,2)，评分距离为 2.83 格；
+    // 这种提前成功会使随后放置留下无法靠重跑修复的失败证据。
+    const arrived = () => {
+      const [px, , pz] = this.pos;
+      return Math.hypot(px - x, pz - z) <= 2;
+    };
+    const requireArrival = () => {
+      if (!arrived()) throw new GolemError("MOVE_NOT_REACHED", `织偶还没走到 (${x}, ${z}) 的 2 格内`);
+    };
+    if (arrived()) {
       await this._sleep(40);
       return this.pos;
     }
@@ -194,8 +203,9 @@ export class GolemBot {
     if (cells.length === 0) {
       // 最后一招：目标本身不可站立时，走到它附近（GoalNear），真实玩家也会站到格子边再动手。
       try {
-        await this._gotoWithRecovery(new goals.GoalNear(x, this.groundY, z, 3), 8_000, `(${x}, ${z}) 附近`);
+        await this._gotoWithRecovery(new goals.GoalNear(x, this.groundY, z, 2), 8_000, `(${x}, ${z}) 附近`);
         await this._sleep(100);
+        requireArrival();
         return this.pos;
       } catch (err) {
         throw new GolemError("NO_STAND_CELL", `(${x}, ${z}) 附近没有可以站立的格子`, err);
@@ -212,6 +222,7 @@ export class GolemBot {
         // 真玩家会贴边滑过去；这里检测到位置长时间不动就停 path、侧移+小跳，再重新寻路。
         await this._gotoWithRecovery(new goals.GoalBlock(cell.x, cell.y, cell.z), attemptMs, `(${x}, ${z})`);
         await this._sleep(150);
+        requireArrival();
         return this.pos;
       } catch (err) {
         lastErr = err;
@@ -228,13 +239,14 @@ export class GolemBot {
       try { this.bot.pathfinder.stop(); this.bot.pathfinder.setGoal(null); } catch { /* ignore */ }
       await this._sleep(350);
     };
-    for (const tolerance of [3, 5]) {
+    for (const tolerance of [2, 1]) {
       await stopAndSettle();
       try {
         await this._gotoWithRecovery(new goals.GoalNear(x, this.groundY, z, tolerance), 10_000, `(${x}, ${z}) 附近`);
         await this._sleep(120);
+        requireArrival();
         return this.pos;
-      } catch { /* try larger tolerance */ }
+      } catch { /* try closer target */ }
     }
     if (lastErr instanceof GolemError) throw lastErr;
     throw new GolemError("MOVE_FAILED", `织偶无法走到 (${x}, ${z})：${lastErr?.message ?? "no path"}`, lastErr);

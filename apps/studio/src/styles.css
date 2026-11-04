@@ -2058,20 +2058,29 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
 .wb-menu .btn { text-align: left; justify-content: flex-start; }
 .wb-menu .btn:focus-visible { outline-offset: -2px; }
 .card-collapse { margin-left: auto; padding: 2px 8px; font-size: 12px; min-height: 26px; }
-/* 位置卡：标题居中，右侧「查坐标点 + 收起/展开」放同一组；窄窗默认收起只留 44px 卡片头。 */
-.hud .card-head { padding-left: 10px; }
+/* 位置卡：标题与坐标/操作分行，右栏宽度变化时互不遮挡。 */
+.hud .card-head {
+  height: auto;
+  min-height: 44px;
+  padding: 8px 10px;
+  flex-direction: column;
+  gap: 6px;
+}
+.hud .card-head h3 { position: static; transform: none; width: 100%; }
 .hud-actions {
-  margin-left: auto;
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   position: relative;
   z-index: 1;
   min-width: 0;
 }
 .hud-actions .card-collapse { margin-left: 0; flex: 0 0 auto; }
-.hud-actions .hud-pos-tag { margin-left: 0; flex: 0 0 auto; max-width: 40%; }
-.hud .card-head .hud-actions .hud-pos-tag { font-family: var(--mono); letter-spacing: 0.04em; }
+.hud-actions .hud-pos-tag { margin-left: 0; flex: 0 1 auto; max-width: 100%; }
+.hud .card-head .hud-actions .hud-pos-tag { font-family: var(--font-code); letter-spacing: 0.04em; }
 .card.hud.is-collapsed .card-head { margin-bottom: 0; border-bottom: 0; }
 .goals .card-head { gap: 8px; }
 .goal-list { gap: 4px !important; }
