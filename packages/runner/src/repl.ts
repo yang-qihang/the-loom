@@ -30,6 +30,8 @@ export interface ReplResult {
 
 export interface ReplOptions extends SandboxRunOptions {
   mode?: "auto-await" | "explicit";
+  /** 真实走路可能超过 3 秒；仅单条 SDK 动作使用此上限，循环/普通表达式仍保持短超时。 */
+  actionTimeoutMs?: number;
 }
 
 interface SyntaxErrorLike {
@@ -42,8 +44,23 @@ function firstSyntaxMessage(error: unknown): string {
   return detail.errors?.[0]?.text ?? detail.message ?? "这一句的语法不对";
 }
 
+/** 长等待仅用于参数无需执行用户函数的单条动作，避免把参数里的死循环也放宽到 60 秒。 */
+function simpleActionArgument(node: ts.Expression): boolean {
+  if (ts.isIdentifier(node) || ts.isLiteralExpression(node)
+    || [ts.SyntaxKind.TrueKeyword, ts.SyntaxKind.FalseKeyword, ts.SyntaxKind.NullKeyword].includes(node.kind)) return true;
+  if (ts.isParenthesizedExpression(node)) return simpleActionArgument(node.expression);
+  if (ts.isPrefixUnaryExpression(node)) return simpleActionArgument(node.operand);
+  if (ts.isPropertyAccessExpression(node)) return simpleActionArgument(node.expression);
+  if (ts.isElementAccessExpression(node)) return simpleActionArgument(node.expression) && simpleActionArgument(node.argumentExpression);
+  if (ts.isBinaryExpression(node)) return simpleActionArgument(node.left) && simpleActionArgument(node.right);
+  if (ts.isArrayLiteralExpression(node)) return node.elements.every(element => ts.isExpression(element) && simpleActionArgument(element));
+  if (ts.isObjectLiteralExpression(node)) return node.properties.every(property =>
+    ts.isPropertyAssignment(property) && !ts.isComputedPropertyName(property.name) && simpleActionArgument(property.initializer));
+  return false;
+}
+
 /** 判断一行是「表达式求值」还是「语句/动作执行」；多行、多条语句直接拒绝。 */
-export function classifyReplLine(line: string): { expression: boolean } | { error: string } {
+export function classifyReplLine(line: string): { expression: boolean; sdkAction?: boolean } | { error: string } {
   const sourceFile = ts.createSourceFile("repl.ts", line, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TS);
   const statements = [...sourceFile.statements];
   if (statements.length === 0) return { error: "写一句再试，比如 golem.pos" };
@@ -60,7 +77,11 @@ export function classifyReplLine(line: string): { expression: boolean } | { erro
     if (ts.isAwaitExpression(current)) current = current.expression;
     return ts.isCallExpression(current) && isAsyncSdkCall(current);
   };
-  return { expression: !isSdkCall(statement.expression) };
+  const sdkAction = isSdkCall(statement.expression);
+  let call = statement.expression;
+  while (ts.isParenthesizedExpression(call) || ts.isAwaitExpression(call)) call = call.expression;
+  const longAction = sdkAction && ts.isCallExpression(call) && call.arguments.every(simpleActionArgument);
+  return { expression: !sdkAction, sdkAction: longAction };
 }
 
 function compileReplExpression(line: string): string {
@@ -121,7 +142,6 @@ export function translateReplError(raw: string): string {
  */
 export async function runReplLine(sdk: RunSdk, line: string, options: ReplOptions = {}): Promise<ReplResult> {
   const log: string[] = [];
-  const timeoutMs = options.timeoutMs ?? 3000;
   const recordLog = (text: string): void => {
     log.push(text);
     options.onLog?.(text);
@@ -138,6 +158,7 @@ export async function runReplLine(sdk: RunSdk, line: string, options: ReplOption
   if ("error" in classification) {
     return { ok: false, kind: "error", display: classification.error, log, error: classification.error };
   }
+  const timeoutMs = (classification.sdkAction ? options.actionTimeoutMs : undefined) ?? options.timeoutMs ?? 3000;
 
   try {
     if (classification.expression) {
@@ -146,6 +167,7 @@ export async function runReplLine(sdk: RunSdk, line: string, options: ReplOption
         entry: "__loomReplExpr",
         captureValue: true,
         timeoutMs,
+        signal: options.signal,
         studentLineCount: 1,
         onLog: recordLog,
       });
@@ -156,6 +178,7 @@ export async function runReplLine(sdk: RunSdk, line: string, options: ReplOption
       entry: "__loomMain",
       captureValue: false,
       timeoutMs,
+      signal: options.signal,
       studentLineCount: 1,
       onLog: recordLog,
     });

@@ -1,6 +1,6 @@
 # 11 — 决策记录（DECISIONS）与待用户确认事项
 
-> 状态：v1｜负责人：Lead｜最后更新：2026-10-31
+> 状态：v1（追加 D47）｜负责人：Lead / Codex（用户反馈修复）｜最后更新：2026-11-04
 > 格式：轻量 ADR（Status / Context / Decision / Consequences / Alternatives / Revisit Trigger）
 > 规则：任何 agent 不得静默改变这里的决定；要改必须写新 ADR 并由 Lead 记录。人类只需看 §13 的待确认清单。
 > 历史说明（2026-11-01 文档审计）：本文件是设计期决策记录（D1–D43），**保留原决策不改**；2026-11-01 的接口/进度/节拍变更以 `docs/46-playtest-fix-plan.md` §2 的新契约为准。
@@ -194,3 +194,13 @@
   - 依据/验收：`docs/61-typography-and-inline-code-style-guide.md`、`npm run check:style`、`apps/studio/e2e/typography.spec.ts`、`apps/studio/e2e/style-policy.spec.ts`。2026-11-02 曾短暂把所有装饰字改成 MiSans，用户当场修正为「像素装饰保留，MiSans 用于非像素正文」。
 - **D45 行内代码必须渲染，不得裸显示反引号**：所有用户可见文本里的 `` `...` `` 一律通过 `RichText` 输出行内 `<code class="inline-code">`（Maple，行内，不另起段落）；标题、列表项、目标、结算、教材 h2/h3/目标、codex 正文、HUD/手册/试符台提示等都不例外。占位符/`aria-label`/`title` 等非富文本属性去掉反引号。自动化：`style-policy.spec.ts` 扫描页面可见文本；`scripts/check-style-policy.mjs` 静态检查已知富文本字段。
 - **D46 防回归门禁**：`check:style` 接入 `verify.sh` l0（Windows `verify.ps1` 同步），`style-policy.spec.ts` 接入真实/mock Playwright 配置；任何前端 agent 改字体/文案前必须读 `docs/61` 并跑这两条。
+
+
+## 24. D47 — 真实 REPL 连接当前世界（2026-11-04）
+
+- **Status**：采纳并实施；依据用户明确反馈「显示照做了，moveTo 后根本没动」要求修复。Codex 按该授权记录本次契约调整。
+- **Context**：此前 Paper 模式为避免创建新 arena 清掉当前关卡，将 REPL 静默接到 MockWorldPort；与 UI 的「灰崽会照做」和 docs/27 的真实世界反馈不符。
+- **Decision**：Studio 创建 REPL 时显式请求 live。Paper 下复用当前同关卡的真实会话与端口，保留世界、epoch、代码和已完成的玩家任务；没有活跃世界时创建独立真实 REPL。不同关卡不静默挂接。旧客户端未请求 live 时仍可使用独立内存练习，本地演示不变。
+- **Consequences**：真实 REPL 的移动/放置确实影响当前世界，UI 明示；不直接评分，也不修改最近一次学生源码。重置真实 REPL 会重置本关，工作台同步清除旧结算。单句与程序/确认串行，reset/stop/dispose 撤销旧 worker；裸 SDK 动作允许 60 秒，循环/普通表达式仍用 3 秒上限。
+- **Alternatives**：继续影子世界不符合用户需求；另起真实 arena 会令原关卡会话失效。本轮不扩展 Paper 多 arena。
+- **Evidence**：docs/64 与 evidence/incremental-fix/；真实世界动作和原关卡快照需一致，不能只用 UI「照做了」作证据。

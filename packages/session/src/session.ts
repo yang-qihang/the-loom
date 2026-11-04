@@ -163,6 +163,8 @@ export class GameSession {
   #disposed = false;
   #replHistory: ReplHistoryEntry[] = [];
   #replTimeoutMs: number;
+  #replController: AbortController | null = null;
+  #activeBeat: object | null = null;
   #runTimeoutMs: number;
   /** 最近一次 verify 评估出的「织偶侧已完成、轮到玩家」；reset 后清零。 */
   #playerBeatReady = false;
@@ -262,6 +264,7 @@ export class GameSession {
   /** 提交一次运行：立即返回 runId，结果通过事件流（result）发布。 */
   async run(source: string, options: SessionRunOptions = {}): Promise<{ runId: string }> {
     this.#assertAlive();
+    if (this.#replController || this.#activeBeat) throw new SessionError("灰崽还在执行上一句，请完成后再运行。", "INVALID_STATE");
     if (this.mode === "repl") {
       throw new SessionError("试符台会话不运行关卡程序；请用 repl(line) 或 POST /api/repl", "INVALID_STATE");
     }
@@ -281,6 +284,7 @@ export class GameSession {
     // 这里在开跑前自动恢复场景（等价于玩家手动点「重置本关」）；已进入玩家节拍、或已通过的
     // 会话不恢复（不能把玩家亲手完成的那一步回滚）。
     await this.#restoreSceneIfDirty();
+    if (this.#replController || this.#activeBeat) throw new SessionError("灰崽还在执行上一句，请完成后再运行。", "INVALID_STATE");
     if (this.#state !== "READY" && this.#state !== "PASSED") {
       throw new SessionError(`当前状态 ${this.#state} 不能运行；请先 reset 回到 READY`, "INVALID_STATE");
     }
@@ -343,7 +347,7 @@ export class GameSession {
         // 记住「这一轮改过世界没有」：下一轮 run 前若上一轮失败且改过世界 → 自动恢复场景。
         this.#lastRunWroteWorld = this.#runWroteWorld;
         this.#activeRun = null;
-        this.#eventRunId = null;
+        if (this.#eventRunId === runId) this.#eventRunId = null;
       }
     }
   }
@@ -438,6 +442,7 @@ export class GameSession {
    */
   async playerBeat(confirmOnly = false): Promise<{ state: SessionState; result: ResultEvent | null }> {
     this.#assertAlive();
+    if (this.#replController || this.#activeBeat) throw new SessionError("灰崽还在执行上一句，请稍后确认。", "INVALID_STATE");
     if (this.mode === "repl") {
       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
     }
@@ -446,6 +451,8 @@ export class GameSession {
     }
     const ticket = this.#ticket;
     const runId = `beat-${++this.#runSeq}`;
+    const beat = {};
+    this.#activeBeat = beat;
     this.#eventRunId = runId;
     try {
       if (!confirmOnly && this.level.playerBeat) {
@@ -454,7 +461,8 @@ export class GameSession {
       const result = await this.#verifyAndPublish({ runId, ticket, studentSource: this.#lastRunSource }, "player-beat");
       return { state: this.#state, result };
     } finally {
-      this.#eventRunId = null;
+      if (this.#eventRunId === runId) this.#eventRunId = null;
+      if (this.#activeBeat === beat) this.#activeBeat = null;
     }
   }
 
@@ -603,6 +611,9 @@ export class GameSession {
       throw new SessionError(`当前状态 ${this.#state} 不能停止`, "INVALID_STATE");
     }
     this.#ticket += 1;
+    this.#replController?.abort();
+    this.#replController = null;
+    this.#activeBeat = null;
     this.#activeRun?.controller.abort();
     this.#activeRun = null;
     this.#eventRunId = null;
@@ -620,6 +631,9 @@ export class GameSession {
       throw new SessionError("场景正在准备，请稍后再重置", "INVALID_STATE");
     }
     this.#ticket += 1;
+    this.#replController?.abort();
+    this.#replController = null;
+    this.#activeBeat = null;
     this.#activeRun?.controller.abort();
     this.#activeRun = null;
     this.#eventRunId = null;
@@ -643,30 +657,35 @@ export class GameSession {
    * 试符台：执行一行（不评分、不写关卡进度、世界在本会话内持久）。
    * 与关卡共用 runner 沙箱；超时/错误翻译在 runner 侧完成。
    */
-  async repl(line: string): Promise<ReplResult> {
+  async repl(line: string, options: { allowLevel?: boolean; actionTimeoutMs?: number } = {}): Promise<ReplResult> {
     this.#assertAlive();
-    if (this.mode !== "repl") {
+    if (this.mode !== "repl" && !options.allowLevel) {
       throw new SessionError("只有试符台会话可以执行单句", "INVALID_STATE");
     }
     if (this.#state !== "READY" && this.#state !== "PASSED") {
       throw new SessionError(`当前状态 ${this.#state} 不能执行试符台；请先重置`, "INVALID_STATE");
     }
+    if (this.#replController || this.#activeBeat) throw new SessionError("灰崽还在执行上一句，请完成后再试。", "INVALID_STATE");
+    const controller = new AbortController();
+    this.#replController = controller;
     const ticket = this.#ticket;
     const collected: string[] = [];
-    const sdk = this.#makeReplSdk(ticket, collected);
-    const result = await runReplLine(sdk, line, { timeoutMs: this.#replTimeoutMs, onLog: () => undefined });
-    if (this.#disposed || ticket !== this.#ticket) {
-      return {
-        ok: false,
-        kind: "error",
-        display: "试符台已重置，这一句的结果作废。",
-        log: [],
-        error: "试符台已重置，这一句的结果作废。",
-      };
+    try {
+      const sdk = this.#makeReplSdk(ticket, collected, controller.signal);
+      const result = await runReplLine(sdk, line, {
+        timeoutMs: this.#replTimeoutMs, actionTimeoutMs: options.actionTimeoutMs,
+        signal: controller.signal, onLog: () => undefined,
+      });
+      if (this.#disposed || ticket !== this.#ticket) {
+        return { ok: false, kind: "error", display: "试符台已停止或重置，这一句的结果作废。", log: [], error: "试符台已停止或重置，这一句的结果作废。" };
+      }
+      result.log = [...collected, ...result.log];
+      this.#replHistory.push({ line: String(line ?? "").trim(), kind: result.kind, display: result.display, at: Date.now() });
+      return result;
+    } finally {
+      controller.abort();
+      if (this.#replController === controller) this.#replController = null;
     }
-    result.log = [...collected, ...result.log];
-    this.#replHistory.push({ line: String(line ?? "").trim(), kind: result.kind, display: result.display, at: Date.now() });
-    return result;
   }
 
   /** 试符台历史（按执行顺序；不含变量/敏感信息）。 */
@@ -688,6 +707,9 @@ export class GameSession {
       throw new SessionError("场景正在准备，请稍后再重置", "INVALID_STATE");
     }
     this.#ticket += 1;
+    this.#replController?.abort();
+    this.#replController = null;
+    this.#activeBeat = null;
     this.#activeRun = null;
     this.#transition("PREPARING");
     this.#epoch += 1;
@@ -715,6 +737,9 @@ export class GameSession {
   async dispose(): Promise<void> {
     this.#assertAlive();
     this.#ticket += 1;
+    this.#replController?.abort();
+    this.#replController = null;
+    this.#activeBeat = null;
     this.#activeRun?.controller.abort();
     this.#disposed = true;
     this.#listeners.clear();
@@ -943,14 +968,14 @@ export class GameSession {
   }
 
   /** 试符台 SDK：与关卡同一 golem/world（含语义方法），但 capability 只校验 epoch/ticket（无评分运行）。 */
-  #makeReplSdk(ticket: number, collected: string[]): RunSdk {
+  #makeReplSdk(ticket: number, collected: string[], signal: AbortSignal): RunSdk {
     const log = (line: string): void => {
       if (!this.#disposed && ticket === this.#ticket) collected.push(line);
     };
     const golem = this.#makeActionsProxy(
       "golem",
       "golem",
-      () => !this.#disposed && ticket === this.#ticket,
+      () => !this.#disposed && ticket === this.#ticket && !signal.aborted,
       "RUN_CANCELLED: 试符台已停止或重置",
       log,
     ) as unknown as Golem;

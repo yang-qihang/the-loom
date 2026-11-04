@@ -239,6 +239,8 @@ function sessionContainers(  session: GameSession,
 export function createEngineServer(world?: WorldRuntime): http.Server {
   const runtime = world ?? createWorldRuntime();
   const sessions = new Map<string, GameSession>();
+  /** 显式请求的真实试符台可挂接现有关卡；旧客户端仍可创建独立内存练习。 */
+  const liveReplSessions = new Set<string>();
   const startedAt = Date.now();
   /**
    * Paper 模式只有一套 arena/一个插件 sessionId：dispose 旧会话和 create 新会话必须串行，
@@ -261,6 +263,7 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       await session.dispose().catch(() => undefined);
     }
     sessions.clear();
+    liveReplSessions.clear();
   };
 
   const requireSession = (sessionId: string): GameSession => {
@@ -346,23 +349,30 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       if (!content) throw new SessionError(`未知关卡 ${levelId}`, "NOT_FOUND");
       const mode = typeof body.mode === "string" && body.mode === "repl" ? "repl" : "level";
       // 真实 Paper 模式同一时刻只允许一个真实世界会话（插件一个 arena/一个 sessionId）。
-      // 试符台是「练一句」的沙箱：用内存 Mock 世界准备本关场景，既不动真实世界/关卡进度，
-      // 也不再 dispose 玩家正在玩的关卡会话（Studio 文案承诺「不会动这一关的进度」）。
-      const replInPaper = mode === "repl" && runtime.mode === "paper";
+      const liveRepl = mode === "repl" && body.live === true && runtime.mode === "paper";
+      const isolatedRepl = mode === "repl" && runtime.mode === "paper" && !liveRepl;
       let session: GameSession;
       try {
         session = await withSessionCreateLock(async () => {
-          if (runtime.mode === "paper" && !replInPaper) await disposePaperSessions();
-          const port = replInPaper ? new MockWorldPort() : await runtime.createPort(content);
+          if (liveRepl) {
+            const current = [...sessions.values()].find(item => item.portKind === "paper+bot");
+            if (current) {
+              if (current.level.def.id !== levelId) throw new SessionError("请先进入要练习的关卡，再打开试符台。", "INVALID_STATE");
+              liveReplSessions.add(current.id);
+              return current;
+            }
+          }
+          if (runtime.mode === "paper" && !isolatedRepl) await disposePaperSessions();
+          const port = isolatedRepl ? new MockWorldPort() : await runtime.createPort(content);
           const runTimeoutMs =
-            runtime.mode === "paper" && !replInPaper ? Number(process.env.LOOM_RUN_TIMEOUT_MS ?? 240_000) : undefined;
+            runtime.mode === "paper" && !isolatedRepl ? Number(process.env.LOOM_RUN_TIMEOUT_MS ?? 240_000) : undefined;
           if (process.env.LOOM_DEBUG_ENGINE === "1") {
             console.log(`[debug] session create level=${levelId} world=${runtime.mode} runTimeoutMs=${runTimeoutMs}`);
           }
           return GameSession.create(content, port, { mode, runTimeoutMs });
         });
       } catch (error) {
-        if (error instanceof WorldUnavailableError) throw error;
+        if (error instanceof WorldUnavailableError || error instanceof SessionError) throw error;
         const message = error instanceof Error ? error.message : String(error);
         throw new WorldUnavailableError(
           `真实 MC 场景准备失败（${levelId}）：${message}`,
@@ -371,6 +381,7 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
         );
       }
       sessions.set(session.id, session);
+      if (liveRepl) liveReplSessions.add(session.id);
       const snapshot = await session.snapshot();
       sendJson(res, 201, {
         sessionId: session.id,
@@ -500,7 +511,10 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
       const body = await readJson(req);
       const session = requireSession(requireString(body, "sessionId"));
       const line = typeof body.line === "string" ? body.line : "";
-      const result = await session.repl(line);
+      const result = await session.repl(line, {
+        allowLevel: liveReplSessions.has(session.id),
+        actionTimeoutMs: session.portKind === "paper+bot" ? 60_000 : undefined,
+      });
       sendJson(res, 200, result);
       return;
     }
@@ -516,7 +530,8 @@ export function createEngineServer(world?: WorldRuntime): http.Server {
     if (method === "POST" && path === "/api/repl/reset") {
       const body = await readJson(req);
       const session = requireSession(requireString(body, "sessionId"));
-      const { state, epoch, snapshot } = await session.replReset();
+      const { state, epoch, snapshot } = liveReplSessions.has(session.id) && session.mode === "level"
+        ? await session.reset() : await session.replReset();
       sendJson(res, 200, { ok: true, state, epoch, snapshot });
       return;
     }
