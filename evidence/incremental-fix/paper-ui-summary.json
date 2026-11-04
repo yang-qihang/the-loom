@@ -1,0 +1,34 @@
+{
+  "mode": "source engine + real Paper + real bot + headless Chrome",
+  "simulatedPlayer": true,
+  "sessionId": "sess-mw1m3g2y-ro44ib",
+  "partialCalls": 6,
+  "finalCalls": 7,
+  "state": "PASSED",
+  "epoch": 0,
+  "progress": [
+    {
+      "id": "l01-three-lamps",
+      "text": "灰崽按顺序点亮 1、2、3 号灯",
+      "passed": true,
+      "player": false,
+      "hint": "先点亮 1 到 3 号灯：写一句 `golem.moveTo(lamp1)` 走到 1 号灯下，再写 `golem.place(\"lantern\", lamp1)` 把灯笼放上灯柱顶。lamp1 到 lamp4 都是关卡给好的名字（指令手册里能查到），照着这三组把 1、2、3 号灯按顺序点完；顺序错了要按「重置」重来。"
+    },
+    {
+      "id": "l01-fourth-by-player",
+      "text": "你亲手点亮 4 号灯",
+      "passed": true,
+      "player": true,
+      "hint": "最后一步轮到你了：4 号灯由你自己走过去点——站到村道尽头的灯柱前，手持灯笼对着灯柱按右键，灯笼会自动挂到柱顶，不用抬头找顶面。点亮后回工作台点「运行」，这一条会打勾。"
+    },
+    {
+      "id": "l01-golem-home",
+      "text": "灰崽回到艾拉身边",
+      "passed": true,
+      "player": false,
+      "hint": "回艾拉身边只要补一句 `golem.moveTo(eira)`：eira 就是艾拉的名字，不用背坐标。把这一句写在最后，再点「运行」；目标面板三条都打勾，这一关就过了。"
+    }
+  ],
+  "allPassed": true,
+  "errors": []
+}

@@ -1,0 +1,59 @@
+{
+  "unit": {
+    "files": 32,
+    "passed": 272
+  },
+  "browser": {
+    "fullMainPassed": 62,
+    "finalFocusedPassed": 13,
+    "mockPassed": 7,
+    "note": "分别执行，不将重复用例累加为一次全量运行"
+  },
+  "arrivalBaseline": {
+    "failed": 3,
+    "passed": 1,
+    "baselineCommit": "418fdb5"
+  },
+  "arrivalFixed": {
+    "passed": 4
+  },
+  "nativeL10": {
+    "checks": 19,
+    "errors": []
+  },
+  "replReal": {
+    "mode": "real Paper + real bot + source engine + headless Chrome",
+    "sessionId": "sess-mw1mmzjz-082c2b",
+    "attachedSameSession": true,
+    "before": [
+      0,
+      11,
+      0
+    ],
+    "after": [
+      -11,
+      11,
+      -1
+    ],
+    "actionMs": 3080,
+    "epochBefore": 0,
+    "epochAfterMove": 0,
+    "epochAfterReset": 1,
+    "afterReset": [
+      0,
+      11,
+      0
+    ],
+    "editorPreserved": true,
+    "errors": []
+  },
+  "verify": {
+    "exitCode": 0,
+    "path": "verify-reports/20261104T043715Z-incremental-live-repl-final.log",
+    "knownWarning": "G-FRESH-READER"
+  },
+  "boundaries": [
+    "未实测 Windows 原生 GUI",
+    "撤销 worker 不等于已发出的原生 bot 动作立即停止"
+  ]
+}

@@ -1,0 +1,107 @@
+
+> loomcraft@0.0.1 test
+> vitest run
+
+
+ RUN  v5.0.5 /home/yqh0919/Documents/deepseek-harness/default-workspace
+
+ ❯ packages/session/src/explicit.test.ts (5 tests | 2 failed) 897ms
+   ❯ session 按 level meta.runMode 选择运行模式（Act III explicit） (5)
+     × 显式 await 参考解通过，玩家节拍拿到 3 星 346ms
+     × 自动 await 模式回归：L01–L08 仍是 sequential，L01 参考解照常 3 星 355ms
+ ❯ content/levels/L09.content.test.ts (21 tests | 1 failed) 867ms
+   ❯ L09 破晓之前（MockWorld · 显式 await 草稿） (21)
+     × Session 读取 def.runMode=explicit：参考解 + 玩家节拍 = 3 星 143ms
+ ❯ packages/session/src/binding.test.ts (6 tests | 1 failed) 1000ms
+   ❯ RT-04 快照绑定（epoch/runId/digest） (6)
+     × 沙箱内篡改 world.vars 不影响评分（参考解仍 3 星） 90ms
+ ❯ packages/session/src/session.test.ts (9 tests | 2 failed) 903ms
+   ❯ GameSession 状态机与评分（MockWorldPort） (9)
+     × 参考解：先失败（缺玩家节拍），玩家节拍后 PASSED 3 星 311ms
+     × stop：撤销能力后拒绝新 run，reset 后可重跑 150ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  content/levels/L09.content.test.ts > L09 破晓之前（MockWorld · 显式 await 草稿） > Session 读取 def.runMode=explicit：参考解 + 玩家节拍 = 3 星
+SessionError: 灰崽还在执行上一句，请稍后确认。
+ ❯ GameSession.playerBeat packages/session/src/session.ts:444:57
+    442|   async playerBeat(confirmOnly = false): Promise<{ state: SessionState…
+    443|     this.#assertAlive();
+    444|     if (this.#replController || this.#eventRunId) throw new SessionErr…
+       |                                                         ^
+    445|     if (this.mode === "repl") {
+    446|       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
+ ❯ content/levels/L09.content.test.ts:245:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  packages/session/src/binding.test.ts > RT-04 快照绑定（epoch/runId/digest） > 沙箱内篡改 world.vars 不影响评分（参考解仍 3 星）
+SessionError: 灰崽还在执行上一句，请稍后确认。
+ ❯ GameSession.playerBeat packages/session/src/session.ts:444:57
+    442|   async playerBeat(confirmOnly = false): Promise<{ state: SessionState…
+    443|     this.#assertAlive();
+    444|     if (this.#replController || this.#eventRunId) throw new SessionErr…
+       |                                                         ^
+    445|     if (this.mode === "repl") {
+    446|       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
+ ❯ packages/session/src/binding.test.ts:122:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  packages/session/src/explicit.test.ts > session 按 level meta.runMode 选择运行模式（Act III explicit） > 显式 await 参考解通过，玩家节拍拿到 3 星
+SessionError: 灰崽还在执行上一句，请稍后确认。
+ ❯ GameSession.playerBeat packages/session/src/session.ts:444:57
+    442|   async playerBeat(confirmOnly = false): Promise<{ state: SessionState…
+    443|     this.#assertAlive();
+    444|     if (this.#replController || this.#eventRunId) throw new SessionErr…
+       |                                                         ^
+    445|     if (this.mode === "repl") {
+    446|       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
+ ❯ packages/session/src/explicit.test.ts:91:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  packages/session/src/explicit.test.ts > session 按 level meta.runMode 选择运行模式（Act III explicit） > 自动 await 模式回归：L01–L08 仍是 sequential，L01 参考解照常 3 星
+SessionError: 灰崽还在执行上一句，请稍后确认。
+ ❯ GameSession.playerBeat packages/session/src/session.ts:444:57
+    442|   async playerBeat(confirmOnly = false): Promise<{ state: SessionState…
+    443|     this.#assertAlive();
+    444|     if (this.#replController || this.#eventRunId) throw new SessionErr…
+       |                                                         ^
+    445|     if (this.mode === "repl") {
+    446|       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
+ ❯ packages/session/src/explicit.test.ts:168:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  packages/session/src/session.test.ts > GameSession 状态机与评分（MockWorldPort） > 参考解：先失败（缺玩家节拍），玩家节拍后 PASSED 3 星
+SessionError: 灰崽还在执行上一句，请稍后确认。
+ ❯ GameSession.playerBeat packages/session/src/session.ts:444:57
+    442|   async playerBeat(confirmOnly = false): Promise<{ state: SessionState…
+    443|     this.#assertAlive();
+    444|     if (this.#replController || this.#eventRunId) throw new SessionErr…
+       |                                                         ^
+    445|     if (this.mode === "repl") {
+    446|       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
+ ❯ packages/session/src/session.test.ts:71:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  packages/session/src/session.test.ts > GameSession 状态机与评分（MockWorldPort） > stop：撤销能力后拒绝新 run，reset 后可重跑
+SessionError: 灰崽还在执行上一句，请稍后确认。
+ ❯ GameSession.playerBeat packages/session/src/session.ts:444:57
+    442|   async playerBeat(confirmOnly = false): Promise<{ state: SessionState…
+    443|     this.#assertAlive();
+    444|     if (this.#replController || this.#eventRunId) throw new SessionErr…
+       |                                                         ^
+    445|     if (this.mode === "repl") {
+    446|       throw new SessionError("试符台会话没有玩家节拍", "INVALID_STATE");
+ ❯ packages/session/src/session.test.ts:110:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  4 failed | 28 passed (32)
+      Tests  6 failed | 266 passed (272)
+   Start at  12:31:37
+   Duration  11.86s (import 45%, tests 44%, transform 10%)

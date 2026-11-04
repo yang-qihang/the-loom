@@ -61,6 +61,7 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
   const [entries, setEntries] = useState<ReplHistoryEntry[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -111,7 +112,7 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
   }, [entries]);
 
   const tryLine = useCallback(async () => {
-    if (!sessionId || busy) return;
+    if (!sessionId || busyRef.current) return;
     const line = input.trim();
     if (!line) {
       setError(chrome.runeBench.errorGeneric);
@@ -139,6 +140,7 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
       setError("括号或引号还没配对。照着示例把这一行补完整，再试一次。");
       return;
     }
+    busyRef.current = true;
     setBusy(true);
     setError(null);
     setNotice(null);
@@ -161,6 +163,7 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
     } catch (cause) {
       setError(cleanReplError(cause instanceof Error ? cause.message : undefined));
     } finally {
+      busyRef.current = false;
       setBusy(false);
       inputRef.current?.focus();
     }
@@ -174,7 +177,8 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
   }, []);
 
   const resetBench = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId || busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     setError(null);
     try {
@@ -184,6 +188,7 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
     } catch (cause) {
       setError(cleanReplError(cause instanceof Error ? cause.message : undefined));
     } finally {
+      busyRef.current = false;
       setBusy(false);
       inputRef.current?.focus();
     }
@@ -250,6 +255,7 @@ export function ReplScreen({ engine, levelId, env, onBack, onOpenManual }: ReplS
               </button>
             </div>
             <p className="repl-hint">{chrome.runeBench.inputHint}</p>
+            {engine.mode === "http" ? <p className="repl-hint"><RichText text={chrome.runeBench.liveHint} /></p> : null}
             <p className="repl-hint repl-help-hint"><RichText text={chrome.runeBench.helpHint} /></p>
             {error ? (
               <p className="repl-error" role="alert" data-testid="repl-error">

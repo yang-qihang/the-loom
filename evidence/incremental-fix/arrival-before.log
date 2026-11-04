@@ -1,0 +1,59 @@
+
+ RUN  v5.0.5 /home/yqh0919/Documents/deepseek-harness/default-workspace
+
+ ❯ apps/engine/src/bot-arrival.test.ts (3 tests | 2 failed) 10ms
+   ❯ moveTo 的物理到达证据 (3)
+     × 距方块中心很近、但取整后超过 2 格时，必须继续走到灯旁 6ms
+     × 寻路回退停在 2 格以外不能把移动报告为成功 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/engine/src/bot-arrival.test.ts > moveTo 的物理到达证据 > 距方块中心很近、但取整后超过 2 格时，必须继续走到灯旁
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/engine/src/bot-arrival.test.ts:32:19
+     30|     };
+     31|     await golem.moveTo(-12, 10);
+     32|     expect(walks).toBe(1);
+       |                   ^
+     33|     expect(Math.hypot(golem.pos[0]! + 12, golem.pos[2]! - 10)).toBeLes…
+     34|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  apps/engine/src/bot-arrival.test.ts > moveTo 的物理到达证据 > 寻路回退停在 2 格以外不能把移动报告为成功
+AssertionError: promise resolved "[ -9, 11, 13 ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  -9,
+  11,
+  13,
+]
+
+ ❯ apps/engine/src/bot-arrival.test.ts:46:40
+     44|     golem.findStandCells = () => [];
+     45|     golem._gotoWithRecovery = async () => undefined;
+     46|     await expect(golem.moveTo(-12, 10)).rejects.toThrow();
+       |                                        ^
+     47|   });
+     48| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  12:18:46
+   Duration  348ms (import 78%, transform 16%, tests 5%, worker 2%)

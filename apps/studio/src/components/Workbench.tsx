@@ -200,6 +200,19 @@ export function Workbench({
     if (!sessionId) return;
     const unsubscribe = engine.subscribe(sessionId, (event: StudioEvent) => {
       if (event.type === "state") {
+        // 真实试符台的「恢复现场」复用本关 reset；同步清掉工作台的旧结果与结算。
+        if (event.state === "loading") {
+          resultRef.current = null;
+          autoBeatKeyRef.current = null;
+          suppressBeatUntilRef.current = Date.now() + 2000;
+          errorHoldRef.current = false;
+          setResult(null);
+          setSettleOpen(false);
+          setError(null);
+          setEngineHint(null);
+          setResultHint(null);
+          setCompletedNotice(null);
+        }
         if (errorHoldRef.current && event.state === "ready") return;
         setPhase(event.state);
       }

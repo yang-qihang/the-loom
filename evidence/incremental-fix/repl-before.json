@@ -1,0 +1,17 @@
+{
+  "requestedLive": true,
+  "replPort": "mock",
+  "reportedOK": true,
+  "reportedDisplay": "灰崽照做了",
+  "realBefore": [
+    1,
+    11,
+    5
+  ],
+  "realAfter": [
+    1,
+    11,
+    5
+  ],
+  "realUnchanged": true
+}

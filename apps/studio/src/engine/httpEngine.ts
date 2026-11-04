@@ -127,10 +127,19 @@ export class HttpEngine implements StudioEngine {
    * SSE 里 error/result 事件都带 runId：对不上的一律丢弃（旧 run 的迟到事件/断线回放不会再污染界面）。
    */
   private activeRunId: string | null = null;
+  private runSessionId: string | null = null;
   /** HTTP 202 确认前先缓存终态：快执行的 SSE 可能比新 runId 更早到达。对象身份即请求 token。 */
   private pendingRun: { sessionId: string; events: Array<() => void> } | null = null;
   /** 玩家节拍请求在途：beat-* 结果不属于 activeRunId，看到对应的 beat 结果后自动放行。 */
   private beatPending = false;
+
+  private invalidateRun(sessionId: string): void {
+    if (this.runSessionId === sessionId) {
+      this.activeRunId = null;
+      this.beatPending = false;
+    }
+    if (this.pendingRun?.sessionId === sessionId) this.pendingRun = null;
+  }
 
   constructor(private readonly base: string = runtimeBase()) {}
 
@@ -228,12 +237,14 @@ export class HttpEngine implements StudioEngine {
       body: JSON.stringify({ levelId }),
     });
     this.pendingRun = null;
+    this.runSessionId = data.sessionId;
     this.activeRunId = null;
     this.beatPending = false;
     return data.sessionId;
   }
 
   async run(sessionId: string, source: string): Promise<string | null> {
+    this.runSessionId = sessionId;
     const pending = { sessionId, events: [] as Array<() => void> };
     this.pendingRun = pending;
     let acknowledged = false;
@@ -254,7 +265,7 @@ export class HttpEngine implements StudioEngine {
   async createReplSession(levelId?: string): Promise<string> {
     const data = await this.request<{ sessionId: string }>("/api/session", {
       method: "POST",
-      body: JSON.stringify({ levelId: levelId ?? "L01", mode: "repl" }),
+      body: JSON.stringify({ levelId: levelId ?? "L01", mode: "repl", live: true }),
     });
     return data.sessionId;
   }
@@ -288,6 +299,7 @@ export class HttpEngine implements StudioEngine {
     const data = await this.request<{ ok?: boolean; kind?: ReplKind; display?: string; log?: string[]; error?: string; line?: number }>("/api/repl", {
       method: "POST",
       body: JSON.stringify({ sessionId, line }),
+      signal: AbortSignal.timeout(75_000),
     });
     const kind: ReplKind = data.kind === "value" || data.kind === "action" ? data.kind : "error";
     return {
@@ -313,22 +325,19 @@ export class HttpEngine implements StudioEngine {
   }
 
   async replReset(sessionId: string): Promise<void> {
+    this.invalidateRun(sessionId);
     await this.request("/api/repl/reset", { method: "POST", body: JSON.stringify({ sessionId }) });
   }
 
   async stop(sessionId: string): Promise<void> {
     await this.request("/api/stop", { method: "POST", body: JSON.stringify({ sessionId }) });
-    this.activeRunId = null;
-    if (this.pendingRun?.sessionId === sessionId) this.pendingRun = null;
-    this.beatPending = false;
+    this.invalidateRun(sessionId);
   }
 
   async reset(sessionId: string): Promise<void> {
     await this.request("/api/reset", { method: "POST", body: JSON.stringify({ sessionId }) });
     // 重置后旧 run 的结果/错误一律作废：清掉活跃 runId，迟到的旧事件会被下方 subscribe 丢弃。
-    this.activeRunId = null;
-    if (this.pendingRun?.sessionId === sessionId) this.pendingRun = null;
-    this.beatPending = false;
+    this.invalidateRun(sessionId);
   }
 
   async playerBeat(sessionId: string, simulate?: boolean): Promise<void> {

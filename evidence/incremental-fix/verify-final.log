@@ -1,0 +1,13 @@
+04:37:15Z verify start task=incremental-live-repl-final layers=l0,l1,l2,l3,lg commit=418fdb5 at=2026-11-04T04:37:15Z
+04:37:15Z ▶ LAYER l0 :: layer_l0
+04:37:21Z ✓ l0 (5855ms)
+04:37:21Z ▶ LAYER l1 :: layer_l1
+04:37:24Z ✓ l1 (3145ms)
+04:37:24Z ▶ LAYER l2 :: layer_l2
+04:37:27Z ✓ l2 (2647ms)
+04:37:27Z ▶ LAYER l3 :: layer_l3
+04:37:30Z ✓ l3 (3484ms)
+04:37:30Z ▶ LAYER lg :: layer_lg
+04:37:35Z ! lg warn (5033ms)
+04:37:35Z VERIFY OK (with warnings) (20193ms) layers=l0,l1,l2,l3,lg
+{"ts":"20261104T043715Z","task":"incremental-live-repl-final","commit":"418fdb5","result":"pass","warnings":["gates: tracked fail=G-FRESH-READER（G-FRESH-READER Round1，见 qa/evidence/qa-gates.json；Round2 前不得假绿）"],"totalMs":20193,"log":"verify-reports/20261104T043715Z-incremental-live-repl-final.log","layers":{"l0":{"status":"pass","ms":5855,"detail":""},"l1":{"status":"pass","ms":3145,"detail":""},"l2":{"status":"pass","ms":2647,"detail":""},"l3":{"status":"pass","ms":3484,"detail":""},"lg":{"status":"warn","ms":5033,"detail":"warn"}}}

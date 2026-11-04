@@ -1,9 +1,74 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 const EVIDENCE = resolve(process.cwd(), "evidence");
 mkdirSync(EVIDENCE, { recursive: true });
+
+async function openWorkbench(page: Page): Promise<string> {
+  await page.addInitScript(() => {
+    localStorage.setItem("loom.studio.progress.v1", JSON.stringify({ prologueSeen: true, actsSeen: [1, 2, 3], levelsStarted: ["L01"], lastCompletedLevelId: null }));
+    localStorage.setItem("loom.textbook.read.v1", JSON.stringify(["L01"]));
+  });
+  await page.goto("/");
+  const created = page.waitForResponse(response => response.url().endsWith("/api/session") && response.status() === 201);
+  await page.getByTestId("level-card-L01").click();
+  const { sessionId } = await (await created).json() as { sessionId: string };
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  return sessionId;
+}
+
+test("工作台试符台显式请求真实接线，命名点单句可执行", async ({ page }) => {
+  await openWorkbench(page);
+  await page.getByTestId("btn-help-menu").click();
+  const created = page.waitForResponse(response => response.url().endsWith("/api/session") && response.request().postDataJSON()?.mode === "repl");
+  await page.getByTestId("btn-repl-top").click();
+  expect((await created).request().postDataJSON()).toMatchObject({ levelId: "L01", mode: "repl", live: true });
+  await expect(page.getByTestId("repl-input")).toBeEnabled();
+  await page.getByTestId("repl-input").fill("golem.moveTo(eira)");
+  await page.getByTestId("btn-repl-try").click();
+  await expect(page.getByTestId("repl-history")).toContainText("照做了");
+  await page.getByTestId("btn-repl-back").click();
+  await expect(page.getByTestId("code-editor")).toBeVisible();
+  await expect(page.getByTestId("settle-overlay")).toBeHidden();
+});
+
+test("真实试符台恢复现场期间，晚到的运行确认不能重开旧结果", async ({ page }) => {
+  const sessionId = await openWorkbench(page);
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route("**/api/run", async route => {
+    const response = await route.fetch();
+    await gate;
+    await route.fulfill({ response });
+  });
+  // HTTP-Mock 测试栈模拟 Paper 的同会话挂接；世界 reset 仍由真实引擎执行。
+  await page.route("**/api/session", async route => {
+    await route.fulfill({ json: { sessionId } });
+  });
+  await page.route("**/api/repl/reset", async route => {
+    const response = await route.fetch({ url: route.request().url().replace("/api/repl/reset", "/api/reset") });
+    release(); // 故意先放旧 run 的 202，再返回 reset 的 HTTP 确认。
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await route.fulfill({ response });
+  });
+  try {
+    await page.evaluate(() => window.__loomStudio?.fillReference());
+    await page.getByTestId("btn-run").click();
+    await expect(page.locator('.goal[data-done="true"]')).toHaveCount(2);
+    await page.getByTestId("btn-help-menu").click();
+    await page.getByTestId("btn-repl-top").click();
+    await expect(page.getByTestId("btn-repl-reset")).toBeEnabled();
+    await page.getByTestId("btn-repl-reset").click();
+    await expect(page.getByTestId("repl-notice")).toContainText("现场已恢复原样");
+    await page.getByTestId("btn-repl-back").click();
+    await expect(page.getByTestId("btn-player-beat")).toBeHidden();
+    await expect(page.getByTestId("settle-overlay")).toBeHidden();
+    await expect(page.locator('.goal[data-done="true"]')).toHaveCount(0);
+  } finally { release(); await page.unroute("**/api/run"); }
+  await page.getByTestId("btn-run").click();
+  await expect(page.getByTestId("btn-player-beat")).toBeVisible();
+});
 
 test("试符台：进入 → 坐标 → 错误 → 重置", async ({ page }) => {
   const consoleErrors: string[] = [];

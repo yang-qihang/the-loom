@@ -1,0 +1,56 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts --grep 保留三盏灯代码补回程|位置卡收起后的坐标
+
+[WebServer] (node:15307) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15318) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15375) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer]
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter]
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:15363) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:15461) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/auto-beat.spec.ts:213:1 › 保留三盏灯代码补回程：玩家先完成第四盏灯，第二次整段运行自动结算 (1.1s)
+  ✘  2 e2e/desktop-ui-regressions.spec.ts:220:1 › 位置卡收起后的坐标与标题、按钮不重叠 (618ms)
+
+
+  1) e2e/desktop-ui-regressions.spec.ts:220:1 › 位置卡收起后的坐标与标题、按钮不重叠 ─────────────────────────────────
+
+    Error: 1920px 下标题、坐标、按钮必须相互避让
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "位置 / (0，0)",
+    + ]
+
+      243 |       return hits;
+      244 |     });
+    > 245 |     expect(collisions, `${width}px 下标题、坐标、按钮必须相互避让`).toEqual([]);
+          |                                                      ^
+      246 |   }
+      247 | });
+      248 |
+        at /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/studio/e2e/desktop-ui-regressions.spec.ts:245:54
+
+    Error Context: .pw-out/real/desktop-ui-regressions-位置卡收起后的坐标与标题、按钮不重叠/error-context.md
+
+  1 failed
+    e2e/desktop-ui-regressions.spec.ts:220:1 › 位置卡收起后的坐标与标题、按钮不重叠 ──────────────────────────────────
+  1 passed (9.2s)

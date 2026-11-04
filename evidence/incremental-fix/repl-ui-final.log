@@ -1,0 +1,64 @@
+
+> @loom/studio@0.1.0 test:e2e
+> playwright test -c playwright.config.ts --grep 试符台|保留三盏灯代码补回程|位置卡收起后的坐标|HTTP 确认在途|双击|L01 参考解跑完后|自动确认串行|字体三轨道
+
+[WebServer] (node:328729) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:328743) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node-22 --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:328787) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer]
+[WebServer] ../world/L01.png referenced in ../world/L01.png didn't resolve at build time, it will remain unchanged to be resolved at runtime
+[WebServer] [plugin builtin:vite-reporter]
+[WebServer] (!) Some chunks are larger than 4096 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:328775) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 13 tests using 1 worker
+
+(node:328876) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✘   1 e2e/auto-beat.spec.ts:114:1 › L01 参考解跑完后：世界侧全完成 → 不点按钮自动结算 3 星 (2.1s)
+(node:329067) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node-22 --trace-warnings ...` to show where the warning was created)
+  ✓   2 e2e/auto-beat.spec.ts:180:1 › 自动确认串行安全：重置后再跑一轮不会残留上一轮的结算 (4.6s)
+  ✓   3 e2e/auto-beat.spec.ts:213:1 › 保留三盏灯代码补回程：玩家先完成第四盏灯，第二次整段运行自动结算 (1.2s)
+  ✓   4 e2e/desktop-ui-regressions.spec.ts:188:1 › HTTP 确认在途时 reset，晚到确认和缓冲结果不得恢复旧运行 (1.0s)
+  ✓   5 e2e/desktop-ui-regressions.spec.ts:222:1 › 位置卡收起后的坐标与标题、按钮不重叠 (1.3s)
+  ✓   6 e2e/narrative-layout.spec.ts:793:5 › 同类长内容浮层 896×603 › 织典 / 试符台 / 指令手册 / 完整解 / 结算：低窗口可滚、按钮不被裁、左右对称 (2.8s)
+  ✓   7 e2e/narrative-layout.spec.ts:793:5 › 同类长内容浮层 720×560 › 织典 / 试符台 / 指令手册 / 完整解 / 结算：低窗口可滚、按钮不被裁、左右对称 (2.6s)
+  ✓   8 e2e/repl.spec.ts:21:1 › 工作台试符台显式请求真实接线，命名点单句可执行 (1.1s)
+  ✓   9 e2e/repl.spec.ts:36:1 › 真实试符台恢复现场期间，晚到的运行确认不能重开旧结果 (1.7s)
+  ✓  10 e2e/repl.spec.ts:73:1 › 试符台：进入 → 坐标 → 错误 → 重置 (2.0s)
+  ✓  11 e2e/runtime-recovery.spec.ts:110:1 › 双击「运行」只发一次 run：不会用 409 红条覆盖正确结果 (1.1s)
+  ✓  12 e2e/style-policy.spec.ts:48:1 › 字体三轨道 + 行内代码渲染策略 (2.7s)
+  ✓  13 e2e/typography.spec.ts:324:1 › 代码统一 Maple Mono：编辑器/参考解/手册/试符台/织典 + 长文 MiSans (2.4s)
+
+
+  1) e2e/auto-beat.spec.ts:114:1 › L01 参考解跑完后：世界侧全完成 → 不点按钮自动结算 3 星 ────────────────────────────────
+
+    Error: 目标打勾应在结算之前：goals=1817.6999999997206 settle=1817.6000000000931
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      156 |     timeline!.goalsAllDoneAt! <= timeline!.settleAt!,
+      157 |     `目标打勾应在结算之前：goals=${timeline!.goalsAllDoneAt} settle=${timeline!.settleAt}`,
+    > 158 |   ).toBe(true);
+          |     ^
+      159 |   const goalDones = await page.locator(".goal").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-done")));
+      160 |   expect(goalDones.length).toBe(3);
+      161 |   expect(goalDones.every((done) => done === "true")).toBe(true);
+        at /home/yqh0919/Documents/deepseek-harness/default-workspace/apps/studio/e2e/auto-beat.spec.ts:158:5
+
+    Error Context: .pw-out/real/auto-beat-L01-参考解跑完后：世界侧全完成-→-不点按钮自动结算-3-星/error-context.md
+
+  1 failed
+    e2e/auto-beat.spec.ts:114:1 › L01 参考解跑完后：世界侧全完成 → 不点按钮自动结算 3 星 ─────────────────────────────────
+  12 passed (34.3s)

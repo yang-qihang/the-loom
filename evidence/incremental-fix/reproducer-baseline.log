@@ -1,0 +1,79 @@
+
+ RUN  v5.0.5 /home/yqh0919/Documents/deepseek-harness/default-workspace
+
+ ❯ tmp/arrival-before-n8NAvK/arrival.test.ts (4 tests | 3 failed) 174ms
+   ❯ moveTo 的物理到达证据 (4)
+     × 距方块中心很近、但取整后超过 2 格时，必须继续走到灯旁 8ms
+     × 寻路回退停在 2 格以外不能把移动报告为成功 3ms
+     × 三盏灯先跑、玩家点第四盏、补回程整段重跑：真实移动判定不会留下永久失败历史 161ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tmp/arrival-before-n8NAvK/arrival.test.ts > moveTo 的物理到达证据 > 距方块中心很近、但取整后超过 2 格时，必须继续走到灯旁
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tmp/arrival-before-n8NAvK/arrival.test.ts:36:19
+     34|     };
+     35|     await golem.moveTo(-12, 10);
+     36|     expect(walks).toBe(1);
+       |                   ^
+     37|     expect(Math.hypot(golem.pos[0]! + 12, golem.pos[2]! - 10)).toBeLes…
+     38|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tmp/arrival-before-n8NAvK/arrival.test.ts > moveTo 的物理到达证据 > 寻路回退停在 2 格以外不能把移动报告为成功
+AssertionError: promise resolved "[ -9, 11, 13 ]" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+[
+  -9,
+  11,
+  13,
+]
+
+ ❯ tmp/arrival-before-n8NAvK/arrival.test.ts:50:40
+     48|     golem.findStandCells = () => [];
+     49|     golem._gotoWithRecovery = async () => undefined;
+     50|     await expect(golem.moveTo(-12, 10)).rejects.toThrow();
+       |                                        ^
+     51|   });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tmp/arrival-before-n8NAvK/arrival.test.ts > moveTo 的物理到达证据 > 三盏灯先跑、玩家点第四盏、补回程整段重跑：真实移动判定不会留下永久失败历史
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tmp/arrival-before-n8NAvK/arrival.test.ts:97:55
+     95|       expect(session.epoch).toBe(0); // 保留真人任务，不靠重置擦掉失败记录。
+     96|       expect(final.progress.every(step => step.passed)).toBe(true);
+     97|       expect(final.hidden.every(step => step.passed)).toBe(true);
+       |                                                       ^
+     98|       expect(final.passed).toBe(true);
+     99|       expect(final.stars).toBe(3);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  12:42:48
+   Duration  1.07s (import 53%, transform 27%, tests 20%)

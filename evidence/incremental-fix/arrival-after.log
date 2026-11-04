@@ -1,0 +1,8 @@
+
+ RUN  v5.0.5 /home/yqh0919/Documents/deepseek-harness/default-workspace
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  12:21:41
+   Duration  767ms (import 67%, tests 21%, transform 12%, worker 1%)
